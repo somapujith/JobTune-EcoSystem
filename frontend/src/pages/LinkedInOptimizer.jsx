@@ -30,7 +30,7 @@ export default function LinkedInOptimizer() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto py-12 px-4 sm:px-6">
+    <div className="w-full max-w-5xl mx-auto py-12 px-4 sm:px-6">
       <div className="text-center mb-12">
         <h1 className="text-3xl font-bold text-slate-900 mb-4 flex items-center justify-center gap-3">
           <Linkedin className="w-8 h-8 text-sky-600" /> LinkedIn Optimizer

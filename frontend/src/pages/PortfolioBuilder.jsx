@@ -8,7 +8,7 @@ export default function PortfolioBuilder() {
   ]);
 
   return (
-    <div className="flex h-[calc(100vh-64px)] overflow-hidden">
+    <div className="flex h-[calc(100vh-80px)] overflow-hidden w-full">
       {/* Sidebar logic for drag and drop */}
       <div className="w-80 bg-white border-r border-slate-200 flex flex-col hidden sm:flex">
          <div className="p-6 border-b border-slate-100">

@@ -17,7 +17,7 @@ export default function ContentVault() {
   const filtered = filter === 'All' ? resources : resources.filter(r => r.category === filter);
 
   return (
-    <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6">
+    <div className="w-full max-w-7xl mx-auto py-12 px-4 sm:px-6">
       <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 mb-2 flex items-center gap-3">

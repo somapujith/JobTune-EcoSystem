@@ -44,7 +44,7 @@ export default function SkillAssessment() {
 
   if (result) {
     return (
-      <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6">
+      <div className="w-full max-w-4xl mx-auto py-12 px-4 sm:px-6">
         <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 mb-8 flex items-center gap-3">
           <Brain className="w-8 h-8 text-blue-600" /> Assessment Complete
         </h2>
@@ -83,7 +83,7 @@ export default function SkillAssessment() {
   const q = questions[currentQ];
 
   return (
-    <div className="max-w-3xl mx-auto py-16 px-4">
+    <div className="w-full max-w-3xl mx-auto py-16 px-4">
       <div className="mb-8 flex justify-between items-center">
         <h1 className="text-2xl font-bold text-slate-800">Skill Assessment - Tier 1</h1>
         <div className="text-sm font-medium text-slate-500">

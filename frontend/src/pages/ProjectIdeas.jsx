@@ -14,7 +14,7 @@ export default function ProjectIdeas() {
   const filtered = filter === 'All' ? projects : projects.filter(p => p.category === filter);
 
   return (
-    <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6">
+    <div className="w-full max-w-7xl mx-auto py-12 px-4 sm:px-6">
       <div className="text-center mb-16">
         <h1 className="text-4xl font-bold text-slate-900 mb-4 flex items-center justify-center gap-3">
           <Lightbulb className="w-10 h-10 text-yellow-500" /> Project Ideas & Templates
