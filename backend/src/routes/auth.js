@@ -14,20 +14,23 @@ router.post('/signup', async (req, res, next) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const userExists = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
-    if (userExists.rows.length > 0) {
+    const [existingUsers] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
+    if (existingUsers.length > 0) {
       return res.status(400).json({ error: 'User already exists' });
     }
 
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(password, salt);
 
-    const newUser = await pool.query(
-      'INSERT INTO users (email, password_hash, github_username, linkedin_url) VALUES ($1, $2, $3, $4) RETURNING id, email, github_username, linkedin_url',
+    const [result] = await pool.query(
+      'INSERT INTO users (email, password_hash, github_username, linkedin_url) VALUES (?, ?, ?, ?)',
       [email, password_hash, github_username, linkedin_url]
     );
 
-    const user = newUser.rows[0];
+    const userId = result.insertId;
+    const [newUsers] = await pool.query('SELECT id, email, github_username, linkedin_url FROM users WHERE id = ?', [userId]);
+    const user = newUsers[0];
+
     const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
     res.status(201).json({ user, token });
@@ -41,12 +44,12 @@ router.post('/login', async (req, res, next) => {
   try {
     const { email, password } = req.body;
     
-    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (result.rows.length === 0) {
+    const [result] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+    if (result.length === 0) {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
 
-    const user = result.rows[0];
+    const user = result[0];
     const validPassword = await bcrypt.compare(password, user.password_hash);
     if (!validPassword) {
       return res.status(400).json({ error: 'Invalid credentials' });
@@ -64,11 +67,11 @@ router.post('/login', async (req, res, next) => {
 // Get Current User
 router.get('/me', authenticateToken, async (req, res, next) => {
   try {
-    const result = await pool.query('SELECT id, email, github_username, linkedin_url, created_at FROM users WHERE id = $1', [req.user.id]);
-    if (result.rows.length === 0) {
+    const [result] = await pool.query('SELECT id, email, github_username, linkedin_url, created_at FROM users WHERE id = ?', [req.user.id]);
+    if (result.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
-    res.json({ user: result.rows[0] });
+    res.json({ user: result[0] });
   } catch (err) {
     next(err);
   }

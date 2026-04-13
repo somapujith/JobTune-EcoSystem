@@ -10,12 +10,14 @@ router.post('/upload', authenticateToken, async (req, res, next) => {
     const content = "Mock optimized text content";
     const sections = { education: true, experience: true, projects: false };
     
-    const result = await pool.query(
-      'INSERT INTO resumes (user_id, content, scores, sections, file_url) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+    const [result] = await pool.query(
+      'INSERT INTO resumes (user_id, content, scores, sections, file_url) VALUES (?, ?, ?, ?, ?)',
       [req.user.id, content, JSON.stringify(scores), JSON.stringify(sections), 'mock_url.pdf']
     );
 
-    res.json(result.rows[0]);
+    const [rows] = await pool.query('SELECT * FROM resumes WHERE id = ?', [result.insertId]);
+
+    res.json(rows[0]);
   } catch (err) {
     next(err);
   }
@@ -24,8 +26,8 @@ router.post('/upload', authenticateToken, async (req, res, next) => {
 // Get Scores
 router.get('/scores', authenticateToken, async (req, res, next) => {
   try {
-    const result = await pool.query('SELECT scores FROM resumes WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1', [req.user.id]);
-    res.json(result.rows[0] || { scores: null });
+    const [rows] = await pool.query('SELECT scores FROM resumes WHERE user_id = ? ORDER BY created_at DESC LIMIT 1', [req.user.id]);
+    res.json(rows[0] || { scores: null });
   } catch (err) {
     next(err);
   }
