@@ -10,7 +10,7 @@ import {
 
 const TOOLS = [
   { name: 'Skill Assessment',  icon: Activity,    path: '/skills',    accent: '#3b82f6', light: '#eff6ff', tag: 'Foundation' },
-  { name: 'Resume Optimizer',  icon: FileText,    path: '/resume',    accent: '#10b981', light: '#f0fdf4', tag: 'Profile',    locked: true },
+  { name: 'Resume Optimizer',  icon: FileText,    path: '/resume',    accent: '#10b981', light: '#f0fdf4', tag: 'Profile'    },
   { name: 'LinkedIn Optimizer',icon: Linkedin,    path: '/linkedin',  accent: '#0ea5e9', light: '#f0f9ff', tag: 'Profile'    },
   { name: 'GitHub Optimizer',  icon: Github,      path: '/github',    accent: '#6366f1', light: '#eef2ff', tag: 'Profile'    },
   { name: 'Portfolio Builder', icon: LayoutIcon,  path: '/portfolio', accent: '#8b5cf6', light: '#f5f3ff', tag: 'Profile'    },

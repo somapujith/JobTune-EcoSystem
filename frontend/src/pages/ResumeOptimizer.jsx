@@ -857,6 +857,9 @@ export default function ResumeOptimizer() {
   };
 
   const handleNavClick = (key) => {
+    const item = navItems.find(n => n.key === key);
+    if (item?.locked) return; // Prevent navigation for locked items
+
     setActiveNav(key);
     setError(null);
     if (key === 'myResumes' || key === 'history') {
@@ -874,7 +877,7 @@ export default function ResumeOptimizer() {
   const navItems = [
     { key: 'myResumes', icon: 'description',       label: 'My Resumes' },
     { key: 'analysis',  icon: 'analytics',         label: 'Analysis'   },
-    { key: 'aiEditor',  icon: 'auto_awesome',      label: 'AI Editor'  },
+    { key: 'aiEditor',  icon: 'auto_awesome',      label: 'AI Editor', locked: true },
     { key: 'history',   icon: 'history',           label: 'History'    },
     { key: 'premium',   icon: 'workspace_premium', label: 'Premium'    },
   ];
@@ -898,14 +901,21 @@ export default function ResumeOptimizer() {
             <button
               key={item.key}
               onClick={() => handleNavClick(item.key)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:translate-x-1 transition-all duration-200 text-left
-                ${activeNav === item.key
-                  ? 'bg-white text-blue-700 shadow-sm'
-                  : 'text-slate-500 hover:bg-slate-100'
+              title={item.locked ? 'Temporarily undergoing maintenance' : ''}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 text-left
+                ${item.locked ? 'opacity-50 cursor-not-allowed text-slate-400 grayscale bg-slate-100/30 mb-1' : 'hover:translate-x-1'}
+                ${activeNav === item.key && !item.locked
+                  ? 'bg-white text-blue-700 shadow-sm border border-slate-200/50'
+                  : !item.locked ? 'text-slate-500 hover:bg-slate-100' : ''
                 }`}
             >
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>{item.icon}</span>
-              <span>{item.label}</span>
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>{item.icon}</span>
+                <span className="text-sm font-bold">{item.label}</span>
+              </div>
+              {item.locked && (
+                <span className="material-symbols-outlined text-xs opacity-60">lock</span>
+              )}
             </button>
           ))}
         </nav>

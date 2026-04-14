@@ -22,7 +22,7 @@ import {
 
 const tools = [
   { name: 'Skill Assessment', icon: Activity, path: '/skills', color: 'bg-blue-500', tier: 'Foundation' },
-  { name: 'Resume Optimizer', icon: FileText, path: '/resume', color: 'bg-emerald-500', tier: 'Profile', locked: true },
+  { name: 'Resume Optimizer', icon: FileText, path: '/resume', color: 'bg-emerald-500', tier: 'Profile' },
   { name: 'LinkedIn Optimizer', icon: Linkedin, path: '/linkedin', color: 'bg-sky-500', tier: 'Profile' },
   { name: 'GitHub Optimizer', icon: Github, path: '/github', color: 'bg-slate-900', tier: 'Profile' },
   { name: 'Portfolio Builder', icon: LayoutIcon, path: '/portfolio', color: 'bg-indigo-500', tier: 'Profile' },
