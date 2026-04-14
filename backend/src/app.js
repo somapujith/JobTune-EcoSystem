@@ -7,13 +7,19 @@ const dashboardRoutes = require('./routes/dashboard');
 const projectsRoutes = require('./routes/projects');
 const profilesRoutes = require('./routes/profiles');
 const learningRoutes = require('./routes/learning');
+const adminRoutes = require('./routes/admin');
 const { errorHandler } = require('./middleware/errorHandler');
+const { auditLogger } = require('./middleware/auditLogger');
+const path = require('path');
 
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Global Audit Logger for API
+app.use('/api', auditLogger('API_REQUEST', 'system'));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -23,6 +29,10 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/projects', projectsRoutes);
 app.use('/api/profiles', profilesRoutes);
 app.use('/api/learning', learningRoutes);
+app.use('/api/admin', adminRoutes);
+
+// Admin UI Route
+app.use('/admin', express.static(path.join(__dirname, 'public/admin')));
 
 // Status route
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));

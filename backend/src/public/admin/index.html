@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div id="loginSection" class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow">
+      <div>
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Admin Login</h2>
+        <p class="mt-2 text-center text-sm text-gray-600">Provide your authorization token</p>
+      </div>
+      <div>
+        <input id="tokenInput" type="text" placeholder="Bearer ey..." class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm">
+      </div>
+      <div>
+        <button id="loginBtn" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+          Access Dashboard
+        </button>
+      </div>
+      <p id="loginError" class="text-red-500 text-sm text-center hidden"></p>
+    </div>
+  </div>
+
+  <div id="dashboardSection" class="hidden min-h-screen">
+    <nav class="bg-indigo-600">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <span class="text-white font-bold text-xl">Admin Dashboard</span>
+            </div>
+            <div class="hidden md:block">
+              <div class="ml-10 flex items-baseline space-x-4">
+                <a href="#" class="bg-indigo-700 text-white px-3 py-2 rounded-md text-sm font-medium" id="navDash">Dashboard</a>
+                <a href="#" class="text-gray-300 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium" id="navUsers">Users</a>
+                <a href="#" class="text-gray-300 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium" id="navLogs">Audit Logs</a>
+              </div>
+            </div>
+          </div>
+          <div class="hidden md:block">
+            <div class="ml-4 flex items-center md:ml-6">
+              <button id="logoutBtn" class="text-white hover:text-gray-200">Logout</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <!-- Dashboard View -->
+      <div id="viewDash">
+        <div class="px-4 py-6 sm:px-0">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+              <div class="px-4 py-5 sm:p-6">
+                <dt class="text-sm font-medium text-gray-500 truncate">Total Users</dt>
+                <dd class="mt-1 text-3xl font-semibold text-gray-900" id="statUsers">-</dd>
+              </div>
+            </div>
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+              <div class="px-4 py-5 sm:p-6">
+                <dt class="text-sm font-medium text-gray-500 truncate">Active Admins</dt>
+                <dd class="mt-1 text-3xl font-semibold text-indigo-600" id="statAdmins">-</dd>
+              </div>
+            </div>
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+              <div class="px-4 py-5 sm:p-6">
+                <dt class="text-sm font-medium text-gray-500 truncate">Total Logs</dt>
+                <dd class="mt-1 text-3xl font-semibold text-gray-900" id="statLogs">-</dd>
+              </div>
+            </div>
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+              <div class="px-4 py-5 sm:p-6">
+                <dt class="text-sm font-medium text-gray-500 truncate">Logs (24h)</dt>
+                <dd class="mt-1 text-3xl font-semibold text-green-600" id="statRecentLogs">-</dd>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users View -->
+      <div id="viewUsers" class="hidden">
+        <div class="px-4 py-6 sm:px-0">
+          <h2 class="text-2xl font-bold mb-4">Manage Users</h2>
+          <div class="bg-white shadow overflow-hidden sm:rounded-md">
+            <ul id="usersList" class="divide-y divide-gray-200">
+              <!-- Users populated here -->
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logs View -->
+      <div id="viewLogs" class="hidden">
+        <div class="px-4 py-6 sm:px-0">
+          <h2 class="text-2xl font-bold mb-4">Audit Logs</h2>
+          <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resource / IP</th>
+                </tr>
+              </thead>
+              <tbody id="logsTableBody" class="bg-white divide-y divide-gray-200">
+                <!-- Logs populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let token = localStorage.getItem('adminToken');
+
+    const API_BASE = '/api/admin';
+
+    // DOM Elements
+    const elements = {
+      loginSection: document.getElementById('loginSection'),
+      dashboardSection: document.getElementById('dashboardSection'),
+      tokenInput: document.getElementById('tokenInput'),
+      loginBtn: document.getElementById('loginBtn'),
+      loginError: document.getElementById('loginError'),
+      logoutBtn: document.getElementById('logoutBtn'),
+      
+      navDash: document.getElementById('navDash'),
+      navUsers: document.getElementById('navUsers'),
+      navLogs: document.getElementById('navLogs'),
+      
+      viewDash: document.getElementById('viewDash'),
+      viewUsers: document.getElementById('viewUsers'),
+      viewLogs: document.getElementById('viewLogs'),
+      
+      statUsers: document.getElementById('statUsers'),
+      statAdmins: document.getElementById('statAdmins'),
+      statLogs: document.getElementById('statLogs'),
+      statRecentLogs: document.getElementById('statRecentLogs'),
+      
+      usersList: document.getElementById('usersList'),
+      logsTableBody: document.getElementById('logsTableBody')
+    };
+
+    const activateView = (viewName) => {
+      elements.viewDash.classList.add('hidden');
+      elements.viewUsers.classList.add('hidden');
+      elements.viewLogs.classList.add('hidden');
+      
+      elements.navDash.className = "text-gray-300 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium";
+      elements.navUsers.className = "text-gray-300 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium";
+      elements.navLogs.className = "text-gray-300 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium";
+      
+      if(viewName === 'dash') {
+        elements.viewDash.classList.remove('hidden');
+        elements.navDash.className = "bg-indigo-700 text-white px-3 py-2 rounded-md text-sm font-medium";
+        loadStats();
+      } else if(viewName === 'users') {
+        elements.viewUsers.classList.remove('hidden');
+        elements.navUsers.className = "bg-indigo-700 text-white px-3 py-2 rounded-md text-sm font-medium";
+        loadUsers();
+      } else if(viewName === 'logs') {
+        elements.viewLogs.classList.remove('hidden');
+        elements.navLogs.className = "bg-indigo-700 text-white px-3 py-2 rounded-md text-sm font-medium";
+        loadLogs();
+      }
+    };
+
+    elements.navDash.addEventListener('click', () => activateView('dash'));
+    elements.navUsers.addEventListener('click', () => activateView('users'));
+    elements.navLogs.addEventListener('click', () => activateView('logs'));
+
+    const checkAuth = async () => {
+      if(!token) {
+        showLogin();
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/stats`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if(res.ok) {
+          const data = await res.json();
+          updateStats(data);
+          showDashboard();
+        } else {
+          showLogin();
+        }
+      } catch (err) {
+        showLogin();
+      }
+    };
+
+    const showLogin = () => {
+      elements.loginSection.classList.remove('hidden');
+      elements.dashboardSection.classList.add('hidden');
+    };
+
+    const showDashboard = () => {
+      elements.loginSection.classList.add('hidden');
+      elements.dashboardSection.classList.remove('hidden');
+      activateView('dash');
+    };
+
+    elements.loginBtn.addEventListener('click', () => {
+      const inputVal = elements.tokenInput.value.trim();
+      token = inputVal.startsWith('Bearer ') ? inputVal.split(' ')[1] : inputVal;
+      localStorage.setItem('adminToken', token);
+      checkAuth();
+    });
+
+    elements.logoutBtn.addEventListener('click', () => {
+      token = null;
+      localStorage.removeItem('adminToken');
+      showLogin();
+    });
+
+    const updateStats = (data) => {
+      elements.statUsers.textContent = data.totalUsers;
+      elements.statAdmins.textContent = data.activeAdmins;
+      elements.statLogs.textContent = data.totalAuditLogs;
+      elements.statRecentLogs.textContent = data.recentLogs;
+    };
+
+    const loadStats = async () => {
+      const res = await fetch(`${API_BASE}/stats`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const data = await res.json();
+      updateStats(data);
+    };
+
+    const makeAdmin = async (userId, isMakeAdmin) => {
+      const role = isMakeAdmin ? 'admin' : 'user';
+      if(!confirm(`Are you sure you want to make user ${userId} an ${role}?`)) return;
+      const res = await fetch(`${API_BASE}/users/${userId}/role`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role })
+      });
+      if(res.ok) {
+        alert('Updated successfully');
+        loadUsers();
+      } else {
+        alert('Failed to update role');
+      }
+    };
+
+    window.makeAdmin = makeAdmin; // Expose to inline onclick
+
+    const loadUsers = async () => {
+      const res = await fetch(`${API_BASE}/users`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const users = await res.json();
+      elements.usersList.innerHTML = users.map(u => `
+        <li class="px-4 py-4 sm:px-6 flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-indigo-600 truncate">${u.name} <span class="text-xs text-gray-500">(${u.email})</span></p>
+            <p class="text-sm text-gray-500">Role: <span class="font-bold ${u.role === 'admin' ? 'text-red-600' : ''}">${u.role}</span> | Joined: ${new Date(u.created_at).toLocaleDateString()}</p>
+          </div>
+          <div>
+            ${u.role === 'user' 
+              ? `<button onclick="makeAdmin(${u.id}, true)" class="bg-gray-200 px-3 py-1 rounded text-sm hover:bg-gray-300">Make Admin</button>`
+              : `<button onclick="makeAdmin(${u.id}, false)" class="bg-red-100 text-red-700 px-3 py-1 rounded text-sm hover:bg-red-200">Revoke Admin</button>`
+            }
+          </div>
+        </li>
+      `).join('');
+    };
+
+    const loadLogs = async () => {
+      const res = await fetch(`${API_BASE}/audit-logs`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const logs = await res.json();
+      elements.logsTableBody.innerHTML = logs.map(l => `
+        <tr>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(l.created_at).toLocaleString()}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${l.user_name || 'Guest'} <br/><span class="text-xs text-gray-500">ID: ${l.user_id || '-'}</span></td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">${l.action}</span></td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${l.resource}<br/><span class="text-xs">${l.ip_address}</span></td>
+        </tr>
+      `).join('');
+    };
+
+    checkAuth();
+  </script>
+</body>
+</html>

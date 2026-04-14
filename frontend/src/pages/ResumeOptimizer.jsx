@@ -560,33 +560,42 @@ function AIEditorView({ analysis }) {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
-  const sendMessage = async (prompt) => {
-    const userText = (prompt || input).trim();
-    if (!userText || loading) return;
+   const sendMessage = async (prompt) => {
+     const userText = (prompt || input).trim();
+     if (!userText || loading) return;
 
-    setInput('');
-    setError(null);
-    setMessages((prev) => [...prev, { role: 'user', content: userText }]);
-    setLoading(true);
+     // Check if user pasted image data (base64)
+     if (userText.startsWith('data:image/') || 
+         (userText.length > 100 && /^[A-Za-z0-9+/]+={0,2}$/.test(userText))) {
+       setError('Please provide text input only. Images are not supported. Try copying and pasting your resume text instead.');
+       setMessages((prev) => [...prev, { role: 'assistant', content: 'Sorry, I cannot process image inputs. Please provide your resume as text.', isError: true }]);
+       setLoading(false);
+       return;
+     }
 
-    try {
-      const { data } = await api.post('/resume/ai-edit', {
-        instruction: userText,
-        resumeText:  resumeText.trim() || undefined,
-        context:     analysis ? `Resume file: ${analysis.file_name}, Overall score: ${analysis.overall_score}/100` : undefined,
-      });
+     setInput('');
+     setError(null);
+     setMessages((prev) => [...prev, { role: 'user', content: userText }]);
+     setLoading(true);
 
-      if (data.success) {
-        setMessages((prev) => [...prev, { role: 'assistant', content: data.data.suggestion }]);
-      }
-    } catch (err) {
-      const msg = err.response?.data?.error || 'Something went wrong. Please try again.';
-      setError(msg);
-      setMessages((prev) => [...prev, { role: 'assistant', content: `Sorry, I ran into an error: ${msg}`, isError: true }]);
-    } finally {
-      setLoading(false);
-    }
-  };
+     try {
+       const { data } = await api.post('/resume/ai-edit', {
+         instruction: userText,
+         resumeText:  resumeText.trim() || undefined,
+         context:     analysis ? `Resume file: ${analysis.file_name}, Overall score: ${analysis.overall_score}/100` : undefined,
+       });
+
+       if (data.success) {
+         setMessages((prev) => [...prev, { role: 'assistant', content: data.data.suggestion }]);
+       }
+     } catch (err) {
+       const msg = err.response?.data?.error || 'Something went wrong. Please try again.';
+       setError(msg);
+       setMessages((prev) => [...prev, { role: 'assistant', content: `Sorry, I ran into an error: ${msg}`, isError: true }]);
+     } finally {
+       setLoading(false);
+     }
+   };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
