@@ -546,7 +546,9 @@ function AIEditorView({ analysis }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: "Hi! I'm your AI resume coach. Paste your resume text below and ask me anything — I can rewrite sections, improve your bullets, suggest keywords, and more.",
+      content: `Hello! I'm your AI Resume Coach. ${analysis ? `I see you've already analyzed "${analysis.file_name}" (Score: ${analysis.overall_score}/100).` : ''} 
+      
+To get started, please **paste your resume text** in the panel on the right. Once that's done, I can help you rewrite sections, optimize for ATS, or strengthen your bullet points. How can I assist you today?`,
     },
   ]);
   const [input, setInput]           = useState('');

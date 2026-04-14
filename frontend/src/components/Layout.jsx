@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Lock } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
 
 const navLinks = [
   { label: 'Dashboard', path: '/dashboard' },
-  { label: 'Resume Optimizer', path: '/resume' },
+  { label: 'Resume Optimizer', path: '/resume', locked: true },
   { label: 'Content Vault', path: '/learning' },
   { label: 'Skill Assessment', path: '/skills' },
   { label: 'Mock Interview', path: '/interview' },
@@ -33,17 +33,28 @@ const Navbar = () => {
           </Link>
           <nav className="hidden lg:flex items-center gap-8">
             {navLinks.map(link => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`text-sm font-semibold transition-all duration-200 ${
-                  location.pathname === link.path
-                    ? 'text-blue-700 border-b-2 border-blue-600 pb-0.5'
-                    : 'text-slate-500 hover:text-blue-600'
-                }`}
-              >
-                {link.label}
-              </Link>
+              link.locked ? (
+                <div 
+                  key={link.path}
+                  className="flex items-center gap-1.5 text-sm font-semibold text-slate-300 cursor-not-allowed"
+                  title="Coming soon/Under maintenance"
+                >
+                  {link.label}
+                  <Lock className="w-3.5 h-3.5" />
+                </div>
+              ) : (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`text-sm font-semibold transition-all duration-200 ${
+                    location.pathname === link.path
+                      ? 'text-blue-700 border-b-2 border-blue-600 pb-0.5'
+                      : 'text-slate-500 hover:text-blue-600'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              )
             ))}
           </nav>
         </div>
@@ -91,17 +102,27 @@ const Navbar = () => {
         <div className="lg:hidden bg-white border-t border-slate-100 shadow-lg">
           <nav className="flex flex-col px-6 py-4 gap-1 max-w-7xl mx-auto">
             {navLinks.map(link => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`py-3 px-4 rounded-xl text-sm font-semibold transition-colors ${
-                  location.pathname === link.path
-                    ? 'bg-blue-50 text-blue-700'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-blue-600'
-                }`}
-              >
-                {link.label}
-              </Link>
+              link.locked ? (
+                <div 
+                  key={link.path}
+                  className="flex items-center justify-between py-3 px-4 rounded-xl text-sm font-semibold text-slate-300 bg-slate-50 cursor-not-allowed"
+                >
+                  <span>{link.label}</span>
+                  <Lock className="w-4 h-4" />
+                </div>
+              ) : (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`py-3 px-4 rounded-xl text-sm font-semibold transition-colors ${
+                    location.pathname === link.path
+                      ? 'bg-blue-50 text-blue-700'
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-blue-600'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              )
             ))}
             <div className="border-t border-slate-100 mt-2 pt-3 flex items-center justify-between">
               <span className="text-sm text-slate-500 font-medium">Support</span>

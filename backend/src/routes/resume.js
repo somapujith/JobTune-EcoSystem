@@ -4,6 +4,7 @@ const multer = require('multer');
 const pdfParse = require('pdf-parse');
 const { authenticateToken } = require('../middleware/auth');
 const { pool } = require('../config/database');
+const { callAI } = require('../utils/aiClient');
 
 // Memory storage — no disk writes needed for mock analysis
 const storage = multer.memoryStorage();
@@ -307,20 +308,13 @@ router.get('/:id', authenticateToken, async (req, res, next) => {
   }
 });
 
-// POST /api/resume/ai-edit — AI-powered resume editing via OpenRouter
+// POST /api/resume/ai-edit — AI-powered resume editing via OpenAI
 router.post('/ai-edit', authenticateToken, async (req, res, next) => {
   try {
     const { instruction, resumeText, context } = req.body;
 
     if (!instruction || typeof instruction !== 'string' || instruction.trim().length === 0) {
       return res.status(400).json({ error: 'instruction is required' });
-    }
-
-    const apiKey = process.env.OPENROUTER_API_KEY;
-    const model  = process.env.OPENROUTER_MODEL;
-
-    if (!apiKey || !model) {
-      return res.status(503).json({ error: 'AI Editor is not configured. Please contact the administrator.' });
     }
 
     const systemPrompt = `You are an expert resume coach and professional writer with 15+ years of experience helping candidates land jobs at top companies. Your role is to provide specific, actionable improvements to resumes.
@@ -336,55 +330,20 @@ When given a resume or resume section and an instruction:
       ? `Here is my resume content:\n\n${resumeText.slice(0, 4000)}\n\n---\n\nInstruction: ${instruction}`
       : `Instruction: ${instruction}${context ? `\n\nContext: ${context}` : ''}`;
 
-     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-       method: 'POST',
-       headers: {
-         'Authorization': `Bearer ${apiKey}`,
-         'Content-Type':  'application/json',
-         'HTTP-Referer':  'http://localhost:3000',
-         'X-Title':       'JobTube Resume Optimizer',
-       },
-       body: JSON.stringify({
-         model,
-         messages: [
-           { role: 'system', content: systemPrompt },
-           { role: 'user',   content: userMessage  },
-         ],
-         max_tokens: 256,
-         temperature: 0.2,
-       }),
-     });
-
-    // We intercept any response that isn't okay and provide a structured fallback.
-    if (!response.ok) {
-      const errBody = await response.text();
-      console.warn('OpenRouter error skipped, using simulation fallback:', response.status);
-
-      // Robust fallback simulator
-      const instLower = instruction.toLowerCase();
-      let fallbackSuggestion = '';
-
-      if (instLower.includes('summary')) {
-        fallbackSuggestion = `**Mock AI Re-write: Summary**\n\nI encountered an issue connecting to the external AI service, but here is a structural rewrite based on industry best practices:\n\n*Results-driven Software Engineer with expertise in building scalable applications. Proven ability to optimize application performance by 30% and deliver clean, maintainable code using React and Node.js. Ready to leverage my background to deliver immediate impact on your engineering team.*`;
-      } else if (instLower.includes('bullet') || instLower.includes('experience')) {
-        fallbackSuggestion = `**Mock AI Re-write: Experience Bullet Point**\n\nSince the AI service is currently unavailable, here's an optimized version of a strong bullet point using the XYZ formula (Accomplished [X] as measured by [Y], by doing [Z]):\n\n* "Engineered and deployed a resilient microservices architecture (Z), improving system uptime by 99.9% (Y) and seamlessly supporting 10,000+ daily active users (X)."`;
-      } else if (instLower.includes('keyword') || instLower.includes('ats')) {
-        fallbackSuggestion = `**Mock AI Feedback: ATS Keywords**\n\nTo pass strict Applicant Tracking Systems, ensure you include exact matches for skills listed in the job description. I suggest integrating the following keywords naturally into your experience section:\n\n* **Languages/Frameworks**: JavaScript, TypeScript, React, Node.js\n* **Tools/Practices**: Agile, CI/CD, Docker, AWS\n* **Action Verbs**: Architected, Spearheaded, Optimized`;
-      } else {
-        fallbackSuggestion = `**Mock AI General Feedback**\n\n(Note: The live AI service is currently unreachable.)\n\nYou asked: "${instruction}".\n\n**Actionable Advice:** Make sure your content is heavily quantified. Use the XYZ formula for every work experience bullet. Keep your summary concise and focused on the value you bring to the employer, rather than what you are seeking.`;
-      }
-
-      return res.json({ success: true, data: { suggestion: fallbackSuggestion } });
+    const aiResult = await callAI({ 
+      systemPrompt, 
+      userPrompt: userMessage, 
+      maxTokens: 256, 
+      temperature: 0.2 
+    });
+ 
+    if (aiResult.ok && aiResult.data) {
+      return res.json({ success: true, data: { suggestion: aiResult.data } });
     }
 
-    const aiData = await response.json();
-    const suggestion = aiData.choices?.[0]?.message?.content;
-
-    if (!suggestion) {
-      return res.status(502).json({ error: 'AI returned an empty response. Please try again.' });
-    }
-
-    res.json({ success: true, data: { suggestion } });
+    res.status(502).json({ 
+      error: aiResult.error || 'AI service unavailable. Please try again later.' 
+    });
   } catch (err) {
     next(err);
   }

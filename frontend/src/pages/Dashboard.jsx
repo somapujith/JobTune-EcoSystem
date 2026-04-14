@@ -16,12 +16,13 @@ import {
   Github,
   Layout as LayoutIcon,
   BookOpen,
-  Lightbulb
+  Lightbulb,
+  Lock
 } from 'lucide-react';
 
 const tools = [
   { name: 'Skill Assessment', icon: Activity, path: '/skills', color: 'bg-blue-500', tier: 'Foundation' },
-  { name: 'Resume Optimizer', icon: FileText, path: '/resume', color: 'bg-emerald-500', tier: 'Profile' },
+  { name: 'Resume Optimizer', icon: FileText, path: '/resume', color: 'bg-emerald-500', tier: 'Profile', locked: true },
   { name: 'LinkedIn Optimizer', icon: Linkedin, path: '/linkedin', color: 'bg-sky-500', tier: 'Profile' },
   { name: 'GitHub Optimizer', icon: Github, path: '/github', color: 'bg-slate-900', tier: 'Profile' },
   { name: 'Portfolio Builder', icon: LayoutIcon, path: '/portfolio', color: 'bg-indigo-500', tier: 'Profile' },
@@ -99,22 +100,43 @@ export default function Dashboard() {
                  View Introduction <ExternalLink className="w-3 h-3" />
               </Link>
            </div>
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {tools.map((tool, i) => (
-                 <Link key={i} to={tool.path} className="group flex items-center justify-between p-6 bg-white rounded-3xl border border-slate-200/60 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300">
-                    <div className="flex items-center gap-4">
-                       <div className={`w-12 h-12 ${tool.color} rounded-xl flex items-center justify-center text-white shadow-lg shadow-${tool.color.split('-')[1]}-500/20`}>
-                          <tool.icon className="w-6 h-6" />
-                       </div>
-                       <div>
-                          <p className="text-[10px] font-black uppercase tracking-tighter text-slate-400">{tool.tier}</p>
-                          <h4 className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{tool.name}</h4>
-                       </div>
-                    </div>
-                    <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
-                 </Link>
-              ))}
-           </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               {tools.map((tool, i) => (
+                 tool.locked ? (
+                   <div 
+                    key={i} 
+                    className="flex items-center justify-between p-6 bg-slate-50 rounded-3xl border border-slate-100 cursor-not-allowed opacity-75"
+                    title="Undergoing maintenance"
+                   >
+                     <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-slate-200 rounded-xl flex items-center justify-center text-slate-400">
+                           <tool.icon className="w-6 h-6" />
+                        </div>
+                        <div>
+                           <p className="text-[10px] font-black uppercase tracking-tighter text-slate-400 flex items-center gap-1">
+                             {tool.tier} <Lock className="w-2.5 h-2.5" />
+                           </p>
+                           <h4 className="font-bold text-slate-400">{tool.name}</h4>
+                        </div>
+                     </div>
+                     <Lock className="w-5 h-5 text-slate-300" />
+                   </div>
+                 ) : (
+                   <Link key={i} to={tool.path} className="group flex items-center justify-between p-6 bg-white rounded-3xl border border-slate-200/60 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300">
+                      <div className="flex items-center gap-4">
+                         <div className={`w-12 h-12 ${tool.color} rounded-xl flex items-center justify-center text-white shadow-lg shadow-${tool.color.split('-')[1]}-500/20`}>
+                            <tool.icon className="w-6 h-6" />
+                         </div>
+                         <div>
+                            <p className="text-[10px] font-black uppercase tracking-tighter text-slate-400">{tool.tier}</p>
+                            <h4 className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{tool.name}</h4>
+                         </div>
+                      </div>
+                      <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                   </Link>
+                 )
+               ))}
+            </div>
         </div>
 
         {/* Action Center & Walkthrough */}

@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom';
 import {
   Activity, FileText, Github, Linkedin, Layout as LayoutIcon,
   BookOpen, Lightbulb, ArrowRight, Sparkles, ChevronRight,
-  CheckCircle2, TrendingUp, Users, Zap, Star
+  CheckCircle2, TrendingUp, Users, Zap, Star, Lock
 } from 'lucide-react';
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 
 const TOOLS = [
   { name: 'Skill Assessment',  icon: Activity,    path: '/skills',    accent: '#3b82f6', light: '#eff6ff', tag: 'Foundation' },
-  { name: 'Resume Optimizer',  icon: FileText,    path: '/resume',    accent: '#10b981', light: '#f0fdf4', tag: 'Profile'    },
+  { name: 'Resume Optimizer',  icon: FileText,    path: '/resume',    accent: '#10b981', light: '#f0fdf4', tag: 'Profile',    locked: true },
   { name: 'LinkedIn Optimizer',icon: Linkedin,    path: '/linkedin',  accent: '#0ea5e9', light: '#f0f9ff', tag: 'Profile'    },
   { name: 'GitHub Optimizer',  icon: Github,      path: '/github',    accent: '#6366f1', light: '#eef2ff', tag: 'Profile'    },
   { name: 'Portfolio Builder', icon: LayoutIcon,  path: '/portfolio', accent: '#8b5cf6', light: '#f5f3ff', tag: 'Profile'    },
@@ -308,10 +308,13 @@ export default function Home() {
             {TOOLS.map(t => (
               <div
                 key={t.name}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/4 border border-white/8 backdrop-blur-sm"
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg border backdrop-blur-sm ${t.locked ? 'bg-white/2 border-white/4 grayscale' : 'bg-white/4 border-white/8'}`}
+                title={t.locked ? 'Under maintenance' : ''}
               >
-                <t.icon className="w-3.5 h-3.5" style={{ color: t.accent }} />
-                <span className="text-xs text-slate-400 font-medium whitespace-nowrap">{t.name}</span>
+                {t.locked ? <Lock className="w-3.5 h-3.5 text-slate-600" /> : <t.icon className="w-3.5 h-3.5" style={{ color: t.accent }} />}
+                <span className="text-xs text-slate-400 font-medium whitespace-nowrap flex items-center gap-1">
+                  {t.name}
+                </span>
               </div>
             ))}
           </div>
@@ -405,18 +408,36 @@ export default function Home() {
             {TOOLS.map((tool, i) => {
               const Icon = tool.icon;
               const isFeatured = i === 0 || i === 5;
-              return (
+              return tool.locked ? (
+                <div 
+                  key={tool.name}
+                  className={`relative p-6 rounded-2xl border border-white/8 bg-white/3 opacity-50 cursor-not-allowed flex flex-col gap-4 overflow-hidden ${isFeatured ? 'sm:col-span-2 lg:col-span-1' : ''}`}
+                >
+                  <div className="relative z-10 flex items-start justify-between">
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-slate-800">
+                      <Lock className="w-5 h-5 text-slate-600" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 border border-white/8 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      {tool.tag} <Lock className="w-2.5 h-2.5" />
+                    </span>
+                  </div>
+                  <div className="relative z-10">
+                    <h3 className="text-base font-bold text-slate-500 mb-1">{tool.name}</h3>
+                    <p className="text-sm text-slate-700 leading-relaxed italic">
+                      Temporarily unavailable while undergoing a massive AI upgrade.
+                    </p>
+                  </div>
+                </div>
+              ) : (
                 <Link
                   key={tool.name}
                   to={tool.path}
                   className={`group relative p-6 rounded-2xl border border-white/8 bg-white/3 hover:bg-white/6 hover:border-white/15 transition-all duration-300 flex flex-col gap-4 overflow-hidden ${isFeatured ? 'sm:col-span-2 lg:col-span-1' : ''}`}
                 >
-                  {/* Accent glow on hover */}
                   <div
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"
                     style={{ background: `radial-gradient(circle at 0% 0%, ${tool.accent}10 0%, transparent 60%)` }}
                   />
-
                   <div className="relative z-10 flex items-start justify-between">
                     <div
                       className="w-11 h-11 rounded-xl flex items-center justify-center"
@@ -428,7 +449,6 @@ export default function Home() {
                       {tool.tag}
                     </span>
                   </div>
-
                   <div className="relative z-10">
                     <h3 className="text-base font-bold text-white mb-1 group-hover:text-slate-100">
                       {tool.name}
@@ -445,7 +465,6 @@ export default function Home() {
                       ][i]}
                     </p>
                   </div>
-
                   <div className="relative z-10 flex items-center gap-1.5 text-xs font-bold mt-auto opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-200" style={{ color: tool.accent }}>
                     Open tool <ArrowRight className="w-3.5 h-3.5" />
                   </div>
