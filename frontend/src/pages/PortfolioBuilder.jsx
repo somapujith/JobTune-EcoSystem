@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Layout as LayoutIcon, Eye, Save, Type, Image as ImageIcon, Link as LinkIcon, Edit3 } from 'lucide-react';
 
 export default function PortfolioBuilder() {
   const [sections, setSections] = useState([
@@ -9,57 +8,69 @@ export default function PortfolioBuilder() {
 
   return (
     <div className="flex h-[calc(100vh-80px)] overflow-hidden w-full">
-      {/* Sidebar logic for drag and drop */}
-      <div className="w-80 bg-white border-r border-slate-200 flex flex-col hidden sm:flex">
-         <div className="p-6 border-b border-slate-100">
-           <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2"><LayoutIcon className="w-5 h-5" /> Blocks</h2>
-           <p className="text-sm text-slate-500 mt-1">Click blocks to add them to your portfolio.</p>
-         </div>
-         <div className="p-4 space-y-3 overflow-y-auto flex-grow">
-           <button className="w-full text-left p-4 border border-slate-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 transition-colors flex items-center gap-3">
-             <Type className="text-slate-400 w-5 h-5" /> <span className="font-medium text-slate-700">Hero Section</span>
-           </button>
-           <button className="w-full text-left p-4 border border-slate-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 transition-colors flex items-center gap-3">
-             <ImageIcon className="text-slate-400 w-5 h-5" /> <span className="font-medium text-slate-700">Project Gallery</span>
-           </button>
-           <button className="w-full text-left p-4 border border-slate-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 transition-colors flex items-center gap-3">
-             <Edit3 className="text-slate-400 w-5 h-5" /> <span className="font-medium text-slate-700">Text / About</span>
-           </button>
-           <button className="w-full text-left p-4 border border-slate-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 transition-colors flex items-center gap-3">
-             <LinkIcon className="text-slate-400 w-5 h-5" /> <span className="font-medium text-slate-700">Contact / Social</span>
-           </button>
-         </div>
-         <div className="p-4 border-t border-slate-100 space-y-3 pb-8">
-           <button className="w-full bg-slate-900 text-white font-medium py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-800">
-              <Eye className="w-5 h-5" /> Preview
-           </button>
-           <button className="w-full bg-indigo-600 text-white font-medium py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-indigo-700">
-              <Save className="w-5 h-5" /> Publish
-           </button>
-         </div>
+      {/* Sidebar */}
+      <div className="w-80 bg-surface-container-lowest border-r-0 flex flex-col hidden sm:flex shadow-[0px_0px_40px_rgba(0,78,159,0.04)]">
+        <div className="p-8">
+          <div className="flex items-center gap-3 mb-2">
+            <span className="material-symbols-outlined text-indigo-600 text-2xl" style={{ fontVariationSettings: "'FILL' 0" }}>web</span>
+            <h2 className="text-xl font-black text-on-surface font-headline">Portfolio Blocks</h2>
+          </div>
+          <p className="text-sm text-on-surface-variant font-medium">Drag blocks to build your professional site</p>
+        </div>
+        <div className="px-8 pb-8 space-y-4 overflow-y-auto flex-grow">
+          <button className="w-full text-left p-4 bg-surface-container rounded-2xl hover:bg-indigo-500/5 hover:shadow-lg transition-all duration-200 flex items-center gap-4 group">
+            <span className="material-symbols-outlined text-indigo-600 text-lg group-hover:scale-110 transition-transform" style={{ fontVariationSettings: "'FILL' 0" }}>text_fields</span>
+            <span className="font-bold text-on-surface">Hero Section</span>
+          </button>
+          <button className="w-full text-left p-4 bg-surface-container rounded-2xl hover:bg-indigo-500/5 hover:shadow-lg transition-all duration-200 flex items-center gap-4 group">
+            <span className="material-symbols-outlined text-indigo-600 text-lg group-hover:scale-110 transition-transform" style={{ fontVariationSettings: "'FILL' 0" }}>image</span>
+            <span className="font-bold text-on-surface">Project Gallery</span>
+          </button>
+          <button className="w-full text-left p-4 bg-surface-container rounded-2xl hover:bg-indigo-500/5 hover:shadow-lg transition-all duration-200 flex items-center gap-4 group">
+            <span className="material-symbols-outlined text-indigo-600 text-lg group-hover:scale-110 transition-transform" style={{ fontVariationSettings: "'FILL' 0" }}>edit</span>
+            <span className="font-bold text-on-surface">About Section</span>
+          </button>
+          <button className="w-full text-left p-4 bg-surface-container rounded-2xl hover:bg-indigo-500/5 hover:shadow-lg transition-all duration-200 flex items-center gap-4 group">
+            <span className="material-symbols-outlined text-indigo-600 text-lg group-hover:scale-110 transition-transform" style={{ fontVariationSettings: "'FILL' 0" }}>contact_page</span>
+            <span className="font-bold text-on-surface">Contact & Social</span>
+          </button>
+        </div>
+        <div className="p-8 space-y-4">
+          <button className="w-full bg-indigo-600 text-on-primary font-bold py-4 rounded-2xl hover:bg-indigo-700 active:scale-95 transition-all duration-200 shadow-[0px_10px_30px_rgba(99,102,241,0.3)] flex items-center justify-center gap-3">
+            <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>visibility</span>
+            Preview Site
+          </button>
+          <button className="w-full bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold py-4 rounded-2xl hover:scale-105 active:scale-95 transition-all duration-200 shadow-[0px_15px_35px_rgba(0,78,159,0.25)] flex items-center justify-center gap-3">
+            <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>publish</span>
+            Publish Portfolio
+          </button>
+        </div>
       </div>
 
       {/* Editor Canvas */}
-      <div className="flex-grow bg-slate-100 overflow-y-auto p-4 sm:p-8">
-         <div className="max-w-4xl mx-auto bg-white min-h-[800px] shadow-sm rounded-lg overflow-hidden outline outline-1 outline-slate-200">
-            {sections.map(sec => (
-              <div key={sec.id} className={`group relative border-2 border-transparent hover:border-indigo-400 transition-colors ${sec.bg || 'bg-white text-slate-900'}`}>
-                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white text-slate-900 text-xs px-2 py-1 rounded shadow-sm font-medium cursor-pointer">Edit Block</div>
-                 {sec.type === 'hero' && (
-                    <div className="py-24 px-12 text-center">
-                       <h1 className="text-5xl font-extrabold tracking-tight mb-6">{sec.title}</h1>
-                       <p className="text-xl opacity-80">{sec.subtitle}</p>
-                    </div>
-                 )}
-                 {sec.type === 'about' && (
-                    <div className="py-16 px-12">
-                       <h3 className="text-2xl font-bold mb-4">About Me</h3>
-                       <p className="text-lg leading-relaxed opacity-80">{sec.text}</p>
-                    </div>
-                 )}
+      <div className="flex-grow bg-surface overflow-y-auto p-4 sm:p-8">
+        <div className="max-w-5xl mx-auto bg-surface-container-lowest min-h-[900px] rounded-3xl overflow-hidden shadow-[0px_25px_50px_rgba(0,78,159,0.08)]">
+          {sections.map(sec => (
+            <div key={sec.id} className={`group relative hover:shadow-[0px_10px_30px_rgba(0,78,159,0.15)] transition-all duration-300 ${sec.bg || 'bg-surface-container-lowest text-on-surface'}`}>
+              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity bg-surface-container-lowest text-on-surface text-sm px-4 py-2 rounded-2xl shadow-lg font-bold cursor-pointer border-0 flex items-center gap-2">
+                <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>edit</span>
+                Edit Block
               </div>
-            ))}
-         </div>
+              {sec.type === 'hero' && (
+                <div className="py-32 px-16 text-center">
+                  <h1 className="text-6xl font-black tracking-tight mb-8 font-headline">{sec.title}</h1>
+                  <p className="text-xl text-on-surface-variant font-medium max-w-2xl mx-auto leading-relaxed">{sec.subtitle}</p>
+                </div>
+              )}
+              {sec.type === 'about' && (
+                <div className="py-20 px-16">
+                  <h3 className="text-3xl font-black mb-8 font-headline">About Me</h3>
+                  <p className="text-lg leading-relaxed text-on-surface-variant font-medium max-w-3xl">{sec.text}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
