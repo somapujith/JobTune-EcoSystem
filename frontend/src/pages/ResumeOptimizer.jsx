@@ -532,9 +532,259 @@ function MyResumesView({ resumes, onResumeClick, onNewAnalysis }) {
   );
 }
 
+// ─── AI Editor View ───────────────────────────────────────────────────────────
+const QUICK_ACTIONS = [
+  { label: 'Improve Summary',    prompt: 'Rewrite my professional summary to be more compelling and ATS-friendly.' },
+  { label: 'Stronger Bullets',   prompt: 'Rewrite my work experience bullet points using stronger action verbs and quantified achievements.' },
+  { label: 'ATS Keywords',       prompt: 'Suggest ATS-friendly keywords I should add to improve my resume pass-through rate.' },
+  { label: 'Fix Skills Section', prompt: 'Help me reorganize and improve my skills section, grouping them by category.' },
+  { label: 'Add Metrics',        prompt: 'Help me add numbers and metrics to my achievements to show concrete impact.' },
+  { label: 'LinkedIn Bio',       prompt: 'Based on my resume, write a compelling LinkedIn About section.' },
+];
+
+function AIEditorView({ analysis }) {
+  const [messages, setMessages] = useState([
+    {
+      role: 'assistant',
+      content: "Hi! I'm your AI resume coach. Paste your resume text below and ask me anything — I can rewrite sections, improve your bullets, suggest keywords, and more.",
+    },
+  ]);
+  const [input, setInput]           = useState('');
+  const [resumeText, setResumeText] = useState('');
+  const [loading, setLoading]       = useState(false);
+  const [error, setError]           = useState(null);
+  const [showTextarea, setShowTextarea] = useState(false);
+  const bottomRef = React.useRef(null);
+
+  React.useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, loading]);
+
+  const sendMessage = async (prompt) => {
+    const userText = (prompt || input).trim();
+    if (!userText || loading) return;
+
+    setInput('');
+    setError(null);
+    setMessages((prev) => [...prev, { role: 'user', content: userText }]);
+    setLoading(true);
+
+    try {
+      const { data } = await api.post('/resume/ai-edit', {
+        instruction: userText,
+        resumeText:  resumeText.trim() || undefined,
+        context:     analysis ? `Resume file: ${analysis.file_name}, Overall score: ${analysis.overall_score}/100` : undefined,
+      });
+
+      if (data.success) {
+        setMessages((prev) => [...prev, { role: 'assistant', content: data.data.suggestion }]);
+      }
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Something went wrong. Please try again.';
+      setError(msg);
+      setMessages((prev) => [...prev, { role: 'assistant', content: `Sorry, I ran into an error: ${msg}`, isError: true }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
+  return (
+    <>
+      <header className="mb-8">
+        <h1 className="text-4xl font-extrabold tracking-tight text-on-surface font-headline mb-2 flex items-center gap-3">
+          <span className="material-symbols-outlined text-primary text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
+          AI Resume Editor
+        </h1>
+        <p className="text-on-surface-variant leading-relaxed max-w-2xl">
+          Chat with your AI resume coach. Get instant rewrites, keyword suggestions, and personalized improvements.
+        </p>
+      </header>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        {/* Chat Column */}
+        <section className="lg:col-span-2 flex flex-col gap-4">
+          {/* Quick Actions */}
+          <div className="bg-surface-container-lowest rounded-2xl p-5 shadow-[0px_4px_20px_rgba(0,78,159,0.06)]">
+            <p className="text-xs font-bold uppercase tracking-wider text-outline mb-3">Quick Actions</p>
+            <div className="flex flex-wrap gap-2">
+              {QUICK_ACTIONS.map((qa) => (
+                <button
+                  key={qa.label}
+                  onClick={() => sendMessage(qa.prompt)}
+                  disabled={loading}
+                  className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary/8 text-primary hover:bg-primary/15 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed border border-primary/20"
+                >
+                  {qa.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Chat Window */}
+          <div className="bg-surface-container-lowest rounded-2xl shadow-[0px_4px_20px_rgba(0,78,159,0.06)] flex flex-col overflow-hidden" style={{ minHeight: '460px' }}>
+            <div className="flex items-center gap-3 px-6 py-4 border-b border-outline-variant/10">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary-container flex items-center justify-center">
+                <span className="material-symbols-outlined text-white text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-800">Resume Coach AI</p>
+                <p className="text-xs text-green-600 font-medium flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
+                  Online
+                </p>
+              </div>
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4" style={{ maxHeight: '400px' }}>
+              {messages.map((msg, i) => (
+                <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                    msg.role === 'user'
+                      ? 'bg-primary text-white'
+                      : msg.isError ? 'bg-red-100' : 'bg-gradient-to-br from-primary/20 to-primary-container/20'
+                  }`}>
+                    <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
+                      {msg.role === 'user' ? 'person' : msg.isError ? 'error' : 'auto_awesome'}
+                    </span>
+                  </div>
+                  <div className={`max-w-[78%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+                    msg.role === 'user'
+                      ? 'bg-primary text-white rounded-tr-sm'
+                      : msg.isError
+                        ? 'bg-red-50 text-red-700 border border-red-100 rounded-tl-sm'
+                        : 'bg-slate-50 text-slate-800 border border-slate-100 rounded-tl-sm'
+                  }`}>
+                    {msg.content}
+                  </div>
+                </div>
+              ))}
+
+              {loading && (
+                <div className="flex gap-3">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary-container/20 shrink-0">
+                    <span className="material-symbols-outlined text-sm text-primary animate-pulse" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
+                  </div>
+                  <div className="bg-slate-50 border border-slate-100 rounded-2xl rounded-tl-sm px-4 py-3 flex gap-1 items-center">
+                    <span className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </div>
+                </div>
+              )}
+              <div ref={bottomRef} />
+            </div>
+
+            {/* Input */}
+            <div className="p-4 border-t border-outline-variant/10">
+              <div className="flex gap-3 items-end">
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Ask me to improve your resume... (Enter to send, Shift+Enter for newline)"
+                  rows={2}
+                  className="flex-1 resize-none px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-primary/50 focus:bg-white transition-all text-sm"
+                />
+                <button
+                  onClick={() => sendMessage()}
+                  disabled={!input.trim() || loading}
+                  className="w-11 h-11 rounded-xl bg-primary text-white flex items-center justify-center hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                >
+                  <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>send</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Right Panel */}
+        <div className="space-y-5">
+          {/* Resume Text Input */}
+          <div className="bg-surface-container-lowest rounded-2xl p-5 shadow-[0px_4px_20px_rgba(0,78,159,0.06)]">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                <span className="material-symbols-outlined text-sm text-primary" style={{ fontVariationSettings: "'FILL' 0" }}>description</span>
+                Resume Text
+              </h3>
+              <button
+                onClick={() => setShowTextarea(!showTextarea)}
+                className="text-xs text-primary font-semibold hover:underline"
+              >
+                {showTextarea ? 'Hide' : 'Paste Resume'}
+              </button>
+            </div>
+
+            {showTextarea ? (
+              <textarea
+                value={resumeText}
+                onChange={(e) => setResumeText(e.target.value)}
+                placeholder="Paste your resume text here so the AI can reference it..."
+                rows={10}
+                className="w-full resize-none px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-primary/50 text-xs leading-relaxed"
+              />
+            ) : (
+              <p className="text-xs text-slate-500 leading-relaxed">
+                {resumeText ? (
+                  <span className="text-green-600 font-medium flex items-center gap-1">
+                    <span className="material-symbols-outlined text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    {resumeText.trim().split(/\s+/).length} words pasted
+                  </span>
+                ) : 'Paste your resume text so the AI can give tailored suggestions.'}
+              </p>
+            )}
+          </div>
+
+          {/* Analysis Context */}
+          {analysis && (
+            <div className="bg-primary/5 rounded-2xl p-5 border border-primary/10">
+              <h3 className="text-sm font-bold text-primary mb-3 flex items-center gap-2">
+                <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>analytics</span>
+                Last Analysis
+              </h3>
+              <p className="text-xs text-slate-600 font-medium truncate mb-1">{analysis.file_name}</p>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-1.5 bg-white rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full ${analysis.overall_score >= 80 ? 'bg-green-500' : analysis.overall_score >= 60 ? 'bg-amber-500' : 'bg-red-400'}`}
+                    style={{ width: `${analysis.overall_score}%` }}
+                  />
+                </div>
+                <span className="text-xs font-black text-slate-700">{analysis.overall_score}/100</span>
+              </div>
+              <p className="text-xs text-slate-500 mt-2">The AI coach is aware of your scores and can give context-aware suggestions.</p>
+            </div>
+          )}
+
+          {/* Tips */}
+          <div className="bg-gradient-to-br from-primary to-primary-container rounded-2xl p-5 text-white">
+            <h3 className="font-bold mb-3 text-sm flex items-center gap-2">
+              <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>lightbulb</span>
+              Tips for Best Results
+            </h3>
+            <ul className="space-y-2 text-xs text-white/85 leading-relaxed">
+              <li className="flex gap-2"><span className="text-white/60 shrink-0">1.</span>Paste your resume text for tailored suggestions</li>
+              <li className="flex gap-2"><span className="text-white/60 shrink-0">2.</span>Use Quick Actions for instant common improvements</li>
+              <li className="flex gap-2"><span className="text-white/60 shrink-0">3.</span>Ask for specific sections: "Rewrite my summary"</li>
+              <li className="flex gap-2"><span className="text-white/60 shrink-0">4.</span>Request keywords for a target job role</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ResumeOptimizer() {
-  const [view, setView]           = useState('upload');   // upload | analyzing | results | myResumes
+  const [view, setView]           = useState('upload');   // upload | analyzing | results | myResumes | aiEditor
   const [file, setFile]           = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [analysis, setAnalysis]   = useState(null);
@@ -602,8 +852,10 @@ export default function ResumeOptimizer() {
       setView('myResumes');
     } else if (key === 'analysis') {
       setView(analysis ? 'results' : 'upload');
+    } else if (key === 'aiEditor') {
+      setView('aiEditor');
     } else {
-      // AI Editor / Premium — fall back to upload for now
+      // Premium — fall back to upload for now
       setView('upload');
     }
   };
@@ -689,6 +941,10 @@ export default function ResumeOptimizer() {
               onResumeClick={handleResumeClick}
               onNewAnalysis={() => { setView('upload'); setFile(null); setActiveNav('analysis'); }}
             />
+          )}
+
+          {view === 'aiEditor' && (
+            <AIEditorView analysis={analysis} />
           )}
         </div>
       </main>

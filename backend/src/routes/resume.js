@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const pdfParse = require('pdf-parse');
 const { authenticateToken } = require('../middleware/auth');
 const { pool } = require('../config/database');
 
@@ -61,79 +62,155 @@ const upload = multer({
   }
 })();
 
-// Generate deterministic-ish mock analysis scores from the filename
-function generateAnalysis(fileName) {
-  const seed = fileName.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-  const rand = (min, max, offset = 0) => min + ((seed + offset) % (max - min + 1));
+// ── Extract plain text from the uploaded file buffer ─────────────────────────
+async function extractText(file) {
+  if (!file) return '';
+  try {
+    if (file.mimetype === 'application/pdf') {
+      const data = await pdfParse(file.buffer);
+      return data.text || '';
+    }
+  } catch (e) {
+    console.error('PDF parse error:', e.message);
+  }
+  // For DOCX or parse failures fall back to empty string
+  return '';
+}
+
+// ── Detect which sections are actually present in the resume text ─────────────
+function detectSections(text) {
+  const upper = text.toUpperCase();
+  const has = (keywords) => keywords.some((kw) => upper.includes(kw));
+
+  return {
+    summary:        has(['SUMMARY', 'OBJECTIVE', 'PROFILE', 'ABOUT ME', 'PROFESSIONAL SUMMARY']),
+    experience:     has(['EXPERIENCE', 'WORK EXPERIENCE', 'EMPLOYMENT', 'PROFESSIONAL EXPERIENCE', 'INTERNSHIP', 'INTERNSHIPS']),
+    education:      has(['EDUCATION', 'ACADEMIC', 'QUALIFICATIONS', 'QUALIFICATION']),
+    skills:         has(['SKILLS', 'TECHNICAL SKILLS', 'SKILL SUMMARY', 'SKILLS SUMMARY', 'COMPETENCIES', 'TECHNOLOGIES']),
+    projects:       has(['PROJECTS', 'PROJECT', 'PERSONAL PROJECTS', 'KEY PROJECTS', 'ACADEMIC PROJECTS']),
+    certifications: has(['CERTIFICATION', 'CERTIFICATIONS', 'CERTIFICATES', 'CERTIFICATE', 'COURSES', 'TRAINING']),
+  };
+}
+
+// ── Score the resume based on real content signals ───────────────────────────
+function scoreResume(text, sections, fileName) {
+  const upper = text.toUpperCase();
+  const wordCount = text.split(/\s+/).filter(Boolean).length;
+
+  // Action verbs check
+  const actionVerbs = ['BUILT','DEVELOPED','DESIGNED','IMPLEMENTED','LED','CREATED','OPTIMIZED',
+    'IMPROVED','MANAGED','ACHIEVED','DELIVERED','LAUNCHED','AUTOMATED','ENGINEERED',
+    'ARCHITECTED','DEPLOYED','REDUCED','INCREASED','COLLABORATED','MENTORED'];
+  const verbCount = actionVerbs.filter((v) => upper.includes(v)).length;
+
+  // Quantification — numbers with % or multipliers
+  const metricMatches = (text.match(/\d+\s*(%|x\b|times|hours|days|weeks|months|users|customers|ms\b)/gi) || []).length;
+
+  // Tech keywords — use simple includes so no regex special-char issues
+  const techKeywords = ['PYTHON','JAVASCRIPT','REACT','NODE.JS','NODE','SQL','AWS','DOCKER',
+    'GIT','TYPESCRIPT','JAVA','C++','FLASK','MONGODB','MACHINE LEARNING','API','REST',
+    'XGBOOST','SCIKIT','TENSORFLOW','PYTORCH','KUBERNETES','LINUX'];
+  const techCount = techKeywords.filter((k) => upper.includes(k)).length;
+
+  // Section count for completeness
+  const sectionCount = Object.values(sections).filter(Boolean).length;
+
+  // ATS: tech keywords presence + section structure
+  const ats = Math.min(98, 50 + techCount * 3 + sectionCount * 3 + (wordCount > 200 ? 5 : 0));
+
+  // Impact: action verbs + metrics
+  const impact = Math.min(95, 40 + verbCount * 4 + metricMatches * 6);
+
+  // Skills: tech keyword density
+  const skills = Math.min(98, 50 + techCount * 4 + (sections.skills ? 10 : 0));
+
+  // Clarity: reasonable word count + good section count
+  const clarity = Math.min(95, 45 + sectionCount * 5 + (wordCount > 150 && wordCount < 800 ? 15 : 5) + (verbCount > 3 ? 10 : 0));
+
+  // Completeness: how many of the 6 key sections are present
+  const completeness = Math.min(98, Math.round((sectionCount / 6) * 100));
+
+  // Industry fit: tech keywords + certifications + projects
+  const industry_fit = Math.min(95, 40 + techCount * 3 + (sections.certifications ? 10 : 0) + (sections.projects ? 10 : 0));
 
   const scores = {
-    ats:           rand(62, 95, 1),
-    impact:        rand(55, 90, 2),
-    skills:        rand(65, 95, 3),
-    clarity:       rand(60, 92, 4),
-    completeness:  rand(58, 88, 5),
-    industry_fit:  rand(50, 85, 6),
+    ats:           Math.max(40, ats),
+    impact:        Math.max(35, impact),
+    skills:        Math.max(40, skills),
+    clarity:       Math.max(40, clarity),
+    completeness:  Math.max(30, completeness),
+    industry_fit:  Math.max(35, industry_fit),
   };
 
   const overall = Math.round(
     Object.values(scores).reduce((a, b) => a + b, 0) / Object.keys(scores).length
   );
 
-  const suggestions = [
-    {
-      type: overall >= 80 ? 'success' : 'warning',
-      category: 'ATS Compatibility',
-      message:
-        overall >= 80
-          ? 'Great ATS compatibility — your keywords align well with common job descriptions.'
-          : 'Add more industry-specific keywords to improve ATS pass-through rate.',
-    },
-    {
-      type: scores.impact >= 75 ? 'success' : 'warning',
-      category: 'Impact Statements',
-      message:
-        scores.impact >= 75
-          ? 'Strong impact statements with quantifiable achievements detected.'
-          : 'Quantify achievements with numbers (e.g., "increased sales by 30%") for stronger impact.',
-    },
-    {
-      type: 'info',
-      category: 'Action Verbs',
-      message: 'Start bullet points with strong action verbs (Led, Built, Designed, Optimized) to boost readability.',
-    },
-    {
-      type: scores.clarity >= 75 ? 'success' : 'info',
-      category: 'Structure & Clarity',
-      message:
-        scores.clarity >= 75
-          ? 'Clear, well-structured sections detected. Good readability score.'
-          : 'Consider using consistent formatting and clear section headers to improve clarity.',
-    },
-    {
-      type: scores.completeness >= 70 ? 'success' : 'warning',
-      category: 'Completeness',
-      message:
-        scores.completeness >= 70
-          ? 'Resume covers all essential sections effectively.'
-          : 'Consider adding a Summary, Projects, or Certifications section to boost completeness.',
-    },
-    {
-      type: 'info',
-      category: 'Skills Section',
-      message: 'Group skills by category (Technical, Tools, Soft Skills) for faster recruiter scanning.',
-    },
-  ];
+  return { scores, overall, verbCount, metricMatches, techCount, sectionCount };
+}
 
-  const sections = {
-    summary:      (seed % 3) !== 0,
-    experience:   true,
-    education:    true,
-    skills:       true,
-    projects:     (seed % 2) === 0,
-    certifications: (seed % 5) === 0,
-  };
+// ── Build contextual improvement suggestions ──────────────────────────────────
+function buildSuggestions(scores, sections, verbCount, metricMatches, techCount) {
+  const suggestions = [];
 
-  return { scores, overall, suggestions, sections };
+  // ATS
+  suggestions.push({
+    type: scores.ats >= 75 ? 'success' : 'warning',
+    category: 'ATS Compatibility',
+    message: scores.ats >= 75
+      ? `Good ATS compatibility — ${techCount} technical keyword${techCount !== 1 ? 's' : ''} detected in your resume.`
+      : 'Add more industry-specific technical keywords to improve ATS pass-through rate.',
+  });
+
+  // Impact / metrics
+  suggestions.push({
+    type: metricMatches >= 2 ? 'success' : 'warning',
+    category: 'Impact & Metrics',
+    message: metricMatches >= 2
+      ? `${metricMatches} quantified achievement${metricMatches !== 1 ? 's' : ''} found — great use of numbers to show impact.`
+      : 'Quantify your achievements (e.g., "improved accuracy by 15–20%") so recruiters can see concrete impact.',
+  });
+
+  // Action verbs
+  suggestions.push({
+    type: verbCount >= 5 ? 'success' : 'info',
+    category: 'Action Verbs',
+    message: verbCount >= 5
+      ? `Strong use of action verbs (${verbCount} detected) makes your bullet points impactful.`
+      : 'Start more bullet points with strong action verbs like Built, Designed, Optimized, Deployed.',
+  });
+
+  // Missing sections
+  const missing = Object.entries(sections).filter(([, v]) => !v).map(([k]) => k);
+  if (missing.length === 0) {
+    suggestions.push({ type: 'success', category: 'Section Coverage', message: 'All key resume sections are present — excellent structure.' });
+  } else {
+    suggestions.push({
+      type: 'warning',
+      category: 'Missing Sections',
+      message: `Consider adding: ${missing.map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(', ')} to strengthen your resume.`,
+    });
+  }
+
+  // Skills grouping
+  suggestions.push({
+    type: sections.skills ? 'info' : 'warning',
+    category: 'Skills Section',
+    message: sections.skills
+      ? 'Skills section detected. Group by category (Languages, Frameworks, Tools, Soft Skills) for faster scanning.'
+      : 'Add a dedicated Skills section with technical and soft skills grouped by category.',
+  });
+
+  // Certifications
+  suggestions.push({
+    type: sections.certifications ? 'success' : 'info',
+    category: 'Certifications',
+    message: sections.certifications
+      ? 'Certifications section found — these add strong credibility to your profile.'
+      : 'Adding certifications or online course completions can boost your industry credibility.',
+  });
+
+  return suggestions;
 }
 
 // POST /api/resume/upload — analyze a resume file
@@ -143,7 +220,17 @@ router.post('/upload', authenticateToken, upload.single('resume'), async (req, r
     const fileName = file ? file.originalname : (req.body && req.body.fileName) || 'resume.pdf';
     const fileSize = file ? file.size : 0;
 
-    const { scores, overall, suggestions, sections } = generateAnalysis(fileName);
+    // Extract real text from the uploaded file
+    const text = await extractText(file);
+
+    // Detect actual sections present in the resume
+    const sections = detectSections(text);
+
+    // Score based on content signals
+    const { scores, overall, verbCount, metricMatches, techCount } = scoreResume(text, sections, fileName);
+
+    // Build contextual suggestions
+    const suggestions = buildSuggestions(scores, sections, verbCount, metricMatches, techCount);
 
     const [result] = await pool.query(
       `INSERT INTO resumes (user_id, file_name, file_size, scores, sections, suggestions, overall_score)
@@ -215,6 +302,73 @@ router.get('/:id', authenticateToken, async (req, res, next) => {
       return res.status(404).json({ error: 'Resume not found' });
     }
     res.json({ success: true, data: parseJsonFields(rows[0]) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/resume/ai-edit — AI-powered resume editing via OpenRouter
+router.post('/ai-edit', authenticateToken, async (req, res, next) => {
+  try {
+    const { instruction, resumeText, context } = req.body;
+
+    if (!instruction || typeof instruction !== 'string' || instruction.trim().length === 0) {
+      return res.status(400).json({ error: 'instruction is required' });
+    }
+
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    const model  = process.env.OPENROUTER_MODEL;
+
+    if (!apiKey || !model) {
+      return res.status(503).json({ error: 'AI Editor is not configured. Please contact the administrator.' });
+    }
+
+    const systemPrompt = `You are an expert resume coach and professional writer with 15+ years of experience helping candidates land jobs at top companies. Your role is to provide specific, actionable improvements to resumes.
+
+When given a resume or resume section and an instruction:
+1. Provide clear, concrete suggestions or rewritten content
+2. Use strong action verbs, quantified achievements, and industry-relevant keywords
+3. Keep suggestions concise, professional, and ATS-friendly
+4. Format your response in clear sections when relevant
+5. If rewriting content, provide the improved version directly`;
+
+    const userMessage = resumeText
+      ? `Here is my resume content:\n\n${resumeText.slice(0, 4000)}\n\n---\n\nInstruction: ${instruction}`
+      : `Instruction: ${instruction}${context ? `\n\nContext: ${context}` : ''}`;
+
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type':  'application/json',
+        'HTTP-Referer':  'http://localhost:3000',
+        'X-Title':       'JobTube Resume Optimizer',
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user',   content: userMessage  },
+        ],
+        max_tokens: 1024,
+        temperature: 0.7,
+      }),
+    });
+
+    if (!response.ok) {
+      const errBody = await response.text();
+      console.error('OpenRouter error:', response.status, errBody);
+      return res.status(502).json({ error: 'AI service returned an error. Please try again.' });
+    }
+
+    const aiData = await response.json();
+    const suggestion = aiData.choices?.[0]?.message?.content;
+
+    if (!suggestion) {
+      return res.status(502).json({ error: 'AI returned an empty response. Please try again.' });
+    }
+
+    res.json({ success: true, data: { suggestion } });
   } catch (err) {
     next(err);
   }
