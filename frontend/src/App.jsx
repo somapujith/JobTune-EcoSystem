@@ -12,6 +12,7 @@ import GitHubOptimizer from './pages/GitHubOptimizer';
 import PortfolioBuilder from './pages/PortfolioBuilder';
 import ProjectIdeas from './pages/ProjectIdeas';
 import MockInterview from './pages/MockInterview';
+import JobMatcher from './pages/JobMatcher';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         <Route path="projects" element={<ProjectIdeas />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="interview" element={<MockInterview />} />
+        <Route path="jobmatch" element={<JobMatcher />} />
       </Route>
       <Route path="/login" element={<Login />} />
     </Routes>

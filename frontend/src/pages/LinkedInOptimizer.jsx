@@ -16,19 +16,27 @@ function getScoreRingColor(score) {
 }
 
 export default function LinkedInOptimizer() {
-  const [url, setUrl] = useState('');
+  const [formData, setFormData] = useState({
+    headline: '',
+    about: '',
+    skills: '',
+    experienceCount: 0,
+    yearsOfExperience: 0,
+    connections: 'lt100',
+    hasPhoto: false,
+    hasFeatured: false
+  });
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState(null);
   const [error, setError] = useState('');
 
   const handleAnalyze = async (e) => {
     e.preventDefault();
-    if (!url) return;
     setLoading(true);
     setError('');
     setReport(null);
     try {
-      const { data } = await api.post('/profiles/linkedin/analyze', { url });
+      const { data } = await api.post('/profiles/linkedin/analyze', formData);
       setReport(data);
     } catch (err) {
       setError(err.response?.data?.error || 'Analysis failed. Please try again.');
@@ -47,7 +55,7 @@ export default function LinkedInOptimizer() {
           LinkedIn Profile Optimizer
         </h1>
         <p className="text-lg text-on-surface-variant font-medium max-w-2xl mx-auto">
-          Scan your LinkedIn profile for keyword optimization, headline impact, and industry benchmarking to get more recruiter attention.
+          Fill in your profile details for an instant score and actionable suggestions — no AI, no scraping required.
         </p>
       </div>
 
@@ -57,38 +65,125 @@ export default function LinkedInOptimizer() {
         </div>
       )}
 
-      <form onSubmit={handleAnalyze} className="max-w-3xl mx-auto mb-16">
-        <div className="relative bg-surface-container-lowest rounded-3xl p-2 shadow-[0px_20px_40px_rgba(14,165,233,0.06)]">
-          <div className="flex items-center gap-4 p-4">
-            <div className="w-12 h-12 rounded-2xl bg-sky-500/10 flex items-center justify-center">
-              <span className="material-symbols-outlined text-sky-600 text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>link</span>
-            </div>
+      <form onSubmit={handleAnalyze} className="max-w-3xl mx-auto mb-16 space-y-4">
+        <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-[0px_20px_40px_rgba(14,165,233,0.06)] space-y-4">
+          
+          <div>
+            <label className="block text-sm font-bold text-on-surface mb-1">Headline</label>
             <input
-              type="url"
-              placeholder="https://linkedin.com/in/your-username"
-              required
-              className="flex-1 bg-transparent outline-none font-medium text-on-surface placeholder:text-outline text-lg"
-              value={url}
-              onChange={e => setUrl(e.target.value)}
+              type="text"
+              maxLength={220}
+              placeholder="e.g. Software Engineer | React & Node.js"
+              className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface placeholder:text-outline/50 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+              value={formData.headline}
+              onChange={e => setFormData({...formData, headline: e.target.value})}
             />
+            <div className="text-right text-xs text-outline mt-1">{formData.headline.length}/220</div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-on-surface mb-1">About / Summary</label>
+            <textarea
+              rows={5}
+              placeholder="Write your LinkedIn summary here..."
+              className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface placeholder:text-outline/50 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 resize-y"
+              value={formData.about}
+              onChange={e => setFormData({...formData, about: e.target.value})}
+            />
+            <div className="text-right text-xs text-outline mt-1">{formData.about.split(/\s+/).filter(Boolean).length} words</div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-on-surface mb-1">Skills</label>
+            <input
+              type="text"
+              placeholder="React, Node.js, Python..."
+              className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface placeholder:text-outline/50 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+              value={formData.skills}
+              onChange={e => setFormData({...formData, skills: e.target.value})}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-on-surface mb-1">Work/Project Experiences</label>
+              <input
+                type="number"
+                min={0}
+                max={20}
+                className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                value={formData.experienceCount}
+                onChange={e => setFormData({...formData, experienceCount: e.target.value})}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-on-surface mb-1">Years of Experience</label>
+              <input
+                type="number"
+                min={0}
+                max={50}
+                step={0.5}
+                className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                value={formData.yearsOfExperience}
+                onChange={e => setFormData({...formData, yearsOfExperience: e.target.value})}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-on-surface mb-1">Connections</label>
+            <select
+              className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+              value={formData.connections}
+              onChange={e => setFormData({...formData, connections: e.target.value})}
+            >
+              <option value="lt100">Less than 100</option>
+              <option value="100to500">100 - 500</option>
+              <option value="500plus">500+</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-6 pt-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                className="w-5 h-5 rounded text-sky-600 focus:ring-sky-500 bg-surface-container border-outline/20"
+                checked={formData.hasPhoto}
+                onChange={e => setFormData({...formData, hasPhoto: e.target.checked})}
+              />
+              <span className="text-sm font-bold text-on-surface">Has Profile Photo</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                className="w-5 h-5 rounded text-sky-600 focus:ring-sky-500 bg-surface-container border-outline/20"
+                checked={formData.hasFeatured}
+                onChange={e => setFormData({...formData, hasFeatured: e.target.checked})}
+              />
+              <span className="text-sm font-bold text-on-surface">Has Featured Section</span>
+            </label>
+          </div>
+          
+          <div className="pt-6 border-t border-outline/10">
             <button
               type="submit"
               disabled={loading}
-              className="bg-gradient-to-r from-sky-500 to-sky-600 text-on-primary px-8 py-3 rounded-2xl font-bold hover:from-sky-600 hover:to-sky-700 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100 shadow-[0px_10px_30px_rgba(14,165,233,0.3)] flex items-center gap-3"
+              className="w-full bg-gradient-to-r from-sky-500 to-sky-600 text-on-primary px-8 py-3 rounded-xl font-bold hover:from-sky-600 hover:to-sky-700 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100 shadow-[0px_10px_20px_rgba(14,165,233,0.3)] flex items-center justify-center gap-3"
             >
               {loading ? (
                 <>
                   <span className="material-symbols-outlined animate-spin text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>sync</span>
-                  Scanning...
+                  Analyzing...
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>search</span>
+                  <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>analytics</span>
                   Analyze Profile
                 </>
               )}
             </button>
           </div>
+
         </div>
       </form>
 

@@ -97,7 +97,7 @@ export default function GitHubOptimizer() {
         <div className="max-w-2xl mx-auto text-center py-12">
           <div className="inline-flex flex-col items-center gap-4">
             <span className="material-symbols-outlined animate-spin text-slate-700 text-5xl" style={{ fontVariationSettings: "'FILL' 0" }}>sync</span>
-            <p className="text-on-surface-variant font-medium">Fetching real GitHub data and running AI analysis...</p>
+            <p className="text-on-surface-variant font-medium">Fetching real GitHub data and generating custom README...</p>
           </div>
         </div>
       )}

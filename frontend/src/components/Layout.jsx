@@ -5,6 +5,7 @@ import useAuthStore from '../store/useAuthStore';
 
 const navLinks = [
   { label: 'Dashboard', path: '/dashboard' },
+  { label: 'Job Matcher', path: '/jobmatch' },
   { label: 'Resume Optimizer', path: '/resume' },
   { label: 'Content Vault', path: '/learning' },
   { label: 'Skill Assessment', path: '/skills' },
