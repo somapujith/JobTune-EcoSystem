@@ -94,7 +94,7 @@ function ScoreRing({ score }) {
 }
 
 // ─── Recent Uploads sidebar widget ───────────────────────────────────────────
-function RecentUploads({ resumes, onResumeClick }) {
+function RecentUploads({ resumes, onResumeClick, onDeleteClick }) {
   const formatDate = (ts) =>
     new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
@@ -117,32 +117,43 @@ function RecentUploads({ resumes, onResumeClick }) {
             const c = colorMap[color];
             const isPdf = r.file_name?.toLowerCase().endsWith('.pdf');
             return (
-              <button
-                key={r.id}
-                onClick={() => onResumeClick(r.id)}
-                className="w-full group bg-surface-container-lowest p-5 rounded-2xl shadow-[0px_10px_30px_rgba(0,78,159,0.04)] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 text-left"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-12 ${isPdf ? 'bg-red-50' : 'bg-blue-50'} rounded-md flex items-center justify-center shrink-0`}>
-                      <span className={`material-symbols-outlined ${isPdf ? 'text-red-500' : 'text-blue-500'}`} style={{ fontVariationSettings: "'FILL' 0" }}>
-                        {isPdf ? 'picture_as_pdf' : 'description'}
-                      </span>
+              <div key={r.id} className="relative group w-full">
+                <button
+                  onClick={() => onResumeClick(r.id)}
+                  className="w-full bg-surface-container-lowest p-5 rounded-2xl shadow-[0px_10px_30px_rgba(0,78,159,0.04)] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 text-left"
+                >
+                  <div className="flex items-start justify-between mb-3 pr-8">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-12 ${isPdf ? 'bg-red-50' : 'bg-blue-50'} rounded-md flex items-center justify-center shrink-0`}>
+                        <span className={`material-symbols-outlined ${isPdf ? 'text-red-500' : 'text-blue-500'}`} style={{ fontVariationSettings: "'FILL' 0" }}>
+                          {isPdf ? 'picture_as_pdf' : 'description'}
+                        </span>
+                      </div>
+                      <div>
+                        <h5 className="font-bold text-sm truncate w-32">{r.file_name}</h5>
+                        <p className="text-[10px] uppercase font-bold text-outline tracking-wider">{formatDate(r.created_at)}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h5 className="font-bold text-sm truncate w-32">{r.file_name}</h5>
-                      <p className="text-[10px] uppercase font-bold text-outline tracking-wider">{formatDate(r.created_at)}</p>
-                    </div>
+                    <span className={`text-xs font-bold px-2 py-1 rounded ${c.bg} ${c.text}`}>{r.overall_score}/100</span>
                   </div>
-                  <span className={`text-xs font-bold px-2 py-1 rounded ${c.bg} ${c.text}`}>{r.overall_score}/100</span>
-                </div>
-                <div className="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
-                  <div
-                    className={`h-full bg-gradient-to-r ${c.bar} rounded-full`}
-                    style={{ width: `${r.overall_score}%` }}
-                  />
-                </div>
-              </button>
+                  <div className="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
+                    <div
+                      className={`h-full bg-gradient-to-r ${c.bar} rounded-full`}
+                      style={{ width: `${r.overall_score}%` }}
+                    />
+                  </div>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteClick(r.id);
+                  }}
+                  title="Delete Resume"
+                  className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200"
+                >
+                  <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>delete</span>
+                </button>
+              </div>
             );
           })}
         </div>
@@ -164,7 +175,7 @@ function RecentUploads({ resumes, onResumeClick }) {
 }
 
 // ─── Upload View ──────────────────────────────────────────────────────────────
-function UploadView({ file, setFile, isDragOver, setIsDragOver, onUpload, error, recentResumes, onResumeClick }) {
+function UploadView({ file, setFile, isDragOver, setIsDragOver, onUpload, error, recentResumes, onResumeClick, onDeleteClick }) {
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragOver(false);
@@ -276,7 +287,7 @@ function UploadView({ file, setFile, isDragOver, setIsDragOver, onUpload, error,
           </div>
         </section>
 
-        <RecentUploads resumes={recentResumes} onResumeClick={onResumeClick} />
+        <RecentUploads resumes={recentResumes} onResumeClick={onResumeClick} onDeleteClick={onDeleteClick} />
       </div>
     </>
   );
@@ -318,7 +329,7 @@ function AnalyzingView({ fileName }) {
 }
 
 // ─── Results View ─────────────────────────────────────────────────────────────
-function ResultsView({ analysis, onNewAnalysis, recentResumes, onResumeClick }) {
+function ResultsView({ analysis, onNewAnalysis, recentResumes, onResumeClick, onDeleteClick }) {
   const { file_name, overall_score, scores, sections, suggestions, created_at } = analysis;
 
   const scoreMetrics = [
@@ -436,7 +447,7 @@ function ResultsView({ analysis, onNewAnalysis, recentResumes, onResumeClick }) 
             </p>
           </div>
 
-          <RecentUploads resumes={recentResumes} onResumeClick={onResumeClick} />
+          <RecentUploads resumes={recentResumes} onResumeClick={onResumeClick} onDeleteClick={onDeleteClick} />
         </div>
       </div>
     </>
@@ -444,7 +455,7 @@ function ResultsView({ analysis, onNewAnalysis, recentResumes, onResumeClick }) 
 }
 
 // ─── My Resumes View ──────────────────────────────────────────────────────────
-function MyResumesView({ resumes, onResumeClick, onNewAnalysis }) {
+function MyResumesView({ resumes, onResumeClick, onNewAnalysis, onDeleteClick }) {
   const formatDate = (ts) =>
     new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
@@ -487,43 +498,54 @@ function MyResumesView({ resumes, onResumeClick, onNewAnalysis }) {
             const badge = scoreBadge(r.overall_score);
             const isPdf = r.file_name?.toLowerCase().endsWith('.pdf');
             return (
-              <button
-                key={r.id}
-                onClick={() => onResumeClick(r.id)}
-                className="group bg-surface-container-lowest p-6 rounded-3xl shadow-[0px_10px_30px_rgba(0,78,159,0.04)] hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`w-12 h-14 ${isPdf ? 'bg-red-50' : 'bg-blue-50'} rounded-xl flex items-center justify-center shrink-0`}>
-                    <span className={`material-symbols-outlined text-2xl ${isPdf ? 'text-red-500' : 'text-blue-500'}`} style={{ fontVariationSettings: "'FILL' 0" }}>
-                      {isPdf ? 'picture_as_pdf' : 'description'}
-                    </span>
+              <div key={r.id} className="relative group">
+                <button
+                  onClick={() => onResumeClick(r.id)}
+                  className="w-full bg-surface-container-lowest p-6 rounded-3xl shadow-[0px_10px_30px_rgba(0,78,159,0.04)] hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left"
+                >
+                  <div className="flex items-center gap-3 mb-4 pr-8">
+                    <div className={`w-12 h-14 ${isPdf ? 'bg-red-50' : 'bg-blue-50'} rounded-xl flex items-center justify-center shrink-0`}>
+                      <span className={`material-symbols-outlined text-2xl ${isPdf ? 'text-red-500' : 'text-blue-500'}`} style={{ fontVariationSettings: "'FILL' 0" }}>
+                        {isPdf ? 'picture_as_pdf' : 'description'}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h5 className="font-bold text-sm truncate">{r.file_name}</h5>
+                      <p className="text-xs text-outline mt-0.5">{formatDate(r.created_at)}</p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h5 className="font-bold text-sm truncate">{r.file_name}</h5>
-                    <p className="text-xs text-outline mt-0.5">{formatDate(r.created_at)}</p>
+
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm text-slate-500 font-medium">Overall Score</span>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${badge.cls}`}>{badge.label}</span>
+                      <span className={`text-xl font-black ${c.text}`}>{r.overall_score}</span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm text-slate-500 font-medium">Overall Score</span>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${badge.cls}`}>{badge.label}</span>
-                    <span className={`text-xl font-black ${c.text}`}>{r.overall_score}</span>
+                  <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                    <div
+                      className={`h-full bg-gradient-to-r ${c.bar} rounded-full`}
+                      style={{ width: `${r.overall_score}%` }}
+                    />
                   </div>
-                </div>
 
-                <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
-                  <div
-                    className={`h-full bg-gradient-to-r ${c.bar} rounded-full`}
-                    style={{ width: `${r.overall_score}%` }}
-                  />
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-outline-variant/10 flex items-center justify-between text-xs text-outline font-medium group-hover:text-primary transition-colors">
-                  <span>View Full Analysis</span>
-                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                </div>
-              </button>
+                  <div className="mt-4 pt-4 border-t border-outline-variant/10 flex items-center justify-between text-xs text-outline font-medium group-hover:text-primary transition-colors">
+                    <span>View Full Analysis</span>
+                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  </div>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteClick(r.id);
+                  }}
+                  title="Delete Resume"
+                  className="absolute top-4 right-4 p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 hover:shadow-sm rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-200"
+                >
+                  <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 0" }}>delete</span>
+                </button>
+              </div>
             );
           })}
         </div>
@@ -856,13 +878,31 @@ export default function ResumeOptimizer() {
     }
   };
 
+  const handleDeleteResume = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this resume? This action cannot be undone.')) return;
+    try {
+      const { data } = await api.delete(`/resume/${id}`);
+      if (data.success) {
+        setRecentResumes(prev => prev.filter(r => r.id !== id));
+        if (analysis && analysis.id === id) {
+          setAnalysis(null);
+          setView('upload');
+          setFile(null);
+          setActiveNav('analysis');
+        }
+      }
+    } catch {
+      setError('Could not delete resume. Please try again later.');
+    }
+  };
+
   const handleNavClick = (key) => {
     const item = navItems.find(n => n.key === key);
     if (item?.locked) return; // Prevent navigation for locked items
 
     setActiveNav(key);
     setError(null);
-    if (key === 'myResumes' || key === 'history') {
+    if (key === 'myResumes') {
       setView('myResumes');
     } else if (key === 'analysis') {
       setView(analysis ? 'results' : 'upload');
@@ -878,8 +918,7 @@ export default function ResumeOptimizer() {
     { key: 'myResumes', icon: 'description',       label: 'My Resumes' },
     { key: 'analysis',  icon: 'analytics',         label: 'Analysis'   },
     { key: 'aiEditor',  icon: 'auto_awesome',      label: 'AI Editor', locked: true },
-    { key: 'history',   icon: 'history',           label: 'History'    },
-    { key: 'premium',   icon: 'workspace_premium', label: 'Premium'    },
+    { key: 'premium',   icon: 'workspace_premium', label: 'Premium',    locked: true },
   ];
 
   return (
@@ -942,6 +981,7 @@ export default function ResumeOptimizer() {
               error={error}
               recentResumes={recentResumes}
               onResumeClick={handleResumeClick}
+              onDeleteClick={handleDeleteResume}
             />
           )}
 
@@ -953,6 +993,7 @@ export default function ResumeOptimizer() {
               onNewAnalysis={() => { setView('upload'); setFile(null); setAnalysis(null); setError(null); setActiveNav('analysis'); }}
               recentResumes={recentResumes}
               onResumeClick={handleResumeClick}
+              onDeleteClick={handleDeleteResume}
             />
           )}
 
@@ -961,6 +1002,7 @@ export default function ResumeOptimizer() {
               resumes={recentResumes}
               onResumeClick={handleResumeClick}
               onNewAnalysis={() => { setView('upload'); setFile(null); setActiveNav('analysis'); }}
+              onDeleteClick={handleDeleteResume}
             />
           )}
 

@@ -10,7 +10,7 @@ import {
 
 const TOOLS = [
   { name: 'Skill Assessment',  icon: Activity,    path: '/skills',    accent: '#3b82f6', light: '#eff6ff', tag: 'Foundation' },
-  { name: 'Resume Optimizer',  icon: FileText,    path: '/resume',    accent: '#10b981', light: '#f0fdf4', tag: 'Profile'    },
+  { name: 'Resume Forge',      icon: FileText,    path: '/resume',    accent: '#10b981', light: '#f0fdf4', tag: 'Resumes'    },
   { name: 'LinkedIn Optimizer',icon: Linkedin,    path: '/linkedin',  accent: '#0ea5e9', light: '#f0f9ff', tag: 'Profile'    },
   { name: 'GitHub Optimizer',  icon: Github,      path: '/github',    accent: '#6366f1', light: '#eef2ff', tag: 'Profile'    },
   { name: 'Portfolio Builder', icon: LayoutIcon,  path: '/portfolio', accent: '#8b5cf6', light: '#f5f3ff', tag: 'Profile'    },
@@ -205,10 +205,10 @@ const FEATURES = [
     Visual: AssessmentVisual,
   },
   {
-    badge: 'Step 2 — Resume Optimizer',
+    badge: 'Step 2 — Resume Forge',
     title: 'Get past every ATS\nfilter, every time.',
     desc: 'Upload once. Get a full ATS compatibility score, keyword gap analysis, and rewritten bullet points with quantified impact — all in seconds. Most users improve their score by 20+ points.',
-    cta: 'Optimize My Resume',
+    cta: 'Forge My Resume',
     path: '/resume',
     Visual: ResumeVisual,
   },

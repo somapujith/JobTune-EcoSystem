@@ -13,6 +13,8 @@ import PortfolioBuilder from './pages/PortfolioBuilder';
 import ProjectIdeas from './pages/ProjectIdeas';
 import MockInterview from './pages/MockInterview';
 import JobMatcher from './pages/JobMatcher';
+import ResumeBuilder from './pages/ResumeBuilder';
+import ResumeHistory from './pages/ResumeHistory';
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
         <Route index element={<Home />} />
         <Route path="skills" element={<SkillAssessment />} />
         <Route path="resume" element={<ResumeOptimizer />} />
+        <Route path="resume/build" element={<ResumeBuilder />} />
+        <Route path="resume/history" element={<ResumeHistory />} />
         <Route path="linkedin" element={<LinkedInOptimizer />} />
         <Route path="github" element={<GitHubOptimizer />} />
         <Route path="portfolio" element={<PortfolioBuilder />} />

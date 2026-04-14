@@ -308,6 +308,117 @@ router.get('/:id', authenticateToken, async (req, res, next) => {
   }
 });
 
+// DELETE /api/resume/:id — delete a specific resume
+router.delete('/:id', authenticateToken, async (req, res, next) => {
+  try {
+    const [result] = await pool.query(
+      'DELETE FROM resumes WHERE id = ? AND user_id = ?',
+      [req.params.id, req.user.id]
+    );
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Resume not found or you do not have permission to delete it.' });
+    }
+    
+    res.json({ success: true, message: 'Resume deleted successfully.' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/resume/tune — Restuner-style: match resume against JD, compute ATS, return AI-tuned resume
+router.post('/tune', upload.single('resume'), async (req, res, next) => {
+  try {
+    const file = req.file;
+    const jobDescription = (req.body && req.body.jobDescription) || '';
+
+    if (!file) return res.status(400).json({ error: 'Resume file is required.' });
+    if (!jobDescription.trim()) return res.status(400).json({ error: 'Job description is required.' });
+
+    // Extract resume text (reuse existing util)
+    const resumeText = await extractText(file);
+    if (!resumeText.trim()) {
+      return res.status(422).json({ error: 'Could not extract text from this file. Please use a text-based PDF.' });
+    }
+
+    // ── ATS Keyword Matching ──────────────────────────────────────────────────
+    const TECH_VOCAB = [
+      'react','angular','vue','svelte','javascript','typescript','node','express','python',
+      'django','flask','fastapi','java','spring','c++','c#','.net','ruby','rails','go',
+      'golang','rust','php','laravel','sql','mysql','postgresql','mongodb','redis','elasticsearch',
+      'docker','kubernetes','aws','azure','gcp','html','css','sass','tailwind','bootstrap',
+      'git','github','ci/cd','jenkins','linux','bash','agile','scrum','rest','graphql','api',
+      'microservices','machine learning','ml','ai','tensorflow','pytorch','pandas','numpy',
+      'react native','flutter','swift','kotlin','android','ios','next.js','nuxt.js','redux',
+      'jest','pytest','selenium','playwright','kafka','rabbitmq','firebase','supabase',
+      'figma','jira','confluence','webpack','vite','babel','eslint','oauth','jwt','websocket',
+    ];
+
+    const jdLower = jobDescription.toLowerCase();
+    const resumeLower = resumeText.toLowerCase();
+
+    const jdKeywords    = TECH_VOCAB.filter(t => jdLower.includes(t));
+    const matchedKeywords = jdKeywords.filter(t => resumeLower.includes(t));
+    const missingKeywords = jdKeywords.filter(t => !resumeLower.includes(t));
+
+    const atsScore = jdKeywords.length > 0
+      ? Math.round((matchedKeywords.length / jdKeywords.length) * 100)
+      : 50;
+
+    // ── Gemini Tuning (Restuner approach ported to Gemini) ─────────────────────
+    const systemPrompt = `You are an expert resume coach and ATS optimization specialist with 15+ years of experience.
+You have been given a candidate's resume text and a job description.
+Your job is to tune and rewrite the resume to maximise alignment with the job description while keeping all real experience accurate.
+Rules:
+- Keep all factual details (companies, dates, degrees, names)
+- Reorder and emphasise experiences relevant to the JD
+- Inject JD keywords naturally into bullet points
+- Use strong action verbs and quantified achievements
+- Format output as professional markdown (no emojis, clean headers)
+- Include all original sections: Summary, Experience, Education, Skills, Projects, Certifications`;
+
+    const userPrompt = `Here is the candidate's resume:
+
+---RESUME START---
+${resumeText.slice(0, 6000)}
+---RESUME END---
+
+Here is the job description to tune for:
+
+---JOB DESCRIPTION START---
+${jobDescription.slice(0, 3000)}
+---JOB DESCRIPTION END---
+
+Missing keywords to naturally incorporate: ${missingKeywords.slice(0, 15).join(', ') || 'none identified'}
+
+Please produce a fully tuned, ATS-optimised version of this resume in markdown format.`;
+
+    const aiResult = await callAI({
+      systemPrompt,
+      userPrompt,
+      maxTokens: 2000,
+      temperature: 0.3,
+    });
+
+    const tunedResume = aiResult.ok && aiResult.data
+      ? aiResult.data
+      : `# Resume Tuning Unavailable\n\nAI service is temporarily unavailable. Here are the keywords to add manually:\n\n**Missing:** ${missingKeywords.join(', ')}\n\n**Your resume already contains:** ${matchedKeywords.join(', ')}`;
+
+    res.json({
+      success: true,
+      atsScore,
+      atsLabel: atsScore >= 80 ? 'Strong Match' : atsScore >= 60 ? 'Good Match' : atsScore >= 40 ? 'Partial Match' : 'Low Match',
+      matchedKeywords,
+      missingKeywords,
+      totalJdKeywords: jdKeywords.length,
+      tunedResume,
+      resumeWordCount: resumeText.split(/\s+/).filter(Boolean).length,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // POST /api/resume/ai-edit — AI-powered resume editing via OpenAI
 router.post('/ai-edit', authenticateToken, async (req, res, next) => {
   try {

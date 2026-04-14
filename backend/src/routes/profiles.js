@@ -199,7 +199,7 @@ router.post('/github/analyze', async (req, res) => {
   // Fetch real GitHub data first
   const ghData = await fetchGitHubData(username);
   if (!ghData) {
-    return res.status(404).json({ error: \`GitHub user "\${username}" not found or API unavailable.\` });
+    return res.status(404).json({ error: `GitHub user "${username}" not found or API unavailable.` });
   }
 
   const { score, scoreLabel, scoreDescription, issues, strengths } = scoreGitHubProfile(ghData);
@@ -304,7 +304,7 @@ router.post('/linkedin/analyze', async (req, res) => {
   if (expCount === 0) suggestions.push("Add at least one experience entry — internships or projects count.");
 
   const firstWordOfHeadline = headlineStr.split(/\s+/)[0] || '';
-  const scoreDescription = \`\${firstWordOfHeadline || 'Your'} profile scores \${score}/100 — \${suggestions.length} improvement\${suggestions.length===1?'':'s'} identified.\`;
+  const scoreDescription = `${firstWordOfHeadline || 'Your'} profile scores ${score}/100 — ${suggestions.length} improvement${suggestions.length===1?'':'s'} identified.`;
 
   res.json({
     score,
@@ -414,15 +414,15 @@ router.post('/jobmatch', (req, res) => {
     suggestions.push("You are missing more than half of the required keywords. Consider if this role aligns with your core stack.");
   }
   if (missingKeywords.length > 0) {
-    suggestions.push(\`Focus on learning or highlighting: \${missingKeywords.slice(0, 3).join(', ')}\`);
+    suggestions.push(`Focus on learning or highlighting: ${missingKeywords.slice(0, 3).join(', ')}`);
   }
   for (const category in gapsByCategory) {
     if (gapsByCategory[category].length >= 2) {
-      suggestions.push(\`You have a significant gap in \${category} technologies.\`);
+      suggestions.push(`You have a significant gap in ${category} technologies.`);
     }
   }
   if (matchedKeywords.length >= 3) {
-    suggestions.push(\`Leverage your strengths in \${matchedKeywords.slice(0, 3).join(', ')} during the interview.\`);
+    suggestions.push(`Leverage your strengths in ${matchedKeywords.slice(0, 3).join(', ')} during the interview.`);
   }
 
   res.json({
