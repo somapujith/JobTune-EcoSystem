@@ -1,14 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { api } from '../store/useAuthStore';
 
-const projects = [
+const FALLBACK_PROJECTS = [
   { id: 1, title: 'E-Commerce Dashboard', diff: 'Intermediate', time: '10 hrs', tech: ['React', 'Chart.js', 'Tailwind'], category: 'Frontend', color: '#3b82f6' },
   { id: 2, title: 'Real-time Chat App', diff: 'Advanced', time: '15 hrs', tech: ['Node.js', 'Socket.io', 'Express'], category: 'Full Stack', color: '#8b5cf6' },
   { id: 3, title: 'Weather API Wrapper', diff: 'Beginner', time: '3 hrs', tech: ['JavaScript', 'Fetch API'], category: 'Backend', color: '#10b981' },
   { id: 4, title: 'URL Shortener', diff: 'Intermediate', time: '8 hrs', tech: ['Express', 'MongoDB', 'Redis'], category: 'Backend', color: '#10b981' },
 ];
 
+const CATEGORY_COLORS = { Frontend: '#3b82f6', Backend: '#10b981', 'Full Stack': '#8b5cf6', Database: '#f59e0b' };
+
 export default function ProjectIdeas() {
   const [filter, setFilter] = useState('All');
+  const [projects, setProjects] = useState(FALLBACK_PROJECTS);
+
+  useEffect(() => {
+    api.get('/projects/ideas')
+      .then(({ data }) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setProjects(data.map(p => ({ ...p, color: CATEGORY_COLORS[p.category] || '#6366f1' })));
+        }
+      })
+      .catch(() => {/* keep fallback data */});
+  }, []);
 
   const filtered = filter === 'All' ? projects : projects.filter(p => p.category === filter);
 

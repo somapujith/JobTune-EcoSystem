@@ -1,5 +1,5 @@
-import React from 'react';
-import useAuthStore from '../store/useAuthStore';
+import React, { useEffect, useState } from 'react';
+import useAuthStore, { api } from '../store/useAuthStore';
 import { Navigate, Link } from 'react-router-dom';
 import { 
   Target, 
@@ -31,6 +31,13 @@ const tools = [
 
 export default function Dashboard() {
   const { user, isAuthenticated } = useAuthStore();
+  const [overview, setOverview] = useState(null);
+
+  useEffect(() => {
+    api.get('/dashboard/overview')
+      .then(({ data }) => setOverview(data))
+      .catch(() => {/* keep static fallback */});
+  }, []);
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
@@ -66,10 +73,10 @@ export default function Dashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {[
-          { label: 'Readiness Score', val: '45/100', icon: Target, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'Skills Verified', val: '12/25', icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Profile Rating', val: 'A-', icon: Star, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Active Projects', val: '3', icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
+          { label: 'Readiness Score', val: overview ? `${overview.readiness}/100` : '45/100', icon: Target, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'Skills Verified', val: overview ? `${overview.skillsVerified}/25` : '12/25', icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Profile Rating', val: overview ? `${overview.profileScore}/100` : 'A-', icon: Star, color: 'text-amber-600', bg: 'bg-amber-50' },
+          { label: 'Active Projects', val: overview ? overview.actionItems?.length ?? '3' : '3', icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
         ].map((stat, i) => (
           <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 group hover:border-blue-200 transition-colors">
             <div className={`w-14 h-14 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
@@ -148,16 +155,16 @@ export default function Dashboard() {
                  <Clock className="w-4 h-4 text-slate-400" />
               </div>
               <div className="space-y-6">
-                 {[
-                   { action: "Skills Verified: React.js", time: "2h ago", color: "bg-blue-500" },
-                   { action: "Resume Scored 85/100", time: "1d ago", color: "bg-emerald-500" },
-                   { action: "Ecosystem Initialized", time: "2d ago", color: "bg-indigo-500" },
-                 ].map((act, i) => (
-                    <div key={i} className="flex gap-4">
-                       <div className={`w-1.5 h-1.5 rounded-full ${act.color} mt-2`}></div>
+                 {(overview?.recentActivity ?? [
+                   { id: 1, action: "Skills Verified: React.js", date: "2h ago" },
+                   { id: 2, action: "Resume Scored 85/100", date: "1d ago" },
+                   { id: 3, action: "Ecosystem Initialized", date: "2d ago" },
+                 ]).map((act, i) => (
+                    <div key={act.id ?? i} className="flex gap-4">
+                       <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2"></div>
                        <div className="flex-grow">
                           <p className="text-sm font-bold text-slate-800 leading-none">{act.action}</p>
-                          <p className="text-[10px] text-slate-400 mt-1 font-bold uppercase tracking-tighter">{act.time}</p>
+                          <p className="text-[10px] text-slate-400 mt-1 font-bold uppercase tracking-tighter">{act.date}</p>
                        </div>
                     </div>
                  ))}

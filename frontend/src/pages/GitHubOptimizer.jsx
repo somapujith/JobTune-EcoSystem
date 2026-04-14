@@ -1,29 +1,35 @@
 import React, { useState } from 'react';
+import { api } from '../store/useAuthStore';
 
 export default function GitHubOptimizer() {
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState(null);
+  const [error, setError] = useState('');
 
-  const handleAnalyze = (e) => {
+  const buildReadme = (u) =>
+    `# Hi there, I'm ${u} 👋\n\n## 🚀 About Me\n- 🎓 Recent Computer Science Graduate\n- 💻 Passionate about Frontend Development & UI/UX\n- 🌱 I'm currently learning **Next.js & TypeScript**\n- 💬 Ask me about **React, JavaScript, and Tailwind CSS**\n\n## 🛠 Tech Stack\n**Languages:** JavaScript, HTML5, CSS3\n**Frameworks:** React.js, Express.js\n**Tools:** Git, VS Code, Figma\n\n## 📈 GitHub Stats\n![${u}'s GitHub stats](https://github-readme-stats.vercel.app/api?username=${u}&show_icons=true&theme=radical)`;
+
+  const handleAnalyze = async (e) => {
     e.preventDefault();
     if (!username) return;
     setLoading(true);
-    setTimeout(() => {
+    setError('');
+    try {
+      const { data } = await api.post('/profiles/github/analyze', { username });
       setReport({
-        score: 65,
-        repoCount: 12,
-        stars: 4,
-        readmeExists: false,
-        issues: [
-          "No profile README found. This is a critical missed opportunity.",
-          "8 of 12 repositories lack a basic README.md",
-          "Only 2 repositories have a description or tags."
-        ],
-        generatedReadme: `# Hi there, I'm ${username} 👋\n\n## 🚀 About Me\n- 🎓 Recent Computer Science Graduate\n- 💻 Passionate about Frontend Development & UI/UX\n- 🌱 I'm currently learning **Next.js & TypeScript**\n- 💬 Ask me about **React, JavaScript, and Tailwind CSS**\n\n## 🛠 Tech Stack\n**Languages:** JavaScript, HTML5, CSS3\n**Frameworks:** React.js, Express.js\n**Tools:** Git, VS Code, Figma\n\n## 📈 GitHub Stats\n![${username}'s GitHub stats](https://github-readme-stats.vercel.app/api?username=${username}&show_icons=true&theme=radical)`
+        score: data.score ?? 65,
+        repoCount: data.repoCount ?? 12,
+        stars: data.stars ?? 4,
+        readmeExists: data.readmeExists ?? false,
+        issues: data.issues ?? ["No profile README found.", "Several repositories lack README.md"],
+        generatedReadme: buildReadme(username),
       });
+    } catch (err) {
+      setError(err.response?.data?.error || 'Analysis failed. Please try again.');
+    } finally {
       setLoading(false);
-    }, 2000);
+    }
   };
 
   return (
@@ -40,6 +46,11 @@ export default function GitHubOptimizer() {
         </p>
       </div>
 
+      {error && (
+        <div className="max-w-2xl mx-auto mb-6 bg-rose-50 border border-rose-100 p-4 rounded-2xl text-rose-600 text-sm font-medium">
+          {error}
+        </div>
+      )}
       <form onSubmit={handleAnalyze} className="max-w-2xl mx-auto mb-16">
         <div className="relative bg-surface-container-lowest rounded-3xl p-2 shadow-[0px_20px_40px_rgba(0,78,159,0.06)]">
           <div className="flex items-center gap-4 p-4">

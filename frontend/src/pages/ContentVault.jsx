@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../store/useAuthStore';
 
-const resources = [
+const FALLBACK_RESOURCES = [
   { id: 1, title: 'Complete React Guide 2026', type: 'Video', duration: '12 Hours', category: 'Frontend', color: '#3b82f6' },
   { id: 2, title: 'System Design Interview Prep', type: 'Article', duration: '45 Mins', category: 'Backend', color: '#8b5cf6' },
   { id: 3, title: 'Advanced SQL Patterns', type: 'Interactive', duration: '2 Hours', category: 'Database', color: '#10b981' },
@@ -9,10 +10,23 @@ const resources = [
   { id: 6, title: 'Docker & Kubernetes Basics', type: 'Article', duration: '1.5 Hours', category: 'DevOps', color: '#ef4444' }
 ];
 
+const TYPE_COLORS = { Video: '#3b82f6', Article: '#8b5cf6', Interactive: '#10b981', Course: '#f59e0b' };
+
 export default function ContentVault() {
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
+  const [resources, setResources] = useState(FALLBACK_RESOURCES);
   const categories = ['All', 'Frontend', 'Backend', 'Database', 'Soft Skills', 'DevOps'];
+
+  useEffect(() => {
+    api.get('/learning/resources')
+      .then(({ data }) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setResources(data.map(r => ({ ...r, color: TYPE_COLORS[r.type] || '#6366f1' })));
+        }
+      })
+      .catch(() => {/* keep fallback data */});
+  }, []);
 
   const filtered = resources.filter(r => {
     const matchesFilter = filter === 'All' || r.category === filter;

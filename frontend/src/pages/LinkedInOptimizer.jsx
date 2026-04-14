@@ -1,31 +1,36 @@
 import React, { useState } from 'react';
+import { api } from '../store/useAuthStore';
+
+const MOCK_METRICS = [
+  { label: 'Headline Impact', val: 60, status: 'warning' },
+  { label: 'About Section Depth', val: 85, status: 'good' },
+  { label: 'Experience Keywords', val: 70, status: 'warning' },
+  { label: 'Skills & Endorsements', val: 90, status: 'good' }
+];
 
 export default function LinkedInOptimizer() {
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState(null);
+  const [error, setError] = useState('');
 
-  const handleAnalyze = (e) => {
+  const handleAnalyze = async (e) => {
     e.preventDefault();
     if (!url) return;
     setLoading(true);
-    setTimeout(() => {
+    setError('');
+    try {
+      const { data } = await api.post('/profiles/linkedin/analyze', { url });
       setReport({
-        score: 72,
-        metrics: [
-          { label: 'Headline Impact', val: 60, status: 'warning' },
-          { label: 'About Section Depth', val: 85, status: 'good' },
-          { label: 'Experience Keywords', val: 70, status: 'warning' },
-          { label: 'Skills & Endorsements', val: 90, status: 'good' }
-        ],
-        suggestions: [
-          "Your headline is too generic ('Frontend Developer'). Try 'React.js Developer | Building Fast, Accessible Web Interfaces'.",
-          "You have 15 skills listed but no endorsements for top skills like React and Node.js.",
-          "Add metrics to your experience section (e.g., 'Improved loading time by 20%')."
-        ]
+        score: data.score,
+        metrics: data.metrics ?? MOCK_METRICS,
+        suggestions: data.suggestions ?? []
       });
+    } catch (err) {
+      setError(err.response?.data?.error || 'Analysis failed. Please try again.');
+    } finally {
       setLoading(false);
-    }, 2000);
+    }
   };
 
   return (
@@ -42,6 +47,11 @@ export default function LinkedInOptimizer() {
         </p>
       </div>
 
+      {error && (
+        <div className="max-w-3xl mx-auto mb-6 bg-rose-50 border border-rose-100 p-4 rounded-2xl text-rose-600 text-sm font-medium">
+          {error}
+        </div>
+      )}
       <form onSubmit={handleAnalyze} className="max-w-3xl mx-auto mb-16">
         <div className="relative bg-surface-container-lowest rounded-3xl p-2 shadow-[0px_20px_40px_rgba(14,165,233,0.06)]">
           <div className="flex items-center gap-4 p-4">
