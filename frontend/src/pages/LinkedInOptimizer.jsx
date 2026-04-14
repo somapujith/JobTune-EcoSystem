@@ -1,12 +1,19 @@
 import React, { useState } from 'react';
 import { api } from '../store/useAuthStore';
 
-const MOCK_METRICS = [
-  { label: 'Headline Impact', val: 60, status: 'warning' },
-  { label: 'About Section Depth', val: 85, status: 'good' },
-  { label: 'Experience Keywords', val: 70, status: 'warning' },
-  { label: 'Skills & Endorsements', val: 90, status: 'good' }
-];
+function getScoreColor(score) {
+  if (score >= 80) return '#10b981'; // emerald
+  if (score >= 60) return '#0ea5e9'; // sky
+  if (score >= 40) return '#f59e0b'; // amber
+  return '#ef4444'; // red
+}
+
+function getScoreRingColor(score) {
+  if (score >= 80) return 'stroke-emerald-500';
+  if (score >= 60) return 'stroke-sky-500';
+  if (score >= 40) return 'stroke-amber-500';
+  return 'stroke-red-500';
+}
 
 export default function LinkedInOptimizer() {
   const [url, setUrl] = useState('');
@@ -19,13 +26,10 @@ export default function LinkedInOptimizer() {
     if (!url) return;
     setLoading(true);
     setError('');
+    setReport(null);
     try {
       const { data } = await api.post('/profiles/linkedin/analyze', { url });
-      setReport({
-        score: data.score,
-        metrics: data.metrics ?? MOCK_METRICS,
-        suggestions: data.suggestions ?? []
-      });
+      setReport(data);
     } catch (err) {
       setError(err.response?.data?.error || 'Analysis failed. Please try again.');
     } finally {
@@ -52,6 +56,7 @@ export default function LinkedInOptimizer() {
           {error}
         </div>
       )}
+
       <form onSubmit={handleAnalyze} className="max-w-3xl mx-auto mb-16">
         <div className="relative bg-surface-container-lowest rounded-3xl p-2 shadow-[0px_20px_40px_rgba(14,165,233,0.06)]">
           <div className="flex items-center gap-4 p-4">
@@ -87,22 +92,45 @@ export default function LinkedInOptimizer() {
         </div>
       </form>
 
-      {report && (
+      {loading && (
+        <div className="max-w-3xl mx-auto text-center py-12">
+          <div className="inline-flex flex-col items-center gap-4">
+            <span className="material-symbols-outlined animate-spin text-sky-500 text-5xl" style={{ fontVariationSettings: "'FILL' 0" }}>sync</span>
+            <p className="text-on-surface-variant font-medium">AI is analyzing your LinkedIn profile...</p>
+          </div>
+        </div>
+      )}
+
+      {report && !loading && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Profile Score Card */}
           <div className="bg-surface-container-lowest p-8 rounded-3xl shadow-[0px_20px_40px_rgba(14,165,233,0.06)] flex flex-col items-center justify-center text-center">
             <div className="relative mb-8">
               <svg viewBox="0 0 36 36" className="w-32 h-32 -rotate-90 mx-auto">
                 <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e5eeff" strokeWidth="3.2" />
-                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#0ea5e9" strokeWidth="3.2"
-                  strokeDasharray={`${(report.score / 100) * 100} 100`} strokeLinecap="round" />
+                <circle
+                  cx="18" cy="18" r="15.9" fill="none"
+                  stroke={getScoreColor(report.score)}
+                  strokeWidth="3.2"
+                  strokeDasharray={`${(report.score / 100) * 100} 100`}
+                  strokeLinecap="round"
+                />
               </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-4xl font-black text-on-surface">{report.score}</span>
+                <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">/ 100</span>
               </div>
             </div>
+            <div
+              className="inline-block px-4 py-1 rounded-full text-sm font-bold mb-3"
+              style={{ backgroundColor: `${getScoreColor(report.score)}20`, color: getScoreColor(report.score) }}
+            >
+              {report.scoreLabel || 'Profile Score'}
+            </div>
             <h3 className="text-2xl font-bold text-on-surface mb-3 font-headline">Profile Score</h3>
-            <p className="text-on-surface-variant font-medium">Your profile is above average, but has room for optimization.</p>
+            <p className="text-on-surface-variant font-medium">
+              {report.scoreDescription || 'See the breakdown below for actionable improvements.'}
+            </p>
           </div>
 
           {/* Metrics Breakdown */}
@@ -116,12 +144,15 @@ export default function LinkedInOptimizer() {
                 <div key={i}>
                   <div className="flex justify-between text-sm font-bold mb-3">
                     <span className="text-on-surface">{m.label}</span>
-                    <span className="text-on-surface">{m.val}/100</span>
+                    <span className="font-black" style={{ color: getScoreColor(m.val) }}>{m.val}/100</span>
                   </div>
                   <div className="w-full bg-surface-container h-3 rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full ${m.status === 'good' ? 'bg-emerald-500' : 'bg-amber-500'} shadow-[0_0_8px_${m.status === 'good' ? 'rgba(16,185,129,0.4)' : 'rgba(245,158,11,0.4)'}]`}
-                      style={{ width: `${m.val}%` }}
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{
+                        width: `${m.val}%`,
+                        backgroundColor: getScoreColor(m.val)
+                      }}
                     />
                   </div>
                 </div>
@@ -138,7 +169,7 @@ export default function LinkedInOptimizer() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {report.suggestions.map((s, i) => (
                 <div key={i} className="bg-surface-container-lowest p-6 rounded-2xl shadow-sm flex gap-4 items-start">
-                  <span className="material-symbols-outlined text-sky-600 text-lg mt-1" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                  <span className="material-symbols-outlined text-sky-600 text-lg mt-1 flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                   <p className="text-on-surface font-medium leading-relaxed">{s}</p>
                 </div>
               ))}
