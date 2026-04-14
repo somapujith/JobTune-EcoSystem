@@ -11,6 +11,7 @@ import LinkedInOptimizer from './pages/LinkedInOptimizer';
 import GitHubOptimizer from './pages/GitHubOptimizer';
 import PortfolioBuilder from './pages/PortfolioBuilder';
 import ProjectIdeas from './pages/ProjectIdeas';
+import MockInterview from './pages/MockInterview';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="learning" element={<ContentVault />} />
         <Route path="projects" element={<ProjectIdeas />} />
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="interview" element={<MockInterview />} />
       </Route>
       <Route path="/login" element={<Login />} />
     </Routes>
