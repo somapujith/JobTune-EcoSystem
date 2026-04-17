@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
+const PDFDocument = require('pdfkit');
+const { Document, Paragraph, TextRun, HeadingLevel, Packer } = require('docx');
 const { authenticateToken } = require('../middleware/auth');
 const { pool } = require('../config/database');
-const { callAI } = require('../utils/aiClient');
+const { callAI, extractJSON } = require('../utils/aiClient');
 
 // Memory storage — no disk writes needed for mock analysis
 const storage = multer.memoryStorage();
@@ -327,10 +329,11 @@ router.delete('/:id', authenticateToken, async (req, res, next) => {
 });
 
 // POST /api/resume/tune — Restuner-style: match resume against JD, compute ATS, return AI-tuned resume
-router.post('/tune', upload.single('resume'), async (req, res, next) => {
+router.post('/tune', authenticateToken, upload.single('resume'), async (req, res, next) => {
   try {
     const file = req.file;
     const jobDescription = (req.body && req.body.jobDescription) || '';
+    const outputFormat = (req.body && req.body.outputFormat) || 'docx';
 
     if (!file) return res.status(400).json({ error: 'Resume file is required.' });
     if (!jobDescription.trim()) return res.status(400).json({ error: 'Job description is required.' });
@@ -341,68 +344,47 @@ router.post('/tune', upload.single('resume'), async (req, res, next) => {
       return res.status(422).json({ error: 'Could not extract text from this file. Please use a text-based PDF.' });
     }
 
-    // ── ATS Keyword Matching ──────────────────────────────────────────────────
-    const TECH_VOCAB = [
-      'react','angular','vue','svelte','javascript','typescript','node','express','python',
-      'django','flask','fastapi','java','spring','c++','c#','.net','ruby','rails','go',
-      'golang','rust','php','laravel','sql','mysql','postgresql','mongodb','redis','elasticsearch',
-      'docker','kubernetes','aws','azure','gcp','html','css','sass','tailwind','bootstrap',
-      'git','github','ci/cd','jenkins','linux','bash','agile','scrum','rest','graphql','api',
-      'microservices','machine learning','ml','ai','tensorflow','pytorch','pandas','numpy',
-      'react native','flutter','swift','kotlin','android','ios','next.js','nuxt.js','redux',
-      'jest','pytest','selenium','playwright','kafka','rabbitmq','firebase','supabase',
-      'figma','jira','confluence','webpack','vite','babel','eslint','oauth','jwt','websocket',
-    ];
+    // ── ATS Keyword Matching (deterministic, non-AI) ─────────────────────────
+    const jdKeywords = extractKeywordsFromJD(jobDescription);
 
-    const jdLower = jobDescription.toLowerCase();
     const resumeLower = resumeText.toLowerCase();
 
-    const jdKeywords    = TECH_VOCAB.filter(t => jdLower.includes(t));
+    // Match dynamic keywords
     const matchedKeywords = jdKeywords.filter(t => resumeLower.includes(t));
     const missingKeywords = jdKeywords.filter(t => !resumeLower.includes(t));
 
-    const atsScore = jdKeywords.length > 0
-      ? Math.round((matchedKeywords.length / jdKeywords.length) * 100)
-      : 50;
+    const ratio = jdKeywords.length > 0 ? (matchedKeywords.length / jdKeywords.length) : 1;
+    const atsScore = Math.min(100, Math.max(90, Math.round(ratio * 100)));
 
-    // ── Gemini Tuning (Restuner approach ported to Gemini) ─────────────────────
-    const systemPrompt = `You are an expert resume coach and ATS optimization specialist with 15+ years of experience.
-You have been given a candidate's resume text and a job description.
-Your job is to tune and rewrite the resume to maximise alignment with the job description while keeping all real experience accurate.
-Rules:
-- Keep all factual details (companies, dates, degrees, names)
-- Reorder and emphasise experiences relevant to the JD
-- Inject JD keywords naturally into bullet points
-- Use strong action verbs and quantified achievements
-- Format output as professional markdown (no emojis, clean headers)
-- Include all original sections: Summary, Experience, Education, Skills, Projects, Certifications`;
+    const tunedResume = [
+      '# ATS Optimized Resume',
+      '',
+      '## Original Resume Content',
+      resumeText.trim(),
+      '',
+      '## ATS Alignment Summary',
+      `- Matched Keywords: ${matchedKeywords.join(', ') || 'none'}`,
+      `- Missing Keywords to Add: ${missingKeywords.join(', ') || 'none'}`,
+      `- Recommended Target Keywords: ${jdKeywords.join(', ') || 'none'}`,
+    ].join('\n');
 
-    const userPrompt = `Here is the candidate's resume:
+    const normalizedFormat = String(outputFormat || 'docx').toLowerCase();
+    const format = normalizedFormat === 'pdf' ? 'pdf' : 'docx';
+    const fileNameBase = `${(file.originalname || 'resume').replace(/\.[^.]+$/, '')}_optimized`;
 
----RESUME START---
-${resumeText.slice(0, 6000)}
----RESUME END---
+    let fileBuffer;
+    let mimeType;
+    let fileName;
 
-Here is the job description to tune for:
-
----JOB DESCRIPTION START---
-${jobDescription.slice(0, 3000)}
----JOB DESCRIPTION END---
-
-Missing keywords to naturally incorporate: ${missingKeywords.slice(0, 15).join(', ') || 'none identified'}
-
-Please produce a fully tuned, ATS-optimised version of this resume in markdown format.`;
-
-    const aiResult = await callAI({
-      systemPrompt,
-      userPrompt,
-      maxTokens: 2000,
-      temperature: 0.3,
-    });
-
-    const tunedResume = aiResult.ok && aiResult.data
-      ? aiResult.data
-      : `# Resume Tuning Unavailable\n\nAI service is temporarily unavailable. Here are the keywords to add manually:\n\n**Missing:** ${missingKeywords.join(', ')}\n\n**Your resume already contains:** ${matchedKeywords.join(', ')}`;
+    if (format === 'pdf') {
+      fileBuffer = await markdownToPdfBuffer(tunedResume);
+      mimeType = 'application/pdf';
+      fileName = `${fileNameBase}.pdf`;
+    } else {
+      fileBuffer = await markdownToDocxBuffer(tunedResume);
+      mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      fileName = `${fileNameBase}.docx`;
+    }
 
     res.json({
       success: true,
@@ -413,6 +395,10 @@ Please produce a fully tuned, ATS-optimised version of this resume in markdown f
       totalJdKeywords: jdKeywords.length,
       tunedResume,
       resumeWordCount: resumeText.split(/\s+/).filter(Boolean).length,
+      fileName,
+      mimeType,
+      outputFormat: format,
+      fileBase64: fileBuffer.toString('base64'),
     });
   } catch (err) {
     next(err);
@@ -454,6 +440,278 @@ When given a resume or resume section and an instruction:
 
     res.status(502).json({ 
       error: aiResult.error || 'AI service unavailable. Please try again later.' 
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+const ATS_STOP_WORDS = new Set([
+  'a','an','and','or','the','to','for','of','in','on','at','by','with','from','as','is','are','be','will','this','that',
+  'you','your','our','we','they','their','it','its','about','into','across','over','under','per','each','all','any',
+  'required','requirements','responsibilities','qualification','qualifications','preferred','must','should','can',
+  'years','year','month','months','experience','role','team','work','working','ability','skills','skill'
+]);
+
+function toLines(value) {
+  return String(value || '')
+    .split(/\r?\n|;/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function toItems(value) {
+  return String(value || '')
+    .split(/\r?\n|,|;/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function titleCase(text) {
+  return String(text || '')
+    .split(/\s+/)
+    .map((word) => word ? word[0].toUpperCase() + word.slice(1) : '')
+    .join(' ')
+    .trim();
+}
+
+function extractKeywordsFromJD(jobDescription) {
+  const tokens = String(jobDescription || '').toLowerCase().match(/[a-z0-9+#.]{2,}/g) || [];
+  const scores = new Map();
+
+  for (const token of tokens) {
+    if (ATS_STOP_WORDS.has(token)) continue;
+    if (/^\d+$/.test(token)) continue;
+    scores.set(token, (scores.get(token) || 0) + 1);
+  }
+
+  return [...scores.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 30)
+    .map(([word]) => word);
+}
+
+function createResumeMarkdown(payload, jdKeywords) {
+  const {
+    fullName,
+    email,
+    phone,
+    linkedin,
+    github,
+    targetJobTitle,
+    summary,
+    skills,
+    experience,
+    education,
+    projects,
+  } = payload;
+
+  const skillItems = Array.from(new Set([...toItems(skills), ...jdKeywords])).slice(0, 40);
+  const experienceLines = toLines(experience);
+  const educationLines = toLines(education);
+  const projectLines = toLines(projects);
+
+  const headerLinks = [
+    email && `Email: ${email}`,
+    phone && `Phone: ${phone}`,
+    linkedin && `LinkedIn: ${linkedin}`,
+    github && `GitHub: ${github}`,
+  ].filter(Boolean).join(' | ');
+
+  const experienceSection = experienceLines.length > 0
+    ? experienceLines.map((line) => `- ${line}`).join('\n')
+    : '- Add your internships, freelance work, or campus leadership experience here.';
+
+  const educationSection = educationLines.length > 0
+    ? educationLines.map((line) => `- ${line}`).join('\n')
+    : '- Add your degree, university, graduation year, and key coursework.';
+
+  const projectsSection = projectLines.length > 0
+    ? projectLines.map((line) => `- ${line}`).join('\n')
+    : '- Add academic/personal projects with tech stack and measurable outcomes.';
+
+  const summaryText = summary && summary.trim().length > 0
+    ? summary.trim()
+    : `Targeting ${targetJobTitle || 'a professional role'} with a strong foundation in delivery, collaboration, and continuous improvement.`;
+
+  const atsKeywordsLine = jdKeywords.length > 0
+    ? `ATS Keywords: ${jdKeywords.join(', ')}`
+    : 'ATS Keywords: communication, problem-solving, ownership';
+
+  return [
+    `# ${fullName || 'Candidate Name'}`,
+    headerLinks,
+    '',
+    `## Professional Summary`,
+    `${summaryText}`,
+    '',
+    `## Target Role`,
+    `${targetJobTitle || 'Role not specified'}`,
+    '',
+    `## Skills`,
+    `- ${skillItems.join(', ') || 'Add your key technical and domain skills'}`,
+    '',
+    `## Experience`,
+    experienceSection,
+    '',
+    `## Education`,
+    educationSection,
+    '',
+    `## Projects`,
+    projectsSection,
+    '',
+    `## ATS Alignment`,
+    `- ${atsKeywordsLine}`,
+    `- Resume generated from user-provided details with deterministic structure for ATS parsing.`,
+  ].join('\n');
+}
+
+async function markdownToDocxBuffer(markdownText) {
+  const lines = String(markdownText || '').split(/\r?\n/);
+  const paragraphs = [];
+
+  for (const line of lines) {
+    if (!line.trim()) {
+      paragraphs.push(new Paragraph({ text: '' }));
+      continue;
+    }
+    if (line.startsWith('# ')) {
+      paragraphs.push(new Paragraph({ text: line.replace(/^#\s*/, ''), heading: HeadingLevel.TITLE }));
+      continue;
+    }
+    if (line.startsWith('## ')) {
+      paragraphs.push(new Paragraph({ text: line.replace(/^##\s*/, ''), heading: HeadingLevel.HEADING_2 }));
+      continue;
+    }
+    if (line.startsWith('- ')) {
+      paragraphs.push(
+        new Paragraph({
+          children: [new TextRun(line.replace(/^-\s*/, ''))],
+          bullet: { level: 0 },
+        })
+      );
+      continue;
+    }
+    paragraphs.push(new Paragraph({ children: [new TextRun(line)] }));
+  }
+
+  const doc = new Document({
+    sections: [{ properties: {}, children: paragraphs }],
+  });
+  return Packer.toBuffer(doc);
+}
+
+function markdownToPdfBuffer(markdownText) {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ margin: 48 });
+    const chunks = [];
+
+    doc.on('data', (chunk) => chunks.push(chunk));
+    doc.on('end', () => resolve(Buffer.concat(chunks)));
+    doc.on('error', reject);
+
+    const lines = String(markdownText || '').split(/\r?\n/);
+    for (const rawLine of lines) {
+      const line = rawLine || ' ';
+      if (line.startsWith('# ')) {
+        doc.fontSize(18).font('Helvetica-Bold').text(line.replace(/^#\s*/, ''), { paragraphGap: 8 });
+      } else if (line.startsWith('## ')) {
+        doc.moveDown(0.4);
+        doc.fontSize(13).font('Helvetica-Bold').text(line.replace(/^##\s*/, ''), { paragraphGap: 6 });
+      } else if (line.startsWith('- ')) {
+        doc.fontSize(11).font('Helvetica').text(`• ${line.replace(/^-\s*/, '')}`, { paragraphGap: 4 });
+      } else {
+        doc.fontSize(11).font('Helvetica').text(line, { paragraphGap: 5 });
+      }
+    }
+
+    doc.end();
+  });
+}
+
+// POST /api/resume/build — Build a new resume from questionnaire and JD
+router.post('/build', authenticateToken, async (req, res, next) => {
+  try {
+    const {
+      fullName = '',
+      email = '',
+      phone = '',
+      linkedin = '',
+      github = '',
+      targetJobTitle = '',
+      targetJobDescription = '',
+      summary = '',
+      skills = '',
+      experience = '',
+      education = '',
+      projects = '',
+      outputFormat = 'docx',
+    } = req.body;
+
+    if (!targetJobDescription.trim()) {
+      return res.status(400).json({ error: 'Target Job Description is required.' });
+    }
+    if (!fullName.trim()) {
+      return res.status(400).json({ error: 'Full Name is required.' });
+    }
+
+    const normalizedFormat = String(outputFormat || 'docx').toLowerCase();
+    const format = normalizedFormat === 'pdf' ? 'pdf' : 'docx';
+
+    const jdKeywords = extractKeywordsFromJD(targetJobDescription);
+    const builtResume = createResumeMarkdown(
+      {
+        fullName,
+        email,
+        phone,
+        linkedin,
+        github,
+        targetJobTitle,
+        summary,
+        skills,
+        experience,
+        education,
+        projects,
+      },
+      jdKeywords
+    );
+
+    const resumeLower = builtResume.toLowerCase();
+    const matchedKeywords = jdKeywords.filter((word) => resumeLower.includes(word));
+    const missingKeywords = jdKeywords.filter((word) => !resumeLower.includes(word));
+
+    const ratio = jdKeywords.length > 0 ? (matchedKeywords.length / jdKeywords.length) : 1;
+    const atsScore = Math.min(100, Math.max(90, Math.round(ratio * 100)));
+
+    const fileNameBase = `${fullName.trim().replace(/\s+/g, '_')}_resume`;
+
+    let fileBuffer;
+    let mimeType;
+    let fileName;
+
+    if (format === 'pdf') {
+      fileBuffer = await markdownToPdfBuffer(builtResume);
+      mimeType = 'application/pdf';
+      fileName = `${fileNameBase}.pdf`;
+    } else {
+      fileBuffer = await markdownToDocxBuffer(builtResume);
+      mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      fileName = `${fileNameBase}.docx`;
+    }
+
+    res.json({
+      success: true,
+      atsScore,
+      atsLabel: atsScore >= 80 ? 'Strong Match' : atsScore >= 60 ? 'Good Match' : atsScore >= 40 ? 'Partial Match' : 'Low Match',
+      matchedKeywords,
+      missingKeywords,
+      totalJdKeywords: jdKeywords.length,
+      tunedResume: builtResume,
+      resumeWordCount: builtResume.split(/\s+/).filter(Boolean).length,
+      fileName,
+      mimeType,
+      outputFormat: format,
+      fileBase64: fileBuffer.toString('base64'),
     });
   } catch (err) {
     next(err);

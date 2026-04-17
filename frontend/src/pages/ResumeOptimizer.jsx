@@ -1,27 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { api } from '../store/useAuthStore';
 
-// ─── Helper: score → colour family ───────────────────────────────────────────
-function scoreColor(score) {
-  if (score >= 80) return 'green';
-  if (score >= 60) return 'amber';
-  return 'red';
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function scoreColor(s) {
+  return s >= 80 ? 'green' : s >= 60 ? 'amber' : 'red';
 }
-
-function scoreBadge(score) {
-  if (score >= 85) return { label: 'Excellent', cls: 'bg-green-50 text-green-700' };
-  if (score >= 70) return { label: 'Good',      cls: 'bg-amber-50 text-amber-700' };
-  if (score >= 55) return { label: 'Fair',       cls: 'bg-orange-50 text-orange-700' };
-  return              { label: 'Needs Work',  cls: 'bg-red-50 text-red-700' };
+function scoreBadge(s) {
+  if (s >= 85) return { label: 'Excellent',  cls: 'bg-green-50 text-green-700'  };
+  if (s >= 70) return { label: 'Good',       cls: 'bg-amber-50 text-amber-700'  };
+  if (s >= 55) return { label: 'Fair',       cls: 'bg-orange-50 text-orange-700' };
+  return              { label: 'Needs Work', cls: 'bg-red-50 text-red-700'      };
 }
-
 const colorMap = {
-  green: { bar: 'from-green-400 to-green-600',     bg: 'bg-green-50',  text: 'text-green-700'  },
-  amber: { bar: 'from-amber-400 to-amber-600',     bg: 'bg-amber-50',  text: 'text-amber-700'  },
-  red:   { bar: 'from-red-400   to-red-500',       bg: 'bg-red-50',    text: 'text-red-700'    },
+  green: { bar: 'from-green-400 to-green-600', bg: 'bg-green-50',  text: 'text-green-700'  },
+  amber: { bar: 'from-amber-400 to-amber-600', bg: 'bg-amber-50',  text: 'text-amber-700'  },
+  red:   { bar: 'from-red-400   to-red-500',   bg: 'bg-red-50',    text: 'text-red-700'    },
 };
 
-// ─── Score Bar Card ───────────────────────────────────────────────────────────
+// ─── Sub-components ───────────────────────────────────────────────────────────
 function ScoreBar({ label, score, icon }) {
   const c = colorMap[scoreColor(score)];
   return (
@@ -34,23 +30,18 @@ function ScoreBar({ label, score, icon }) {
         <span className={`text-lg font-black ${c.text}`}>{score}<span className="text-xs font-medium opacity-60">/100</span></span>
       </div>
       <div className="w-full h-2 bg-white/70 rounded-full overflow-hidden">
-        <div
-          className={`h-full bg-gradient-to-r ${c.bar} rounded-full transition-all duration-1000`}
-          style={{ width: `${score}%` }}
-        />
+        <div className={`h-full bg-gradient-to-r ${c.bar} rounded-full transition-all duration-1000`} style={{ width: `${score}%` }} />
       </div>
     </div>
   );
 }
 
-// ─── Suggestion Card ─────────────────────────────────────────────────────────
 function SuggestionCard({ type, category, message }) {
   const cfg = {
     success: { icon: 'check_circle', cls: 'text-green-600 bg-green-50 border-green-100' },
     warning: { icon: 'warning',      cls: 'text-amber-600 bg-amber-50 border-amber-100' },
     info:    { icon: 'info',         cls: 'text-blue-600  bg-blue-50  border-blue-100'  },
   }[type] || { icon: 'info', cls: 'text-blue-600 bg-blue-50 border-blue-100' };
-
   return (
     <div className={`flex gap-4 p-4 rounded-xl border ${cfg.cls}`}>
       <span className="material-symbols-outlined text-xl shrink-0 mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>{cfg.icon}</span>
@@ -62,26 +53,18 @@ function SuggestionCard({ type, category, message }) {
   );
 }
 
-// ─── Overall Score Ring ───────────────────────────────────────────────────────
 function ScoreRing({ score }) {
   const badge = scoreBadge(score);
-  const c = colorMap[scoreColor(score)];
   const circumference = 2 * Math.PI * 54;
   const offset = circumference - (score / 100) * circumference;
-
   return (
     <div className="flex flex-col items-center gap-3">
       <div className="relative w-36 h-36">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
           <circle cx="60" cy="60" r="54" fill="none" stroke="#e2e8f0" strokeWidth="10" />
-          <circle
-            cx="60" cy="60" r="54" fill="none"
-            strokeWidth="10"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={offset}
-            className={`transition-all duration-1000 ${score >= 80 ? 'stroke-green-500' : score >= 60 ? 'stroke-amber-500' : 'stroke-red-400'}`}
-          />
+          <circle cx="60" cy="60" r="54" fill="none" strokeWidth="10" strokeLinecap="round"
+            strokeDasharray={circumference} strokeDashoffset={offset}
+            className={`transition-all duration-1000 ${score >= 80 ? 'stroke-green-500' : score >= 60 ? 'stroke-amber-500' : 'stroke-red-400'}`} />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-3xl font-black text-slate-800">{score}</span>
@@ -93,18 +76,51 @@ function ScoreRing({ score }) {
   );
 }
 
-// ─── Recent Uploads sidebar widget ───────────────────────────────────────────
-function RecentUploads({ resumes, onResumeClick, onDeleteClick }) {
-  const formatDate = (ts) =>
-    new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+function ATSRing({ score, label }) {
+  const circumference = 2 * Math.PI * 54;
+  const offset = circumference - (score / 100) * circumference;
+  const color = score >= 80 ? '#10b981' : score >= 60 ? '#0ea5e9' : score >= 40 ? '#f59e0b' : '#ef4444';
+  const labelColor = score >= 80 ? 'bg-emerald-50 text-emerald-700' : score >= 60 ? 'bg-sky-50 text-sky-700' : score >= 40 ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700';
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div className="relative w-40 h-40">
+        <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="54" fill="none" stroke="#e2e8f0" strokeWidth="10" />
+          <circle cx="60" cy="60" r="54" fill="none" strokeWidth="10" strokeLinecap="round"
+            strokeDasharray={circumference} strokeDashoffset={offset}
+            style={{ stroke: color, transition: 'stroke-dashoffset 1.2s ease' }} />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-4xl font-black text-slate-800">{score}%</span>
+          <span className="text-xs text-slate-500 font-semibold mt-0.5">ATS Match</span>
+        </div>
+      </div>
+      <span className={`text-sm font-bold px-4 py-1.5 rounded-full ${labelColor}`}>{label}</span>
+    </div>
+  );
+}
 
+function KeywordPill({ text, variant }) {
+  return (
+    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${
+      variant === 'match'   ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+      variant === 'missing' ? 'bg-red-50 text-red-700 border border-red-200' :
+                              'bg-slate-100 text-slate-600 border border-slate-200'
+    }`}>
+      <span>{variant === 'match' ? '✓' : variant === 'missing' ? '✗' : '○'}</span>
+      {text}
+    </span>
+  );
+}
+
+function RecentUploads({ resumes, onResumeClick, onDeleteClick }) {
+  const formatDate = (ts) => new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   return (
     <section className="space-y-6">
       <h2 className="text-xl font-bold flex items-center gap-3">
         <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 0" }}>history</span>
         Recent Uploads
       </h2>
-
       {resumes.length === 0 ? (
         <div className="bg-surface-container-lowest rounded-2xl p-8 text-center text-on-surface-variant text-sm">
           <span className="material-symbols-outlined text-3xl mb-3 block opacity-40">description</span>
@@ -113,15 +129,12 @@ function RecentUploads({ resumes, onResumeClick, onDeleteClick }) {
       ) : (
         <div className="space-y-4">
           {resumes.map((r) => {
-            const color = scoreColor(r.overall_score);
-            const c = colorMap[color];
+            const c = colorMap[scoreColor(r.overall_score)];
             const isPdf = r.file_name?.toLowerCase().endsWith('.pdf');
             return (
               <div key={r.id} className="relative group w-full">
-                <button
-                  onClick={() => onResumeClick(r.id)}
-                  className="w-full bg-surface-container-lowest p-5 rounded-2xl shadow-[0px_10px_30px_rgba(0,78,159,0.04)] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 text-left"
-                >
+                <button onClick={() => onResumeClick(r.id)}
+                  className="w-full bg-surface-container-lowest p-5 rounded-2xl shadow-[0px_10px_30px_rgba(0,78,159,0.04)] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 text-left">
                   <div className="flex items-start justify-between mb-3 pr-8">
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-12 ${isPdf ? 'bg-red-50' : 'bg-blue-50'} rounded-md flex items-center justify-center shrink-0`}>
@@ -137,20 +150,11 @@ function RecentUploads({ resumes, onResumeClick, onDeleteClick }) {
                     <span className={`text-xs font-bold px-2 py-1 rounded ${c.bg} ${c.text}`}>{r.overall_score}/100</span>
                   </div>
                   <div className="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
-                    <div
-                      className={`h-full bg-gradient-to-r ${c.bar} rounded-full`}
-                      style={{ width: `${r.overall_score}%` }}
-                    />
+                    <div className={`h-full bg-gradient-to-r ${c.bar} rounded-full`} style={{ width: `${r.overall_score}%` }} />
                   </div>
                 </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDeleteClick(r.id);
-                  }}
-                  title="Delete Resume"
-                  className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200"
-                >
+                <button onClick={(e) => { e.stopPropagation(); onDeleteClick(r.id); }}
+                  title="Delete" className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200">
                   <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>delete</span>
                 </button>
               </div>
@@ -158,14 +162,9 @@ function RecentUploads({ resumes, onResumeClick, onDeleteClick }) {
           })}
         </div>
       )}
-
-      {/* Decorative illustration */}
       <div className="mt-4 rounded-3xl overflow-hidden aspect-video relative group bg-surface-container">
-        <img
-          alt="Professional workspace"
-          className="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700 mix-blend-multiply"
-          src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-        />
+        <img alt="Professional workspace" className="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700 mix-blend-multiply"
+          src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent flex items-end p-6">
           <p className="text-xs font-bold italic text-white/90">"Your resume is your professional signature."</p>
         </div>
@@ -174,843 +173,673 @@ function RecentUploads({ resumes, onResumeClick, onDeleteClick }) {
   );
 }
 
-// ─── Upload View ──────────────────────────────────────────────────────────────
-function UploadView({ file, setFile, isDragOver, setIsDragOver, onUpload, error, recentResumes, onResumeClick, onDeleteClick }) {
+// ─── Main Component ────────────────────────────────────────────────────────────
+export default function ResumeOptimizer() {
+  const [activeTab, setActiveTab] = useState('analyze'); // 'analyze' | 'forge'
+
+  // Analyze tab state
+  const [file, setFile]           = useState(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [uploading, setUploading]   = useState(false);
+  const [error, setError]           = useState('');
+  const [analysis, setAnalysis]     = useState(null);
+  const [recentResumes, setRecentResumes] = useState([]);
+
+  // Forge tab state
+  const [forgeFile, setForgeFile]   = useState(null);
+  const [jobDescription, setJobDescription] = useState('');
+  const [forging, setForging]       = useState(false);
+  const [forgeError, setForgeError] = useState('');
+  const [forgeResult, setForgeResult] = useState(null);
+  const [copiedReadme, setCopiedReadme] = useState(false);
+
+  const [forgeMode, setForgeMode] = useState('optimize'); // 'optimize' | 'create'
+  const [createFormData, setCreateFormData] = useState({
+    fullName: '', email: '', phone: '', linkedin: '', github: '',
+    targetJobTitle: '', targetJobDescription: '', summary: '',
+    skills: '', experience: '', education: '', projects: '',
+    outputFormat: 'docx',
+  });
+  const [optimizeOutputFormat, setOptimizeOutputFormat] = useState('docx');
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState('');
+  const [createResult, setCreateResult] = useState(null);
+  const forgeDrop = useRef(false);
+
+  const [isMockDataEnabled, setIsMockDataEnabled] = useState(false);
+
+  const fillMockData = () => {
+    if (!isMockDataEnabled) return;
+    setCreateFormData({
+      ...createFormData,
+      fullName: 'John Doe',
+      email: 'john.doe@example.com',
+      phone: '123-456-7890',
+      linkedin: 'https://linkedin.com/in/johndoe',
+      github: 'https://github.com/johndoe',
+      targetJobTitle: 'Frontend Developer',
+      targetJobDescription: 'We are looking for a React developer with Vite and Tailwind experience. You should be familiar with state management and modern CSS. Needs strong JavaScript fundamentals.',
+      summary: 'Experienced frontend developer passionate about building performance-heavy web apps and intuitive user interfaces.',
+      skills: 'React, Node.js, TailwindCSS, Express\nDocker, Git, CI/CD, Vite\nMongoDB, SQL',
+      experience: 'Software Engineer at TechCorp (2020-Present)\n- Built scalable React applications using modern hooks and context API.\n- Improved page load speed by 30% via lazy loading.\n\nJunior Web Developer at WebSolutions (2018-2020)\n- Maintained legacy codebases and wrote new jQuery plugins.\n- Converted Figma designs to pixel-perfect HTML/CSS.',
+      education: 'B.Sc. in Computer Science\nUniversity of Technology, 2018\nGPA: 3.8/4.0',
+      projects: 'JobTube Eco System\n- Built a deterministic resume optimizer fullstack app using Node and Vite.\n- Handled file generation with pdfkit and docx.'
+    });
+  };
+
+  useEffect(() => {
+    fetchRecent();
+  }, []);
+
+  const fetchRecent = async () => {
+    try {
+      const { data } = await api.get('/resume/list');
+      if (data.success) setRecentResumes(data.data);
+    } catch {}
+  };
+
+  // ── Analyze Tab ──────────────────────────────────────────────────────────────
   const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragOver(false);
+    e.preventDefault(); setIsDragOver(false);
     const dropped = e.dataTransfer.files?.[0];
     if (dropped && /\.(pdf|doc|docx)$/i.test(dropped.name)) setFile(dropped);
   };
 
-  return (
-    <>
-      <header className="mb-12">
-        <h1 className="text-5xl font-extrabold tracking-tight text-on-surface font-headline mb-4">Resume Optimizer</h1>
-        <p className="text-xl text-on-surface-variant max-w-2xl leading-relaxed">
-          Elevate your professional narrative. Our AI-driven analysis scans for keyword density, structural clarity, and impact metrics to help you land the interview.
-        </p>
-      </header>
-
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 flex items-center gap-3">
-          <span className="material-symbols-outlined text-red-500 shrink-0">error</span>
-          {error}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <section className="lg:col-span-2 space-y-8">
-          {/* Drop Zone */}
-          <div className="relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-primary/10 to-primary-container/10 rounded-3xl blur opacity-75 group-hover:opacity-100 transition duration-1000" />
-            <div
-              className={`relative bg-surface-container-lowest rounded-3xl p-12 border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center text-center cursor-pointer min-h-[400px]
-                ${isDragOver ? 'border-primary bg-primary/5 scale-[1.01]' : 'border-outline-variant/40 hover:border-primary/50'}`}
-              onDrop={handleDrop}
-              onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-              onDragLeave={(e) => { e.preventDefault(); setIsDragOver(false); }}
-              onClick={() => document.getElementById('resume-upload').click()}
-            >
-              <input
-                type="file"
-                id="resume-upload"
-                className="hidden"
-                accept=".pdf,.doc,.docx"
-                onChange={(e) => setFile(e.target.files[0])}
-              />
-
-              <div className="w-20 h-20 bg-surface-container-low rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
-                <span className="material-symbols-outlined text-primary text-4xl" style={{ fontVariationSettings: "'FILL' 0" }}>upload_file</span>
-              </div>
-
-              <h3 className="text-2xl font-bold mb-2">Drop your resume here</h3>
-              <p className="text-on-surface-variant mb-8 font-medium">Or click anywhere to browse from your computer</p>
-
-              <div className="flex gap-4 items-center mb-8">
-                {[['picture_as_pdf', 'PDF'], ['description', 'DOCX']].map(([icon, fmt]) => (
-                  <div key={fmt} className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-lg">
-                    <span className="material-symbols-outlined text-sm text-slate-500" style={{ fontVariationSettings: "'FILL' 0" }}>{icon}</span>
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-600">{fmt}</span>
-                  </div>
-                ))}
-              </div>
-
-              {file ? (
-                <div className="flex flex-col items-center gap-4" onClick={(e) => e.stopPropagation()}>
-                  <div className="flex items-center gap-3 px-5 py-3 bg-primary/5 border border-primary/20 rounded-xl">
-                    <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 0" }}>
-                      {file.name.endsWith('.pdf') ? 'picture_as_pdf' : 'description'}
-                    </span>
-                    <div className="text-left">
-                      <p className="text-sm font-bold text-slate-800">{file.name}</p>
-                      <p className="text-xs text-slate-500">{(file.size / 1024).toFixed(1)} KB</p>
-                    </div>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setFile(null); }}
-                      className="ml-2 text-slate-400 hover:text-red-500 transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-sm">close</span>
-                    </button>
-                  </div>
-                  <button
-                    onClick={onUpload}
-                    className="bg-gradient-to-br from-primary to-primary-container text-white py-4 px-10 rounded-xl font-bold shadow-[0px_20px_40px_rgba(0,78,159,0.15)] hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
-                  >
-                    <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>analytics</span>
-                    Analyze Resume
-                  </button>
-                </div>
-              ) : (
-                <label
-                  htmlFor="resume-upload"
-                  className="bg-white border-2 border-outline-variant/50 text-slate-700 py-3 px-8 rounded-xl font-bold hover:bg-slate-50 active:scale-95 transition-all cursor-pointer"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  Choose File
-                </label>
-              )}
-
-              <p className="mt-8 text-xs text-outline font-medium">Maximum file size: 10MB</p>
-            </div>
-          </div>
-
-          {/* Pro Tip */}
-          <div className="bg-primary/5 rounded-3xl p-8 flex gap-6 items-center">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 0" }}>lightbulb</span>
-            </div>
-            <div>
-              <h4 className="font-bold text-primary mb-1">Pro Tip</h4>
-              <p className="text-sm text-on-surface-variant leading-relaxed">PDF format is recommended to maintain layout integrity during our AI semantic structure scan.</p>
-            </div>
-          </div>
-        </section>
-
-        <RecentUploads resumes={recentResumes} onResumeClick={onResumeClick} onDeleteClick={onDeleteClick} />
-      </div>
-    </>
-  );
-}
-
-// ─── Analyzing View ───────────────────────────────────────────────────────────
-function AnalyzingView({ fileName }) {
-  const steps = ['ATS Scan', 'Keyword Analysis', 'Impact Metrics', 'Structure Check', 'Industry Fit'];
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-10">
-      <div className="relative w-36 h-36">
-        <div className="absolute inset-0 rounded-full border-4 border-primary/15" />
-        <div className="absolute inset-0 rounded-full border-4 border-t-primary border-r-primary border-b-transparent border-l-transparent animate-spin" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="material-symbols-outlined text-primary text-5xl" style={{ fontVariationSettings: "'FILL' 0" }}>auto_awesome</span>
-        </div>
-      </div>
-
-      <div className="text-center">
-        <h2 className="text-3xl font-bold mb-3">Analyzing Your Resume</h2>
-        <p className="text-on-surface-variant max-w-md mb-2">
-          Our AI is scanning <span className="font-semibold text-primary">{fileName}</span> for compatibility, keyword density, impact metrics, and structural clarity...
-        </p>
-      </div>
-
-      <div className="flex gap-3 flex-wrap justify-center max-w-lg">
-        {steps.map((step, i) => (
-          <span
-            key={step}
-            className="px-4 py-2 bg-primary/5 rounded-full text-sm font-medium text-primary animate-pulse"
-            style={{ animationDelay: `${i * 0.25}s` }}
-          >
-            {step}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ─── Results View ─────────────────────────────────────────────────────────────
-function ResultsView({ analysis, onNewAnalysis, recentResumes, onResumeClick, onDeleteClick }) {
-  const { file_name, overall_score, scores, sections, suggestions, created_at } = analysis;
-
-  const scoreMetrics = [
-    { key: 'ats',          label: 'ATS Compatibility', icon: 'verified'         },
-    { key: 'impact',       label: 'Impact Statements', icon: 'trending_up'      },
-    { key: 'skills',       label: 'Skills Match',      icon: 'psychology'       },
-    { key: 'clarity',      label: 'Clarity',           icon: 'visibility'       },
-    { key: 'completeness', label: 'Completeness',      icon: 'checklist'        },
-    { key: 'industry_fit', label: 'Industry Fit',      icon: 'work'             },
-  ];
-
-  const sectionLabels = {
-    summary:        'Summary',
-    experience:     'Experience',
-    education:      'Education',
-    skills:         'Skills',
-    projects:       'Projects',
-    certifications: 'Certifications',
-  };
-
-  const formatDate = (ts) =>
-    new Date(ts).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-
-  return (
-    <>
-      <header className="mb-10 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
-        <div>
-          <h1 className="text-4xl font-extrabold tracking-tight text-on-surface font-headline mb-1">Analysis Results</h1>
-          <p className="text-on-surface-variant flex items-center gap-2">
-            <span className="material-symbols-outlined text-sm opacity-60" style={{ fontVariationSettings: "'FILL' 0" }}>
-              {file_name?.endsWith('.pdf') ? 'picture_as_pdf' : 'description'}
-            </span>
-            {file_name} &bull; {formatDate(created_at)}
-          </p>
-        </div>
-        <button
-          onClick={onNewAnalysis}
-          className="self-start sm:self-auto flex items-center gap-2 px-6 py-3 bg-white border-2 border-outline-variant/40 rounded-xl font-bold hover:bg-slate-50 active:scale-95 transition-all"
-        >
-          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>upload_file</span>
-          Analyze Another
-        </button>
-      </header>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left: scores + suggestions */}
-        <section className="lg:col-span-2 space-y-8">
-          {/* Overall + metric bars */}
-          <div className="bg-surface-container-lowest rounded-3xl p-8 shadow-[0px_10px_30px_rgba(0,78,159,0.06)]">
-            <div className="flex flex-col sm:flex-row items-center gap-8 mb-8">
-              <ScoreRing score={overall_score} />
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold mb-2">Overall Resume Score</h2>
-                <p className="text-on-surface-variant text-sm leading-relaxed">
-                  Your resume has been evaluated across 6 key dimensions. Focus on the areas marked in amber or red for the highest improvement impact.
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {scoreMetrics.map(({ key, label, icon }) => (
-                <ScoreBar key={key} label={label} score={scores?.[key] ?? 0} icon={icon} />
-              ))}
-            </div>
-          </div>
-
-          {/* Improvement suggestions */}
-          <div className="bg-surface-container-lowest rounded-3xl p-8 shadow-[0px_10px_30px_rgba(0,78,159,0.06)]">
-            <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 0" }}>tips_and_updates</span>
-              Improvement Suggestions
-            </h3>
-            <div className="space-y-3">
-              {(suggestions || []).map((s, i) => (
-                <SuggestionCard key={i} {...s} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Right: sections detected + recent uploads */}
-        <div className="space-y-6">
-          {/* Sections detected */}
-          <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-[0px_10px_30px_rgba(0,78,159,0.06)]">
-            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>checklist</span>
-              Sections Detected
-            </h3>
-            <div className="space-y-2">
-              {Object.entries(sectionLabels).map(([key, label]) => {
-                const present = sections?.[key];
-                return (
-                  <div key={key} className="flex items-center justify-between py-2 border-b border-outline-variant/10 last:border-0">
-                    <span className="text-sm font-medium text-slate-700">{label}</span>
-                    <span className={`flex items-center gap-1 text-xs font-bold ${present ? 'text-green-600' : 'text-slate-400'}`}>
-                      <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
-                        {present ? 'check_circle' : 'radio_button_unchecked'}
-                      </span>
-                      {present ? 'Found' : 'Missing'}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Quick tips card */}
-          <div className="bg-gradient-to-br from-primary to-primary-container rounded-3xl p-6 text-white">
-            <h3 className="font-bold mb-2 flex items-center gap-2">
-              <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>lightbulb</span>
-              Quick Win
-            </h3>
-            <p className="text-sm leading-relaxed text-white/90">
-              Tailor your resume to each job description. Mirroring the job's exact keywords can increase your ATS score by up to 40%.
-            </p>
-          </div>
-
-          <RecentUploads resumes={recentResumes} onResumeClick={onResumeClick} onDeleteClick={onDeleteClick} />
-        </div>
-      </div>
-    </>
-  );
-}
-
-// ─── My Resumes View ──────────────────────────────────────────────────────────
-function MyResumesView({ resumes, onResumeClick, onNewAnalysis, onDeleteClick }) {
-  const formatDate = (ts) =>
-    new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
-  return (
-    <>
-      <header className="mb-10 flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-extrabold tracking-tight text-on-surface font-headline mb-1">My Resumes</h1>
-          <p className="text-on-surface-variant">{resumes.length} resume{resumes.length !== 1 ? 's' : ''} analyzed</p>
-        </div>
-        <button
-          onClick={onNewAnalysis}
-          className="flex items-center gap-2 bg-gradient-to-br from-primary to-primary-container text-white py-3 px-6 rounded-xl font-semibold shadow-[0px_20px_40px_rgba(0,78,159,0.15)] hover:scale-105 active:scale-95 transition-all"
-        >
-          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>add</span>
-          New Analysis
-        </button>
-      </header>
-
-      {resumes.length === 0 ? (
-        <div className="flex flex-col items-center justify-center min-h-[40vh] gap-6 text-center">
-          <div className="w-20 h-20 bg-surface-container-low rounded-2xl flex items-center justify-center">
-            <span className="material-symbols-outlined text-4xl text-outline" style={{ fontVariationSettings: "'FILL' 0" }}>description</span>
-          </div>
-          <div>
-            <h3 className="text-xl font-bold mb-2">No Resumes Yet</h3>
-            <p className="text-on-surface-variant">Upload your first resume to see your analysis history here.</p>
-          </div>
-          <button
-            onClick={onNewAnalysis}
-            className="bg-gradient-to-br from-primary to-primary-container text-white py-3 px-8 rounded-xl font-bold hover:scale-105 active:scale-95 transition-all"
-          >
-            Upload Resume
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-          {resumes.map((r) => {
-            const c = colorMap[scoreColor(r.overall_score)];
-            const badge = scoreBadge(r.overall_score);
-            const isPdf = r.file_name?.toLowerCase().endsWith('.pdf');
-            return (
-              <div key={r.id} className="relative group">
-                <button
-                  onClick={() => onResumeClick(r.id)}
-                  className="w-full bg-surface-container-lowest p-6 rounded-3xl shadow-[0px_10px_30px_rgba(0,78,159,0.04)] hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left"
-                >
-                  <div className="flex items-center gap-3 mb-4 pr-8">
-                    <div className={`w-12 h-14 ${isPdf ? 'bg-red-50' : 'bg-blue-50'} rounded-xl flex items-center justify-center shrink-0`}>
-                      <span className={`material-symbols-outlined text-2xl ${isPdf ? 'text-red-500' : 'text-blue-500'}`} style={{ fontVariationSettings: "'FILL' 0" }}>
-                        {isPdf ? 'picture_as_pdf' : 'description'}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h5 className="font-bold text-sm truncate">{r.file_name}</h5>
-                      <p className="text-xs text-outline mt-0.5">{formatDate(r.created_at)}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm text-slate-500 font-medium">Overall Score</span>
-                    <div className="flex items-center gap-2">
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${badge.cls}`}>{badge.label}</span>
-                      <span className={`text-xl font-black ${c.text}`}>{r.overall_score}</span>
-                    </div>
-                  </div>
-
-                  <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
-                    <div
-                      className={`h-full bg-gradient-to-r ${c.bar} rounded-full`}
-                      style={{ width: `${r.overall_score}%` }}
-                    />
-                  </div>
-
-                  <div className="mt-4 pt-4 border-t border-outline-variant/10 flex items-center justify-between text-xs text-outline font-medium group-hover:text-primary transition-colors">
-                    <span>View Full Analysis</span>
-                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                  </div>
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDeleteClick(r.id);
-                  }}
-                  title="Delete Resume"
-                  className="absolute top-4 right-4 p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 hover:shadow-sm rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-200"
-                >
-                  <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 0" }}>delete</span>
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </>
-  );
-}
-
-// ─── AI Editor View ───────────────────────────────────────────────────────────
-const QUICK_ACTIONS = [
-  { label: 'Improve Summary',    prompt: 'Rewrite my professional summary to be more compelling and ATS-friendly.' },
-  { label: 'Stronger Bullets',   prompt: 'Rewrite my work experience bullet points using stronger action verbs and quantified achievements.' },
-  { label: 'ATS Keywords',       prompt: 'Suggest ATS-friendly keywords I should add to improve my resume pass-through rate.' },
-  { label: 'Fix Skills Section', prompt: 'Help me reorganize and improve my skills section, grouping them by category.' },
-  { label: 'Add Metrics',        prompt: 'Help me add numbers and metrics to my achievements to show concrete impact.' },
-  { label: 'LinkedIn Bio',       prompt: 'Based on my resume, write a compelling LinkedIn About section.' },
-];
-
-function AIEditorView({ analysis }) {
-  const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      content: `Hello! I'm your AI Resume Coach. ${analysis ? `I see you've already analyzed "${analysis.file_name}" (Score: ${analysis.overall_score}/100).` : ''} 
-      
-To get started, please **paste your resume text** in the panel on the right. Once that's done, I can help you rewrite sections, optimize for ATS, or strengthen your bullet points. How can I assist you today?`,
-    },
-  ]);
-  const [input, setInput]           = useState('');
-  const [resumeText, setResumeText] = useState('');
-  const [loading, setLoading]       = useState(false);
-  const [error, setError]           = useState(null);
-  const [showTextarea, setShowTextarea] = useState(false);
-  const bottomRef = React.useRef(null);
-
-  React.useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, loading]);
-
-   const sendMessage = async (prompt) => {
-     const userText = (prompt || input).trim();
-     if (!userText || loading) return;
-
-     // Check if user pasted image data (base64)
-     if (userText.startsWith('data:image/') || 
-         (userText.length > 100 && /^[A-Za-z0-9+/]+={0,2}$/.test(userText))) {
-       setError('Please provide text input only. Images are not supported. Try copying and pasting your resume text instead.');
-       setMessages((prev) => [...prev, { role: 'assistant', content: 'Sorry, I cannot process image inputs. Please provide your resume as text.', isError: true }]);
-       setLoading(false);
-       return;
-     }
-
-     setInput('');
-     setError(null);
-     setMessages((prev) => [...prev, { role: 'user', content: userText }]);
-     setLoading(true);
-
-     try {
-       const { data } = await api.post('/resume/ai-edit', {
-         instruction: userText,
-         resumeText:  resumeText.trim() || undefined,
-         context:     analysis ? `Resume file: ${analysis.file_name}, Overall score: ${analysis.overall_score}/100` : undefined,
-       });
-
-       if (data.success) {
-         setMessages((prev) => [...prev, { role: 'assistant', content: data.data.suggestion }]);
-       }
-     } catch (err) {
-       const msg = err.response?.data?.error || 'Something went wrong. Please try again.';
-       setError(msg);
-       setMessages((prev) => [...prev, { role: 'assistant', content: `Sorry, I ran into an error: ${msg}`, isError: true }]);
-     } finally {
-       setLoading(false);
-     }
-   };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
-
-  return (
-    <>
-      <header className="mb-8">
-        <h1 className="text-4xl font-extrabold tracking-tight text-on-surface font-headline mb-2 flex items-center gap-3">
-          <span className="material-symbols-outlined text-primary text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-          AI Resume Editor
-        </h1>
-        <p className="text-on-surface-variant leading-relaxed max-w-2xl">
-          Chat with your AI resume coach. Get instant rewrites, keyword suggestions, and personalized improvements.
-        </p>
-      </header>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        {/* Chat Column */}
-        <section className="lg:col-span-2 flex flex-col gap-4">
-          {/* Quick Actions */}
-          <div className="bg-surface-container-lowest rounded-2xl p-5 shadow-[0px_4px_20px_rgba(0,78,159,0.06)]">
-            <p className="text-xs font-bold uppercase tracking-wider text-outline mb-3">Quick Actions</p>
-            <div className="flex flex-wrap gap-2">
-              {QUICK_ACTIONS.map((qa) => (
-                <button
-                  key={qa.label}
-                  onClick={() => sendMessage(qa.prompt)}
-                  disabled={loading}
-                  className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary/8 text-primary hover:bg-primary/15 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed border border-primary/20"
-                >
-                  {qa.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Chat Window */}
-          <div className="bg-surface-container-lowest rounded-2xl shadow-[0px_4px_20px_rgba(0,78,159,0.06)] flex flex-col overflow-hidden" style={{ minHeight: '460px' }}>
-            <div className="flex items-center gap-3 px-6 py-4 border-b border-outline-variant/10">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary-container flex items-center justify-center">
-                <span className="material-symbols-outlined text-white text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-              </div>
-              <div>
-                <p className="text-sm font-bold text-slate-800">Resume Coach AI</p>
-                <p className="text-xs text-green-600 font-medium flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
-                  Online
-                </p>
-              </div>
-            </div>
-
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4" style={{ maxHeight: '400px' }}>
-              {messages.map((msg, i) => (
-                <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                    msg.role === 'user'
-                      ? 'bg-primary text-white'
-                      : msg.isError ? 'bg-red-100' : 'bg-gradient-to-br from-primary/20 to-primary-container/20'
-                  }`}>
-                    <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
-                      {msg.role === 'user' ? 'person' : msg.isError ? 'error' : 'auto_awesome'}
-                    </span>
-                  </div>
-                  <div className={`max-w-[78%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
-                    msg.role === 'user'
-                      ? 'bg-primary text-white rounded-tr-sm'
-                      : msg.isError
-                        ? 'bg-red-50 text-red-700 border border-red-100 rounded-tl-sm'
-                        : 'bg-slate-50 text-slate-800 border border-slate-100 rounded-tl-sm'
-                  }`}>
-                    {msg.content}
-                  </div>
-                </div>
-              ))}
-
-              {loading && (
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary-container/20 shrink-0">
-                    <span className="material-symbols-outlined text-sm text-primary animate-pulse" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-                  </div>
-                  <div className="bg-slate-50 border border-slate-100 rounded-2xl rounded-tl-sm px-4 py-3 flex gap-1 items-center">
-                    <span className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </div>
-                </div>
-              )}
-              <div ref={bottomRef} />
-            </div>
-
-            {/* Input */}
-            <div className="p-4 border-t border-outline-variant/10">
-              <div className="flex gap-3 items-end">
-                <textarea
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Ask me to improve your resume... (Enter to send, Shift+Enter for newline)"
-                  rows={2}
-                  className="flex-1 resize-none px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-primary/50 focus:bg-white transition-all text-sm"
-                />
-                <button
-                  onClick={() => sendMessage()}
-                  disabled={!input.trim() || loading}
-                  className="w-11 h-11 rounded-xl bg-primary text-white flex items-center justify-center hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
-                >
-                  <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>send</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Right Panel */}
-        <div className="space-y-5">
-          {/* Resume Text Input */}
-          <div className="bg-surface-container-lowest rounded-2xl p-5 shadow-[0px_4px_20px_rgba(0,78,159,0.06)]">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                <span className="material-symbols-outlined text-sm text-primary" style={{ fontVariationSettings: "'FILL' 0" }}>description</span>
-                Resume Text
-              </h3>
-              <button
-                onClick={() => setShowTextarea(!showTextarea)}
-                className="text-xs text-primary font-semibold hover:underline"
-              >
-                {showTextarea ? 'Hide' : 'Paste Resume'}
-              </button>
-            </div>
-
-            {showTextarea ? (
-              <textarea
-                value={resumeText}
-                onChange={(e) => setResumeText(e.target.value)}
-                placeholder="Paste your resume text here so the AI can reference it..."
-                rows={10}
-                className="w-full resize-none px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-primary/50 text-xs leading-relaxed"
-              />
-            ) : (
-              <p className="text-xs text-slate-500 leading-relaxed">
-                {resumeText ? (
-                  <span className="text-green-600 font-medium flex items-center gap-1">
-                    <span className="material-symbols-outlined text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                    {resumeText.trim().split(/\s+/).length} words pasted
-                  </span>
-                ) : 'Paste your resume text so the AI can give tailored suggestions.'}
-              </p>
-            )}
-          </div>
-
-          {/* Analysis Context */}
-          {analysis && (
-            <div className="bg-primary/5 rounded-2xl p-5 border border-primary/10">
-              <h3 className="text-sm font-bold text-primary mb-3 flex items-center gap-2">
-                <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>analytics</span>
-                Last Analysis
-              </h3>
-              <p className="text-xs text-slate-600 font-medium truncate mb-1">{analysis.file_name}</p>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 h-1.5 bg-white rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full ${analysis.overall_score >= 80 ? 'bg-green-500' : analysis.overall_score >= 60 ? 'bg-amber-500' : 'bg-red-400'}`}
-                    style={{ width: `${analysis.overall_score}%` }}
-                  />
-                </div>
-                <span className="text-xs font-black text-slate-700">{analysis.overall_score}/100</span>
-              </div>
-              <p className="text-xs text-slate-500 mt-2">The AI coach is aware of your scores and can give context-aware suggestions.</p>
-            </div>
-          )}
-
-          {/* Tips */}
-          <div className="bg-gradient-to-br from-primary to-primary-container rounded-2xl p-5 text-white">
-            <h3 className="font-bold mb-3 text-sm flex items-center gap-2">
-              <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>lightbulb</span>
-              Tips for Best Results
-            </h3>
-            <ul className="space-y-2 text-xs text-white/85 leading-relaxed">
-              <li className="flex gap-2"><span className="text-white/60 shrink-0">1.</span>Paste your resume text for tailored suggestions</li>
-              <li className="flex gap-2"><span className="text-white/60 shrink-0">2.</span>Use Quick Actions for instant common improvements</li>
-              <li className="flex gap-2"><span className="text-white/60 shrink-0">3.</span>Ask for specific sections: "Rewrite my summary"</li>
-              <li className="flex gap-2"><span className="text-white/60 shrink-0">4.</span>Request keywords for a target job role</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
-
-// ─── Main Page ────────────────────────────────────────────────────────────────
-export default function ResumeOptimizer() {
-  const [view, setView]           = useState('upload');   // upload | analyzing | results | myResumes | aiEditor
-  const [file, setFile]           = useState(null);
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [analysis, setAnalysis]   = useState(null);
-  const [recentResumes, setRecentResumes] = useState([]);
-  const [activeNav, setActiveNav] = useState('analysis');
-  const [error, setError]         = useState(null);
-  const [analyzingFileName, setAnalyzingFileName] = useState('');
-
-  useEffect(() => {
-    fetchRecentResumes();
-  }, []);
-
-  const fetchRecentResumes = async () => {
-    try {
-      const { data } = await api.get('/resume/list');
-      if (data.success) setRecentResumes(data.data);
-    } catch {
-      // not logged in or network error — silently degrade
-    }
-  };
-
-  const handleUpload = async () => {
+  const handleUpload = async (e) => {
+    e.preventDefault();
     if (!file) return;
-    setAnalyzingFileName(file.name);
-    setView('analyzing');
-    setError(null);
-
+    setUploading(true); setError('');
     try {
-      const formData = new FormData();
-      formData.append('resume', file);
-
-      const { data } = await api.post('/resume/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-
-      if (data.success) {
-        setAnalysis(data.data);
-        setView('results');
-        setActiveNav('analysis');
-        fetchRecentResumes();
-      }
+      const fd = new FormData(); fd.append('resume', file);
+      const { data } = await api.post('/resume/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      if (data.success) { setAnalysis(data.data); fetchRecent(); }
     } catch (err) {
-      setError(err.response?.data?.error || 'Analysis failed. Please check you are logged in and try again.');
-      setView('upload');
-    }
+      setError(err.response?.data?.error || 'Upload failed. Please try again.');
+    } finally { setUploading(false); }
   };
 
   const handleResumeClick = async (id) => {
     try {
       const { data } = await api.get(`/resume/${id}`);
-      if (data.success) {
-        setAnalysis(data.data);
-        setView('results');
-        setActiveNav('analysis');
-      }
-    } catch {
-      setError('Could not load resume details.');
-    }
+      if (data.success) setAnalysis(data.data);
+    } catch {}
   };
 
-  const handleDeleteResume = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this resume? This action cannot be undone.')) return;
+  const handleDeleteClick = async (id) => {
+    if (!window.confirm('Delete this resume?')) return;
     try {
-      const { data } = await api.delete(`/resume/${id}`);
+      await api.delete(`/resume/${id}`);
+      setRecentResumes(prev => prev.filter(r => r.id !== id));
+      if (analysis?.id === id) setAnalysis(null);
+    } catch {}
+  };
+
+  // ── Forge Tab ────────────────────────────────────────────────────────────────
+  const handleForgeDrop = (e) => {
+    e.preventDefault(); forgeDrop.current = false;
+    const dropped = e.dataTransfer.files?.[0];
+    if (dropped && /\.(pdf|doc|docx)$/i.test(dropped.name)) setForgeFile(dropped);
+  };
+
+  const handleForge = async (e) => {
+    e.preventDefault();
+    if (!forgeFile || !jobDescription.trim()) return;
+    setForging(true); setForgeError(''); setForgeResult(null);
+    try {
+      const fd = new FormData();
+      fd.append('resume', forgeFile);
+      fd.append('jobDescription', jobDescription);
+      fd.append('outputFormat', optimizeOutputFormat);
+      const { data } = await api.post('/resume/tune', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      if (data.success) setForgeResult(data);
+    } catch (err) {
+      setForgeError(err.response?.data?.error || 'Tuning failed. Please try again.');
+    } finally { setForging(false); }
+  };
+
+  const handleCreateResume = async (e) => {
+    e.preventDefault();
+    if (!createFormData.fullName || !createFormData.targetJobDescription) return;
+    setCreating(true); setCreateError(''); setCreateResult(null);
+    try {
+      const { data } = await api.post('/resume/build', createFormData);
       if (data.success) {
-        setRecentResumes(prev => prev.filter(r => r.id !== id));
-        if (analysis && analysis.id === id) {
-          setAnalysis(null);
-          setView('upload');
-          setFile(null);
-          setActiveNav('analysis');
-        }
+        setCreateResult(data);
       }
-    } catch {
-      setError('Could not delete resume. Please try again later.');
-    }
+    } catch (err) {
+       console.error('Create error:', err);
+      setCreateError(err.response?.data?.error || 'Resume creation failed. Please try again.');
+    } finally { setCreating(false); }
   };
 
-  const handleNavClick = (key) => {
-    const item = navItems.find(n => n.key === key);
-    if (item?.locked) return; // Prevent navigation for locked items
-
-    setActiveNav(key);
-    setError(null);
-    if (key === 'myResumes') {
-      setView('myResumes');
-    } else if (key === 'analysis') {
-      setView(analysis ? 'results' : 'upload');
-    } else if (key === 'aiEditor') {
-      setView('aiEditor');
-    } else {
-      // Premium — fall back to upload for now
-      setView('upload');
-    }
+  const handleDownloadGenerated = (result) => {
+    if (!result?.fileBase64 || !result?.fileName || !result?.mimeType) return;
+    const link = document.createElement('a');
+    link.href = `data:${result.mimeType};base64,${result.fileBase64}`;
+    link.download = result.fileName;
+    link.click();
   };
 
-  const navItems = [
-    { key: 'myResumes', icon: 'description',       label: 'My Resumes' },
-    { key: 'analysis',  icon: 'analytics',         label: 'Analysis'   },
-    { key: 'aiEditor',  icon: 'auto_awesome',      label: 'AI Editor', locked: true },
-    { key: 'premium',   icon: 'workspace_premium', label: 'Premium',    locked: true },
-  ];
+  const handleCopyTuned = () => {
+    if (!forgeResult?.tunedResume) return;
+    navigator.clipboard.writeText(forgeResult.tunedResume);
+    setCopiedReadme(true); setTimeout(() => setCopiedReadme(false), 2000);
+  };
 
+  // ── Render ───────────────────────────────────────────────────────────────────
   return (
-    <div className="flex pt-[0px] min-h-[calc(100vh-5rem)] w-full">
-      {/* ─── Sidebar ─────────────────────────────────────────────── */}
-      <aside className="hidden md:flex flex-col gap-2 p-4 w-64 bg-slate-50 border-r border-slate-200 fixed left-0 top-20 h-[calc(100vh-5rem)] font-headline font-medium z-[40]">
-        <div className="px-4 py-6 mb-4">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="material-symbols-outlined text-white text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-            </div>
-            <span className="text-lg font-black text-blue-900">Resume Pro</span>
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Header */}
+      <header className="mb-10">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+            <span className="material-symbols-outlined text-emerald-600 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>auto_fix_high</span>
           </div>
-          <p className="text-xs text-slate-500 uppercase tracking-widest pl-11">Optimization Engine</p>
+          <h1 className="text-4xl font-extrabold tracking-tight text-on-surface font-headline">Resume Forge</h1>
         </div>
+        <p className="text-lg text-on-surface-variant max-w-2xl leading-relaxed">
+          Analyze your resume structure and ATS score, then forge a tailored version for any job description — using deterministic ATS-first logic.
+        </p>
+      </header>
 
-        <nav className="flex-1 space-y-1">
-          {navItems.map((item) => (
-            <button
-              key={item.key}
-              onClick={() => handleNavClick(item.key)}
-              title={item.locked ? 'Temporarily undergoing maintenance' : ''}
-              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 text-left
-                ${item.locked ? 'opacity-50 cursor-not-allowed text-slate-400 grayscale bg-slate-100/30 mb-1' : 'hover:translate-x-1'}
-                ${activeNav === item.key && !item.locked
-                  ? 'bg-white text-blue-700 shadow-sm border border-slate-200/50'
-                  : !item.locked ? 'text-slate-500 hover:bg-slate-100' : ''
-                }`}
-            >
-              <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>{item.icon}</span>
-                <span className="text-sm font-bold">{item.label}</span>
-              </div>
-              {item.locked && (
-                <span className="material-symbols-outlined text-xs opacity-60">lock</span>
-              )}
-            </button>
-          ))}
-        </nav>
-
-        <button
-          onClick={() => { setView('upload'); setFile(null); setAnalysis(null); setError(null); setActiveNav('analysis'); }}
-          className="mt-auto mb-4 mx-2 bg-gradient-to-br from-primary to-primary-container text-white py-3 px-6 rounded-xl font-semibold shadow-[0px_20px_40px_rgba(0,78,159,0.15)] active:scale-95 transition-all flex items-center justify-center gap-2"
-        >
-          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>add</span>
-          New Analysis
+      {/* Tab Switcher */}
+      <div className="flex gap-1 p-1 bg-surface-container rounded-2xl w-fit mb-10">
+        <button onClick={() => setActiveTab('analyze')}
+          className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${activeTab === 'analyze' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+          <span className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0" }}>analytics</span>
+            Analyze Resume
+          </span>
         </button>
-      </aside>
+        <button onClick={() => setActiveTab('forge')}
+          className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${activeTab === 'forge' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+          <span className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>auto_fix_high</span>
+            Forge for Job
+          </span>
+        </button>
+      </div>
 
-      {/* ─── Main Content ─────────────────────────────────────────── */}
-      <main className="flex-1 ml-0 md:ml-64 p-8 md:p-12 bg-surface min-h-[calc(100vh-5rem)]">
-        <div className="max-w-6xl mx-auto">
-          {view === 'upload' && (
-            <UploadView
-              file={file}
-              setFile={setFile}
-              isDragOver={isDragOver}
-              setIsDragOver={setIsDragOver}
-              onUpload={handleUpload}
-              error={error}
-              recentResumes={recentResumes}
-              onResumeClick={handleResumeClick}
-              onDeleteClick={handleDeleteResume}
-            />
-          )}
+      {/* ═══════════════════════════════════════════════════════════════════════ */}
+      {/* ANALYZE TAB                                                            */}
+      {/* ═══════════════════════════════════════════════════════════════════════ */}
+      {activeTab === 'analyze' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left column — upload + results */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Upload Card */}
+            <div className="bg-surface-container-lowest rounded-3xl shadow-[0px_20px_40px_rgba(0,78,159,0.06)] overflow-hidden">
+              <div className="p-8">
+                <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
+                  <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 0" }}>upload_file</span>
+                  Upload Resume
+                </h2>
+                {error && (
+                  <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 flex items-center gap-3 text-sm">
+                    <span className="material-symbols-outlined text-red-500 shrink-0">error</span>{error}
+                  </div>
+                )}
+                <form onSubmit={handleUpload} className="space-y-5">
+                  <div
+                    onDrop={handleDrop}
+                    onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                    onDragLeave={() => setIsDragOver(false)}
+                    onClick={() => document.getElementById('analyze-file-input').click()}
+                    className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all duration-200 ${isDragOver ? 'border-primary bg-primary/5' : 'border-outline/30 hover:border-primary/50 hover:bg-surface-container'}`}
+                  >
+                    <input id="analyze-file-input" type="file" accept=".pdf,.doc,.docx" className="hidden"
+                      onChange={(e) => setFile(e.target.files?.[0] || null)} />
+                    <span className="material-symbols-outlined text-5xl text-outline/40 mb-3 block" style={{ fontVariationSettings: "'FILL' 0" }}>
+                      {file ? 'description' : 'cloud_upload'}
+                    </span>
+                    {file ? (
+                      <div>
+                        <p className="font-bold text-on-surface">{file.name}</p>
+                        <p className="text-sm text-on-surface-variant mt-1">{(file.size / 1024).toFixed(0)} KB · Click to change</p>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="font-semibold text-on-surface">Drop your resume here or click to browse</p>
+                        <p className="text-sm text-on-surface-variant mt-1">PDF, DOC, DOCX — up to 10 MB</p>
+                      </div>
+                    )}
+                  </div>
+                  <button type="submit" disabled={!file || uploading}
+                    className="w-full py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-2xl hover:from-emerald-600 hover:to-emerald-700 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0px_10px_30px_rgba(16,185,129,0.3)] flex items-center justify-center gap-3">
+                    {uploading ? (
+                      <><span className="material-symbols-outlined animate-spin text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>sync</span>Analyzing...</>
+                    ) : (
+                      <><span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>analytics</span>Analyze Resume</>
+                    )}
+                  </button>
+                </form>
+              </div>
+            </div>
 
-          {view === 'analyzing' && <AnalyzingView fileName={analyzingFileName} />}
+            {/* Analysis Results */}
+            {analysis && (
+              <>
+                {/* Scores grid */}
+                <div className="bg-surface-container-lowest rounded-3xl p-8 shadow-[0px_20px_40px_rgba(0,78,159,0.06)]">
+                  <div className="flex flex-col sm:flex-row gap-8 items-center sm:items-start mb-8">
+                    <ScoreRing score={analysis.overall_score} />
+                    <div>
+                      <h2 className="text-2xl font-extrabold text-on-surface font-headline">{analysis.file_name}</h2>
+                      <p className="text-on-surface-variant mt-1">Overall resume quality score</p>
+                      <div className="flex flex-wrap gap-2 mt-4">
+                        {analysis.sections && Object.entries(analysis.sections).map(([key, val]) => (
+                          <span key={key} className={`text-xs font-bold px-3 py-1 rounded-full ${val ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-400 line-through'}`}>
+                            {key.charAt(0).toUpperCase() + key.slice(1)}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {analysis.scores && [
+                      { key: 'ats',          label: 'ATS Compatibility', icon: 'filter_alt'      },
+                      { key: 'impact',       label: 'Impact & Metrics',  icon: 'trending_up'     },
+                      { key: 'skills',       label: 'Skills Coverage',   icon: 'code'            },
+                      { key: 'clarity',      label: 'Clarity & Format',  icon: 'format_align_left'},
+                      { key: 'completeness', label: 'Completeness',      icon: 'checklist'       },
+                      { key: 'industry_fit', label: 'Industry Fit',      icon: 'work'            },
+                    ].map(({ key, label, icon }) => (
+                      <ScoreBar key={key} label={label} score={analysis.scores[key]} icon={icon} />
+                    ))}
+                  </div>
+                </div>
 
-          {view === 'results' && analysis && (
-            <ResultsView
-              analysis={analysis}
-              onNewAnalysis={() => { setView('upload'); setFile(null); setAnalysis(null); setError(null); setActiveNav('analysis'); }}
-              recentResumes={recentResumes}
-              onResumeClick={handleResumeClick}
-              onDeleteClick={handleDeleteResume}
-            />
-          )}
+                {/* Suggestions */}
+                {analysis.suggestions?.length > 0 && (
+                  <div className="bg-surface-container-lowest rounded-3xl p-8 shadow-[0px_20px_40px_rgba(0,78,159,0.06)]">
+                    <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
+                      <span className="material-symbols-outlined text-amber-500" style={{ fontVariationSettings: "'FILL' 1" }}>lightbulb</span>
+                      Improvement Suggestions
+                    </h3>
+                    <div className="space-y-3">
+                      {analysis.suggestions.map((s, i) => (
+                        <SuggestionCard key={i} type={s.type} category={s.category} message={s.message} />
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-          {view === 'myResumes' && (
-            <MyResumesView
-              resumes={recentResumes}
-              onResumeClick={handleResumeClick}
-              onNewAnalysis={() => { setView('upload'); setFile(null); setActiveNav('analysis'); }}
-              onDeleteClick={handleDeleteResume}
-            />
-          )}
+                {/* Forge CTA */}
+                <div className="bg-gradient-to-r from-emerald-500 to-sky-500 rounded-3xl p-8 text-white">
+                  <div className="flex items-start gap-4">
+                    <span className="material-symbols-outlined text-3xl opacity-80" style={{ fontVariationSettings: "'FILL' 1" }}>auto_fix_high</span>
+                    <div>
+                      <h3 className="text-xl font-bold mb-1">Take it further with Resume Forge</h3>
+                      <p className="text-white/80 text-sm mb-4">Paste a job description and let AI rewrite your resume to maximise your match score for that specific role.</p>
+                      <button onClick={() => setActiveTab('forge')}
+                        className="bg-white text-emerald-700 font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-emerald-50 transition-colors flex items-center gap-2">
+                        <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>auto_fix_high</span>
+                        Open Forge Tab
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
 
-          {view === 'aiEditor' && (
-            <AIEditorView analysis={analysis} />
-          )}
+          {/* Right column — recent uploads */}
+          <div className="lg:col-span-1">
+            <div className="bg-surface-container-lowest rounded-3xl p-8 shadow-[0px_20px_40px_rgba(0,78,159,0.06)] sticky top-8">
+              <RecentUploads resumes={recentResumes} onResumeClick={handleResumeClick} onDeleteClick={handleDeleteClick} />
+            </div>
+          </div>
         </div>
-      </main>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════════ */}
+      {/* FORGE TAB                                                              */}
+      {/* ═══════════════════════════════════════════════════════════════════════ */}
+      {activeTab === 'forge' && (() => {
+        const resultToRender = forgeMode === 'optimize' ? forgeResult : createResult;
+        const isLoading = forgeMode === 'optimize' ? forging : creating;
+
+        return (
+          <div className="space-y-8">
+            {/* Mode Switcher */}
+            <div className="bg-surface-container-lowest rounded-3xl p-4 shadow-[0px_20px_40px_rgba(16,185,129,0.05)] border border-outline/10 flex gap-2">
+              <button
+                onClick={() => setForgeMode('optimize')}
+                className={`flex-1 py-3 px-6 rounded-2xl font-bold flex justify-center items-center gap-3 transition-all duration-200 ${
+                  forgeMode === 'optimize' 
+                    ? 'bg-emerald-50 text-emerald-700 shadow-sm border border-emerald-100' 
+                    : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+                }`}
+              >
+                <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>auto_fix_high</span>
+                Optimize Existing Resume
+              </button>
+              <button
+                onClick={() => setForgeMode('create')}
+                className={`flex-1 py-3 px-6 rounded-2xl font-bold flex justify-center items-center gap-3 transition-all duration-200 ${
+                  forgeMode === 'create' 
+                    ? 'bg-sky-50 text-sky-700 shadow-sm border border-sky-100' 
+                    : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+                }`}
+              >
+                <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>note_add</span>
+                Create New Resume
+              </button>
+            </div>
+
+            {/* Input Panel */}
+            <div className="bg-surface-container-lowest rounded-3xl p-8 shadow-[0px_20px_40px_rgba(16,185,129,0.08)]">
+              {forgeMode === 'optimize' ? (
+                <>
+                  <h2 className="text-xl font-bold mb-2 flex items-center gap-3">
+                    <span className="material-symbols-outlined text-emerald-600" style={{ fontVariationSettings: "'FILL' 1" }}>auto_fix_high</span>
+                    Forge Resume for a Job
+                  </h2>
+                  <p className="text-on-surface-variant text-sm mb-6">Upload your resume and paste the job description. The system will calculate ATS match and generate a deterministic optimized version.</p>
+
+                  {forgeError && (
+                    <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 flex items-center gap-3 text-sm">
+                      <span className="material-symbols-outlined text-red-500 shrink-0">error</span>{forgeError}
+                    </div>
+                  )}
+
+                  <form onSubmit={handleForge} className="space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Resume Upload */}
+                      <div>
+                        <label className="block text-sm font-bold text-on-surface mb-2">
+                          <span className="material-symbols-outlined text-sm align-middle mr-1" style={{ fontVariationSettings: "'FILL' 0" }}>upload_file</span>
+                          Your Resume (PDF / DOCX)
+                        </label>
+                        <div
+                          onDrop={handleForgeDrop}
+                          onDragOver={(e) => { e.preventDefault(); forgeDrop.current = true; }}
+                          onDragLeave={() => { forgeDrop.current = false; }}
+                          onClick={() => document.getElementById('forge-file-input').click()}
+                          className="border-2 border-dashed border-outline/30 hover:border-emerald-400/70 hover:bg-emerald-50/30 rounded-2xl p-8 text-center cursor-pointer transition-all duration-200"
+                        >
+                          <input id="forge-file-input" type="file" accept=".pdf,.doc,.docx" className="hidden"
+                            onChange={(e) => setForgeFile(e.target.files?.[0] || null)} />
+                          <span className="material-symbols-outlined text-4xl text-outline/40 mb-2 block" style={{ fontVariationSettings: "'FILL' 0" }}>
+                            {forgeFile ? 'description' : 'cloud_upload'}
+                          </span>
+                          {forgeFile ? (
+                            <div>
+                              <p className="font-bold text-on-surface text-sm">{forgeFile.name}</p>
+                              <p className="text-xs text-on-surface-variant mt-0.5">{(forgeFile.size / 1024).toFixed(0)} KB · Click to change</p>
+                            </div>
+                          ) : (
+                            <div>
+                              <p className="font-semibold text-on-surface text-sm">Drop file or click to browse</p>
+                              <p className="text-xs text-on-surface-variant mt-0.5">PDF, DOC, DOCX</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Job Description */}
+                      <div>
+                        <label className="block text-sm font-bold text-on-surface mb-2">
+                          <span className="material-symbols-outlined text-sm align-middle mr-1" style={{ fontVariationSettings: "'FILL' 0" }}>work</span>
+                          Job Description
+                          <span className="text-xs font-normal text-on-surface-variant ml-2">{jobDescription.split(/\s+/).filter(Boolean).length} words</span>
+                        </label>
+                        <textarea
+                          rows={10}
+                          placeholder="Paste the full job description here — include required skills, responsibilities, and qualifications for the best ATS match..."
+                          className="w-full bg-surface-container border border-outline/20 rounded-2xl px-4 py-3 font-medium text-on-surface placeholder:text-outline/40 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 resize-y text-sm leading-relaxed"
+                          value={jobDescription}
+                          onChange={(e) => setJobDescription(e.target.value)}
+                        />
+                        <div className="mt-3">
+                          <label className="block text-xs font-bold text-on-surface mb-1">Download Format</label>
+                          <select
+                            className="w-full bg-surface-container border border-outline/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500"
+                            value={optimizeOutputFormat}
+                            onChange={(e) => setOptimizeOutputFormat(e.target.value)}
+                          >
+                            <option value="docx">DOCX</option>
+                            <option value="pdf">PDF</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button type="submit" disabled={!forgeFile || !jobDescription.trim() || forging}
+                      className="w-full py-4 bg-gradient-to-r from-emerald-500 to-sky-500 text-white font-bold rounded-2xl hover:from-emerald-600 hover:to-sky-600 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0px_10px_30px_rgba(16,185,129,0.35)] flex items-center justify-center gap-3 text-base">
+                      {forging ? (
+                        <><span className="material-symbols-outlined animate-spin text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>sync</span>Forging your resume — this takes ~15 seconds...</>
+                      ) : (
+                        <><span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>auto_fix_high</span>Forge Resume for This Job</>
+                      )}
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+                    <div>
+                      <h2 className="text-xl font-bold mb-2 flex items-center gap-3">
+                        <span className="material-symbols-outlined text-sky-600" style={{ fontVariationSettings: "'FILL' 1" }}>note_add</span>
+                        Create Resume from Scratch
+                      </h2>
+                      <p className="text-on-surface-variant text-sm">Fill in your details and generate a professional resume (no AI rewriting) with ATS-friendly structure for your target role.</p>
+                    </div>
+                    <div className="flex items-center justify-start gap-4 sm:ml-auto">
+                      <label className="flex items-center gap-2 cursor-pointer text-sm font-bold text-slate-600 bg-surface-container hover:bg-surface-container-highest px-3 py-1.5 rounded-xl transition-colors border border-outline/10">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 rounded text-sky-500 focus:ring-sky-500 border-outline/30 cursor-pointer"
+                          checked={isMockDataEnabled}
+                          onChange={(e) => setIsMockDataEnabled(e.target.checked)}
+                        />
+                        Mock Data Mode
+                      </label>
+                      {isMockDataEnabled && (
+                        <button
+                          type="button"
+                          onClick={fillMockData}
+                          className="px-4 py-1.5 bg-sky-100 text-sky-700 hover:bg-sky-200 rounded-xl text-sm font-bold transition-colors"
+                        >
+                          Fill Data
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {createError && (
+                    <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 flex items-center gap-3 text-sm">
+                      <span className="material-symbols-outlined text-red-500 shrink-0">error</span>{createError}
+                    </div>
+                  )}
+
+                  <form onSubmit={handleCreateResume} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Personal Info */}
+                      <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-on-surface mb-1">Full Name *</label>
+                          <input required type="text" className="w-full bg-surface-container border border-outline/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-sky-500"
+                            value={createFormData.fullName} onChange={e => setCreateFormData({...createFormData, fullName: e.target.value})} />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-on-surface mb-1">Email</label>
+                          <input type="email" className="w-full bg-surface-container border border-outline/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-sky-500"
+                            value={createFormData.email} onChange={e => setCreateFormData({...createFormData, email: e.target.value})} />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-on-surface mb-1">Phone</label>
+                          <input type="tel" className="w-full bg-surface-container border border-outline/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-sky-500"
+                            value={createFormData.phone} onChange={e => setCreateFormData({...createFormData, phone: e.target.value})} />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-on-surface mb-1">Target Job Title</label>
+                          <input type="text" className="w-full bg-surface-container border border-outline/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-sky-500"
+                            value={createFormData.targetJobTitle} onChange={e => setCreateFormData({...createFormData, targetJobTitle: e.target.value})} />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-on-surface mb-1">Output Format</label>
+                          <select
+                            className="w-full bg-surface-container border border-outline/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-sky-500"
+                            value={createFormData.outputFormat}
+                            onChange={e => setCreateFormData({ ...createFormData, outputFormat: e.target.value })}
+                          >
+                            <option value="docx">DOCX</option>
+                            <option value="pdf">PDF</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Content Fields */}
+                      <div>
+                         <label className="block text-xs font-bold text-on-surface mb-1 text-emerald-600">Target Job Description *</label>
+                         <textarea required rows={5} placeholder="Paste the JD here..." className="w-full bg-surface-container border border-outline/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-sky-500 resize-y"
+                            value={createFormData.targetJobDescription} onChange={e => setCreateFormData({...createFormData, targetJobDescription: e.target.value})} />
+                      </div>
+                      <div>
+                         <label className="block text-xs font-bold text-on-surface mb-1">Experience</label>
+                         <textarea rows={5} placeholder="Job titles, companies, dates, achievements..." className="w-full bg-surface-container border border-outline/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-sky-500 resize-y"
+                            value={createFormData.experience} onChange={e => setCreateFormData({...createFormData, experience: e.target.value})} />
+                      </div>
+                      <div>
+                         <label className="block text-xs font-bold text-on-surface mb-1">Professional Summary & Skills</label>
+                         <textarea rows={4} placeholder="Brief summary and list of key skills..." className="w-full bg-surface-container border border-outline/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-sky-500 resize-y"
+                            value={createFormData.summary} onChange={e => setCreateFormData({...createFormData, summary: e.target.value})} />
+                      </div>
+                      <div>
+                         <label className="block text-xs font-bold text-on-surface mb-1">Skills</label>
+                         <textarea rows={4} placeholder="Comma or newline separated skills..." className="w-full bg-surface-container border border-outline/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-sky-500 resize-y"
+                           value={createFormData.skills} onChange={e => setCreateFormData({...createFormData, skills: e.target.value})} />
+                       </div>
+                       <div>
+                         <label className="block text-xs font-bold text-on-surface mb-1">Education</label>
+                         <textarea rows={4} placeholder="Degrees, schools, notable coursework..." className="w-full bg-surface-container border border-outline/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-sky-500 resize-y"
+                           value={createFormData.education} onChange={e => setCreateFormData({...createFormData, education: e.target.value})} />
+                       </div>
+                       <div>
+                         <label className="block text-xs font-bold text-on-surface mb-1">Projects</label>
+                         <textarea rows={4} placeholder="Project name, stack, outcomes..." className="w-full bg-surface-container border border-outline/20 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-sky-500 resize-y"
+                           value={createFormData.projects} onChange={e => setCreateFormData({...createFormData, projects: e.target.value})} />
+                      </div>
+                    </div>
+
+                    <button type="submit" disabled={!createFormData.fullName || !createFormData.targetJobDescription || creating}
+                      className="w-full py-4 bg-gradient-to-r from-sky-500 to-indigo-500 text-white font-bold rounded-2xl hover:from-sky-600 hover:to-indigo-600 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0px_10px_30px_rgba(14,165,233,0.35)] flex items-center justify-center gap-3 text-base">
+                      {creating ? (
+                        <><span className="material-symbols-outlined animate-spin text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>sync</span>Crafting your resume...</>
+                      ) : (
+                        <><span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>draw</span>Create Tailored Resume</>
+                      )}
+                    </button>
+                  </form>
+                </>
+              )}
+            </div>
+
+            {/* Shared Results Panel */}
+            {resultToRender && !isLoading && (
+              <>
+                {/* ATS Score + Keyword Stats Row */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* ATS Ring */}
+                  <div className="bg-surface-container-lowest rounded-3xl p-8 shadow-[0px_20px_40px_rgba(16,185,129,0.08)] flex flex-col items-center justify-center text-center">
+                    <ATSRing score={resultToRender.atsScore} label={resultToRender.atsLabel} />
+                    <p className="text-sm text-on-surface-variant mt-4 max-w-[180px]">
+                      {resultToRender.totalJdKeywords} tech keywords found in the job description
+                    </p>
+                  </div>
+
+                  {/* Matched Keywords */}
+                  <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-[0px_20px_40px_rgba(16,185,129,0.08)]">
+                    <h3 className="text-sm font-bold text-emerald-700 mb-3 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                      Optimized Keywords ({resultToRender.matchedKeywords?.length || 0})
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {resultToRender.matchedKeywords?.length > 0 ? (
+                        resultToRender.matchedKeywords.map(kw => <KeywordPill key={kw} text={kw} variant="match" />)
+                      ) : (
+                        <p className="text-xs text-on-surface-variant">No matching keywords found.</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Missing Keywords */}
+                  <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-[0px_20px_40px_rgba(16,185,129,0.08)]">
+                    <h3 className="text-sm font-bold text-red-700 mb-3 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0" }}>cancel</span>
+                      Still Missing ({resultToRender.missingKeywords?.length || 0})
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {resultToRender.missingKeywords?.length > 0 ? (
+                        resultToRender.missingKeywords.map(kw => <KeywordPill key={kw} text={kw} variant="missing" />)
+                      ) : (
+                        <p className="text-xs text-emerald-700 font-semibold">Your resume is a perfect keyword match!</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* AI-Tuned Resume */}
+                <div className="bg-slate-900 rounded-3xl shadow-[0px_25px_50px_rgba(15,23,42,0.25)] overflow-hidden">
+                  <div className="bg-slate-800 px-8 py-5 flex justify-between items-center">
+                    <div className="flex items-center gap-4">
+                      <span className="material-symbols-outlined text-emerald-400 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>auto_fix_high</span>
+                      <div>
+                        <h3 className="text-white font-bold text-base">Final Resume</h3>
+                        <p className="text-slate-400 text-xs">Generated from your questionnaire details with ATS-first template logic</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-bold text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full">
+                        {resultToRender.atsScore}% ATS Match
+                      </span>
+                      <button onClick={() => {
+                        const txt = resultToRender.tunedResume || resultToRender.generatedResume;
+                        if (txt) {
+                          navigator.clipboard.writeText(txt);
+                          setCopiedReadme(true); setTimeout(() => setCopiedReadme(false), 2000);
+                        }
+                      }}
+                        className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-xl font-medium text-sm transition-colors flex items-center gap-2">
+                        <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>
+                          {copiedReadme ? 'check' : 'content_copy'}
+                        </span>
+                        {copiedReadme ? 'Copied!' : 'Copy'}
+                      </button>
+                      {resultToRender.fileBase64 && (
+                        <button
+                          onClick={() => handleDownloadGenerated(resultToRender)}
+                          className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl font-medium text-sm transition-colors flex items-center gap-2"
+                        >
+                          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>download</span>
+                          Download {resultToRender.outputFormat?.toUpperCase() || 'FILE'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="p-8 max-h-[600px] overflow-y-auto">
+                    <pre className="text-slate-200 font-mono text-sm whitespace-pre-wrap leading-relaxed">
+                      {resultToRender.tunedResume || resultToRender.generatedResume || "No resume text generated."}
+                    </pre>
+                  </div>
+                </div>
+
+                {/* How it was tuned note */}
+                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6 flex gap-4">
+                  <span className="material-symbols-outlined text-emerald-600 text-xl shrink-0 mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>info</span>
+                  <div>
+                    <p className="text-sm font-bold text-emerald-800 mb-1">How Resume Forge works</p>
+                    <p className="text-xs text-emerald-700 leading-relaxed">
+                      Your factual details are assembled into a deterministic ATS-first resume structure. Job-description keywords are merged into the skill profile, then scored for alignment so you can export the result as DOCX or PDF.
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }

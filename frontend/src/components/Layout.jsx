@@ -1,9 +1,14 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { Menu, X, Lock, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown, Moon, Sun } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
+import { useDarkMode } from '../hooks/useDarkMode';
 
 const NAV_GROUPS = [
+  { label: 'Job Search', items: [
+    { label: 'Job Tracker',      path: '/jobs',      desc: 'Track applications' },
+    { label: 'Job Matcher',      path: '/jobmatch',  desc: 'Find matching roles' },
+  ]},
   { label: 'Portfolios', items: [
     { label: 'GitHub Profile',   path: '/github',    desc: 'Audit & generate README' },
     { label: 'LinkedIn Profile', path: '/linkedin',  desc: 'Score your LinkedIn presence' },
@@ -17,6 +22,7 @@ const NAV_GROUPS = [
 
 const Navbar = () => {
   const { user, logout, isAuthenticated, checkAuth } = useAuthStore();
+  const [isDark, setIsDark] = useDarkMode();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState(null);
@@ -116,8 +122,15 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="hidden md:block text-sm text-slate-500 font-medium hover:text-blue-600 cursor-pointer transition-colors">Support</span>
-          <div className="hidden md:flex items-center gap-3 border-l pl-4 border-slate-200">
+          <button
+            onClick={() => setIsDark(!isDark)}
+            title={isDark ? 'Light mode' : 'Dark mode'}
+            className="p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          >
+            {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
+          <span className="hidden md:block text-sm text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer transition-colors">Support</span>
+          <div className="hidden md:flex items-center gap-3 border-l pl-4 border-slate-200 dark:border-slate-700">
             {isAuthenticated ? (
               <>
                 <button
@@ -246,10 +259,10 @@ const Layout = () => {
             &copy; 2024 JobTune AI. Professional Vanguard System.
         </div>
         <div className="flex gap-8">
-          <a className="text-slate-500 hover:text-blue-700 transition-opacity duration-300" href="#">Privacy Policy</a>
-          <a className="text-slate-500 hover:text-blue-700 transition-opacity duration-300" href="#">Terms of Service</a>
-          <a className="text-slate-500 hover:text-blue-700 transition-opacity duration-300" href="#">Help Center</a>
-          <a className="text-slate-500 hover:text-blue-700 transition-opacity duration-300" href="#">API</a>
+          <a className="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors duration-300" href="#">Privacy Policy</a>
+          <a className="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors duration-300" href="#">Terms of Service</a>
+          <a className="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors duration-300" href="#">Help Center</a>
+          <a className="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors duration-300" href="#">API</a>
         </div>
       </footer>
     </div>

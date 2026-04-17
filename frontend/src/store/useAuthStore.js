@@ -18,6 +18,7 @@ const useAuthStore = create((set) => ({
   isAuthenticated: false,
   isLoading: true,
   error: null,
+  hasCompletedOnboarding: localStorage.getItem('onboarded') === 'true',
   login: async (credentials) => {
     try {
       set({ isLoading: true, error: null });
@@ -41,6 +42,10 @@ const useAuthStore = create((set) => ({
   logout: () => {
     localStorage.removeItem('token');
     set({ user: null, isAuthenticated: false });
+  },
+  markOnboardingComplete: () => {
+    localStorage.setItem('onboarded', 'true');
+    set({ hasCompletedOnboarding: true });
   },
   checkAuth: async () => {
     const token = localStorage.getItem('token');

@@ -1,7 +1,9 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
+import ErrorBoundary from './components/ErrorBoundary';
 import Home from './pages/Home';
+import Onboarding from './pages/Onboarding';
 import SkillAssessment from './pages/SkillAssessment';
 import ResumeOptimizer from './pages/ResumeOptimizer';
 import Dashboard from './pages/Dashboard';
@@ -13,29 +15,74 @@ import PortfolioBuilder from './pages/PortfolioBuilder';
 import ProjectIdeas from './pages/ProjectIdeas';
 import MockInterview from './pages/MockInterview';
 import JobMatcher from './pages/JobMatcher';
+import JobTracker from './pages/JobTracker';
 import ResumeBuilder from './pages/ResumeBuilder';
 import ResumeHistory from './pages/ResumeHistory';
+import ResumeComparison from './pages/ResumeComparison';
+import ResumeSend from './pages/ResumeSend';
+import useAuthStore from './store/useAuthStore';
+
+function ProtectedRoute({ children, requireOnboarding = false }) {
+  const { isAuthenticated, hasCompletedOnboarding } = useAuthStore();
+
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (requireOnboarding && !hasCompletedOnboarding) return <Navigate to="/onboarding" replace />;
+
+  return children;
+}
 
 function App() {
+  const { checkAuth, isLoading } = useAuthStore();
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 mb-4 animate-spin">
+            <div className="w-8 h-8 rounded-full border-2 border-white border-t-transparent" />
+          </div>
+          <p className="text-slate-600 font-semibold">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <Routes>
-      <Route path="/" element={<Layout />}>
-        <Route index element={<Home />} />
-        <Route path="skills" element={<SkillAssessment />} />
-        <Route path="resume" element={<ResumeOptimizer />} />
-        <Route path="resume/build" element={<ResumeBuilder />} />
-        <Route path="resume/history" element={<ResumeHistory />} />
-        <Route path="linkedin" element={<LinkedInOptimizer />} />
-        <Route path="github" element={<GitHubOptimizer />} />
-        <Route path="portfolio" element={<PortfolioBuilder />} />
-        <Route path="learning" element={<ContentVault />} />
-        <Route path="projects" element={<ProjectIdeas />} />
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="interview" element={<MockInterview />} />
-        <Route path="jobmatch" element={<JobMatcher />} />
-      </Route>
-      <Route path="/login" element={<Login />} />
-    </Routes>
+    <ErrorBoundary>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="onboarding" element={<Onboarding />} />
+          <Route path="skills" element={<SkillAssessment />} />
+          <Route path="resume" element={<ResumeOptimizer />} />
+          <Route path="resume/build" element={<ResumeBuilder />} />
+          <Route path="resume/history" element={<ResumeHistory />} />
+          <Route path="resume/compare" element={<ResumeComparison />} />
+          <Route path="resume/send" element={<ResumeSend />} />
+          <Route path="linkedin" element={<LinkedInOptimizer />} />
+          <Route path="github" element={<GitHubOptimizer />} />
+          <Route path="portfolio" element={<PortfolioBuilder />} />
+          <Route path="learning" element={<ContentVault />} />
+          <Route path="projects" element={<ProjectIdeas />} />
+          <Route
+            path="dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="interview" element={<MockInterview />} />
+          <Route path="jobmatch" element={<JobMatcher />} />
+          <Route path="jobs" element={<JobTracker />} />
+        </Route>
+        <Route path="/login" element={<Login />} />
+      </Routes>
+    </ErrorBoundary>
   );
 }
 
