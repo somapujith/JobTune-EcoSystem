@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { api } from '../store/useAuthStore';
+import GitHubReadmeGenerator from '../components/GitHubReadmeGenerator';
 
 function getScoreColor(score) {
   if (score >= 80) return '#10b981';
@@ -9,6 +10,7 @@ function getScoreColor(score) {
 }
 
 export default function GitHubOptimizer() {
+  const [activeTab, setActiveTab] = useState('analyzer');
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState(null);
@@ -69,23 +71,50 @@ export default function GitHubOptimizer() {
           GitHub Profile Optimizer
         </h1>
         <p className="text-lg text-on-surface-variant font-medium max-w-2xl mx-auto">
-          Scan your real repositories and get an AI-generated professional profile README tailored to your actual tech stack.
+          Analyze your GitHub profile or create a custom README from scratch.
         </p>
       </div>
 
-      {error && (
-        <div className="max-w-2xl mx-auto mb-6 bg-rose-50 border border-rose-100 p-4 rounded-2xl text-rose-600 text-sm font-medium">
-          {error}
-        </div>
-      )}
+      {/* Tab Navigation */}
+      <div className="flex gap-4 mb-12 justify-center border-b border-slate-200 dark:border-slate-700">
+        <button
+          onClick={() => setActiveTab('analyzer')}
+          className={`px-6 py-3 font-semibold transition-all border-b-2 ${
+            activeTab === 'analyzer'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          📊 Analyzer
+        </button>
+        <button
+          onClick={() => setActiveTab('generator')}
+          className={`px-6 py-3 font-semibold transition-all border-b-2 ${
+            activeTab === 'generator'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          ✏️ Generator
+        </button>
+      </div>
 
-      {validationError && (
-        <div className="max-w-2xl mx-auto mb-6 bg-rose-50 border border-rose-100 p-4 rounded-2xl text-rose-600 text-sm font-medium">
-          {validationError}
-        </div>
-      )}
+      {/* Analyzer Tab */}
+      {activeTab === 'analyzer' && (
+        <>
+          {error && (
+            <div className="max-w-2xl mx-auto mb-6 bg-rose-50 border border-rose-100 p-4 rounded-2xl text-rose-600 text-sm font-medium">
+              {error}
+            </div>
+          )}
 
-      <form onSubmit={handleAnalyze} className="max-w-2xl mx-auto mb-16">
+          {validationError && (
+            <div className="max-w-2xl mx-auto mb-6 bg-rose-50 border border-rose-100 p-4 rounded-2xl text-rose-600 text-sm font-medium">
+              {validationError}
+            </div>
+          )}
+
+          <form onSubmit={handleAnalyze} className="max-w-2xl mx-auto mb-16">
         <div className="relative bg-surface-container-lowest rounded-3xl p-2 shadow-[0px_20px_40px_rgba(0,78,159,0.06)]">
           <div className="flex items-center gap-4 p-4">
             <div className="w-12 h-12 rounded-2xl bg-slate-900/10 flex items-center justify-center">
@@ -248,6 +277,13 @@ export default function GitHubOptimizer() {
             </div>
           </div>
         </div>
+      )}
+        </>
+      )}
+
+      {/* Generator Tab */}
+      {activeTab === 'generator' && (
+        <GitHubReadmeGenerator />
       )}
     </div>
   );
