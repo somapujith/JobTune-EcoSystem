@@ -125,15 +125,17 @@ Compensation
           How It Works
         </h3>
         <div className="space-y-3 text-slate-700 dark:text-slate-300">
-          <p><strong>1. Fill in Your Details:</strong></p>
-          <ul className="list-disc list-inside ml-4 space-y-1">
-            <li><strong>Company Name:</strong> The company you're applying to</li>
-            <li><strong>Position Title:</strong> The job title you're applying for</li>
-            <li><strong>Your Name:</strong> Your full name for the signature</li>
-            <li><strong>Job Description:</strong> Copy-paste the complete job posting</li>
-            <li><strong>Your Background:</strong> Brief description of your relevant experience (optional but recommended)</li>
-            <li><strong>Tone:</strong> Choose between Formal, Friendly, or Confident</li>
-          </ul>
+          <div>
+            <p className="mb-2"><strong>1. Fill in Your Details:</strong></p>
+            <ul className="list-disc list-inside ml-4 space-y-1">
+              <li><strong>Company Name:</strong> The company you're applying to</li>
+              <li><strong>Position Title:</strong> The job title you're applying for</li>
+              <li><strong>Your Name:</strong> Your full name for the signature</li>
+              <li><strong>Job Description:</strong> Copy-paste the complete job posting</li>
+              <li><strong>Your Background:</strong> Brief description of your relevant experience (optional but recommended)</li>
+              <li><strong>Tone:</strong> Choose between Formal, Friendly, or Confident</li>
+            </ul>
+          </div>
           <p><strong>2. AI Generation:</strong> Our AI creates a personalized, compelling cover letter (3-4 paragraphs) tailored to the specific job and company</p>
           <p><strong>3. Use Immediately:</strong> Copy the letter to your clipboard or download it as a text file. Customize as needed and send with your application</p>
         </div>

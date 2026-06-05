@@ -180,14 +180,15 @@ Compensation & Benefits
         <div className="space-y-3 text-slate-700 dark:text-slate-300">
           <p><strong>1. Upload Your Resume:</strong> Click the upload area and select your PDF or DOCX resume file (max 5MB)</p>
           <p><strong>2. Paste Job Description:</strong> Copy and paste the complete job posting you want to match against</p>
-          <p><strong>3. Get Your Score:</strong> The tool analyzes your resume against the job and calculates:
-            <ul className="list-disc list-inside ml-4 mt-2 space-y-1">
+          <div>
+            <p className="mb-2"><strong>3. Get Your Score:</strong> The tool analyzes your resume against the job and calculates:</p>
+            <ul className="list-disc list-inside ml-4 space-y-1">
               <li><strong>Overall ATS Score (0-100):</strong> How well your resume matches the job</li>
               <li><strong>Hard Skills Match (%):</strong> Technical skills alignment</li>
               <li><strong>Soft Skills Match (%):</strong> Behavioral skills alignment</li>
               <li><strong>Experience Match (%):</strong> Years of experience fit</li>
             </ul>
-          </p>
+          </div>
           <p><strong>4. Review Results:</strong> See which keywords matched (✓) and which are missing (✗), plus actionable recommendations</p>
         </div>
       </div>

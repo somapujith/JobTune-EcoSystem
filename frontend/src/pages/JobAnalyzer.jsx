@@ -105,15 +105,17 @@ Remote (US-based preferred, but global candidates considered)`;
         </h3>
         <div className="space-y-3 text-slate-700 dark:text-slate-300">
           <p><strong>1. Paste Job Description:</strong> Copy the complete job posting (including all requirements, responsibilities, and qualifications)</p>
-          <p><strong>2. AI Analysis:</strong> Our AI analyzes the posting and extracts:</p>
-          <ul className="list-disc list-inside ml-4 space-y-1">
-            <li><strong>Required Skills:</strong> Must-have technical skills for the role</li>
-            <li><strong>Nice-to-Have Skills:</strong> Bonus skills that are preferred but not required</li>
-            <li><strong>Seniority Level:</strong> Junior, Mid, or Senior</li>
-            <li><strong>Experience Required:</strong> Years of experience needed</li>
-            <li><strong>Key Responsibilities:</strong> Main duties of the position</li>
-            <li><strong>Keywords & Concepts:</strong> Important tools, frameworks, and concepts</li>
-          </ul>
+          <div>
+            <p className="mb-2"><strong>2. AI Analysis:</strong> Our AI analyzes the posting and extracts:</p>
+            <ul className="list-disc list-inside ml-4 space-y-1">
+              <li><strong>Required Skills:</strong> Must-have technical skills for the role</li>
+              <li><strong>Nice-to-Have Skills:</strong> Bonus skills that are preferred but not required</li>
+              <li><strong>Seniority Level:</strong> Junior, Mid, or Senior</li>
+              <li><strong>Experience Required:</strong> Years of experience needed</li>
+              <li><strong>Key Responsibilities:</strong> Main duties of the position</li>
+              <li><strong>Keywords & Concepts:</strong> Important tools, frameworks, and concepts</li>
+            </ul>
+          </div>
           <p><strong>3. Use Results:</strong> Compare with your skills to identify gaps and prepare accordingly</p>
         </div>
       </div>
