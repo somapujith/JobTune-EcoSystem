@@ -47,17 +47,26 @@ router.get('/overview', authenticateToken, async (req, res) => {
     let skillScore = 0;
     try {
       const [skills] = await pool.query(
-        'SELECT scores FROM skill_assessments WHERE user_id = ? ORDER BY created_at DESC LIMIT 1',
+        'SELECT * FROM skill_assessments WHERE user_id = ? ORDER BY created_at DESC LIMIT 1',
         [userId]
       );
-      if (skills.length > 0 && skills[0].scores) {
-        const scoresData = typeof skills[0].scores === 'string'
-          ? JSON.parse(skills[0].scores)
-          : skills[0].scores;
-        skillScore = Math.round(Object.values(scoresData).reduce((a, b) => a + b, 0) / Object.keys(scoresData).length);
+      if (skills.length > 0) {
+        // Try to extract score from available columns
+        if (skills[0].score) {
+          skillScore = skills[0].score;
+        } else if (skills[0].scores) {
+          const scoresData = typeof skills[0].scores === 'string'
+            ? JSON.parse(skills[0].scores)
+            : skills[0].scores;
+          skillScore = Math.round(Object.values(scoresData).reduce((a, b) => a + b, 0) / Object.keys(scoresData).length);
+        } else {
+          // Default to 65 if we have skills assessment but no explicit score
+          skillScore = 65;
+        }
       }
     } catch (err) {
-      console.warn('Skill assessments table not found or error:', err.message);
+      console.warn('Skill assessments score not available:', err.message);
+      skillScore = 0;
     }
 
     // 5. Recent activity log
