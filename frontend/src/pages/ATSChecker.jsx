@@ -326,7 +326,7 @@ UI/UX Design, Figma, Photoshop, Video Editing, Project Management`;
           )}
 
           {/* Recommendations */}
-          {result.recommendations.length > 0 && (
+          {result.recommendations && result.recommendations.length > 0 && (
             <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-amber-200 dark:border-amber-900">
               <div className="flex items-center justify-between gap-3 mb-4">
                 <div className="flex items-center gap-3">

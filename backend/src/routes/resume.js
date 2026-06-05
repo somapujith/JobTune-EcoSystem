@@ -73,8 +73,13 @@ async function extractText(file) {
   if (!file) return '';
   try {
     if (file.mimetype === 'application/pdf') {
-      const data = await pdfParse(file.buffer);
-      return data.text || '';
+      try {
+        const data = await pdfParse(file.buffer);
+        return data.text || '';
+      } catch (pdfErr) {
+        console.warn('PDF parse error, falling back to reading as text:', pdfErr.message);
+        return file.buffer.toString('utf8');
+      }
     }
   } catch (e) {
     console.error('PDF parse error:', e.message);
@@ -307,7 +312,21 @@ router.get('/:id', authenticateToken, async (req, res, next) => {
     if (rows.rows.length === 0) {
       return res.status(404).json({ error: 'Resume not found' });
     }
-    res.json({ success: true, data: parseJsonFields(rows.rows[0]) });
+
+    const resultData = parseJsonFields(rows.rows[0]);
+
+    // Reconstruct raw resume text from chunks
+    const chunksRow = await pool.query(
+      'SELECT chunk_text FROM resume_embeddings WHERE resume_id = $1 AND user_id = $2 ORDER BY chunk_index',
+      [req.params.id, req.user.id]
+    );
+    if (chunksRow.rows.length > 0) {
+      resultData.content = chunksRow.rows.map(r => r.chunk_text).join('\n');
+    } else {
+      resultData.content = '';
+    }
+
+    res.json({ success: true, data: resultData });
   } catch (err) {
     next(err);
   }

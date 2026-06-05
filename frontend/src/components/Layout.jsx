@@ -12,6 +12,7 @@ const NAV_GROUPS = [
   { label: 'Job Tools', items: [
     { label: 'Job Analyzer',     path: '/job-analyzer', desc: 'Extract skills from postings' },
     { label: 'ATS Checker',      path: '/ats-checker',  desc: 'Resume-job match score' },
+    { label: 'Job Fit Scorer',   path: '/job-fit',      desc: 'Detailed job fit analysis' },
     { label: 'Cover Letter',     path: '/cover-letter', desc: 'AI-generated letters' },
   ]},
   { label: 'Portfolios', items: [

@@ -233,6 +233,19 @@ const tables = [
       );
       CREATE INDEX IF NOT EXISTS idx_pii_redactions_user_id ON pii_redactions(user_id);
     `
+  },
+  {
+    name: 'onet_occupations',
+    query: `
+      CREATE TABLE IF NOT EXISTS onet_occupations (
+        code VARCHAR(20) PRIMARY KEY,
+        title VARCHAR(500),
+        description TEXT,
+        domain VARCHAR(255),
+        skills JSONB,
+        keywords JSONB
+      );
+    `
   }
 ];
 

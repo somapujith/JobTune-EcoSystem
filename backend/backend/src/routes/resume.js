@@ -73,8 +73,13 @@ async function extractText(file) {
   if (!file) return '';
   try {
     if (file.mimetype === 'application/pdf') {
-      const data = await pdfParse(file.buffer);
-      return data.text || '';
+      try {
+        const data = await pdfParse(file.buffer);
+        return data.text || '';
+      } catch (pdfErr) {
+        console.warn('PDF parse error, falling back to reading as text:', pdfErr.message);
+        return file.buffer.toString('utf8');
+      }
     }
   } catch (e) {
     console.error('PDF parse error:', e.message);

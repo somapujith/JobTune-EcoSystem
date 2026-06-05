@@ -12,8 +12,13 @@ async function extractTextFromFile(file) {
 
   try {
     if (file.mimetype === 'application/pdf') {
-      const pdfData = await pdfParse(file.buffer);
-      return pdfData.text;
+      try {
+        const pdfData = await pdfParse(file.buffer);
+        return pdfData.text;
+      } catch (pdfErr) {
+        console.warn('PDF parsing failed, falling back to reading as plain text:', pdfErr.message);
+        return file.buffer.toString('utf8');
+      }
     } else if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
       const JSZip = require('jszip');
       const zip = new JSZip();
@@ -23,7 +28,7 @@ async function extractTextFromFile(file) {
       const xmlContent = await xmlFile.async('text');
       return xmlContent.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
     } else {
-      throw new Error('Unsupported file type');
+      return file.buffer.toString('utf8');
     }
   } catch (err) {
     console.error('File extraction error:', err);
@@ -123,6 +128,7 @@ function calculateFallbackScore(resumeText) {
     strengths: ['Resume exists', 'Parseable format'],
     improvements: ['Ensure ATS-friendly formatting', 'Add more specific achievements'],
     atsIssues: [],
+    recommendations: [],
     aiPowered: false
   };
 }

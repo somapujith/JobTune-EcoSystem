@@ -29,7 +29,7 @@ async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature 
   try {
     console.log(`📡 Calling LM Studio: ${selectedModel} at ${baseURL}`);
 
-    const response = await fetch(`${baseURL}/chat/completions`, {
+    let response = await fetch(`${baseURL}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -50,11 +50,44 @@ async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature 
     if (!response.ok) {
       const errText = await response.text();
       console.warn(`LM Studio error: ${response.status}`, errText);
-      return {
-        ok: false,
-        error: `LM Studio API error ${response.status}. Check server is running at ${baseURL}`,
-        data: null
-      };
+
+      // Self-healing: if "system" role is rejected, retry by merging prompts into a single user message
+      if (response.status === 400 && (errText.toLowerCase().includes('role') || errText.toLowerCase().includes('system') || errText.toLowerCase().includes('template'))) {
+        console.log(`⚠️ LM Studio system role rejected. Retrying with merged user prompt...`);
+        const mergedPrompt = `[System Instructions]\n${systemPrompt}\n\n[User Input]\n${userPrompt}`;
+        response = await fetch(`${baseURL}/chat/completions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: selectedModel,
+            messages: [
+              { role: 'user', content: mergedPrompt }
+            ],
+            max_tokens: maxTokens,
+            temperature: temperature,
+            stream: false
+          }),
+          timeout: 60000
+        });
+
+        if (!response.ok) {
+          const retryErrText = await response.text();
+          console.warn(`LM Studio retry error: ${response.status}`, retryErrText);
+          return {
+            ok: false,
+            error: `LM Studio API retry error ${response.status}.`,
+            data: null
+          };
+        }
+      } else {
+        return {
+          ok: false,
+          error: `LM Studio API error ${response.status}. Check server is running at ${baseURL}`,
+          data: null
+        };
+      }
     }
 
     const json = await response.json();

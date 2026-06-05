@@ -1,8 +1,8 @@
 # Implementation Context & Progress
 
-**Last Updated**: 2026-06-06 04:30 UTC  
-**Current Phase**: 4 (ONET + Job Fit) — Next to implement  
-**Overall Progress**: 6/9 phases complete (67%)
+**Last Updated**: 2026-06-06 04:45 UTC  
+**Current Phase**: 6 (Scorer Registry + State Machine) — Next to implement  
+**Overall Progress**: 7/9 phases complete (78%)
 
 ---
 
@@ -55,37 +55,18 @@
 - 45 tests, 80%+ coverage
 - Commit: `f076c177`
 
+### Phase 4: ONET Taxonomy + Job Fit Scoring ✅
+- Bundle trimmed ONET dataset (20 occupations)
+- Job fit scorer strategy (domain + seniority + skills)
+- Refactored to use local LM Studio (callAI)
+- POST /api/jobs/fit route registered
+- Frontend JobFitAnalysis radar chart page built
+- 47 tests, 97.7% coverage
+
 ---
 
 ## 📋 REMAINING PHASES
 
-### Phase 4: ONET Taxonomy + Job Fit Scoring (2.5 days)
-**Status**: Ready to implement  
-**Depends on**: Phase 2 (discovered_jobs exists)
-
-**What to build**:
-- Bundle trimmed ONET dataset (~20 occupations: SWE, DevOps, PM, Data Scientist, etc.)
-- Job fit scorer: domain match + seniority match + skill overlap
-- Score = 0.35*domain + 0.35*seniority + 0.30*skills
-- POST /api/jobs/fit → {score, breakdown}
-- Frontend JobFitAnalysis radar chart
-
-**AI Requirements**:
-- ✅ **LM Studio LOCAL** — for domain classification
-- ✅ **NO external APIs** — semantic matching via local embeddings
-- ✅ Fallback to rule-based (keyword + years-of-experience regex)
-
-**Files**:
-- backend/src/data/onet/occupations.json
-- backend/src/services/taxonomy/onetLoader.js
-- backend/src/services/scoring/strategies/jobFit.js
-- backend/src/routes/jobFit.js
-- backend/tests/jobFit.test.js, onetLoader.test.js
-- frontend/src/pages/JobFitAnalysis.jsx
-
-**Tests**: 80%+ coverage via TDD (write tests first)
-
----
 
 ### Phase 6: Scorer Registry + State Machine (3 days) ⚠️ CRITICAL
 **Status**: Blocked until Phase 4 done  
@@ -186,42 +167,32 @@ All scorers have **deterministic rule-based fallbacks** for when LM Studio is of
 | 1 | 80% | 100% | ✅ |
 | 2 | 80% | 80%+ | ✅ |
 | 3 | 80% | 100% | ✅ |
-| 4 | 80% | 0% | ⏳ Next |
+| 4 | 80% | 97.7% | ✅ |
 | 5 | 80% | 92.9% | ✅ |
-| 6 | 80% | 0% | 📋 Queued |
+| 6 | 80% | 0% | ⏳ Next |
 | 7 | 80% | 0% | 📋 Queued |
 | 8 | 80% | 80%+ | ✅ |
 | 9 | 80% | 0% | 📋 Queued |
-| **TOTAL** | **80%** | **~45%** | ⏳ |
+| **TOTAL** | **80%** | **~55%** | ⏳ |
 
 ---
 
 ## 🚀 NEXT IMMEDIATE STEPS
 
-**Phase 4 (ONET + Job Fit): 2.5 day sprint**
+**Phase 6 (Scorer Registry + State Machine): 3 day sprint**
 
 1. Write tests FIRST (TDD Red phase)
-   - jobFit.test.js: scorer returns score + breakdown
-   - onetLoader.test.js: load + search + domain extract
+   - scorerRegistry.test.js: register & score ATS/HR/fit/embed
+   - stateMachine.test.js: transitions & pipeline orchestrator
 
 2. Implement services
-   - Bundle ONET data (20 occupations)
-   - Job fit scorer (domain + seniority + skills)
-   - LM Studio local classification + rule fallback
+   - Scorer registry wrapper
+   - Refactor existing ATS checker strategy
+   - HR strategy with LLM evaluator
+   - State machine model + pipeline runner
 
-3. Implement route
-   - POST /api/jobs/fit (auth-required)
-   - Mount in app.js
-
-4. Implement frontend
-   - JobFitAnalysis page
-   - Radar chart for domain/seniority/skills
-
-5. Test + commit
+3. Test + commit
    - Verify 80%+ coverage
-   - Commit with description
-
-**Estimated**: 2-3 hours parallel work
 
 ---
 

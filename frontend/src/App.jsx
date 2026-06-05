@@ -26,6 +26,7 @@ import ATSChecker from './pages/ATSChecker';
 import JobAnalyzer from './pages/JobAnalyzer';
 import CoverLetterGenerator from './pages/CoverLetterGenerator';
 import EvidenceDashboard from './pages/EvidenceDashboard';
+import JobFitAnalysis from './pages/JobFitAnalysis';
 import useAuthStore from './store/useAuthStore';
 
 function ProtectedRoute({ children, requireOnboarding = false }) {
@@ -89,6 +90,7 @@ function App() {
           <Route path="career" element={<CareerRoadmap />} />
           <Route path="job-analyzer" element={<JobAnalyzer />} />
           <Route path="ats-checker" element={<ATSChecker />} />
+          <Route path="job-fit" element={<JobFitAnalysis />} />
           <Route path="cover-letter" element={<CoverLetterGenerator />} />
           <Route
             path="evidence"

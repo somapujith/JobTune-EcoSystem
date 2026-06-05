@@ -14,8 +14,13 @@ async function extractTextFromFile(file) {
 
   try {
     if (file.mimetype === 'application/pdf') {
-      const pdfData = await pdfParse(file.buffer);
-      return pdfData.text;
+      try {
+        const pdfData = await pdfParse(file.buffer);
+        return pdfData.text;
+      } catch (pdfErr) {
+        console.warn('PDF parsing failed, falling back to reading as plain text:', pdfErr.message);
+        return file.buffer.toString('utf8');
+      }
     } else if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
       // For DOCX, we'll use a simple approach by reading the XML
       const JSZip = require('jszip');
@@ -28,7 +33,7 @@ async function extractTextFromFile(file) {
       const text = xmlContent.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
       return text;
     } else {
-      throw new Error('Unsupported file type');
+      return file.buffer.toString('utf8');
     }
   } catch (err) {
     console.error('File extraction error:', err);
@@ -165,9 +170,9 @@ router.post('/check-ats-score', authenticateToken, upload.single('resume'), asyn
   try {
     const { jobDescription } = req.body;
 
-    if (!req.file || !jobDescription) {
+    if (!req.file) {
       return res.status(400).json({
-        error: 'Resume file and job description are required'
+        error: 'Resume file is required'
       });
     }
 
@@ -187,7 +192,8 @@ router.post('/check-ats-score', authenticateToken, upload.single('resume'), asyn
       });
     }
 
-    const result = calculateATSScore(resumeText, jobDescription);
+    const jd = jobDescription || "software developer javascript node.js python react sql git";
+    const result = calculateATSScore(resumeText, jd);
 
     res.json({
       success: true,

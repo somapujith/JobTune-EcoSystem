@@ -1,0 +1,162 @@
+[
+  {
+    "code": "15-1252.00",
+    "title": "Software Developer",
+    "description": "Research, design, and develop computer and network software or specialized utility programs. Analyze user needs and develop software solutions, applying principles and techniques of computer science, engineering, and mathematical analysis.",
+    "domain": "IT",
+    "skills": ["programming", "software development", "debugging", "algorithms", "data structures", "version control", "testing", "agile"],
+    "keywords": ["developer", "software", "engineer", "programming", "code", "javascript", "python", "java", "node", "react", "angular", "vue", "typescript", "fullstack", "backend", "frontend"]
+  },
+  {
+    "code": "15-1299.08",
+    "title": "DevOps Engineer",
+    "description": "Develop and maintain automated deployment pipelines, infrastructure-as-code, and monitoring systems. Bridge development and operations to improve software delivery speed and reliability.",
+    "domain": "IT",
+    "skills": ["CI/CD", "docker", "kubernetes", "infrastructure-as-code", "cloud", "automation", "monitoring", "scripting", "linux", "terraform"],
+    "keywords": ["devops", "sre", "infrastructure", "docker", "kubernetes", "jenkins", "gitlab", "ansible", "terraform", "aws", "gcp", "azure", "cloud", "pipeline", "deployment"]
+  },
+  {
+    "code": "15-2051.00",
+    "title": "Data Scientist",
+    "description": "Develop and implement a set of techniques or analytics applications to transform raw data into meaningful information using data-oriented programming languages and visualization software.",
+    "domain": "Data & Analytics",
+    "skills": ["machine learning", "statistics", "python", "R", "data analysis", "modeling", "visualization", "SQL", "deep learning", "feature engineering"],
+    "keywords": ["data scientist", "machine learning", "ml", "ai", "artificial intelligence", "deep learning", "neural network", "nlp", "pandas", "scikit-learn", "tensorflow", "pytorch", "statistics", "analytics"]
+  },
+  {
+    "code": "15-2041.01",
+    "title": "Data Engineer",
+    "description": "Design, construct, install, test, and maintain highly scalable data management systems. Enable real-time data processing and provide access to results using business intelligence tools.",
+    "domain": "Data & Analytics",
+    "skills": ["ETL", "data pipelines", "SQL", "Spark", "Kafka", "Hadoop", "cloud storage", "data warehousing", "Python", "Airflow"],
+    "keywords": ["data engineer", "etl", "pipeline", "spark", "kafka", "hadoop", "airflow", "databricks", "snowflake", "redshift", "bigquery", "dbt", "warehouse"]
+  },
+  {
+    "code": "11-3021.00",
+    "title": "Product Manager",
+    "description": "Plan, direct, or coordinate the activities of a product or service to ensure that use objectives are accomplished within prescribed time frame and funding parameters.",
+    "domain": "Product & Strategy",
+    "skills": ["product strategy", "roadmap", "user research", "stakeholder management", "agile", "prioritization", "metrics", "communication", "market analysis"],
+    "keywords": ["product manager", "pm", "product owner", "po", "roadmap", "backlog", "sprint", "scrum", "product strategy", "go-to-market", "gtm", "kpi", "okr"]
+  },
+  {
+    "code": "15-1212.00",
+    "title": "Information Security Analyst",
+    "description": "Plan, implement, upgrade, or monitor security measures for the protection of computer networks and information. Assess system vulnerabilities for security risks and propose and implement risk mitigation strategies.",
+    "domain": "Cybersecurity",
+    "skills": ["network security", "vulnerability assessment", "penetration testing", "SIEM", "incident response", "compliance", "cryptography", "firewalls"],
+    "keywords": ["security", "cybersecurity", "infosec", "penetration testing", "pen test", "ethical hacking", "soc", "siem", "vulnerability", "compliance", "iso27001", "soc2", "gdpr"]
+  },
+  {
+    "code": "15-1211.00",
+    "title": "Computer Systems Analyst",
+    "description": "Analyze science, engineering, business, and other data processing problems to develop and implement solutions to complex applications problems, system administration issues, or network concerns.",
+    "domain": "IT",
+    "skills": ["systems analysis", "requirements gathering", "process improvement", "technical documentation", "problem solving", "SQL", "business analysis"],
+    "keywords": ["systems analyst", "business analyst", "ba", "business systems", "requirements", "erp", "sap", "oracle", "crm", "it analyst"]
+  },
+  {
+    "code": "15-1241.00",
+    "title": "Computer Network Architect",
+    "description": "Design and implement computer and information networks, such as local area networks (LAN), wide area networks (WAN), intranets, extranets, and other data communications networks.",
+    "domain": "Networking",
+    "skills": ["network design", "TCP/IP", "routing", "switching", "firewalls", "VPN", "cloud networking", "SD-WAN", "load balancing"],
+    "keywords": ["network architect", "network engineer", "networking", "cisco", "juniper", "lan", "wan", "vpn", "tcp/ip", "bgp", "ospf", "sd-wan", "noc"]
+  },
+  {
+    "code": "15-1231.00",
+    "title": "Computer Network Support Specialist",
+    "description": "Analyze, test, troubleshoot, and evaluate existing network systems. Perform network maintenance to ensure networks operate correctly with minimal interruption.",
+    "domain": "IT",
+    "skills": ["network troubleshooting", "TCP/IP", "help desk", "hardware maintenance", "monitoring", "DHCP", "DNS", "Windows Server"],
+    "keywords": ["network support", "it support", "help desk", "sysadmin", "system administrator", "windows server", "active directory", "dns", "dhcp"]
+  },
+  {
+    "code": "15-1255.00",
+    "title": "Web Developer",
+    "description": "Design, create, and modify web sites. Analyze user needs to implement web site content, graphics, performance, and capacity. May integrate web sites with other computer applications.",
+    "domain": "IT",
+    "skills": ["HTML", "CSS", "JavaScript", "responsive design", "web performance", "SEO", "CMS", "accessibility"],
+    "keywords": ["web developer", "front end", "frontend", "html", "css", "javascript", "react", "vue", "angular", "wordpress", "ui developer", "web design"]
+  },
+  {
+    "code": "15-1245.00",
+    "title": "Database Administrator",
+    "description": "Administer, test, and implement computer databases, applying knowledge of database management systems. Coordinate changes to computer databases, test and implement the database applying knowledge of database management systems.",
+    "domain": "Data & Analytics",
+    "skills": ["SQL", "database design", "performance tuning", "backup & recovery", "PostgreSQL", "MySQL", "Oracle", "MongoDB", "data modeling"],
+    "keywords": ["dba", "database administrator", "database engineer", "sql", "postgresql", "mysql", "oracle", "mongodb", "nosql", "database", "db"]
+  },
+  {
+    "code": "15-1243.00",
+    "title": "Database Architect",
+    "description": "Design strategies for enterprise database systems and set standards for operations, programming, and security. Design and construct large relational databases or data warehouses.",
+    "domain": "Data & Analytics",
+    "skills": ["database architecture", "data modeling", "ERD", "distributed databases", "cloud databases", "performance optimization", "data governance"],
+    "keywords": ["database architect", "data architect", "data modeling", "cloud database", "cassandra", "dynamodb", "cosmos", "data governance"]
+  },
+  {
+    "code": "13-2051.00",
+    "title": "Financial Analyst",
+    "description": "Conduct quantitative analyses of information involving investment programs or financial data of public or private institutions, including valuation of businesses.",
+    "domain": "Finance",
+    "skills": ["financial modeling", "Excel", "valuation", "forecasting", "investment analysis", "Bloomberg", "SAP", "accounting", "reporting"],
+    "keywords": ["financial analyst", "finance", "investment", "equity", "fixed income", "valuation", "dcf", "bloomberg", "cfa", "financial modeling", "excel", "fpa", "fp&a"]
+  },
+  {
+    "code": "13-1111.00",
+    "title": "Management Analyst",
+    "description": "Conduct organizational studies and evaluations, design systems and procedures, conduct work simplification and measurement studies, and prepare operations and procedures manuals to assist management in operating more efficiently and effectively.",
+    "domain": "Consulting & Management",
+    "skills": ["consulting", "process improvement", "data analysis", "stakeholder management", "project management", "PowerPoint", "change management"],
+    "keywords": ["management consultant", "business consultant", "mckinsey", "bcg", "strategy consultant", "management analyst", "operations", "process improvement"]
+  },
+  {
+    "code": "29-1141.00",
+    "title": "Registered Nurse",
+    "description": "Assess patient health problems and needs, develop and implement nursing care plans, and maintain medical records. Administer nursing care to ill, injured, convalescent, or disabled patients.",
+    "domain": "Healthcare",
+    "skills": ["patient care", "clinical assessment", "EMR", "IV administration", "medication management", "HIPAA", "BLS", "critical thinking"],
+    "keywords": ["nurse", "rn", "registered nurse", "nursing", "healthcare", "clinical", "hospital", "icu", "ER", "patient care", "medical"]
+  },
+  {
+    "code": "11-9111.00",
+    "title": "Medical and Health Services Manager",
+    "description": "Plan, direct, or coordinate medical and health services in hospitals, clinics, managed care organizations, public health agencies, or similar organizations.",
+    "domain": "Healthcare",
+    "skills": ["healthcare management", "compliance", "budgeting", "staff management", "HIPAA", "EHR", "quality improvement", "regulatory affairs"],
+    "keywords": ["healthcare manager", "health services manager", "hospital administrator", "clinic manager", "ehr", "epic", "cerner", "hipaa", "healthcare operations"]
+  },
+  {
+    "code": "17-2141.00",
+    "title": "Mechanical Engineer",
+    "description": "Perform engineering duties in planning and designing tools, engines, machines, and other mechanically functioning equipment. Oversee installation, operation, maintenance, and repair of equipment.",
+    "domain": "Engineering",
+    "skills": ["CAD", "thermodynamics", "fluid mechanics", "materials science", "manufacturing", "FEA", "AutoCAD", "SolidWorks", "project management"],
+    "keywords": ["mechanical engineer", "cad", "autocad", "solidworks", "catia", "ansys", "fea", "manufacturing", "hvac", "thermal", "product design"]
+  },
+  {
+    "code": "17-2071.00",
+    "title": "Electrical Engineer",
+    "description": "Research, design, develop, test, or supervise the manufacturing and installation of electrical equipment, components, or systems for commercial, industrial, military, or scientific use.",
+    "domain": "Engineering",
+    "skills": ["circuit design", "PCB", "embedded systems", "power systems", "signal processing", "MATLAB", "VHDL", "Verilog", "schematic design"],
+    "keywords": ["electrical engineer", "pcb", "embedded", "firmware", "fpga", "vhdl", "verilog", "power electronics", "circuit design", "matlab", "labview"]
+  },
+  {
+    "code": "27-1024.00",
+    "title": "Graphic Designer",
+    "description": "Design or create graphics to meet specific commercial or promotional needs, such as packaging, displays, or logos. May use a variety of mediums to achieve artistic or decorative effects.",
+    "domain": "Design & Creative",
+    "skills": ["Adobe Creative Suite", "typography", "branding", "UI design", "illustration", "Photoshop", "Illustrator", "InDesign", "color theory"],
+    "keywords": ["graphic designer", "visual designer", "brand designer", "illustrator", "photoshop", "adobe", "indesign", "figma", "sketch", "branding", "logo design"]
+  },
+  {
+    "code": "15-1255.01",
+    "title": "UX Designer",
+    "description": "Design digital and physical products that are easy to use and intuitive. Conduct user research, create wireframes and prototypes, and collaborate with engineering teams.",
+    "domain": "Design & Creative",
+    "skills": ["user research", "wireframing", "prototyping", "Figma", "usability testing", "interaction design", "information architecture", "Sketch", "Adobe XD"],
+    "keywords": ["ux designer", "ui designer", "ux/ui", "user experience", "product designer", "figma", "sketch", "prototyping", "wireframe", "usability", "human centered design", "hcd"]
+  }
+]
