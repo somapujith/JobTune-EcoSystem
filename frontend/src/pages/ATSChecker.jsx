@@ -355,12 +355,56 @@ Compensation & Benefits
             </div>
           )}
 
+          {/* AI Strengths */}
+          {result.strengths && result.strengths.length > 0 && (
+            <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-cyan-200 dark:border-cyan-900">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="material-symbols-outlined text-cyan-600 text-xl">star</span>
+                <h3 className="text-xl font-bold text-cyan-600">Your Strengths (AI Analysis)</h3>
+              </div>
+              <ul className="space-y-2">
+                {result.strengths.map((strength, i) => (
+                  <li key={i} className="flex gap-3 text-slate-700 dark:text-slate-300">
+                    <span className="text-cyan-600 flex-shrink-0">→</span>
+                    <span>{strength}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* AI Gaps */}
+          {result.gaps && result.gaps.length > 0 && (
+            <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-orange-200 dark:border-orange-900">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="material-symbols-outlined text-orange-600 text-xl">warning</span>
+                <h3 className="text-xl font-bold text-orange-600">Skill Gaps (AI Analysis)</h3>
+              </div>
+              <ul className="space-y-2">
+                {result.gaps.map((gap, i) => (
+                  <li key={i} className="flex gap-3 text-slate-700 dark:text-slate-300">
+                    <span className="text-orange-600 flex-shrink-0">!</span>
+                    <span>{gap}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* Recommendations */}
           {result.recommendations.length > 0 && (
             <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-amber-200 dark:border-amber-900">
-              <div className="flex items-center gap-3 mb-4">
-                <TrendingUp className="w-6 h-6 text-amber-600" />
-                <h3 className="text-xl font-bold text-amber-600">Recommendations</h3>
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <div className="flex items-center gap-3">
+                  <TrendingUp className="w-6 h-6 text-amber-600" />
+                  <h3 className="text-xl font-bold text-amber-600">Recommendations</h3>
+                </div>
+                {result.aiPowered && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-full text-xs font-bold">
+                    <span className="material-symbols-outlined text-purple-600 text-sm">stars</span>
+                    AI-Powered
+                  </span>
+                )}
               </div>
               <ul className="space-y-3">
                 {result.recommendations.map((rec, i) => (
