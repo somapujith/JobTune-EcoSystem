@@ -16,9 +16,7 @@ const { embedText, findTopSimilarChunks, chunkText } = require('../utils/embeddi
         chunk_index INTEGER NOT NULL,
         chunk_text TEXT NOT NULL,
         embedding JSONB NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (resume_id) REFERENCES resumes(id) ON DELETE CASCADE
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
       CREATE INDEX IF NOT EXISTS idx_resume_embeddings_user_resume ON resume_embeddings(user_id, resume_id);
     `);

@@ -11,7 +11,7 @@ const { callAI, extractJSON } = require('../utils/aiClient');
       CREATE TABLE IF NOT EXISTS career_roadmaps (
         id SERIAL PRIMARY KEY,
         user_id INTEGER NOT NULL,
-        current_role VARCHAR(255),
+        "current_role" VARCHAR(255),
         target_role VARCHAR(255) NOT NULL,
         timeframe VARCHAR(50),
         roadmap JSONB NOT NULL,
@@ -117,7 +117,7 @@ Return ONLY valid JSON in this exact format:
     // Save to database
     try {
       const result = await pool.query(
-        'INSERT INTO career_roadmaps (user_id, current_role, target_role, timeframe, roadmap) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+        'INSERT INTO career_roadmaps (user_id, "current_role", target_role, timeframe, roadmap) VALUES ($1, $2, $3, $4, $5) RETURNING id',
         [userId, currentRole || 'Fresher', targetRole, selectedTimeframe, JSON.stringify(roadmap)]
       );
       roadmap.id = result.rows[0].id;
