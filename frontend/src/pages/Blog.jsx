@@ -208,19 +208,19 @@ const BlogList = () => {
 
   if (selectedPost) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
-        <div className="max-w-3xl mx-auto px-6 py-12">
+      <div className="w-full max-w-4xl mx-auto py-16 px-4 sm:px-6">
+        <div className="mx-auto">
           <button
             onClick={() => setSelectedPost(null)}
-            className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mb-8 font-medium transition"
+            className="flex items-center gap-2 text-sky-600 hover:text-sky-700 mb-8 font-bold transition"
           >
             ← Back to Blog
           </button>
 
-          <article className="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-sm">
+          <article className="glass-card rounded-3xl p-8">
             <div className={`w-full h-64 rounded-lg mb-8 ${BlogPost[selectedPost].image}`} />
 
-            <div className="flex flex-wrap gap-4 mb-6 text-sm text-slate-600 dark:text-slate-400">
+            <div className="flex flex-wrap gap-4 mb-6 text-sm text-on-surface-variant font-medium">
               <div className="flex items-center gap-2">
                 <Calendar size={16} />
                 {BlogPost[selectedPost].date}
@@ -229,14 +229,14 @@ const BlogList = () => {
                 <User size={16} />
                 {BlogPost[selectedPost].author}
               </div>
-              <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs font-semibold">
+              <span className="px-3 py-1 glass-panel text-on-surface-variant rounded-full text-xs font-bold">
                 {BlogPost[selectedPost].category}
               </span>
-              <span className="text-slate-500 dark:text-slate-400">{BlogPost[selectedPost].readTime}</span>
+              <span className="text-on-surface-variant">{BlogPost[selectedPost].readTime}</span>
             </div>
 
             <div
-              className="prose dark:prose-invert max-w-none text-slate-700 dark:text-slate-300"
+              className="prose max-w-none text-on-surface prose-headings:text-on-surface prose-strong:text-on-surface"
               dangerouslySetInnerHTML={{ __html: BlogPost[selectedPost].content }}
             />
           </article>
@@ -246,14 +246,14 @@ const BlogList = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
+    <div className="w-full max-w-6xl mx-auto py-16 px-4 sm:px-6">
       {/* Hero */}
       <div className="max-w-6xl mx-auto px-6 py-20">
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">
+          <h1 className="text-4xl md:text-5xl font-black text-on-surface font-headline mb-4">
             JobTube Blog
           </h1>
-          <p className="text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+          <p className="text-xl text-on-surface-variant font-medium max-w-2xl mx-auto">
             Career insights, job search strategies, and AI-powered optimization tips for freshers breaking into tech.
           </p>
         </div>
@@ -264,7 +264,7 @@ const BlogList = () => {
             <div
               key={post.id}
               onClick={() => setSelectedPost(post.id)}
-              className="group cursor-pointer bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg dark:shadow-slate-900/50 transition-all duration-300 hover:-translate-y-2"
+              className="group cursor-pointer glass-card rounded-3xl overflow-hidden hover:shadow-lg hover:-translate-y-2 transition-all duration-300"
             >
               <div className={`w-full h-48 ${post.image} relative overflow-hidden`}>
                 <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition" />
@@ -272,27 +272,27 @@ const BlogList = () => {
 
               <div className="p-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-xs font-semibold">
+                  <span className="px-2 py-1 glass-panel text-on-surface-variant rounded text-xs font-bold">
                     {post.category}
                   </span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">{post.readTime}</span>
+                  <span className="text-xs font-medium text-on-surface-variant">{post.readTime}</span>
                 </div>
 
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
+                <h2 className="text-xl font-bold text-on-surface font-headline mb-3 group-hover:text-sky-600 transition">
                   {post.title}
                 </h2>
 
-                <p className="text-slate-600 dark:text-slate-400 mb-4 text-sm line-clamp-2">
+                <p className="text-on-surface-variant font-medium mb-4 text-sm line-clamp-2">
                   {post.excerpt}
                 </p>
 
-                <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700">
-                  <div className="text-xs text-slate-500 dark:text-slate-400">
+                <div className="flex items-center justify-between pt-4 border-t border-outline/10">
+                  <div className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
                     {post.date} • {post.author}
                   </div>
                   <ArrowRight
                     size={16}
-                    className="text-blue-600 dark:text-blue-400 group-hover:translate-x-1 transition-transform"
+                    className="text-sky-600 group-hover:translate-x-1 transition-transform"
                   />
                 </div>
               </div>
@@ -301,16 +301,16 @@ const BlogList = () => {
         </div>
 
         {/* Featured */}
-        <div className="mt-20 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-8 border border-blue-200 dark:border-blue-800">
-          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
+        <div className="mt-20 glass-card border-blue-200/50 rounded-3xl p-8">
+          <h3 className="text-2xl font-bold text-on-surface font-headline mb-4">
             💡 Pro Tip: Start Here
           </h3>
-          <p className="text-slate-700 dark:text-slate-300 mb-4">
+          <p className="text-on-surface-variant font-medium mb-6">
             First time optimizing your career? Start with <strong>"Why AI Resume Optimization..."</strong> and then move to <strong>"Mock Interviews."</strong> These two foundations will transform your job search in 30 days.
           </p>
           <button
             onClick={() => setSelectedPost(1)}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition inline-flex items-center gap-2"
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg rounded-xl font-bold hover:from-blue-700 hover:to-indigo-700 transition-all inline-flex items-center gap-2"
           >
             Read Article <ArrowRight size={16} />
           </button>

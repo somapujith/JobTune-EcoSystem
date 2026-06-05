@@ -21,6 +21,7 @@ const evidenceRoutes = require('./routes/evidence');
 const piiRedactionRoutes = require('./routes/piiRedaction');
 const jobDiscoveryRoutes = require('./routes/jobDiscovery');
 const jobFitRoutes = require('./routes/jobFit');
+const jobPreparationRoutes = require('./routes/jobPreparation');
 const { errorHandler } = require('./middleware/errorHandler');
 const { auditLogger } = require('./middleware/auditLogger');
 const path = require('path');
@@ -56,6 +57,7 @@ app.use('/api/evidence', evidenceRoutes);
 app.use('/api/pii', piiRedactionRoutes);
 app.use('/api/jobs', jobDiscoveryRoutes);
 app.use('/api/jobs', jobFitRoutes);
+app.use('/api/job-prep', jobPreparationRoutes);
 
 // Admin UI Route
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));

@@ -12,7 +12,7 @@ function JobCard({ job, onAddToTracker, addedIds }) {
   const isAdded = addedIds.has(job.externalId);
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3">
+    <div className="glass-card p-5 rounded-2xl flex flex-col gap-3 hover:-translate-y-1 transition-all duration-300">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <h3 className="font-bold text-slate-900 text-base leading-snug truncate">
@@ -156,7 +156,7 @@ export default function JobDiscovery() {
       </div>
 
       {/* Search Form */}
-      <form onSubmit={handleSearch} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+      <form onSubmit={handleSearch} className="glass-card p-6 rounded-3xl space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-1">
             <label htmlFor="query" className="block text-sm font-medium text-slate-700 mb-1">
@@ -170,7 +170,7 @@ export default function JobDiscovery() {
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="e.g. React Developer"
-                className="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full bg-surface-container border border-outline/20 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-on-surface placeholder:text-outline/50"
               />
             </div>
           </div>
@@ -185,7 +185,7 @@ export default function JobDiscovery() {
                 id="location"
                 value={location}
                 onChange={e => setLocation(e.target.value)}
-                className="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white appearance-none"
+                className="w-full bg-surface-container border border-outline/20 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 appearance-none text-on-surface"
               >
                 <option value="">Any Location</option>
                 <option value="Hyderabad">Hyderabad</option>
@@ -206,7 +206,7 @@ export default function JobDiscovery() {
               id="source"
               value={source}
               onChange={e => setSource(e.target.value)}
-              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+              className="w-full bg-surface-container border border-outline/20 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-on-surface"
             >
               {SOURCES.map(s => (
                 <option key={s.value} value={s.value}>{s.label}</option>
@@ -219,7 +219,7 @@ export default function JobDiscovery() {
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 active:bg-indigo-800 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-xl font-bold hover:from-indigo-600 hover:to-indigo-700 active:scale-95 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed shadow-[0px_10px_20px_rgba(79,70,229,0.2)]"
           >
             {loading ? (
               <>
@@ -238,14 +238,14 @@ export default function JobDiscovery() {
 
       {/* Error */}
       {error && (
-        <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+        <div className="flex items-center gap-3 p-4 glass-card border-red-200/50 rounded-2xl text-red-700 text-sm font-medium">
           <AlertCircle className="w-5 h-5 shrink-0" />
           {error}
         </div>
       )}
 
       {addError && (
-        <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-700 text-sm">
+        <div className="flex items-center gap-3 p-4 glass-card border-amber-200/50 rounded-2xl text-amber-700 text-sm font-medium">
           <AlertCircle className="w-5 h-5 shrink-0" />
           {addError}
         </div>

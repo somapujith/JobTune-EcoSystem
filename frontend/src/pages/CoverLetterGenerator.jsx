@@ -119,7 +119,7 @@ Compensation
       </div>
 
       {/* How It Works Guide */}
-      <div className="max-w-5xl mx-auto mb-12 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200 dark:border-emerald-800 rounded-3xl p-8">
+      <div className="max-w-5xl mx-auto mb-12 glass-card border-emerald-200/50 rounded-3xl p-8">
         <h3 className="text-xl font-bold text-on-surface mb-4 flex items-center gap-2">
           <span className="material-symbols-outlined text-emerald-600">info</span>
           How It Works
@@ -142,7 +142,7 @@ Compensation
       </div>
 
       {error && (
-        <div className="max-w-3xl mx-auto mb-6 bg-rose-50 border border-rose-100 p-4 rounded-2xl text-rose-600 text-sm font-medium flex items-center gap-3">
+        <div className="max-w-3xl mx-auto mb-6 glass-card border-rose-200/50 p-4 rounded-2xl text-rose-600 text-sm font-medium flex items-center gap-3">
           <AlertCircle className="w-5 h-5 flex-shrink-0" />
           {error}
         </div>
@@ -160,7 +160,7 @@ Compensation
               value={formData.companyName}
               onChange={handleInputChange}
               placeholder="e.g., Google, Microsoft"
-              className="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-on-surface dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-4 py-2 bg-surface-container/50 border border-outline/20 rounded-xl text-on-surface placeholder:text-outline/50 focus:ring-1 focus:ring-blue-500 outline-none"
             />
           </div>
 
@@ -173,7 +173,7 @@ Compensation
               value={formData.position}
               onChange={handleInputChange}
               placeholder="e.g., Senior Software Engineer"
-              className="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-on-surface dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-4 py-2 bg-surface-container/50 border border-outline/20 rounded-xl text-on-surface placeholder:text-outline/50 focus:ring-1 focus:ring-blue-500 outline-none"
             />
           </div>
 
@@ -186,7 +186,7 @@ Compensation
               value={formData.yourName}
               onChange={handleInputChange}
               placeholder="e.g., John Doe"
-              className="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-on-surface dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-4 py-2 bg-surface-container/50 border border-outline/20 rounded-xl text-on-surface placeholder:text-outline/50 focus:ring-1 focus:ring-blue-500 outline-none"
             />
           </div>
 
@@ -199,7 +199,7 @@ Compensation
               onChange={handleInputChange}
               placeholder="Describe your relevant experience (optional)..."
               rows={4}
-              className="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-on-surface dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+              className="w-full px-4 py-2 bg-surface-container/50 border border-outline/20 rounded-xl text-on-surface placeholder:text-outline/50 focus:ring-1 focus:ring-blue-500 outline-none resize-none"
             />
           </div>
 
@@ -210,7 +210,7 @@ Compensation
               name="tone"
               value={formData.tone}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-on-surface dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-4 py-2 bg-surface-container/50 border border-outline/20 rounded-xl text-on-surface focus:ring-1 focus:ring-blue-500 outline-none"
             >
               <option value="formal">Formal & Professional</option>
               <option value="friendly">Friendly & Warm</option>
@@ -227,7 +227,7 @@ Compensation
               onChange={handleInputChange}
               placeholder="Paste the job posting here..."
               rows={6}
-              className="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-on-surface dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+              className="w-full px-4 py-2 bg-surface-container/50 border border-outline/20 rounded-xl text-on-surface placeholder:text-outline/50 focus:ring-1 focus:ring-blue-500 outline-none resize-none"
             />
           </div>
 
@@ -235,7 +235,7 @@ Compensation
             <button
               type="submit"
               disabled={loading}
-              className="px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-3"
+              className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white rounded-xl font-bold transition-all shadow-lg flex items-center justify-center gap-3"
             >
               {loading ? (
                 <>
@@ -252,7 +252,7 @@ Compensation
             <button
               type="button"
               onClick={loadTestData}
-              className="px-8 py-3 bg-slate-400 hover:bg-slate-500 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-3"
+              className="px-8 py-3 glass-card hover:bg-white/40 text-on-surface rounded-xl font-bold transition-all flex items-center justify-center gap-3"
             >
               <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>dataset</span>
               Load Test Data
@@ -263,13 +263,13 @@ Compensation
         {/* Letter Display */}
         <div className="h-full">
           {letter ? (
-            <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-100 dark:border-slate-700 h-full flex flex-col">
+            <div className="glass-card rounded-3xl p-8 h-full flex flex-col">
               <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200 dark:border-slate-700">
                 <h3 className="text-lg font-bold text-on-surface">Generated Letter</h3>
                 <div className="flex gap-2">
                   <button
                     onClick={handleCopy}
-                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                    className="p-2 hover:bg-surface-container/50 rounded-lg transition-colors"
                     title="Copy"
                   >
                     {copied ? (
@@ -280,7 +280,7 @@ Compensation
                   </button>
                   <button
                     onClick={handleDownload}
-                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                    className="p-2 hover:bg-surface-container/50 rounded-lg transition-colors"
                     title="Download"
                   >
                     <Download className="w-5 h-5 text-slate-600" />
@@ -301,7 +301,7 @@ Compensation
               </div>
             </div>
           ) : (
-            <div className="bg-slate-50 dark:bg-slate-700 rounded-3xl p-8 h-full flex items-center justify-center border-2 border-dashed border-slate-200 dark:border-slate-600">
+            <div className="glass-card bg-surface-container/30 rounded-3xl p-8 h-full flex items-center justify-center border-2 border-dashed border-outline/20">
               <p className="text-center text-slate-500 dark:text-slate-400">
                 Fill in the form and click "Generate Cover Letter" to see your personalized letter here.
               </p>

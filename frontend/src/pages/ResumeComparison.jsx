@@ -45,7 +45,7 @@ function StatDelta({ label, oldVal, newVal }) {
   const isPositive = delta >= 0;
 
   return (
-    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+    <div className="flex items-center justify-between p-3 glass-card rounded-lg">
       <span className="text-sm font-medium text-slate-700">{label}</span>
       <div className="flex items-center gap-3">
         <span className="text-sm text-slate-500">{oldVal}</span>
@@ -149,7 +149,7 @@ export default function ResumeComparison() {
       <button
         onClick={handleCompare}
         disabled={!selected.old || !selected.new}
-        className="mb-8 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="mb-8 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white rounded-xl font-bold transition-all shadow-lg"
       >
         Compare Versions
       </button>
@@ -157,7 +157,7 @@ export default function ResumeComparison() {
       {comparison && (
         <div className="space-y-8">
           {/* Stats summary */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6">
+          <div className="glass-card rounded-3xl p-6">
             <h2 className="text-xl font-bold text-slate-900 mb-4">Changes Summary</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <StatDelta label="Keywords" oldVal={comparison.oldStats?.keywords || 0} newVal={comparison.newStats?.keywords || 0} />
@@ -168,7 +168,7 @@ export default function ResumeComparison() {
           </div>
 
           {/* Sections diff */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6">
+          <div className="glass-card rounded-3xl p-6">
             <h2 className="text-xl font-bold text-slate-900 mb-4">Content Changes</h2>
             <div className="space-y-6">
               {comparison.sections?.map((section) => (
@@ -184,12 +184,12 @@ export default function ResumeComparison() {
           <div className="flex gap-3 justify-center">
             <button
               onClick={() => copyToClipboard(comparison.newContent)}
-              className="flex items-center gap-2 px-6 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors"
+              className="flex items-center gap-2 px-6 py-3 glass-card hover:bg-white/40 text-on-surface rounded-xl font-bold transition-all"
             >
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               {copied ? 'Copied!' : 'Copy New Version'}
             </button>
-            <button className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors">
+            <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold transition-all shadow-lg">
               <Download className="w-4 h-4" /> Download PDF
             </button>
           </div>

@@ -28,6 +28,10 @@ import JobAnalyzer from './pages/JobAnalyzer';
 import CoverLetterGenerator from './pages/CoverLetterGenerator';
 import EvidenceDashboard from './pages/EvidenceDashboard';
 import JobFitAnalysis from './pages/JobFitAnalysis';
+import JobPreparation from './pages/JobPreparation';
+import TuneAndPolishTrack from './pages/TuneAndPolishTrack';
+import ZeroToHeroTrack from './pages/ZeroToHeroTrack';
+import LearnAndBuildTrack from './pages/LearnAndBuildTrack';
 import useAuthStore from './store/useAuthStore';
 
 function ProtectedRoute({ children, requireOnboarding = false }) {
@@ -74,6 +78,10 @@ function App() {
           <Route path="linkedin" element={<LinkedInOptimizer />} />
           <Route path="github" element={<GitHubOptimizer />} />
           <Route path="portfolio" element={<PortfolioBuilder />} />
+          <Route path="preparation" element={<JobPreparation />} />
+          <Route path="preparation/tune-and-polish" element={<TuneAndPolishTrack />} />
+          <Route path="preparation/zero-to-hero" element={<ZeroToHeroTrack />} />
+          <Route path="preparation/learn-and-build" element={<LearnAndBuildTrack />} />
           <Route path="learning" element={<ContentVault />} />
           <Route path="projects" element={<ProjectIdeas />} />
           <Route path="blog" element={<Blog />} />

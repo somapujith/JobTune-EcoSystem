@@ -56,7 +56,7 @@ export default function ContentVault() {
             placeholder="Search resources..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full lg:w-80 pl-12 pr-6 py-4 bg-surface-container rounded-2xl focus:ring-2 focus:ring-amber-500/20 outline-none font-medium text-on-surface placeholder:text-outline"
+            className="w-full lg:w-80 pl-12 pr-6 py-4 bg-surface-container/50 border border-outline/20 rounded-2xl focus:ring-2 focus:ring-amber-500/20 outline-none font-medium text-on-surface placeholder:text-outline"
           />
         </div>
       </div>
@@ -68,8 +68,8 @@ export default function ContentVault() {
             onClick={() => setFilter(c)}
             className={`px-6 py-3 rounded-2xl font-bold whitespace-nowrap transition-all duration-200 ${
               filter === c
-                ? 'bg-amber-500 text-on-primary shadow-lg shadow-amber-500/30'
-                : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30'
+                : 'glass-card hover:bg-white/40 text-on-surface transition-all'
             }`}
           >
             {c}
@@ -79,14 +79,14 @@ export default function ContentVault() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filtered.map(item => (
-          <div key={item.id} className="group bg-surface-container-lowest rounded-3xl p-6 shadow-[0px_10px_30px_rgba(245,158,11,0.06)] hover:shadow-[0px_20px_40px_rgba(245,158,11,0.12)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+          <div key={item.id} className="group glass-card rounded-3xl p-6 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
             <div
               className="absolute top-0 left-0 w-full h-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               style={{ background: `linear-gradient(90deg, ${item.color} 0%, ${item.color}80 100%)` }}
             />
 
             <div className="flex justify-between items-start mb-6">
-              <span className="px-4 py-2 bg-surface-container text-outline text-xs font-bold rounded-xl uppercase tracking-wider">
+              <span className="px-4 py-2 glass-panel border border-outline/10 text-on-surface-variant text-xs font-bold rounded-xl uppercase tracking-wider">
                 {item.category}
               </span>
               <div
@@ -110,7 +110,7 @@ export default function ContentVault() {
               <span className="text-sm font-medium text-outline">{item.type}</span>
             </div>
 
-            <button className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-on-primary font-bold rounded-2xl hover:from-amber-600 hover:to-amber-700 active:scale-95 transition-all duration-200 shadow-[0px_8px_20px_rgba(245,158,11,0.3)] flex items-center justify-center gap-2">
+            <button className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold rounded-2xl hover:from-amber-600 hover:to-amber-700 active:scale-95 transition-all duration-200 shadow-lg flex items-center justify-center gap-2">
               <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>play_arrow</span>
               Start Learning
             </button>

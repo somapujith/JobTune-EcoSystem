@@ -111,14 +111,14 @@ export default function Onboarding() {
 
   if (allAnswered && recommendations.length > 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center px-4">
-        <div className="max-w-2xl w-full bg-white rounded-3xl shadow-2xl p-8 sm:p-12">
+      <div className="w-full max-w-6xl mx-auto py-16 px-4 sm:px-6 flex items-center justify-center">
+        <div className="max-w-2xl w-full glass-card p-8 sm:p-12">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-100 rounded-full mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 glass-card border-emerald-200/50 rounded-full mb-4">
               <CheckCircle2 className="w-8 h-8 text-emerald-600" />
             </div>
-            <h1 className="text-3xl font-black text-slate-900 mb-2">Your Personalized Path</h1>
-            <p className="text-slate-600">Based on your answers, here's what we recommend:</p>
+            <h1 className="text-3xl font-black text-on-surface font-headline mb-2">Your Personalized Path</h1>
+            <p className="text-on-surface-variant font-medium">Based on your answers, here's what we recommend:</p>
           </div>
 
           <div className="space-y-3 mb-8">
@@ -126,15 +126,15 @@ export default function Onboarding() {
               <button
                 key={rec.path}
                 onClick={() => handleSkipToPath(rec.path)}
-                className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl hover:shadow-lg hover:border-blue-400 transition-all group"
+                className="w-full flex items-center justify-between p-4 glass-card hover:bg-white/40 border-outline/20 hover:border-sky-400/50 rounded-2xl hover:shadow-lg transition-all group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center justify-center w-10 h-10 bg-white rounded-full font-bold text-blue-600 group-hover:bg-blue-100 transition-colors">
+                  <div className="flex items-center justify-center w-10 h-10 glass-panel text-sky-600 group-hover:bg-white/40 rounded-full font-bold transition-colors">
                     {i + 1}
                   </div>
-                  <span className="font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">{rec.label}</span>
+                  <span className="font-bold text-on-surface group-hover:text-sky-600 transition-colors">{rec.label}</span>
                 </div>
-                <ArrowRight className="w-5 h-5 text-blue-400 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-5 h-5 text-sky-400 group-hover:translate-x-1 transition-transform" />
               </button>
             ))}
           </div>
@@ -142,13 +142,13 @@ export default function Onboarding() {
           <div className="flex gap-3">
             <button
               onClick={() => navigate('/dashboard')}
-              className="flex-1 py-3 px-4 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors"
+              className="flex-1 py-3 px-4 glass-card hover:bg-white/40 text-on-surface rounded-xl font-bold transition-colors"
             >
               Go to Dashboard
             </button>
             <button
               onClick={() => handleSkipToPath(recommendations[0].path)}
-              className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+              className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2"
             >
               Start with Step 1 <ArrowRight className="w-4 h-4" />
             </button>
@@ -159,7 +159,7 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center px-4 py-12">
+    <div className="w-full max-w-6xl mx-auto py-16 px-4 sm:px-6 flex items-center justify-center">
       <div className="max-w-2xl w-full">
         {/* Progress bar */}
         <div className="mb-8">
@@ -168,24 +168,24 @@ export default function Onboarding() {
               <div
                 key={i}
                 className={`h-1.5 flex-1 rounded-full transition-colors ${
-                  i < currentStep ? 'bg-emerald-500' : i === currentStep ? 'bg-blue-600' : 'bg-slate-200'
+                  i < currentStep ? 'bg-emerald-500' : i === currentStep ? 'bg-blue-600' : 'bg-outline/10'
                 }`}
               />
             ))}
           </div>
-          <p className="text-xs text-slate-500 font-semibold mt-2">
+          <p className="text-xs text-on-surface-variant font-bold mt-2 uppercase tracking-wider">
             Step {currentStep + 1} of {ONBOARDING_STEPS.length}
           </p>
         </div>
 
         {/* Question card */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8 sm:p-12">
+        <div className="glass-card p-8 sm:p-12">
           <div className="mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-100 rounded-2xl mb-6">
-              <step.icon className="w-7 h-7 text-blue-600" />
+            <div className="inline-flex items-center justify-center w-14 h-14 glass-panel rounded-2xl mb-6">
+              <step.icon className="w-7 h-7 text-sky-600" />
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-slate-900 mb-2">{step.question}</h1>
-            <p className="text-slate-500">This helps us personalize your career path</p>
+            <h1 className="text-3xl sm:text-4xl font-black text-on-surface font-headline mb-2">{step.question}</h1>
+            <p className="text-on-surface-variant font-medium">This helps us personalize your career path</p>
           </div>
 
           <div className="space-y-3 mb-8">
@@ -193,12 +193,12 @@ export default function Onboarding() {
               <button
                 key={option.value}
                 onClick={() => handleAnswer(option.value)}
-                className="w-full flex items-center gap-4 p-4 text-left bg-slate-50 border border-slate-200 rounded-2xl hover:bg-blue-50 hover:border-blue-300 transition-all group cursor-pointer"
+                className="w-full flex items-center gap-4 p-4 text-left glass-card border border-outline/20 hover:bg-white/40 hover:border-sky-400/50 rounded-2xl transition-all group cursor-pointer"
               >
-                <div className="w-5 h-5 rounded-full border-2 border-slate-300 group-hover:border-blue-500 transition-colors flex items-center justify-center shrink-0">
-                  <div className="w-2.5 h-2.5 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="w-5 h-5 rounded-full border-2 border-outline/50 group-hover:border-sky-500 transition-colors flex items-center justify-center shrink-0">
+                  <div className="w-2.5 h-2.5 bg-sky-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
-                <span className="font-medium text-slate-700 group-hover:text-blue-700 transition-colors">
+                <span className="font-bold text-on-surface group-hover:text-sky-600 transition-colors">
                   {option.label}
                 </span>
               </button>
@@ -209,7 +209,7 @@ export default function Onboarding() {
             <button
               onClick={() => currentStep > 0 && setCurrentStep(currentStep - 1)}
               disabled={currentStep === 0}
-              className="flex-1 py-3 px-4 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 py-3 px-4 glass-card hover:bg-white/40 text-on-surface rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Back
             </button>
@@ -217,7 +217,7 @@ export default function Onboarding() {
               <button
                 onClick={handleComplete}
                 disabled={isCompleting}
-                className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 disabled:opacity-75 transition-colors"
+                className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg text-white rounded-xl font-bold disabled:opacity-75 transition-all"
               >
                 {isCompleting ? 'Saving...' : 'See My Path'}
               </button>
@@ -225,7 +225,7 @@ export default function Onboarding() {
           </div>
         </div>
 
-        <p className="text-center text-sm text-slate-500 mt-6">
+        <p className="text-center text-sm font-medium text-on-surface-variant mt-6">
           You can skip this and update your preferences later in your dashboard
         </p>
       </div>

@@ -19,7 +19,7 @@ export default function ResumeHistory() {
           { icon: 'compare',     label: 'Version Compare', desc: 'Diff any two versions'   },
           { icon: 'cloud_done',  label: 'Cloud Storage',   desc: 'All versions saved'      },
         ].map(f => (
-          <div key={f.label} className="bg-surface-container-lowest rounded-2xl p-5 border border-outline/10">
+          <div key={f.label} className="glass-card p-5 rounded-2xl">
             <span className="material-symbols-outlined text-2xl text-violet-500 mb-2 block" style={{ fontVariationSettings: "'FILL' 1" }}>{f.icon}</span>
             <p className="font-bold text-on-surface text-sm">{f.label}</p>
             <p className="text-xs text-on-surface-variant mt-0.5">{f.desc}</p>

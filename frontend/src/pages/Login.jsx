@@ -38,9 +38,10 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex bg-white overflow-hidden">
+    <div className="w-full max-w-6xl mx-auto py-8 px-4 sm:px-6 flex items-center justify-center min-h-[calc(100vh-100px)]">
+      <div className="w-full flex flex-col lg:flex-row glass-card rounded-[3rem] overflow-hidden shadow-2xl border border-outline/10">
       {/* Left Side: Visual/Walkthrough Reinforcement */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#020617] relative flex-col justify-center px-16 overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-center px-12 lg:px-16 overflow-hidden bg-gradient-to-br from-blue-900/80 to-indigo-900/80 border-r border-outline/10">
          <div className="absolute inset-0">
             <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-600/20 blur-[130px] rounded-full"></div>
             <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-indigo-600/20 blur-[130px] rounded-full"></div>
@@ -88,19 +89,19 @@ export default function Login() {
       </div>
 
       {/* Right Side: Auth Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-24 relative">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-16 relative bg-surface-container-lowest/30 backdrop-blur-xl">
          <div className="max-w-md w-full space-y-8 animate-in fade-in slide-in-from-right duration-500">
             <div className="text-center lg:text-left space-y-2">
-               <h3 className="text-3xl font-black text-slate-900 tracking-tight">
+               <h3 className="text-3xl font-black text-on-surface font-headline tracking-tight">
                   {isLogin ? 'Welcome Back!' : 'Create your Account'}
                </h3>
-               <p className="text-slate-500">
+               <p className="text-on-surface-variant font-medium">
                   {isLogin ? 'Pick up where you left off.' : 'Start your professional journey today.'}
                </p>
             </div>
 
             {(error || localError) && (
-               <div className="bg-rose-50 border border-rose-100 p-4 rounded-xl text-rose-600 text-sm flex items-center gap-3">
+               <div className="glass-card border-rose-200/50 p-4 rounded-xl text-rose-600 font-bold text-sm flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-rose-500"></div>
                   {error || localError}
                </div>
@@ -114,7 +115,7 @@ export default function Login() {
                         type="email"
                         required
                         placeholder="Email Address"
-                        className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900 font-medium"
+                        className="w-full pl-12 pr-4 py-4 bg-surface-container/50 border border-outline/20 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-on-surface placeholder:text-outline font-medium"
                         value={formData.email}
                         onChange={e => setFormData({...formData, email: e.target.value})}
                      />
@@ -125,7 +126,7 @@ export default function Login() {
                         type="password"
                         required
                         placeholder="Password"
-                        className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900 font-medium"
+                        className="w-full pl-12 pr-4 py-4 bg-surface-container/50 border border-outline/20 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-on-surface placeholder:text-outline font-medium"
                         value={formData.password}
                         onChange={e => setFormData({...formData, password: e.target.value})}
                      />
@@ -136,7 +137,7 @@ export default function Login() {
                        <input
                           type="text"
                           placeholder="GitHub Username"
-                          className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900 font-medium"
+                          className="w-full pl-12 pr-4 py-4 bg-surface-container/50 border border-outline/20 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-on-surface placeholder:text-outline font-medium"
                           value={formData.github_username}
                           onChange={e => setFormData({...formData, github_username: e.target.value})}
                        />
@@ -147,7 +148,7 @@ export default function Login() {
                <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black py-4 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
                >
                   {isLoading ? 'Authenticating...' : (isLogin ? 'Sign In' : 'Create Account')}
                   <ArrowRight className="w-5 h-5" />
@@ -156,24 +157,25 @@ export default function Login() {
 
             <div className="relative">
                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-100"></div>
+                  <div className="w-full border-t border-outline/10"></div>
                </div>
                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-slate-400">New to the Ecosystem?</span>
+                  <span className="px-4 py-1 glass-panel rounded-full text-outline font-bold">New to the Ecosystem?</span>
                </div>
             </div>
 
             <button
                onClick={() => setIsLogin(!isLogin)}
-               className="w-full py-4 border border-slate-200 rounded-2xl font-bold text-slate-600 hover:bg-slate-50 transition-all active:scale-95"
+               className="w-full py-4 glass-card border-outline/20 rounded-2xl font-bold text-on-surface hover:bg-white/40 transition-all active:scale-95"
             >
                {isLogin ? 'Create an Account' : 'Return to Login'}
             </button>
 
-            <p className="text-center text-xs text-slate-400 px-8">
+            <p className="text-center text-xs text-on-surface-variant font-medium px-8">
                By joining, you agree to our Terms of Service and Professional Conduct Guidelines.
             </p>
          </div>
+      </div>
       </div>
     </div>
   );

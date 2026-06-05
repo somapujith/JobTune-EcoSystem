@@ -48,13 +48,13 @@ export default function JobMatcher() {
       </div>
 
       {error && (
-        <div className="max-w-3xl mx-auto mb-6 bg-rose-50 border border-rose-100 p-4 rounded-2xl text-rose-600 text-sm font-medium">
+        <div className="max-w-3xl mx-auto mb-6 glass-card border-rose-200/50 p-4 rounded-2xl text-rose-600 text-sm font-medium">
           {error}
         </div>
       )}
 
       <form onSubmit={handleAnalyze} className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-12">
-        <div className="bg-surface-container-lowest p-6 rounded-3xl shadow-[0px_20px_40px_rgba(99,102,241,0.06)]">
+        <div className="glass-card p-6 rounded-3xl">
           <label className="block text-sm font-bold text-on-surface mb-2">Job Description</label>
           <textarea
             required
@@ -65,7 +65,7 @@ export default function JobMatcher() {
             onChange={e => setFormData({...formData, jobDescription: e.target.value})}
           />
         </div>
-        <div className="bg-surface-container-lowest p-6 rounded-3xl shadow-[0px_20px_40px_rgba(99,102,241,0.06)] flex flex-col">
+        <div className="glass-card p-6 rounded-3xl flex flex-col">
           <label className="block text-sm font-bold text-on-surface mb-2">Your Skills</label>
           <textarea
             required
@@ -97,7 +97,7 @@ export default function JobMatcher() {
 
       {report && !loading && (
         <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="bg-surface-container-lowest p-8 rounded-3xl shadow-[0px_20px_40px_rgba(99,102,241,0.06)] text-center flex flex-col items-center">
+          <div className="glass-card p-8 rounded-3xl text-center flex flex-col items-center">
             <div className="relative mb-6">
               <svg viewBox="0 0 36 36" className="w-32 h-32 -rotate-90 mx-auto">
                 <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e5eeff" strokeWidth="3.2" />
@@ -126,7 +126,7 @@ export default function JobMatcher() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-surface-container-lowest p-6 rounded-3xl shadow-sm border border-emerald-500/10">
+            <div className="glass-card p-6 rounded-3xl border-emerald-500/20">
               <h3 className="text-lg font-bold text-emerald-600 flex items-center gap-2 mb-4">
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                 Matched Skills
@@ -140,7 +140,7 @@ export default function JobMatcher() {
               </div>
             </div>
 
-            <div className="bg-surface-container-lowest p-6 rounded-3xl shadow-sm border border-rose-500/10">
+            <div className="glass-card p-6 rounded-3xl border-rose-500/20">
               <h3 className="text-lg font-bold text-rose-600 flex items-center gap-2 mb-4">
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>cancel</span>
                 Missing Skills (Gaps)
@@ -156,7 +156,7 @@ export default function JobMatcher() {
           </div>
 
           {Object.keys(report.gapsByCategory).length > 0 && (
-            <div className="bg-surface-container-lowest p-8 rounded-3xl shadow-sm">
+            <div className="glass-card p-8 rounded-3xl">
               <h3 className="text-xl font-bold text-on-surface mb-6 font-headline">Gaps by Category</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {Object.entries(report.gapsByCategory).map(([category, kws]) => (
@@ -176,7 +176,7 @@ export default function JobMatcher() {
           )}
 
           {report.suggestions && report.suggestions.length > 0 && (
-            <div className="bg-indigo-50 p-8 rounded-3xl">
+            <div className="glass-card bg-indigo-50/50 border-indigo-200/50 p-8 rounded-3xl">
               <h3 className="text-xl font-bold text-indigo-700 mb-6 flex items-center gap-3 font-headline">
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>tips_and_updates</span>
                 How to Improve

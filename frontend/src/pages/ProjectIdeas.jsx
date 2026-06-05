@@ -47,8 +47,8 @@ export default function ProjectIdeas() {
             onClick={() => setFilter(c)}
             className={`px-8 py-3 rounded-2xl font-bold whitespace-nowrap transition-all duration-200 ${
               filter === c
-                ? 'bg-rose-500 text-on-primary shadow-lg shadow-rose-500/30'
-                : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/30'
+                : 'glass-card hover:bg-white/40 text-on-surface-variant hover:text-on-surface'
             }`}
           >
             {c}
@@ -58,7 +58,7 @@ export default function ProjectIdeas() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filtered.map(proj => (
-          <div key={proj.id} className="group bg-surface-container-lowest rounded-3xl p-8 shadow-[0px_10px_30px_rgba(244,63,94,0.06)] hover:shadow-[0px_20px_40px_rgba(244,63,94,0.12)] hover:-translate-y-2 transition-all duration-300 flex flex-col">
+          <div key={proj.id} className="group glass-card rounded-3xl p-8 hover:-translate-y-2 transition-all duration-300 flex flex-col">
             <div className="flex justify-between items-start mb-6">
               <span className={`px-4 py-2 rounded-2xl text-xs font-bold uppercase tracking-wider ${
                 proj.diff === 'Beginner' ? 'bg-emerald-500/10 text-emerald-700' :
@@ -74,7 +74,7 @@ export default function ProjectIdeas() {
 
             <div className="flex flex-wrap gap-2 mb-8 flex-grow">
               {proj.tech.map(t => (
-                <span key={t} className="px-3 py-1.5 bg-surface-container text-outline rounded-xl font-semibold text-sm">
+                <span key={t} className="px-3 py-1.5 bg-surface-container/50 border border-outline/20 text-on-surface-variant rounded-xl font-semibold text-sm">
                   {t}
                 </span>
               ))}
@@ -85,7 +85,7 @@ export default function ProjectIdeas() {
                 <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>play_arrow</span>
                 Start Guide
               </button>
-              <button className="px-5 py-4 bg-surface-container text-on-surface font-bold rounded-2xl hover:bg-surface-container-high active:scale-95 transition-all duration-200">
+              <button className="px-5 py-4 glass-card hover:bg-white/40 text-on-surface font-bold rounded-2xl active:scale-95 transition-all duration-200">
                 <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>code</span>
               </button>
             </div>

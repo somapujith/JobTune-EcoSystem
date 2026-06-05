@@ -20,11 +20,11 @@ const NAV_GROUPS = [
     { label: 'GitHub Profile',   path: '/github',    desc: 'Audit & generate README' },
     { label: 'LinkedIn Profile', path: '/linkedin',  desc: 'Score your LinkedIn presence' },
   ]},
-  { label: 'Learning', items: [
-    { label: 'Content Vault',    path: '/learning',   desc: 'Curated resources' },
-    { label: 'Skill Assessment', path: '/skills',     desc: '25+ domain quiz' },
-    { label: 'Mock Interview',   path: '/interview',  desc: 'AI-powered practice' },
-    { label: 'Career Roadmap',   path: '/career',     desc: 'Personalized growth plan' },
+  { label: 'Preparation', items: [
+    { label: 'Job Preparation Hub', path: '/preparation', desc: 'Your central prep center' },
+    { label: 'Tune & Polish', path: '/preparation/tune-and-polish', desc: 'Interview Copilot & Resumes' },
+    { label: 'Zero to Hero', path: '/preparation/zero-to-hero', desc: 'Path Finder & AI Tutor' },
+    { label: 'Learn & Build', path: '/preparation/learn-and-build', desc: 'Targeted Portfolio Projects' },
   ]},
 ];
 

@@ -29,8 +29,9 @@ function JobCard({ job, status, onDelete, onUpdate, onDragStart }) {
     <div
       draggable
       onDragStart={() => onDragStart(job)}
-      className={`p-4 rounded-xl border-2 ${status.color} space-y-3 cursor-grab active:cursor-grabbing transition-opacity hover:opacity-90`}
+      className={`glass-card p-4 rounded-2xl space-y-3 cursor-grab active:cursor-grabbing transition-all hover:shadow-lg border border-white/50 relative overflow-hidden`}
     >
+      <div className={`absolute top-0 left-0 w-1.5 h-full ${status.textColor.replace('text-', 'bg-')}`} />
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1">
           <h3 className="font-bold text-slate-900">{job.role}</h3>
@@ -176,7 +177,7 @@ export default function JobTracker() {
             { label: 'Offers', value: stats?.offers || 0, icon: CheckCircle2, color: 'text-green-600' },
             { label: 'Reply Rate', value: `${stats?.replyRate || 0}%`, icon: TrendingUp, color: 'text-purple-600' },
           ].map((stat, i) => (
-            <div key={i} className="bg-white p-4 rounded-xl border border-slate-200">
+            <div key={i} className="glass-card p-5 rounded-2xl">
               <p className="text-xs font-bold text-slate-500 uppercase mb-2">{stat.label}</p>
               <p className={`text-2xl font-black ${stat.color}`}>{stat.value}</p>
             </div>
@@ -186,7 +187,7 @@ export default function JobTracker() {
 
       {/* Add form */}
       {showForm && (
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-8">
+        <div className="glass-card rounded-3xl p-6 mb-8">
           <form onSubmit={handleAddJob} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input
@@ -194,7 +195,7 @@ export default function JobTracker() {
                 placeholder="Company name"
                 value={formData.company}
                 onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                className="px-4 py-2 border border-slate-200 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 required
               />
               <input
@@ -202,14 +203,14 @@ export default function JobTracker() {
                 placeholder="Job title"
                 value={formData.role}
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                className="px-4 py-2 border border-slate-200 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 required
               />
             </div>
             <select
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+              className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             >
               {STATUSES.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -221,7 +222,7 @@ export default function JobTracker() {
               placeholder="Notes (optional)"
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+              className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               rows="2"
             />
             <div className="flex gap-3">
@@ -247,8 +248,8 @@ export default function JobTracker() {
             key={status.id}
             onDragOver={handleDragOver}
             onDrop={() => handleDropColumn(status.id)}
-            className={`bg-slate-50 rounded-2xl p-4 min-h-96 transition-colors ${
-              draggedJob && draggedJob.status !== status.id ? 'bg-blue-50 ring-2 ring-blue-300' : ''
+            className={`glass-card rounded-3xl p-4 min-h-[24rem] transition-all duration-300 ${
+              draggedJob && draggedJob.status !== status.id ? 'ring-2 ring-blue-300 bg-blue-50/20' : ''
             }`}
           >
             <div className="flex items-center gap-2 mb-4">

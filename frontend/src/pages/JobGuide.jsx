@@ -13,18 +13,18 @@ import {
 } from 'lucide-react';
 
 const SECTION_COLORS = {
-  questions: 'border-blue-500 bg-blue-50',
-  talkingPoints: 'border-green-500 bg-green-50',
-  companyResearch: 'border-purple-500 bg-purple-50'
+  questions: 'glass-card border-blue-500/50 bg-blue-500/5',
+  talkingPoints: 'glass-card border-emerald-500/50 bg-emerald-500/5',
+  companyResearch: 'glass-card border-purple-500/50 bg-purple-500/5'
 };
 
 function CollapsibleSection({ title, icon: Icon, colorClass, children, defaultOpen = true }) {
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <div className={`border-l-4 rounded-lg ${colorClass} mb-4 overflow-hidden`}>
+    <div className={`border-l-4 rounded-xl ${colorClass} mb-4 overflow-hidden shadow-sm`}>
       <button
-        className="w-full flex items-center justify-between p-4 font-semibold text-gray-800 hover:bg-white/30 transition-colors"
+        className="w-full flex items-center justify-between p-4 font-bold text-on-surface hover:bg-surface-container/30 transition-colors"
         onClick={() => setOpen(prev => !prev)}
       >
         <span className="flex items-center gap-2">
@@ -79,12 +79,12 @@ export default function JobGuide() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <div className="flex items-center gap-3 mb-6">
-        <BookOpen className="text-blue-600" size={28} />
+    <div className="w-full max-w-4xl mx-auto py-16 px-4 sm:px-6">
+      <div className="flex items-center gap-3 mb-8">
+        <BookOpen className="text-blue-600" size={32} />
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Interview Prep Guide</h1>
-          <p className="text-gray-500 text-sm">
+          <h1 className="text-3xl font-black text-on-surface font-headline">Interview Prep Guide</h1>
+          <p className="text-on-surface-variant font-medium mt-1">
             AI-powered questions, talking points, and company research for your next interview.
           </p>
         </div>
@@ -94,20 +94,20 @@ export default function JobGuide() {
       <div className="flex gap-2 mb-6">
         <button
           onClick={() => setMode('applicationId')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${
             mode === 'applicationId'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
+              : 'glass-card hover:bg-white/40 text-on-surface'
           }`}
         >
           From Application
         </button>
         <button
           onClick={() => setMode('manual')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${
             mode === 'manual'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
+              : 'glass-card hover:bg-white/40 text-on-surface'
           }`}
         >
           Manual Entry
@@ -115,10 +115,10 @@ export default function JobGuide() {
       </div>
 
       {/* Form */}
-      <form onSubmit={handleGenerate} className="bg-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm">
+      <form onSubmit={handleGenerate} className="glass-card rounded-3xl p-8 mb-8 shadow-lg">
         {mode === 'applicationId' ? (
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+          <div className="mb-6">
+            <label className="block text-sm font-bold text-on-surface mb-2">
               Application ID
             </label>
             <input
@@ -126,16 +126,16 @@ export default function JobGuide() {
               value={applicationId}
               onChange={e => setApplicationId(e.target.value)}
               placeholder="e.g. 42"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full bg-surface-container/50 border border-outline/20 rounded-xl px-4 py-2 text-sm font-medium text-on-surface placeholder:text-outline/50 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-on-surface-variant font-medium mt-2">
               Find your Application ID in the Job Tracker.
             </p>
           </div>
         ) : (
           <>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="mb-6">
+              <label className="block text-sm font-bold text-on-surface mb-2">
                 Role / Job Title
               </label>
               <input
@@ -143,11 +143,11 @@ export default function JobGuide() {
                 value={role}
                 onChange={e => setRole(e.target.value)}
                 placeholder="e.g. Senior Backend Engineer"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-surface-container/50 border border-outline/20 rounded-xl px-4 py-2 text-sm font-medium text-on-surface placeholder:text-outline/50 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="mb-6">
+              <label className="block text-sm font-bold text-on-surface mb-2">
                 Job Description <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -155,14 +155,14 @@ export default function JobGuide() {
                 onChange={e => setJobDescription(e.target.value)}
                 rows={5}
                 placeholder="Paste the full job description here..."
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+                className="w-full bg-surface-container/50 border border-outline/20 rounded-xl px-4 py-2 text-sm font-medium text-on-surface placeholder:text-outline/50 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-y"
               />
             </div>
           </>
         )}
 
         {error && (
-          <div className="flex items-center gap-2 text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-sm mb-4">
+          <div className="flex items-center gap-3 text-rose-600 glass-card border-rose-200/50 rounded-xl px-4 py-3 text-sm font-medium mb-6">
             <AlertCircle size={16} />
             {error}
           </div>
@@ -171,7 +171,7 @@ export default function JobGuide() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
+          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
         >
           {loading ? (
             <>
@@ -190,7 +190,7 @@ export default function JobGuide() {
       {/* Results */}
       {guide && (
         <div>
-          <div className="flex items-center gap-2 text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-sm mb-4">
+          <div className="flex items-center gap-3 text-emerald-600 glass-card border-emerald-200/50 rounded-xl px-4 py-3 text-sm font-medium mb-6">
             <CheckCircle2 size={16} />
             Guide generated successfully (saved as #{guide.savedId})
           </div>
@@ -202,7 +202,7 @@ export default function JobGuide() {
           >
             <ol className="list-decimal list-inside space-y-2">
               {(guide.questions || []).map((q, i) => (
-                <li key={i} className="text-sm text-gray-700">
+                <li key={i} className="text-sm text-on-surface-variant font-medium leading-relaxed">
                   {q}
                 </li>
               ))}
@@ -216,7 +216,7 @@ export default function JobGuide() {
           >
             <ul className="space-y-2">
               {(guide.talkingPoints || []).map((tp, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                <li key={i} className="flex items-start gap-2 text-sm text-on-surface-variant font-medium leading-relaxed">
                   <CheckCircle2 size={14} className="text-green-600 mt-0.5 shrink-0" />
                   {tp}
                 </li>
@@ -229,7 +229,7 @@ export default function JobGuide() {
             icon={Building2}
             colorClass={SECTION_COLORS.companyResearch}
           >
-            <p className="text-sm text-gray-700 leading-relaxed">{guide.companyResearch}</p>
+            <p className="text-sm text-on-surface-variant font-medium leading-relaxed">{guide.companyResearch}</p>
           </CollapsibleSection>
         </div>
       )}

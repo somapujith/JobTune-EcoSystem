@@ -61,7 +61,7 @@ function SuggestionWithCTA({ section, suggestion, impact }) {
   };
 
   return (
-    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+    <div className="glass-card border-blue-200/50 rounded-xl p-4">
       <div className="flex items-start justify-between gap-3 mb-2">
         <div>
           <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">{section}</p>
@@ -122,7 +122,7 @@ function NextStepsCard({ suggestions, score }) {
   const recs = getRecommendations();
 
   return (
-    <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 text-white">
+    <div className="glass-card rounded-2xl p-8">
       <div className="flex items-center gap-2 mb-6">
         <Zap className="w-5 h-5 text-blue-400" />
         <h3 className="text-xl font-bold">Next Steps to Improve Your Score</h3>
@@ -135,24 +135,24 @@ function NextStepsCard({ suggestions, score }) {
               {rec.priority}
             </div>
             <div className="flex-1">
-              <p className="font-semibold text-white mb-1">{rec.action}</p>
-              <p className="text-xs text-slate-300 mb-2">{rec.example}</p>
+              <p className="font-semibold text-on-surface mb-1">{rec.action}</p>
+              <p className="text-xs text-on-surface-variant mb-2">{rec.example}</p>
               <span className="text-xs font-bold px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-300">{rec.impact}</span>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="border-t border-slate-700 pt-6 flex gap-3">
+      <div className="border-t border-outline/20 pt-6 flex gap-3">
         <a
           href="https://linkedin.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg"
         >
           Open LinkedIn <ExternalLink className="w-4 h-4" />
         </a>
-        <button className="flex-1 px-4 py-3 bg-slate-700 text-white rounded-xl font-semibold hover:bg-slate-600 transition-colors">
+        <button className="flex-1 px-4 py-3 glass-card hover:bg-white/40 text-on-surface rounded-xl font-semibold transition-all">
           Re-Analyze Later
         </button>
       </div>
@@ -198,21 +198,21 @@ export default function LinkedInOptimizerEnhanced() {
             group
           </span>
         </div>
-        <h1 className="text-4xl font-black text-slate-900 mb-4">LinkedIn Profile Optimizer</h1>
-        <p className="text-lg text-slate-600 font-medium max-w-2xl mx-auto">
+        <h1 className="text-4xl font-black text-on-surface font-headline mb-4">LinkedIn Profile Optimizer</h1>
+        <p className="text-lg text-on-surface-variant font-medium max-w-2xl mx-auto">
           Get an instant score and actionable suggestions to improve your LinkedIn visibility
         </p>
       </div>
 
       {error && (
-        <div className="max-w-3xl mx-auto mb-6 bg-rose-50 border border-rose-100 p-4 rounded-2xl text-rose-600 text-sm font-medium">
+        <div className="max-w-3xl mx-auto mb-6 glass-card border-rose-200/50 p-4 rounded-2xl text-rose-600 text-sm font-medium">
           {error}
         </div>
       )}
 
       {!report ? (
         <form onSubmit={handleAnalyze} className="max-w-3xl mx-auto mb-16 space-y-4">
-          <div className="bg-white rounded-3xl p-6 shadow-[0px_20px_40px_rgba(14,165,233,0.06)] space-y-4">
+          <div className="glass-card rounded-3xl p-6 space-y-4">
             <div>
               <label className="block text-sm font-bold text-slate-900 mb-2">
                 Headline <span className="text-xs text-slate-500">(max 220 chars)</span>
@@ -221,7 +221,7 @@ export default function LinkedInOptimizerEnhanced() {
                 type="text"
                 maxLength={220}
                 placeholder="e.g. Software Engineer | React & Node.js | Full-Stack"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                className="w-full bg-surface-container/50 border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface placeholder:text-outline/50 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
                 value={formData.headline}
                 onChange={(e) => setFormData({ ...formData, headline: e.target.value })}
               />
@@ -232,7 +232,7 @@ export default function LinkedInOptimizerEnhanced() {
               <label className="block text-sm font-bold text-slate-900 mb-2">About Section</label>
               <textarea
                 placeholder="Write a brief summary of your professional background..."
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                className="w-full bg-surface-container/50 border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface placeholder:text-outline/50 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
                 rows="3"
                 value={formData.about}
                 onChange={(e) => setFormData({ ...formData, about: e.target.value })}
@@ -244,7 +244,7 @@ export default function LinkedInOptimizerEnhanced() {
               <input
                 type="text"
                 placeholder="React, Node.js, TypeScript, PostgreSQL, AWS"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                className="w-full bg-surface-container/50 border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface placeholder:text-outline/50 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
                 value={formData.skills}
                 onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
               />
@@ -257,7 +257,7 @@ export default function LinkedInOptimizerEnhanced() {
                   type="number"
                   min="0"
                   max="20"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-medium text-slate-900 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                  className="w-full bg-surface-container/50 border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
                   value={formData.experienceCount}
                   onChange={(e) => setFormData({ ...formData, experienceCount: parseInt(e.target.value) })}
                 />
@@ -268,14 +268,14 @@ export default function LinkedInOptimizerEnhanced() {
                   type="number"
                   min="0"
                   max="60"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 font-medium text-slate-900 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                  className="w-full bg-surface-container/50 border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
                   value={formData.yearsOfExperience}
                   onChange={(e) => setFormData({ ...formData, yearsOfExperience: parseInt(e.target.value) })}
                 />
               </div>
             </div>
 
-            <div className="space-y-3 p-4 bg-slate-50 rounded-xl">
+            <div className="space-y-3 p-4 glass-card rounded-xl">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -299,7 +299,7 @@ export default function LinkedInOptimizerEnhanced() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-sky-600 text-white rounded-xl font-bold hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 bg-gradient-to-r from-sky-500 to-sky-600 text-white rounded-xl font-bold hover:from-sky-600 hover:to-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg flex items-center justify-center gap-2"
             >
               {loading && <span className="animate-spin inline-block">⟳</span>}
               {loading ? 'Analyzing...' : 'Get LinkedIn Score'}
@@ -342,7 +342,7 @@ export default function LinkedInOptimizerEnhanced() {
 
           <NextStepsCard suggestions={report.suggestions} score={report.score || 65} />
 
-          <button onClick={() => setReport(null)} className="w-full py-3 px-4 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors">
+          <button onClick={() => setReport(null)} className="w-full py-3 px-4 glass-card hover:bg-white/40 text-on-surface rounded-xl font-semibold transition-all">
             Analyze Again
           </button>
         </div>

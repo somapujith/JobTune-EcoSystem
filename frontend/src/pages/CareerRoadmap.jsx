@@ -79,9 +79,9 @@ export default function CareerRoadmap() {
   // ─────────────────────────────────────────────────────────────
   if (step === 'form') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-12 px-4">
+      <div className="w-full py-12 px-4">
         <div className="max-w-2xl mx-auto">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8">
+          <div className="glass-card rounded-3xl p-8">
             <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Career Roadmap</h1>
             <p className="text-slate-600 dark:text-slate-400 mb-8">
               Get a personalized 3-12 month plan to reach your career goals
@@ -98,7 +98,7 @@ export default function CareerRoadmap() {
                   placeholder="e.g., Junior Developer, Fresher, Intern"
                   value={formData.currentRole}
                   onChange={(e) => setFormData({ ...formData, currentRole: e.target.value })}
-                  className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
 
@@ -112,7 +112,7 @@ export default function CareerRoadmap() {
                   placeholder="e.g., Senior Frontend Developer, Full Stack Engineer"
                   value={formData.targetRole}
                   onChange={(e) => setFormData({ ...formData, targetRole: e.target.value })}
-                  className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
 
@@ -126,7 +126,7 @@ export default function CareerRoadmap() {
                   value={formData.currentSkills}
                   onChange={(e) => setFormData({ ...formData, currentSkills: e.target.value })}
                   rows={3}
-                  className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
 
@@ -138,7 +138,7 @@ export default function CareerRoadmap() {
                 <select
                   value={formData.timeframe}
                   onChange={(e) => setFormData({ ...formData, timeframe: e.target.value })}
-                  className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 text-on-surface focus:outline-none focus:ring-1 focus:ring-blue-500"
                 >
                   <option value="3months">3 months</option>
                   <option value="6months">6 months</option>
@@ -155,7 +155,7 @@ export default function CareerRoadmap() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors"
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg"
               >
                 {loading ? 'Generating...' : 'Generate My Roadmap'}
               </button>
@@ -171,7 +171,7 @@ export default function CareerRoadmap() {
   // ─────────────────────────────────────────────────────────────
   if (step === 'generating') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-12 px-4 flex items-center justify-center">
+      <div className="w-full py-12 px-4 flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-600 mb-6 animate-spin">
             <Loader className="w-8 h-8 text-white" />
@@ -189,7 +189,7 @@ export default function CareerRoadmap() {
   if (!roadmap) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-12 px-4">
+    <div className="w-full py-12 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-12">
@@ -200,15 +200,15 @@ export default function CareerRoadmap() {
             {roadmap.summary}
           </p>
           <div className="grid grid-cols-3 gap-4">
-            <div className="bg-white dark:bg-slate-800 rounded-lg p-4">
+            <div className="glass-card rounded-2xl p-4">
               <div className="text-sm text-slate-600 dark:text-slate-400">Estimated Hours</div>
               <div className="text-2xl font-bold text-blue-600">{roadmap.estimatedHours || 200}</div>
             </div>
-            <div className="bg-white dark:bg-slate-800 rounded-lg p-4">
+            <div className="glass-card rounded-2xl p-4">
               <div className="text-sm text-slate-600 dark:text-slate-400">Phases</div>
               <div className="text-2xl font-bold text-blue-600">{roadmap.phases?.length || 3}</div>
             </div>
-            <div className="bg-white dark:bg-slate-800 rounded-lg p-4">
+            <div className="glass-card rounded-2xl p-4">
               <div className="text-sm text-slate-600 dark:text-slate-400">Key Milestones</div>
               <div className="text-2xl font-bold text-blue-600">{roadmap.keyMetrics?.length || 4}</div>
             </div>
@@ -220,7 +220,7 @@ export default function CareerRoadmap() {
           {roadmap.phases?.map((phase, idx) => (
             <div
               key={idx}
-              className="bg-white dark:bg-slate-800 rounded-xl shadow-md overflow-hidden"
+              className="glass-card rounded-3xl overflow-hidden"
             >
               <button
                 onClick={() => togglePhase(idx)}
@@ -324,7 +324,7 @@ export default function CareerRoadmap() {
         {/* Tips & Metrics */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           {roadmap.tips && roadmap.tips.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-md p-6">
+            <div className="glass-card rounded-3xl p-6">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">💡 Tips for Success</h3>
               <ul className="space-y-2">
                 {roadmap.tips.map((tip, i) => (
@@ -338,7 +338,7 @@ export default function CareerRoadmap() {
           )}
 
           {roadmap.keyMetrics && roadmap.keyMetrics.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-md p-6">
+            <div className="glass-card rounded-3xl p-6">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">📊 Track Progress</h3>
               <ul className="space-y-2">
                 {roadmap.keyMetrics.map((metric, i) => (
@@ -354,7 +354,7 @@ export default function CareerRoadmap() {
 
         <button
           onClick={() => { setStep('form'); setError(''); }}
-          className="w-full bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-900 dark:text-white font-semibold py-3 px-4 rounded-lg transition-colors"
+          className="w-full glass-card hover:bg-white/40 text-on-surface font-bold py-3 px-4 rounded-2xl transition-all"
         >
           Generate New Roadmap
         </button>

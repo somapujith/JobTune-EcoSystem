@@ -9,7 +9,7 @@ export default function PortfolioBuilder() {
   return (
     <div className="flex h-[calc(100vh-80px)] overflow-hidden w-full">
       {/* Sidebar */}
-      <div className="w-80 bg-surface-container-lowest border-r-0 flex flex-col hidden sm:flex shadow-[0px_0px_40px_rgba(0,78,159,0.04)]">
+      <div className="w-80 glass-card rounded-r-3xl rounded-l-none border-l-0 flex flex-col hidden sm:flex shadow-none">
         <div className="p-8">
           <div className="flex items-center gap-3 mb-2">
             <span className="material-symbols-outlined text-indigo-600 text-2xl" style={{ fontVariationSettings: "'FILL' 0" }}>web</span>
@@ -18,19 +18,19 @@ export default function PortfolioBuilder() {
           <p className="text-sm text-on-surface-variant font-medium">Drag blocks to build your professional site</p>
         </div>
         <div className="px-8 pb-8 space-y-4 overflow-y-auto flex-grow">
-          <button className="w-full text-left p-4 bg-surface-container rounded-2xl hover:bg-indigo-500/5 hover:shadow-lg transition-all duration-200 flex items-center gap-4 group">
+          <button className="w-full text-left p-4 glass-card hover:bg-white/40 rounded-2xl transition-all duration-200 flex items-center gap-4 group">
             <span className="material-symbols-outlined text-indigo-600 text-lg group-hover:scale-110 transition-transform" style={{ fontVariationSettings: "'FILL' 0" }}>text_fields</span>
             <span className="font-bold text-on-surface">Hero Section</span>
           </button>
-          <button className="w-full text-left p-4 bg-surface-container rounded-2xl hover:bg-indigo-500/5 hover:shadow-lg transition-all duration-200 flex items-center gap-4 group">
+          <button className="w-full text-left p-4 glass-card hover:bg-white/40 rounded-2xl transition-all duration-200 flex items-center gap-4 group">
             <span className="material-symbols-outlined text-indigo-600 text-lg group-hover:scale-110 transition-transform" style={{ fontVariationSettings: "'FILL' 0" }}>image</span>
             <span className="font-bold text-on-surface">Project Gallery</span>
           </button>
-          <button className="w-full text-left p-4 bg-surface-container rounded-2xl hover:bg-indigo-500/5 hover:shadow-lg transition-all duration-200 flex items-center gap-4 group">
+          <button className="w-full text-left p-4 glass-card hover:bg-white/40 rounded-2xl transition-all duration-200 flex items-center gap-4 group">
             <span className="material-symbols-outlined text-indigo-600 text-lg group-hover:scale-110 transition-transform" style={{ fontVariationSettings: "'FILL' 0" }}>edit</span>
             <span className="font-bold text-on-surface">About Section</span>
           </button>
-          <button className="w-full text-left p-4 bg-surface-container rounded-2xl hover:bg-indigo-500/5 hover:shadow-lg transition-all duration-200 flex items-center gap-4 group">
+          <button className="w-full text-left p-4 glass-card hover:bg-white/40 rounded-2xl transition-all duration-200 flex items-center gap-4 group">
             <span className="material-symbols-outlined text-indigo-600 text-lg group-hover:scale-110 transition-transform" style={{ fontVariationSettings: "'FILL' 0" }}>contact_page</span>
             <span className="font-bold text-on-surface">Contact & Social</span>
           </button>
@@ -48,11 +48,11 @@ export default function PortfolioBuilder() {
       </div>
 
       {/* Editor Canvas */}
-      <div className="flex-grow bg-surface overflow-y-auto p-4 sm:p-8">
-        <div className="max-w-5xl mx-auto bg-surface-container-lowest min-h-[900px] rounded-3xl overflow-hidden shadow-[0px_25px_50px_rgba(0,78,159,0.08)]">
+      <div className="flex-grow overflow-y-auto p-4 sm:p-8">
+        <div className="max-w-5xl mx-auto glass-card min-h-[900px] rounded-3xl overflow-hidden">
           {sections.map(sec => (
-            <div key={sec.id} className={`group relative hover:shadow-[0px_10px_30px_rgba(0,78,159,0.15)] transition-all duration-300 ${sec.bg || 'bg-surface-container-lowest text-on-surface'}`}>
-              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity bg-surface-container-lowest text-on-surface text-sm px-4 py-2 rounded-2xl shadow-lg font-bold cursor-pointer border-0 flex items-center gap-2">
+            <div key={sec.id} className={`group relative hover:shadow-[0px_10px_30px_rgba(0,78,159,0.15)] transition-all duration-300 ${sec.bg || 'glass-card border-none'}`}>
+              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity glass-card text-on-surface text-sm px-4 py-2 rounded-2xl shadow-lg font-bold cursor-pointer border flex items-center gap-2">
                 <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>edit</span>
                 Edit Block
               </div>

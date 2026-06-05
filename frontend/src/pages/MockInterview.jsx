@@ -113,7 +113,7 @@ export default function MockInterview() {
           </p>
         </div>
 
-        <div className="bg-surface-container-lowest p-8 rounded-3xl shadow-[0px_20px_40px_rgba(0,78,159,0.06)] mb-8">
+        <div className="glass-card p-8 rounded-3xl mb-8">
           <h3 className="text-xl font-bold text-on-surface mb-6">Select Target Role</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {ROLES.map(role => (
@@ -123,7 +123,7 @@ export default function MockInterview() {
                 className={`p-4 rounded-2xl font-bold text-left transition-all duration-200 ${
                   selectedRole === role
                     ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-lg shadow-violet-500/30'
-                    : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                    : 'bg-white/40 border border-white/60 text-on-surface-variant hover:bg-white/60 hover:text-on-surface'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -137,7 +137,7 @@ export default function MockInterview() {
           </div>
         </div>
 
-        <div className="bg-violet-500/5 p-6 rounded-3xl mb-8">
+        <div className="glass-card border-violet-500/20 p-6 rounded-3xl mb-8">
           <h4 className="font-bold text-on-surface mb-3 flex items-center gap-2">
             <span className="material-symbols-outlined text-violet-600 text-base" style={{ fontVariationSettings: "'FILL' 1" }}>info</span>
             How it works
@@ -183,13 +183,13 @@ export default function MockInterview() {
         </div>
 
         {finalResult.final_feedback && (
-          <div className="bg-violet-500/5 p-6 rounded-3xl mb-8">
+          <div className="glass-card border-violet-500/20 p-6 rounded-3xl mb-8">
             <p className="text-on-surface font-medium leading-relaxed">{finalResult.final_feedback}</p>
           </div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          <div className="bg-surface-container-lowest p-8 rounded-3xl shadow-[0px_10px_30px_rgba(0,78,159,0.06)]">
+          <div className="glass-card p-8 rounded-3xl">
             <h3 className="text-xl font-bold text-on-surface mb-4 flex items-center gap-3">
               <span className="material-symbols-outlined text-emerald-500 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>thumb_up</span>
               Strengths
@@ -200,7 +200,7 @@ export default function MockInterview() {
               ))}
             </ul>
           </div>
-          <div className="bg-surface-container-lowest p-8 rounded-3xl shadow-[0px_10px_30px_rgba(0,78,159,0.06)]">
+          <div className="glass-card p-8 rounded-3xl">
             <h3 className="text-xl font-bold text-on-surface mb-4 flex items-center gap-3">
               <span className="material-symbols-outlined text-amber-500 text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>trending_up</span>
               Areas to Improve
@@ -253,7 +253,7 @@ export default function MockInterview() {
                 ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-br-lg'
                 : msg.type === 'feedback'
                   ? 'bg-emerald-500/10 text-on-surface border border-emerald-200 rounded-bl-lg'
-                  : 'bg-surface-container-lowest text-on-surface shadow-md rounded-bl-lg'
+                  : 'glass-card text-on-surface rounded-bl-lg'
             }`}>
               {msg.role === 'interviewer' && msg.type && msg.type !== 'feedback' && (
                 <div className="mb-3"><TypeBadge type={msg.type} /></div>
@@ -269,7 +269,7 @@ export default function MockInterview() {
         ))}
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-surface-container-lowest p-5 rounded-3xl rounded-bl-lg shadow-md">
+            <div className="glass-card p-5 rounded-3xl rounded-bl-lg">
               <div className="flex gap-1.5">
                 <span className="w-2.5 h-2.5 bg-outline/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
                 <span className="w-2.5 h-2.5 bg-outline/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
@@ -294,7 +294,7 @@ export default function MockInterview() {
       {/* Input */}
       <div className="flex gap-3">
         <textarea
-          className="flex-1 bg-surface-container-lowest rounded-2xl p-4 focus:ring-2 focus:ring-violet-500/20 outline-none resize-none font-medium text-on-surface placeholder:text-outline shadow-sm border border-surface-container"
+          className="flex-1 glass-card rounded-2xl p-4 focus:ring-2 focus:ring-violet-500/20 outline-none resize-none font-medium text-on-surface placeholder:text-outline/50"
           placeholder="Type your answer... (Enter to send, Shift+Enter for newline)"
           rows={3}
           value={currentAnswer}

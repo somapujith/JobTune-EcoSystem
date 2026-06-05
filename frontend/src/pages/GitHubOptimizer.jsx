@@ -103,21 +103,21 @@ export default function GitHubOptimizer() {
       {activeTab === 'analyzer' && (
         <>
           {error && (
-            <div className="max-w-2xl mx-auto mb-6 bg-rose-50 border border-rose-100 p-4 rounded-2xl text-rose-600 text-sm font-medium">
+            <div className="max-w-2xl mx-auto mb-6 glass-card border-rose-200/50 p-4 rounded-2xl text-rose-600 text-sm font-medium">
               {error}
             </div>
           )}
 
           {validationError && (
-            <div className="max-w-2xl mx-auto mb-6 bg-rose-50 border border-rose-100 p-4 rounded-2xl text-rose-600 text-sm font-medium">
+            <div className="max-w-2xl mx-auto mb-6 glass-card border-rose-200/50 p-4 rounded-2xl text-rose-600 text-sm font-medium">
               {validationError}
             </div>
           )}
 
           <form onSubmit={handleAnalyze} className="max-w-2xl mx-auto mb-16">
-        <div className="relative bg-surface-container-lowest rounded-3xl p-2 shadow-[0px_20px_40px_rgba(0,78,159,0.06)]">
+        <div className="relative glass-card rounded-3xl p-2 shadow-lg">
           <div className="flex items-center gap-4 p-4">
-            <div className="w-12 h-12 rounded-2xl bg-slate-900/10 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl glass-card flex items-center justify-center">
               <span className="material-symbols-outlined text-slate-900 text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>person</span>
             </div>
             <input
@@ -130,7 +130,7 @@ export default function GitHubOptimizer() {
             <button
               type="submit"
               disabled={loading || !!validationError}
-              className="bg-gradient-to-r from-slate-900 to-slate-800 text-on-primary px-8 py-3 rounded-2xl font-bold hover:from-slate-800 hover:to-slate-700 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100 shadow-[0px_10px_30px_rgba(15,23,42,0.3)] flex items-center gap-3"
+              className="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700/50 text-white px-8 py-3 rounded-2xl font-bold hover:from-slate-700 hover:to-slate-800 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100 shadow-[0px_10px_30px_rgba(15,23,42,0.3)] flex items-center gap-3"
             >
               {loading ? (
                 <>
@@ -161,7 +161,7 @@ export default function GitHubOptimizer() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1 space-y-8">
             {/* Profile Health Score */}
-            <div className="bg-surface-container-lowest p-8 rounded-3xl shadow-[0px_20px_40px_rgba(0,78,159,0.06)] text-center">
+            <div className="glass-card p-8 rounded-3xl text-center">
               <div className="relative mb-6">
                 <svg viewBox="0 0 36 36" className="w-24 h-24 -rotate-90 mx-auto">
                   <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e5eeff" strokeWidth="3.2" />
@@ -189,12 +189,12 @@ export default function GitHubOptimizer() {
                 <p className="text-on-surface-variant text-sm font-medium">{report.scoreDescription}</p>
               )}
               <div className="grid grid-cols-2 gap-4 mt-6">
-                <div className="bg-surface-container p-4 rounded-2xl text-center">
+                <div className="glass-card bg-surface-container/30 p-4 rounded-2xl text-center">
                   <span className="material-symbols-outlined text-outline text-xl mb-2 block" style={{ fontVariationSettings: "'FILL' 0" }}>account_tree</span>
                   <div className="font-black text-2xl text-on-surface">{report.repoCount}</div>
                   <div className="text-xs font-bold text-outline uppercase tracking-wider">Repos</div>
                 </div>
-                <div className="bg-surface-container p-4 rounded-2xl text-center">
+                <div className="glass-card bg-surface-container/30 p-4 rounded-2xl text-center">
                   <span className="material-symbols-outlined text-amber-500 text-xl mb-2 block" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
                   <div className="font-black text-2xl text-on-surface">{report.stars}</div>
                   <div className="text-xs font-bold text-outline uppercase tracking-wider">Stars</div>
@@ -203,7 +203,7 @@ export default function GitHubOptimizer() {
               {report.languages && report.languages.length > 0 && (
                 <div className="mt-4 flex flex-wrap gap-2 justify-center">
                   {report.languages.slice(0, 6).map((lang, i) => (
-                    <span key={i} className="px-2 py-1 bg-surface-container rounded-lg text-xs font-bold text-on-surface-variant">
+                    <span key={i} className="px-2 py-1 glass-card bg-surface-container/30 rounded-lg text-xs font-bold text-on-surface-variant">
                       {lang}
                     </span>
                   ))}
@@ -213,7 +213,7 @@ export default function GitHubOptimizer() {
 
             {/* Strengths */}
             {report.strengths && report.strengths.length > 0 && (
-              <div className="bg-surface-container-lowest p-8 rounded-3xl shadow-[0px_20px_40px_rgba(0,78,159,0.06)]">
+              <div className="glass-card p-8 rounded-3xl">
                 <h3 className="text-xl font-bold text-emerald-600 mb-6 flex items-center gap-3 font-headline">
                   <span className="material-symbols-outlined text-emerald-500 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                   Strengths
@@ -231,7 +231,7 @@ export default function GitHubOptimizer() {
 
             {/* Critical Issues */}
             {report.issues && report.issues.length > 0 && (
-              <div className="bg-surface-container-lowest p-8 rounded-3xl shadow-[0px_20px_40px_rgba(0,78,159,0.06)]">
+              <div className="glass-card p-8 rounded-3xl">
                 <h3 className="text-xl font-bold text-rose-600 mb-6 flex items-center gap-3 font-headline">
                   <span className="material-symbols-outlined text-rose-500 text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>warning</span>
                   Improvements
@@ -250,8 +250,8 @@ export default function GitHubOptimizer() {
 
           {/* Generated README */}
           <div className="lg:col-span-2">
-            <div className="bg-slate-900 rounded-3xl shadow-[0px_25px_50px_rgba(15,23,42,0.25)] overflow-hidden flex flex-col" style={{ minHeight: '500px' }}>
-              <div className="bg-slate-800 px-8 py-6 flex justify-between items-center">
+            <div className="glass-card border-slate-700/50 rounded-3xl shadow-[0px_25px_50px_rgba(15,23,42,0.25)] overflow-hidden flex flex-col" style={{ minHeight: '500px' }}>
+              <div className="glass-panel border-b border-white/20 bg-slate-800/50 px-8 py-6 flex justify-between items-center">
                 <div className="flex items-center gap-4">
                   <span className="material-symbols-outlined text-slate-400 text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>description</span>
                   <div>
@@ -261,7 +261,7 @@ export default function GitHubOptimizer() {
                 </div>
                 <button
                   onClick={handleCopy}
-                  className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-xl font-medium transition-colors flex items-center gap-2"
+                  className="glass-card hover:bg-white/10 text-white px-4 py-2 rounded-xl font-medium transition-colors flex items-center gap-2 border border-slate-600/50"
                 >
                   <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>
                     {copied ? 'check' : 'content_copy'}

@@ -60,13 +60,13 @@ export default function LinkedInOptimizer() {
       </div>
 
       {error && (
-        <div className="max-w-3xl mx-auto mb-6 bg-rose-50 border border-rose-100 p-4 rounded-2xl text-rose-600 text-sm font-medium">
+        <div className="max-w-3xl mx-auto mb-6 glass-card border-rose-200/50 p-4 rounded-2xl text-rose-600 text-sm font-medium">
           {error}
         </div>
       )}
 
       <form onSubmit={handleAnalyze} className="max-w-3xl mx-auto mb-16 space-y-4">
-        <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-[0px_20px_40px_rgba(14,165,233,0.06)] space-y-4">
+        <div className="glass-card rounded-3xl p-6 space-y-4">
           
           <div>
             <label className="block text-sm font-bold text-on-surface mb-1">Headline</label>
@@ -74,7 +74,7 @@ export default function LinkedInOptimizer() {
               type="text"
               maxLength={220}
               placeholder="e.g. Software Engineer | React & Node.js"
-              className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface placeholder:text-outline/50 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+              className="w-full bg-surface-container/50 border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface placeholder:text-outline/50 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
               value={formData.headline}
               onChange={e => setFormData({...formData, headline: e.target.value})}
             />
@@ -86,7 +86,7 @@ export default function LinkedInOptimizer() {
             <textarea
               rows={5}
               placeholder="Write your LinkedIn summary here..."
-              className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface placeholder:text-outline/50 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 resize-y"
+              className="w-full bg-surface-container/50 border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface placeholder:text-outline/50 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 resize-y"
               value={formData.about}
               onChange={e => setFormData({...formData, about: e.target.value})}
             />
@@ -98,7 +98,7 @@ export default function LinkedInOptimizer() {
             <input
               type="text"
               placeholder="React, Node.js, Python..."
-              className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface placeholder:text-outline/50 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+              className="w-full bg-surface-container/50 border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface placeholder:text-outline/50 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
               value={formData.skills}
               onChange={e => setFormData({...formData, skills: e.target.value})}
             />
@@ -111,7 +111,7 @@ export default function LinkedInOptimizer() {
                 type="number"
                 min={0}
                 max={20}
-                className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                className="w-full bg-surface-container/50 border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
                 value={formData.experienceCount}
                 onChange={e => setFormData({...formData, experienceCount: Number(e.target.value)})}
               />
@@ -123,7 +123,7 @@ export default function LinkedInOptimizer() {
                 min={0}
                 max={50}
                 step={0.5}
-                className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                className="w-full bg-surface-container/50 border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
                 value={formData.yearsOfExperience}
                 onChange={e => setFormData({...formData, yearsOfExperience: Number(e.target.value)})}
               />
@@ -133,7 +133,7 @@ export default function LinkedInOptimizer() {
           <div>
             <label className="block text-sm font-bold text-on-surface mb-1">Connections</label>
             <select
-              className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+              className="w-full bg-surface-container/50 border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
               value={formData.connections}
               onChange={e => setFormData({...formData, connections: e.target.value})}
             >
@@ -168,7 +168,7 @@ export default function LinkedInOptimizer() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-sky-500 to-sky-600 text-on-primary px-8 py-3 rounded-xl font-bold hover:from-sky-600 hover:to-sky-700 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100 shadow-[0px_10px_20px_rgba(14,165,233,0.3)] flex items-center justify-center gap-3"
+              className="w-full bg-gradient-to-r from-sky-500 to-sky-600 text-white px-8 py-3 rounded-xl font-bold hover:from-sky-600 hover:to-sky-700 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100 shadow-lg flex items-center justify-center gap-3"
             >
               {loading ? (
                 <>
@@ -199,7 +199,7 @@ export default function LinkedInOptimizer() {
       {report && !loading && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Profile Score Card */}
-          <div className="bg-surface-container-lowest p-8 rounded-3xl shadow-[0px_20px_40px_rgba(14,165,233,0.06)] flex flex-col items-center justify-center text-center">
+          <div className="glass-card p-8 rounded-3xl flex flex-col items-center justify-center text-center">
             <div className="relative mb-8">
               <svg viewBox="0 0 36 36" className="w-32 h-32 -rotate-90 mx-auto">
                 <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e5eeff" strokeWidth="3.2" />
@@ -229,7 +229,7 @@ export default function LinkedInOptimizer() {
           </div>
 
           {/* Metrics Breakdown */}
-          <div className="bg-surface-container-lowest p-8 rounded-3xl shadow-[0px_20px_40px_rgba(14,165,233,0.06)]">
+          <div className="glass-card p-8 rounded-3xl">
             <h3 className="text-xl font-bold text-on-surface mb-8 flex items-center gap-3 font-headline">
               <span className="material-symbols-outlined text-sky-600 text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>bar_chart</span>
               Metrics Breakdown
@@ -241,7 +241,7 @@ export default function LinkedInOptimizer() {
                     <span className="text-on-surface">{m.label}</span>
                     <span className="font-black" style={{ color: getScoreColor(m.val) }}>{m.val}/100</span>
                   </div>
-                  <div className="w-full bg-surface-container h-3 rounded-full overflow-hidden">
+                  <div className="w-full bg-surface-container/50 h-3 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-700"
                       style={{
@@ -256,14 +256,14 @@ export default function LinkedInOptimizer() {
           </div>
 
           {/* AI Suggestions */}
-          <div className="lg:col-span-2 bg-sky-500/5 p-8 rounded-3xl">
+          <div className="lg:col-span-2 glass-card border-sky-500/20 p-8 rounded-3xl">
             <h3 className="text-xl font-bold text-sky-700 mb-8 flex items-center gap-3 font-headline">
               <span className="material-symbols-outlined text-sky-600 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>lightbulb</span>
               AI-Powered Suggestions
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {report.suggestions.map((s, i) => (
-                <div key={i} className="bg-surface-container-lowest p-6 rounded-2xl shadow-sm flex gap-4 items-start">
+                <div key={i} className="glass-card p-6 rounded-2xl flex gap-4 items-start">
                   <span className="material-symbols-outlined text-sky-600 text-lg mt-1 flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                   <p className="text-on-surface font-medium leading-relaxed">{s}</p>
                 </div>

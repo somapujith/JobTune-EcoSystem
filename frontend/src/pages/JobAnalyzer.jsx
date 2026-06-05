@@ -98,7 +98,7 @@ Remote (US-based preferred, but global candidates considered)`;
       </div>
 
       {/* How It Works Guide */}
-      <div className="max-w-3xl mx-auto mb-12 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 rounded-3xl p-8">
+      <div className="max-w-3xl mx-auto mb-12 glass-card border-purple-200/50 rounded-3xl p-8">
         <h3 className="text-xl font-bold text-on-surface mb-4 flex items-center gap-2">
           <span className="material-symbols-outlined text-purple-600">info</span>
           How It Works
@@ -121,21 +121,21 @@ Remote (US-based preferred, but global candidates considered)`;
       </div>
 
       {error && (
-        <div className="max-w-3xl mx-auto mb-6 bg-rose-50 border border-rose-100 p-4 rounded-2xl text-rose-600 text-sm font-medium flex items-center gap-3">
+        <div className="max-w-3xl mx-auto mb-6 glass-card border-rose-200/50 p-4 rounded-2xl text-rose-600 text-sm font-medium flex items-center gap-3">
           <AlertCircle className="w-5 h-5 flex-shrink-0" />
           {error}
         </div>
       )}
 
       <form onSubmit={handleAnalyze} className="max-w-3xl mx-auto mb-12">
-        <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-100 dark:border-slate-700 shadow-sm">
+        <div className="glass-card rounded-3xl p-8">
           <label className="block text-sm font-bold text-on-surface mb-3">Job Description</label>
           <textarea
             value={jobDescription}
             onChange={(e) => setJobDescription(e.target.value)}
             placeholder="Paste the complete job posting here..."
             rows={12}
-            className="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-on-surface dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+            className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-3 text-on-surface placeholder:text-outline/50 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
           />
           <p className="text-xs text-slate-400 mt-2">{jobDescription.length} characters</p>
         </div>
@@ -144,7 +144,7 @@ Remote (US-based preferred, but global candidates considered)`;
           <button
             type="submit"
             disabled={loading}
-            className="px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-3"
+            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white rounded-2xl font-bold transition-all shadow-lg flex items-center justify-center gap-3"
           >
             {loading ? (
               <>
@@ -161,7 +161,7 @@ Remote (US-based preferred, but global candidates considered)`;
           <button
             type="button"
             onClick={loadTestData}
-            className="px-8 py-3 bg-slate-400 hover:bg-slate-500 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-3"
+            className="px-8 py-3 glass-card hover:bg-white/40 text-on-surface rounded-2xl font-bold transition-all flex items-center justify-center gap-3"
           >
             <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>dataset</span>
             Load Test Data
@@ -174,15 +174,15 @@ Remote (US-based preferred, but global candidates considered)`;
         <div className="max-w-3xl mx-auto space-y-8">
           {/* Seniority & Experience */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-6 border border-blue-200 dark:border-blue-700">
+            <div className="glass-card border-blue-500/20 rounded-2xl p-6">
               <p className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase mb-2">Seniority Level</p>
               <p className="text-2xl font-black text-blue-700 dark:text-blue-300">{result.seniority}</p>
             </div>
-            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-2xl p-6 border border-purple-200 dark:border-purple-700">
+            <div className="glass-card border-purple-500/20 rounded-2xl p-6">
               <p className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase mb-2">Experience</p>
               <p className="text-lg font-black text-purple-700 dark:text-purple-300">{result.experienceLevel}</p>
             </div>
-            <div className="bg-amber-50 dark:bg-amber-900/20 rounded-2xl p-6 border border-amber-200 dark:border-amber-700">
+            <div className="glass-card border-amber-500/20 rounded-2xl p-6">
               <p className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase mb-2">Salary Range</p>
               <p className="text-lg font-black text-amber-700 dark:text-amber-300">{result.salaryRange}</p>
             </div>
@@ -190,7 +190,7 @@ Remote (US-based preferred, but global candidates considered)`;
 
           {/* Required Skills */}
           {result.requiredSkills.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-100 dark:border-slate-700">
+            <div className="glass-card rounded-3xl p-8">
               <div className="flex items-center gap-3 mb-4">
                 <Code2 className="w-6 h-6 text-emerald-600" />
                 <h3 className="text-xl font-bold text-on-surface">Required Skills</h3>
@@ -207,7 +207,7 @@ Remote (US-based preferred, but global candidates considered)`;
 
           {/* Nice-to-Have Skills */}
           {result.niceToHaveSkills.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-100 dark:border-slate-700">
+            <div className="glass-card rounded-3xl p-8">
               <div className="flex items-center gap-3 mb-4">
                 <Code2 className="w-6 h-6 text-blue-600" />
                 <h3 className="text-xl font-bold text-on-surface">Nice-to-Have Skills</h3>
@@ -224,7 +224,7 @@ Remote (US-based preferred, but global candidates considered)`;
 
           {/* Responsibilities */}
           {result.responsibilities.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-100 dark:border-slate-700">
+            <div className="glass-card rounded-3xl p-8">
               <div className="flex items-center gap-3 mb-4">
                 <Briefcase className="w-6 h-6 text-purple-600" />
                 <h3 className="text-xl font-bold text-on-surface">Key Responsibilities</h3>
@@ -242,7 +242,7 @@ Remote (US-based preferred, but global candidates considered)`;
 
           {/* Keywords */}
           {result.keywords.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-100 dark:border-slate-700">
+            <div className="glass-card rounded-3xl p-8">
               <div className="flex items-center gap-3 mb-4">
                 <Users className="w-6 h-6 text-blue-600" />
                 <h3 className="text-xl font-bold text-on-surface">Key Concepts & Tools</h3>
