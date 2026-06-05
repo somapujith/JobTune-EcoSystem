@@ -124,7 +124,12 @@ router.post('/generate-roadmap', authenticateToken, async (req, res, next) => {
 
     const userPrompt = `Skill gaps to address: ${gaps.join(', ')}${targetRole ? `\nTarget role: ${targetRole}` : ''}\n\nCreate a 4-week learning roadmap.`;
 
-    const aiResult = await callAI({ systemPrompt: SYSTEM_PROMPT_ROADMAP, userPrompt, maxTokens: 1500 });
+    const aiResult = await callAI({
+      systemPrompt: SYSTEM_PROMPT_ROADMAP,
+      userPrompt,
+      maxTokens: 1500,
+      model: process.env.LM_STUDIO_MODEL_ROADMAP
+    });
 
     let roadmap;
     let aiPowered = false;

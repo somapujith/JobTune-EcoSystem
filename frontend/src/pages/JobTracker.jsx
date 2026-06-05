@@ -9,7 +9,7 @@ const STATUSES = [
   { id: 'rejected', label: 'Rejected', color: 'bg-red-50', icon: XCircle, textColor: 'text-red-700' },
 ];
 
-function JobCard({ job, status, onDelete, onUpdate }) {
+function JobCard({ job, status, onDelete, onUpdate, onDragStart }) {
   const [isEditing, setIsEditing] = useState(false);
   const [notes, setNotes] = useState(job.notes || '');
 
@@ -26,7 +26,11 @@ function JobCard({ job, status, onDelete, onUpdate }) {
   const daysAgo = Math.floor((Date.now() - new Date(job.appliedAt)) / (1000 * 60 * 60 * 24));
 
   return (
-    <div className={`p-4 rounded-xl border-2 ${status.color} space-y-3`}>
+    <div
+      draggable
+      onDragStart={() => onDragStart(job)}
+      className={`p-4 rounded-xl border-2 ${status.color} space-y-3 cursor-grab active:cursor-grabbing transition-opacity hover:opacity-90`}
+    >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1">
           <h3 className="font-bold text-slate-900">{job.role}</h3>
@@ -121,9 +125,25 @@ export default function JobTracker() {
     try {
       const { data } = await api.patch(`/jobs/${jobId}`, { status: newStatus });
       setJobs(jobs.map((j) => (j.id === jobId ? data : j)));
-      fetchJobs();
     } catch (err) {
       console.error('Failed to update job:', err);
+    }
+  };
+
+  const [draggedJob, setDraggedJob] = useState(null);
+
+  const handleDragStart = (job) => {
+    setDraggedJob(job);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDropColumn = (targetStatusId) => {
+    if (draggedJob && draggedJob.status !== targetStatusId) {
+      handleUpdateJob(draggedJob.id, targetStatusId);
+      setDraggedJob(null);
     }
   };
 
@@ -223,7 +243,14 @@ export default function JobTracker() {
       {/* Kanban board */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {STATUSES.map((status) => (
-          <div key={status.id} className="bg-slate-50 rounded-2xl p-4 min-h-96">
+          <div
+            key={status.id}
+            onDragOver={handleDragOver}
+            onDrop={() => handleDropColumn(status.id)}
+            className={`bg-slate-50 rounded-2xl p-4 min-h-96 transition-colors ${
+              draggedJob && draggedJob.status !== status.id ? 'bg-blue-50 ring-2 ring-blue-300' : ''
+            }`}
+          >
             <div className="flex items-center gap-2 mb-4">
               <status.icon className={`w-5 h-5 ${status.textColor}`} />
               <h2 className="font-bold text-slate-900">
@@ -234,7 +261,7 @@ export default function JobTracker() {
             <div className="space-y-3 min-h-80">
               {groupedJobs[status.id]?.map((job) => (
                 <div key={job.id} className="relative group">
-                  <JobCard job={job} status={status} onDelete={handleDeleteJob} onUpdate={handleUpdateJob} />
+                  <JobCard job={job} status={status} onDelete={handleDeleteJob} onUpdate={handleUpdateJob} onDragStart={handleDragStart} />
 
                   {/* Status move buttons */}
                   {status.id !== 'rejected' && (

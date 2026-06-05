@@ -9,6 +9,8 @@ const profilesRoutes = require('./routes/profiles');
 const learningRoutes = require('./routes/learning');
 const adminRoutes = require('./routes/admin');
 const interviewRoutes = require('./routes/interview');
+const resumeChatRoutes = require('./routes/resumeChat');
+const careerRoadmapRoutes = require('./routes/careerRoadmap');
 const { errorHandler } = require('./middleware/errorHandler');
 const { auditLogger } = require('./middleware/auditLogger');
 const path = require('path');
@@ -32,6 +34,8 @@ app.use('/api/profiles', profilesRoutes);
 app.use('/api/learning', learningRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/interview', interviewRoutes);
+app.use('/api/resume-chat', resumeChatRoutes);
+app.use('/api/career', careerRoadmapRoutes);
 
 // Admin UI Route
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));

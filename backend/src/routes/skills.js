@@ -105,7 +105,12 @@ router.post('/assessment', authenticateToken, async (req, res, next) => {
     const userPrompt = `Evaluate this fresher candidate's technical assessment:\n\n${formattedQA}`;
 
     // Try AI first
-    const aiResult = await callAI({ systemPrompt: SYSTEM_PROMPT_SKILLS, userPrompt, maxTokens: 800 });
+    const aiResult = await callAI({
+      systemPrompt: SYSTEM_PROMPT_SKILLS,
+      userPrompt,
+      maxTokens: 800,
+      model: process.env.LM_STUDIO_MODEL_SKILLS
+    });
     
     let result;
     if (aiResult.ok) {

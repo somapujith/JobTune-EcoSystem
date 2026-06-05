@@ -17,6 +17,7 @@ const NAV_GROUPS = [
     { label: 'Content Vault',    path: '/learning',   desc: 'Curated resources' },
     { label: 'Skill Assessment', path: '/skills',     desc: '25+ domain quiz' },
     { label: 'Mock Interview',   path: '/interview',  desc: 'AI-powered practice' },
+    { label: 'Career Roadmap',   path: '/career',     desc: 'Personalized growth plan' },
   ]},
 ];
 
@@ -86,6 +87,16 @@ const Navbar = () => {
               }`}
             >
               Resume Forge
+            </Link>
+            <Link
+              to="/blog"
+              className={`text-sm font-semibold transition-all duration-200 ${
+                location.pathname === '/blog'
+                  ? 'text-blue-700 border-b-2 border-blue-600 pb-0.5'
+                  : 'text-slate-500 hover:text-blue-600'
+              }`}
+            >
+              Blog
             </Link>
             {NAV_GROUPS.map((group) => {
               const active = isGroupActive(group);
@@ -190,7 +201,17 @@ const Navbar = () => {
             >
               Resume Forge
             </Link>
-            
+            <Link
+              to="/blog"
+              className={`py-3 px-4 rounded-xl text-sm font-semibold transition-colors ${
+                location.pathname === '/blog'
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-blue-600'
+              }`}
+            >
+              Blog
+            </Link>
+
             {NAV_GROUPS.map((group) => {
               const isOpen = openMobileGroup === group.label;
               return (

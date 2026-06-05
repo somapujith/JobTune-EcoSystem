@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { authenticateToken } = require('../middleware/auth');
 
 // Fetch real GitHub user data from public API
 async function fetchGitHubData(username) {
@@ -166,7 +167,7 @@ function generateReadme(ghData) {
 
   const projects = ghData.topRepos.map(r => {
     return `- **[${r.name}](https://github.com/${ghData.login}/${r.name})**: ${r.description || 'No description provided'} *(⭐ ${r.stars} | ${r.language || 'Unknown'})*`;
-  }).join('\\n');
+  }).join('\n');
 
   let connect = '';
   if (ghData.blog) {
@@ -192,7 +193,7 @@ ${connect}`;
 }
 
 // POST /profiles/github/analyze
-router.post('/github/analyze', async (req, res) => {
+router.post('/github/analyze', authenticateToken, async (req, res) => {
   const { username } = req.body;
   if (!username) return res.status(400).json({ error: 'GitHub username is required' });
 
@@ -221,7 +222,7 @@ router.post('/github/analyze', async (req, res) => {
 });
 
 // POST /profiles/linkedin/analyze
-router.post('/linkedin/analyze', async (req, res) => {
+router.post('/linkedin/analyze', authenticateToken, async (req, res) => {
   const { headline, about, skills, experienceCount, yearsOfExperience, connections, hasPhoto, hasFeatured } = req.body;
   
   const headlineStr = (headline || '').trim();
@@ -321,7 +322,7 @@ router.post('/linkedin/analyze', async (req, res) => {
 });
 
 // POST /profiles/jobmatch
-router.post('/jobmatch', (req, res) => {
+router.post('/jobmatch', authenticateToken, (req, res) => {
   const { jobDescription, userSkills } = req.body;
   if (!jobDescription || !userSkills) {
     return res.status(400).json({ error: 'Job description and user skills are required' });

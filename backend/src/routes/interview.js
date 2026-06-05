@@ -118,7 +118,12 @@ router.post('/start', authenticateToken, async (req, res, next) => {
 
     const userPrompt = `Start a mock interview for the role: ${targetRole}. This is the first question - ask an engaging opening question appropriate for a fresher/junior candidate.`;
 
-    const aiResult = await callAI({ systemPrompt: INTERVIEWER_PROMPT, userPrompt, maxTokens: 500 });
+    const aiResult = await callAI({
+      systemPrompt: INTERVIEWER_PROMPT,
+      userPrompt,
+      maxTokens: 500,
+      model: process.env.LM_STUDIO_MODEL_INTERVIEW
+    });
 
     let response;
     let aiPowered = false;

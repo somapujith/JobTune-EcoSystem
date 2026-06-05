@@ -206,27 +206,6 @@ export default function ResumeOptimizer() {
   const [createResult, setCreateResult] = useState(null);
   const forgeDrop = useRef(false);
 
-  const [isMockDataEnabled, setIsMockDataEnabled] = useState(false);
-
-  const fillMockData = () => {
-    if (!isMockDataEnabled) return;
-    setCreateFormData({
-      ...createFormData,
-      fullName: 'John Doe',
-      email: 'john.doe@example.com',
-      phone: '123-456-7890',
-      linkedin: 'https://linkedin.com/in/johndoe',
-      github: 'https://github.com/johndoe',
-      targetJobTitle: 'Frontend Developer',
-      targetJobDescription: 'We are looking for a React developer with Vite and Tailwind experience. You should be familiar with state management and modern CSS. Needs strong JavaScript fundamentals.',
-      summary: 'Experienced frontend developer passionate about building performance-heavy web apps and intuitive user interfaces.',
-      skills: 'React, Node.js, TailwindCSS, Express\nDocker, Git, CI/CD, Vite\nMongoDB, SQL',
-      experience: 'Software Engineer at TechCorp (2020-Present)\n- Built scalable React applications using modern hooks and context API.\n- Improved page load speed by 30% via lazy loading.\n\nJunior Web Developer at WebSolutions (2018-2020)\n- Maintained legacy codebases and wrote new jQuery plugins.\n- Converted Figma designs to pixel-perfect HTML/CSS.',
-      education: 'B.Sc. in Computer Science\nUniversity of Technology, 2018\nGPA: 3.8/4.0',
-      projects: 'JobTube Eco System\n- Built a deterministic resume optimizer fullstack app using Node and Vite.\n- Handled file generation with pdfkit and docx.'
-    });
-  };
-
   useEffect(() => {
     fetchRecent();
   }, []);
@@ -624,26 +603,6 @@ export default function ResumeOptimizer() {
                         Create Resume from Scratch
                       </h2>
                       <p className="text-on-surface-variant text-sm">Fill in your details and generate a professional resume (no AI rewriting) with ATS-friendly structure for your target role.</p>
-                    </div>
-                    <div className="flex items-center justify-start gap-4 sm:ml-auto">
-                      <label className="flex items-center gap-2 cursor-pointer text-sm font-bold text-slate-600 bg-surface-container hover:bg-surface-container-highest px-3 py-1.5 rounded-xl transition-colors border border-outline/10">
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 rounded text-sky-500 focus:ring-sky-500 border-outline/30 cursor-pointer"
-                          checked={isMockDataEnabled}
-                          onChange={(e) => setIsMockDataEnabled(e.target.checked)}
-                        />
-                        Mock Data Mode
-                      </label>
-                      {isMockDataEnabled && (
-                        <button
-                          type="button"
-                          onClick={fillMockData}
-                          className="px-4 py-1.5 bg-sky-100 text-sky-700 hover:bg-sky-200 rounded-xl text-sm font-bold transition-colors"
-                        >
-                          Fill Data
-                        </button>
-                      )}
                     </div>
                   </div>
 

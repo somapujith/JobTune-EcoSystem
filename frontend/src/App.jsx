@@ -9,6 +9,7 @@ import ResumeOptimizer from './pages/ResumeOptimizer';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import ContentVault from './pages/ContentVault';
+import Blog from './pages/Blog';
 import LinkedInOptimizer from './pages/LinkedInOptimizer';
 import GitHubOptimizer from './pages/GitHubOptimizer';
 import PortfolioBuilder from './pages/PortfolioBuilder';
@@ -20,6 +21,7 @@ import ResumeBuilder from './pages/ResumeBuilder';
 import ResumeHistory from './pages/ResumeHistory';
 import ResumeComparison from './pages/ResumeComparison';
 import ResumeSend from './pages/ResumeSend';
+import CareerRoadmap from './pages/CareerRoadmap';
 import useAuthStore from './store/useAuthStore';
 
 function ProtectedRoute({ children, requireOnboarding = false }) {
@@ -68,6 +70,7 @@ function App() {
           <Route path="portfolio" element={<PortfolioBuilder />} />
           <Route path="learning" element={<ContentVault />} />
           <Route path="projects" element={<ProjectIdeas />} />
+          <Route path="blog" element={<Blog />} />
           <Route
             path="dashboard"
             element={
@@ -79,6 +82,7 @@ function App() {
           <Route path="interview" element={<MockInterview />} />
           <Route path="jobmatch" element={<JobMatcher />} />
           <Route path="jobs" element={<JobTracker />} />
+          <Route path="career" element={<CareerRoadmap />} />
         </Route>
         <Route path="/login" element={<Login />} />
       </Routes>

@@ -1,68 +1,78 @@
 /**
- * Shared AI Client for all Gemini API calls.
- * Provides a single fetch wrapper with built-in fallback logic.
+ * LM Studio AI Client
+ * Uses OpenAI-compatible API (http://172.19.80.1:1234/v1)
+ * Designed for local LLMs running in LM Studio — no cloud dependencies
  */
 
-async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature = 0.4, model: modelOverride }) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  const model  = modelOverride || process.env.GEMINI_MODEL || 'gemini-2.0-flash';
-  const isMock = process.env.MOCK_AI === 'true' || !apiKey || (apiKey && apiKey.includes('your_'));
+async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature = 0.4, model }) {
+  const baseURL = process.env.LM_STUDIO_URL || 'http://172.19.80.1:1234/v1';
+  const selectedModel = model || process.env.LM_STUDIO_MODEL || 'mistral-7b-instruct-v0.3';
 
+  // Fallback to mock if explicitly enabled
+  const isMock = process.env.MOCK_AI === 'true';
   if (isMock) {
-    console.log(`🤖 AI Client status: isMock=${isMock}, MOCK_AI_ENV="${process.env.MOCK_AI}", KeyExists=${!!apiKey}`);
+    console.log(`🤖 AI Client: Mock mode enabled`);
     await new Promise(resolve => setTimeout(resolve, 800));
-    
+
     const promptLower = userPrompt.toLowerCase();
-    let mockResponse = "I'm currently in development mode. To enable real Gemini AI responses, please provide a valid GEMINI_API_KEY in the .env file.";
-    
+    let mockResponse = "I'm currently in mock mode. Switch MOCK_AI=false in .env to use real LM Studio models.";
+
     if (promptLower.includes('summary')) {
-      mockResponse = "### Optimized Professional Summary (Simulated Gemini)\n\nResults-driven professional with a strong foundation in software development and a passion for building scalable applications. Experienced in modern JavaScript frameworks and collaborative team environments.";
+      mockResponse = "### Optimized Professional Summary (Mock)\n\nResults-driven professional with a strong foundation in software development and a passion for building scalable applications. Experienced in modern JavaScript frameworks and collaborative team environments.";
     } else if (promptLower.includes('linkedin') || promptLower.includes('about')) {
-      mockResponse = "### LinkedIn About Section (Simulated Gemini)\n\n🚀 Passionate Software Engineer dedicated to building impactful digital solutions. \n\nWith a focus on performance and user experience, I leverage React and Node.js to create seamless web applications. I thrive in collaborative environments and am always eager to learn new technologies. Let's connect and build something great together!";
+      mockResponse = "### LinkedIn About Section (Mock)\n\n🚀 Passionate Software Engineer dedicated to building impactful digital solutions. \n\nWith a focus on performance and user experience, I leverage React and Node.js to create seamless web applications. I thrive in collaborative environments and am always eager to learn new technologies.";
     }
 
     return { ok: true, error: null, data: mockResponse };
   }
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
-    
-    const response = await fetch(url, {
+    console.log(`📡 Calling LM Studio: ${selectedModel} at ${baseURL}`);
+
+    const response = await fetch(`${baseURL}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: `${systemPrompt}\n\nUser Request: ${userPrompt}` }]
-          }
+        model: selectedModel,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
         ],
-        generationConfig: {
-          maxOutputTokens: maxTokens,
-          temperature: temperature,
-        }
+        max_tokens: maxTokens,
+        temperature: temperature,
+        stream: false
       }),
+      timeout: 60000 // 60 second timeout for inference
     });
 
     if (!response.ok) {
       const errText = await response.text();
-      console.warn('Gemini error:', response.status, errText);
-      return { ok: false, error: `Gemini API error ${response.status}`, data: null };
+      console.warn(`LM Studio error: ${response.status}`, errText);
+      return {
+        ok: false,
+        error: `LM Studio API error ${response.status}. Check server is running at ${baseURL}`,
+        data: null
+      };
     }
 
     const json = await response.json();
-    const content = json.candidates?.[0]?.content?.parts?.[0]?.text;
+    const content = json.choices?.[0]?.message?.content;
 
     if (!content) {
-      return { ok: false, error: 'Empty Gemini response', data: null };
+      return { ok: false, error: 'Empty LM Studio response', data: null };
     }
 
+    console.log(`✅ LM Studio response received (${content.length} chars)`);
     return { ok: true, error: null, data: content };
   } catch (err) {
-    console.error('Gemini Client fetch error:', err.message);
-    return { ok: false, error: err.message, data: null };
+    console.error(`❌ LM Studio connection error: ${err.message}`);
+    return {
+      ok: false,
+      error: `Cannot connect to LM Studio at ${baseURL}. Ensure LM Studio is running and accessible.`,
+      data: null
+    };
   }
 }
 

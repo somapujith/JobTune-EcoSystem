@@ -73,10 +73,18 @@ router.get('/audit-logs', async (req, res) => {
     const [logs] = await pool.query(query, params);
     
     // Parse details JSON string back to object for UI
-    const parsedLogs = logs.map(log => ({
-      ...log,
-      details: typeof log.details === 'string' ? JSON.parse(log.details) : log.details
-    }));
+    const parsedLogs = logs.map(log => {
+      let details = log.details;
+      if (typeof details === 'string') {
+        try {
+          details = JSON.parse(details);
+        } catch (e) {
+          console.warn('Failed to parse audit log details:', e.message);
+          details = { raw: details };
+        }
+      }
+      return { ...log, details };
+    });
     
     res.json(parsedLogs);
   } catch (err) {

@@ -427,11 +427,12 @@ When given a resume or resume section and an instruction:
       ? `Here is my resume content:\n\n${resumeText.slice(0, 4000)}\n\n---\n\nInstruction: ${instruction}`
       : `Instruction: ${instruction}${context ? `\n\nContext: ${context}` : ''}`;
 
-    const aiResult = await callAI({ 
-      systemPrompt, 
-      userPrompt: userMessage, 
-      maxTokens: 256, 
-      temperature: 0.2 
+    const aiResult = await callAI({
+      systemPrompt,
+      userPrompt: userMessage,
+      maxTokens: 256,
+      temperature: 0.2,
+      model: process.env.LM_STUDIO_MODEL_RESUME
     });
  
     if (aiResult.ok && aiResult.data) {

@@ -13,11 +13,32 @@ export default function GitHubOptimizer() {
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState(null);
   const [error, setError] = useState('');
+  const [validationError, setValidationError] = useState('');
   const [copied, setCopied] = useState(false);
+
+  const validateUsername = (value) => {
+    if (!value.trim()) {
+      return 'GitHub username is required';
+    }
+    if (!/^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i.test(value)) {
+      return 'Invalid GitHub username format';
+    }
+    return '';
+  };
+
+  const handleUsernameChange = (e) => {
+    const value = e.target.value;
+    setUsername(value);
+    setValidationError(validateUsername(value));
+  };
 
   const handleAnalyze = async (e) => {
     e.preventDefault();
-    if (!username) return;
+    const validation = validateUsername(username);
+    if (validation) {
+      setValidationError(validation);
+      return;
+    }
     setLoading(true);
     setError('');
     setReport(null);
@@ -58,6 +79,12 @@ export default function GitHubOptimizer() {
         </div>
       )}
 
+      {validationError && (
+        <div className="max-w-2xl mx-auto mb-6 bg-rose-50 border border-rose-100 p-4 rounded-2xl text-rose-600 text-sm font-medium">
+          {validationError}
+        </div>
+      )}
+
       <form onSubmit={handleAnalyze} className="max-w-2xl mx-auto mb-16">
         <div className="relative bg-surface-container-lowest rounded-3xl p-2 shadow-[0px_20px_40px_rgba(0,78,159,0.06)]">
           <div className="flex items-center gap-4 p-4">
@@ -67,14 +94,13 @@ export default function GitHubOptimizer() {
             <input
               type="text"
               placeholder="Enter your GitHub username"
-              required
-              className="flex-1 bg-transparent outline-none font-medium text-on-surface placeholder:text-outline text-lg"
+              className={`flex-1 bg-transparent outline-none font-medium text-on-surface placeholder:text-outline text-lg ${validationError ? 'border-b-2 border-red-500' : ''}`}
               value={username}
-              onChange={e => setUsername(e.target.value)}
+              onChange={handleUsernameChange}
             />
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !!validationError}
               className="bg-gradient-to-r from-slate-900 to-slate-800 text-on-primary px-8 py-3 rounded-2xl font-bold hover:from-slate-800 hover:to-slate-700 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100 shadow-[0px_10px_30px_rgba(15,23,42,0.3)] flex items-center gap-3"
             >
               {loading ? (

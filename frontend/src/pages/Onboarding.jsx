@@ -16,7 +16,7 @@ const ONBOARDING_STEPS = [
   },
   {
     id: 'linkedin_status',
-    question: 'How's your LinkedIn profile?',
+    question: "How's your LinkedIn profile?",
     options: [
       { label: 'Profile complete and up-to-date', value: 'complete' },
       { label: 'Profile needs optimization', value: 'needs_work' },
@@ -26,21 +26,21 @@ const ONBOARDING_STEPS = [
   },
   {
     id: 'interview_prep',
-    question: 'How prepared are you for interviews?',
+    question: "How prepared are you for interviews?",
     options: [
       { label: 'Very prepared, ready to practice', value: 'ready' },
       { label: 'Could use some practice', value: 'some_prep' },
-      { label: "Haven't practiced at all", value: 'no_prep' },
+      { label: "Haven't practiced at all", value: "no_prep" },
     ],
     icon: Zap,
   },
   {
     id: 'github_status',
-    question: 'How visible is your GitHub presence?',
+    question: "How visible is your GitHub presence?",
     options: [
       { label: 'Strong profile with projects', value: 'strong' },
       { label: 'Profile exists, needs polish', value: 'exists' },
-      { label: "Don't have public projects", value: 'none' },
+      { label: "Don't have public projects", value: "none" },
     ],
     icon: Code2,
   },

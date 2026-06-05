@@ -113,7 +113,7 @@ export default function LinkedInOptimizer() {
                 max={20}
                 className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
                 value={formData.experienceCount}
-                onChange={e => setFormData({...formData, experienceCount: e.target.value})}
+                onChange={e => setFormData({...formData, experienceCount: Number(e.target.value)})}
               />
             </div>
             <div>
@@ -125,7 +125,7 @@ export default function LinkedInOptimizer() {
                 step={0.5}
                 className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-2 font-medium text-on-surface focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
                 value={formData.yearsOfExperience}
-                onChange={e => setFormData({...formData, yearsOfExperience: e.target.value})}
+                onChange={e => setFormData({...formData, yearsOfExperience: Number(e.target.value)})}
               />
             </div>
           </div>
