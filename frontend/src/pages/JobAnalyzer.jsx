@@ -43,6 +43,27 @@ export default function JobAnalyzer() {
         </p>
       </div>
 
+      {/* How It Works Guide */}
+      <div className="max-w-3xl mx-auto mb-12 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 rounded-3xl p-8">
+        <h3 className="text-xl font-bold text-on-surface mb-4 flex items-center gap-2">
+          <span className="material-symbols-outlined text-purple-600">info</span>
+          How It Works
+        </h3>
+        <div className="space-y-3 text-slate-700 dark:text-slate-300">
+          <p><strong>1. Paste Job Description:</strong> Copy the complete job posting (including all requirements, responsibilities, and qualifications)</p>
+          <p><strong>2. AI Analysis:</strong> Our AI analyzes the posting and extracts:</p>
+          <ul className="list-disc list-inside ml-4 space-y-1">
+            <li><strong>Required Skills:</strong> Must-have technical skills for the role</li>
+            <li><strong>Nice-to-Have Skills:</strong> Bonus skills that are preferred but not required</li>
+            <li><strong>Seniority Level:</strong> Junior, Mid, or Senior</li>
+            <li><strong>Experience Required:</strong> Years of experience needed</li>
+            <li><strong>Key Responsibilities:</strong> Main duties of the position</li>
+            <li><strong>Keywords & Concepts:</strong> Important tools, frameworks, and concepts</li>
+          </ul>
+          <p><strong>3. Use Results:</strong> Compare with your skills to identify gaps and prepare accordingly</p>
+        </div>
+      </div>
+
       {error && (
         <div className="max-w-3xl mx-auto mb-6 bg-rose-50 border border-rose-100 p-4 rounded-2xl text-rose-600 text-sm font-medium flex items-center gap-3">
           <AlertCircle className="w-5 h-5 flex-shrink-0" />

@@ -1,6 +1,40 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
+const multer = require('multer');
+const pdfParse = require('pdf-parse');
+const { Packer, Document } = require('docx');
+const fs = require('fs');
+const path = require('path');
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+
+async function extractTextFromFile(file) {
+  if (!file) throw new Error('No file provided');
+
+  try {
+    if (file.mimetype === 'application/pdf') {
+      const pdfData = await pdfParse(file.buffer);
+      return pdfData.text;
+    } else if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      // For DOCX, we'll use a simple approach by reading the XML
+      const JSZip = require('jszip');
+      const zip = new JSZip();
+      await zip.loadAsync(file.buffer);
+      const xmlFile = zip.file('word/document.xml');
+      if (!xmlFile) throw new Error('Invalid DOCX file');
+      const xmlContent = await xmlFile.async('text');
+      // Extract text between XML tags (simple approach)
+      const text = xmlContent.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+      return text;
+    } else {
+      throw new Error('Unsupported file type');
+    }
+  } catch (err) {
+    console.error('File extraction error:', err);
+    throw new Error('Failed to extract text from file: ' + err.message);
+  }
+}
 
 function extractKeywords(text) {
   const words = text.toLowerCase().match(/\b[a-z]+(?:\+\+|#)?\b/g) || [];
@@ -127,17 +161,33 @@ function generateRecommendations(missingKeywords, resumeText) {
   return recommendations.slice(0, 4);
 }
 
-router.post('/check-ats-score', authenticateToken, (req, res) => {
+router.post('/check-ats-score', authenticateToken, upload.single('resume'), async (req, res) => {
   try {
-    const { resume, jobDescription } = req.body;
+    const { jobDescription } = req.body;
 
-    if (!resume || !jobDescription) {
+    if (!req.file || !jobDescription) {
       return res.status(400).json({
-        error: 'Resume and job description are required'
+        error: 'Resume file and job description are required'
       });
     }
 
-    const result = calculateATSScore(resume, jobDescription);
+    // Extract text from file
+    let resumeText;
+    try {
+      resumeText = await extractTextFromFile(req.file);
+    } catch (err) {
+      return res.status(400).json({
+        error: 'Failed to process resume file: ' + err.message
+      });
+    }
+
+    if (!resumeText || resumeText.length < 50) {
+      return res.status(400).json({
+        error: 'Resume file appears to be empty or too short'
+      });
+    }
+
+    const result = calculateATSScore(resumeText, jobDescription);
 
     res.json({
       success: true,
@@ -146,7 +196,7 @@ router.post('/check-ats-score', authenticateToken, (req, res) => {
   } catch (err) {
     console.error('ATS check error:', err);
     res.status(500).json({
-      error: 'Failed to check ATS score'
+      error: 'Failed to check ATS score: ' + err.message
     });
   }
 });

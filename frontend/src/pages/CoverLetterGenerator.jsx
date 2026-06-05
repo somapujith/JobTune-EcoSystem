@@ -75,6 +75,27 @@ export default function CoverLetterGenerator() {
         </p>
       </div>
 
+      {/* How It Works Guide */}
+      <div className="max-w-5xl mx-auto mb-12 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200 dark:border-emerald-800 rounded-3xl p-8">
+        <h3 className="text-xl font-bold text-on-surface mb-4 flex items-center gap-2">
+          <span className="material-symbols-outlined text-emerald-600">info</span>
+          How It Works
+        </h3>
+        <div className="space-y-3 text-slate-700 dark:text-slate-300">
+          <p><strong>1. Fill in Your Details:</strong></p>
+          <ul className="list-disc list-inside ml-4 space-y-1">
+            <li><strong>Company Name:</strong> The company you're applying to</li>
+            <li><strong>Position Title:</strong> The job title you're applying for</li>
+            <li><strong>Your Name:</strong> Your full name for the signature</li>
+            <li><strong>Job Description:</strong> Copy-paste the complete job posting</li>
+            <li><strong>Your Background:</strong> Brief description of your relevant experience (optional but recommended)</li>
+            <li><strong>Tone:</strong> Choose between Formal, Friendly, or Confident</li>
+          </ul>
+          <p><strong>2. AI Generation:</strong> Our AI creates a personalized, compelling cover letter (3-4 paragraphs) tailored to the specific job and company</p>
+          <p><strong>3. Use Immediately:</strong> Copy the letter to your clipboard or download it as a text file. Customize as needed and send with your application</p>
+        </div>
+      </div>
+
       {error && (
         <div className="max-w-3xl mx-auto mb-6 bg-rose-50 border border-rose-100 p-4 rounded-2xl text-rose-600 text-sm font-medium flex items-center gap-3">
           <AlertCircle className="w-5 h-5 flex-shrink-0" />
