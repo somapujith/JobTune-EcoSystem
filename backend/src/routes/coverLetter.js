@@ -60,7 +60,7 @@ Make it personalized, compelling, and 3-4 paragraphs.`;
       userPrompt,
       maxTokens: 800,
       temperature: 0.7,
-      model: process.env.LM_STUDIO_MODEL_RESUME || 'mistral-7b-instruct'
+      model: process.env.LM_STUDIO_MODEL_JOB || process.env.LM_STUDIO_MODEL_RESUME
     });
 
     let letterText;

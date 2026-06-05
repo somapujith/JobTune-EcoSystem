@@ -78,7 +78,7 @@ Return ONLY this JSON structure (valid JSON only, no markdown):
       userPrompt,
       maxTokens: 500,
       temperature: 0.3,
-      model: process.env.LM_STUDIO_MODEL_PROFILE || 'qwen2.5-7b-instruct'
+      model: process.env.LM_STUDIO_MODEL_JOB || process.env.LM_STUDIO_MODEL_SKILLS
     });
 
     let analysis;
