@@ -74,10 +74,10 @@ export default function Dashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {[
-          { label: 'Readiness Score', val: overview ? `${overview.readiness}/100` : '45/100', icon: Target, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'Skills Verified', val: overview ? `${overview.skillsVerified}/25` : '12/25', icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Profile Rating', val: overview ? `${overview.profileScore}/100` : 'A-', icon: Star, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Active Projects', val: overview ? overview.actionItems?.length ?? '3' : '3', icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
+          { label: 'Readiness Score', val: overview ? `${overview.readinessScore}/100` : '45/100', icon: Target, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'Skills Verified', val: overview ? `${overview.skillScore}/100` : '60/100', icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Resume Score', val: overview ? `${overview.resumeScore}/100` : '70/100', icon: Star, color: 'text-amber-600', bg: 'bg-amber-50' },
+          { label: 'Interviews Done', val: overview ? overview.interviewsCompleted || '0' : '0', icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
         ].map((stat, i) => (
           <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 group hover:border-blue-200 transition-colors">
             <div className={`w-14 h-14 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
