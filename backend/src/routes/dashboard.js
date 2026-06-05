@@ -9,33 +9,33 @@ router.get('/overview', authenticateToken, async (req, res) => {
     const userId = req.user.id;
 
     // 1. Fetch resume scores (history + latest)
-    const [resumes] = await pool.query(
-      'SELECT overall_score, created_at FROM resumes WHERE user_id = ? ORDER BY created_at DESC LIMIT 10',
+    const resumes = await pool.query(
+      'SELECT overall_score, created_at FROM resumes WHERE user_id = $1 ORDER BY created_at DESC LIMIT 10',
       [userId]
     );
-    const resumeScores = resumes.map(r => r.overall_score);
+    const resumeScores = resumes.rows.map(r => r.overall_score);
     const latestResumeScore = resumeScores[0] || 0;
 
     // 2. Fetch mock interview data
-    const [interviews] = await pool.query(
-      'SELECT score FROM mock_interviews WHERE user_id = ? ORDER BY created_at DESC',
+    const interviews = await pool.query(
+      'SELECT score FROM mock_interviews WHERE user_id = $1 ORDER BY created_at DESC',
       [userId]
     );
-    const avgInterviewScore = interviews.length > 0
-      ? Math.round(interviews.reduce((sum, i) => sum + (i.score || 0), 0) / interviews.length)
+    const avgInterviewScore = interviews.rows.length > 0
+      ? Math.round(interviews.rows.reduce((sum, i) => sum + (i.score || 0), 0) / interviews.rows.length)
       : 0;
 
     // 3. Fetch job applications (assumes job_applications table exists)
     let jobStats = { total: 0, interviews: 0, offers: 0, rejected: 0, replyRate: 0 };
     try {
-      const [jobs] = await pool.query(
-        'SELECT status FROM job_applications WHERE user_id = ?',
+      const jobs = await pool.query(
+        'SELECT status FROM job_applications WHERE user_id = $1',
         [userId]
       );
-      jobStats.total = jobs.length;
-      jobStats.interviews = jobs.filter(j => j.status === 'interview' || j.status === 'interviewing').length;
-      jobStats.offers = jobs.filter(j => j.status === 'offer').length;
-      jobStats.rejected = jobs.filter(j => j.status === 'rejected').length;
+      jobStats.total = jobs.rows.length;
+      jobStats.interviews = jobs.rows.filter(j => j.status === 'interview' || j.status === 'interviewing').length;
+      jobStats.offers = jobs.rows.filter(j => j.status === 'offer').length;
+      jobStats.rejected = jobs.rows.filter(j => j.status === 'rejected').length;
       jobStats.replyRate = jobStats.total > 0
         ? Math.round(((jobStats.interviews + jobStats.offers) / jobStats.total) * 100)
         : 0;
@@ -46,18 +46,18 @@ router.get('/overview', authenticateToken, async (req, res) => {
     // 4. Skill assessment score (if available)
     let skillScore = 0;
     try {
-      const [skills] = await pool.query(
-        'SELECT * FROM skill_assessments WHERE user_id = ? ORDER BY created_at DESC LIMIT 1',
+      const skills = await pool.query(
+        'SELECT * FROM skill_assessments WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
         [userId]
       );
-      if (skills.length > 0) {
+      if (skills.rows.length > 0) {
         // Try to extract score from available columns
-        if (skills[0].score) {
-          skillScore = skills[0].score;
-        } else if (skills[0].scores) {
-          const scoresData = typeof skills[0].scores === 'string'
-            ? JSON.parse(skills[0].scores)
-            : skills[0].scores;
+        if (skills.rows[0].score) {
+          skillScore = skills.rows[0].score;
+        } else if (skills.rows[0].scores) {
+          const scoresData = typeof skills.rows[0].scores === 'string'
+            ? JSON.parse(skills.rows[0].scores)
+            : skills.rows[0].scores;
           skillScore = Math.round(Object.values(scoresData).reduce((a, b) => a + b, 0) / Object.keys(scoresData).length);
         } else {
           // Default to 65 if we have skills assessment but no explicit score
@@ -71,26 +71,26 @@ router.get('/overview', authenticateToken, async (req, res) => {
 
     // 5. Recent activity log
     const recentActivity = [];
-    if (resumes.length > 0) {
+    if (resumes.rows.length > 0) {
       recentActivity.push({
-        id: `resume-${resumes[0].id}`,
+        id: `resume-${resumes.rows[0].id}`,
         action: `Uploaded Resume (Score: ${resumeScores[0]}/100)`,
-        date: formatDate(resumes[0].created_at)
+        date: formatDate(resumes.rows[0].created_at)
       });
     }
-    if (interviews.length > 0) {
+    if (interviews.rows.length > 0) {
       recentActivity.push({
-        id: `interview-${interviews[0].id}`,
-        action: `Completed Mock Interview (Score: ${interviews[0].score || 0}/100)`,
-        date: formatDate(interviews[0].created_at)
+        id: `interview-${interviews.rows[0].id}`,
+        action: `Completed Mock Interview (Score: ${interviews.rows[0].score || 0}/100)`,
+        date: formatDate(interviews.rows[0].created_at)
       });
     }
 
     // 6. AI-powered action items (based on readiness)
     const readinessScore = Math.round((latestResumeScore + avgInterviewScore + skillScore) / 3);
     const actionItems = generateActionItems(readinessScore, {
-      hasResume: resumes.length > 0,
-      hasInterviews: interviews.length > 0,
+      hasResume: resumes.rows.length > 0,
+      hasInterviews: interviews.rows.length > 0,
       jobsApplied: jobStats.total > 0,
       skillScore
     });
@@ -100,7 +100,7 @@ router.get('/overview', authenticateToken, async (req, res) => {
       readinessScore,
       resumeScore: latestResumeScore,
       resumeHistory: resumeScores.slice(0, 5).reverse(), // Last 5 scores, oldest first
-      interviewsCompleted: interviews.length,
+      interviewsCompleted: interviews.rows.length,
       avgInterviewScore,
       skillScore,
       jobsApplied: jobStats.total,

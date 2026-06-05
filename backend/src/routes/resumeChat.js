@@ -10,17 +10,17 @@ const { embedText, findTopSimilarChunks, chunkText } = require('../utils/embeddi
   try {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS resume_embeddings (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
-        resume_id INT NOT NULL,
-        chunk_index INT NOT NULL,
-        chunk_text LONGTEXT NOT NULL,
-        embedding JSON NOT NULL,
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        resume_id INTEGER NOT NULL,
+        chunk_index INTEGER NOT NULL,
+        chunk_text TEXT NOT NULL,
+        embedding JSONB NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (resume_id) REFERENCES resumes(id) ON DELETE CASCADE,
-        INDEX (user_id, resume_id)
-      )
+        FOREIGN KEY (resume_id) REFERENCES resumes(id) ON DELETE CASCADE
+      );
+      CREATE INDEX IF NOT EXISTS idx_resume_embeddings_user_resume ON resume_embeddings(user_id, resume_id);
     `);
     console.log('✅ resume_embeddings table ready');
   } catch (err) {
@@ -32,7 +32,7 @@ const { embedText, findTopSimilarChunks, chunkText } = require('../utils/embeddi
 async function embedAndStoreResume(userId, resumeId, resumeText) {
   try {
     // Clear old embeddings for this resume
-    await pool.query('DELETE FROM resume_embeddings WHERE resume_id = ?', [resumeId]);
+    await pool.query('DELETE FROM resume_embeddings WHERE resume_id = $1', [resumeId]);
 
     // Chunk the resume text
     const chunks = chunkText(resumeText, 500); // ~500 token chunks
@@ -45,7 +45,7 @@ async function embedAndStoreResume(userId, resumeId, resumeText) {
 
       if (embedding) {
         await pool.query(
-          'INSERT INTO resume_embeddings (user_id, resume_id, chunk_index, chunk_text, embedding) VALUES (?, ?, ?, ?, ?)',
+          'INSERT INTO resume_embeddings (user_id, resume_id, chunk_index, chunk_text, embedding) VALUES ($1, $2, $3, $4, $5)',
           [userId, resumeId, i, chunk, JSON.stringify(embedding)]
         );
       }
@@ -68,17 +68,17 @@ router.post('/chat', authenticateToken, async (req, res) => {
     }
 
     // Fetch all embeddings for this resume
-    const [embeddings] = await pool.query(
-      'SELECT chunk_text, embedding FROM resume_embeddings WHERE user_id = ? AND resume_id = ? ORDER BY chunk_index',
+    const embeddings = await pool.query(
+      'SELECT chunk_text, embedding FROM resume_embeddings WHERE user_id = $1 AND resume_id = $2 ORDER BY chunk_index',
       [userId, resumeId]
     );
 
-    if (embeddings.length === 0) {
+    if (embeddings.rows.length === 0) {
       return res.status(404).json({ error: 'Resume embeddings not found. Please re-upload your resume.' });
     }
 
     // Parse embeddings (stored as JSON strings)
-    const chunks = embeddings.map(e => ({
+    const chunks = embeddings.rows.map(e => ({
       text: e.chunk_text,
       embedding: typeof e.embedding === 'string' ? JSON.parse(e.embedding) : e.embedding
     }));

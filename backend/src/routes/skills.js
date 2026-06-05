@@ -127,8 +127,8 @@ router.post('/assessment', authenticateToken, async (req, res, next) => {
     }
 
     // Save to database
-    const [dbResult] = await pool.query(
-      'INSERT INTO skill_assessments (user_id, skills, strengths, gaps, role_matches) VALUES (?, ?, ?, ?, ?)',
+    const dbResult = await pool.query(
+      'INSERT INTO skill_assessments (user_id, skills, strengths, gaps, role_matches) VALUES ($1, $2, $3, $4, $5) RETURNING id',
       [
         req.user.id,
         JSON.stringify(answers),
@@ -138,11 +138,11 @@ router.post('/assessment', authenticateToken, async (req, res, next) => {
       ]
     );
 
-    const [rows] = await pool.query('SELECT * FROM skill_assessments WHERE id = ?', [dbResult.insertId]);
+    const rows = await pool.query('SELECT * FROM skill_assessments WHERE id = $1', [dbResult.rows[0].id]);
 
     // Return the enriched result
     res.json({
-      ...rows[0],
+      ...rows.rows[0],
       strengths: result.strengths,
       gaps: result.gaps,
       role_matches: result.role_matches,
@@ -158,8 +158,8 @@ router.post('/assessment', authenticateToken, async (req, res, next) => {
 // Get User History
 router.get('/history', authenticateToken, async (req, res, next) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM skill_assessments WHERE user_id = ? ORDER BY created_at DESC', [req.user.id]);
-    res.json(rows);
+    const rows = await pool.query('SELECT * FROM skill_assessments WHERE user_id = $1 ORDER BY created_at DESC', [req.user.id]);
+    res.json(rows.rows);
   } catch (err) {
     next(err);
   }

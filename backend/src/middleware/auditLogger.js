@@ -19,7 +19,7 @@ const auditLogger = (action, resource) => {
 
       try {
         await pool.query(
-          `INSERT INTO audit_logs (user_id, action, resource, details, ip_address) VALUES (?, ?, ?, ?, ?)`,
+          `INSERT INTO audit_logs (user_id, action, resource, details, ip_address) VALUES ($1, $2, $3, $4, $5)`,
           [userId, action, resource, JSON.stringify(details), req.ip || req.connection.remoteAddress]
         );
       } catch (err) {

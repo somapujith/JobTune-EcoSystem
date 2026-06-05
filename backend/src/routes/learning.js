@@ -9,11 +9,11 @@ const { callAI, extractJSON } = require('../utils/aiClient');
   try {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS learning_roadmaps (
-        id          INT AUTO_INCREMENT PRIMARY KEY,
-        user_id     INT NOT NULL,
-        gaps        JSON,
+        id          SERIAL PRIMARY KEY,
+        user_id     INTEGER NOT NULL,
+        gaps        JSONB,
         target_role VARCHAR(255) DEFAULT '',
-        roadmap     JSON,
+        roadmap     JSONB,
         ai_powered  BOOLEAN DEFAULT false,
         created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
@@ -147,12 +147,12 @@ router.post('/generate-roadmap', authenticateToken, async (req, res, next) => {
     }
 
     // Save to database
-    const [result] = await pool.query(
-      'INSERT INTO learning_roadmaps (user_id, gaps, target_role, roadmap, ai_powered) VALUES (?, ?, ?, ?, ?)',
+    const result = await pool.query(
+      'INSERT INTO learning_roadmaps (user_id, gaps, target_role, roadmap, ai_powered) VALUES ($1, $2, $3, $4, $5) RETURNING id',
       [req.user.id, JSON.stringify(gaps), targetRole || '', JSON.stringify(roadmap), aiPowered]
     );
 
-    res.json({ success: true, data: { id: result.insertId, roadmap, ai_powered: aiPowered } });
+    res.json({ success: true, data: { id: result.rows[0].id, roadmap, ai_powered: aiPowered } });
   } catch (err) {
     next(err);
   }
@@ -161,11 +161,11 @@ router.post('/generate-roadmap', authenticateToken, async (req, res, next) => {
 // GET /api/learning/roadmaps - get user's roadmaps
 router.get('/roadmaps', authenticateToken, async (req, res, next) => {
   try {
-    const [rows] = await pool.query(
-      'SELECT * FROM learning_roadmaps WHERE user_id = ? ORDER BY created_at DESC LIMIT 10',
+    const rows = await pool.query(
+      'SELECT * FROM learning_roadmaps WHERE user_id = $1 ORDER BY created_at DESC LIMIT 10',
       [req.user.id]
     );
-    const parsed = rows.map(r => ({
+    const parsed = rows.rows.map(r => ({
       ...r,
       gaps: typeof r.gaps === 'string' ? JSON.parse(r.gaps) : r.gaps,
       roadmap: typeof r.roadmap === 'string' ? JSON.parse(r.roadmap) : r.roadmap,

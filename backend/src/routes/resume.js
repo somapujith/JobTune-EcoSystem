@@ -28,36 +28,39 @@ const upload = multer({
 });
 
 // Ensure the resumes table exists with all required columns.
-// Uses ADD COLUMN per-column so existing tables get migrated automatically.
+// Uses CREATE TABLE IF NOT EXISTS for PostgreSQL compatibility.
 (async () => {
   try {
     // Base table (covers fresh installs)
     await pool.query(`
       CREATE TABLE IF NOT EXISTS resumes (
-        id           INT AUTO_INCREMENT PRIMARY KEY,
-        user_id      INT NOT NULL,
+        id           SERIAL PRIMARY KEY,
+        user_id      INTEGER NOT NULL,
         file_name    VARCHAR(255) NOT NULL DEFAULT 'resume.pdf',
-        file_size    INT DEFAULT 0,
-        scores       JSON,
-        sections     JSON,
-        suggestions  JSON,
-        overall_score INT DEFAULT 0,
+        file_size    INTEGER DEFAULT 0,
+        scores       JSONB,
+        sections     JSONB,
+        suggestions  JSONB,
+        overall_score INTEGER DEFAULT 0,
         created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
-    // Column migrations — safe to run every startup; ER_DUP_FIELDNAME is ignored
+    // Column migrations — safe to run every startup; column existence is checked
     const migrations = [
-      ['file_name',     'VARCHAR(255) NOT NULL DEFAULT "resume.pdf"'],
-      ['file_size',     'INT DEFAULT 0'],
-      ['suggestions',   'JSON'],
-      ['overall_score', 'INT DEFAULT 0'],
+      ['file_name',     'VARCHAR(255) NOT NULL DEFAULT \'resume.pdf\''],
+      ['file_size',     'INTEGER DEFAULT 0'],
+      ['suggestions',   'JSONB'],
+      ['overall_score', 'INTEGER DEFAULT 0'],
     ];
     for (const [col, def] of migrations) {
       try {
-        await pool.query(`ALTER TABLE resumes ADD COLUMN ${col} ${def}`);
+        await pool.query(`
+          ALTER TABLE resumes ADD COLUMN IF NOT EXISTS ${col} ${def}
+        `);
       } catch (e) {
-        if (e.code !== 'ER_DUP_FIELDNAME') throw e;
+        // Ignore column already exists errors
+        if (!e.message.includes('already exists')) throw e;
       }
     }
   } catch (err) {
@@ -235,9 +238,9 @@ router.post('/upload', authenticateToken, upload.single('resume'), async (req, r
     // Build contextual suggestions
     const suggestions = buildSuggestions(scores, sections, verbCount, metricMatches, techCount);
 
-    const [result] = await pool.query(
+    const result = await pool.query(
       `INSERT INTO resumes (user_id, file_name, file_size, scores, sections, suggestions, overall_score)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
       [
         req.user.id,
         fileName,
@@ -249,8 +252,8 @@ router.post('/upload', authenticateToken, upload.single('resume'), async (req, r
       ]
     );
 
-    const [rows] = await pool.query('SELECT * FROM resumes WHERE id = ?', [result.insertId]);
-    const resume = parseJsonFields(rows[0]);
+    const rows = await pool.query('SELECT * FROM resumes WHERE id = $1', [result.rows[0].id]);
+    const resume = parseJsonFields(rows.rows[0]);
 
     res.json({ success: true, data: resume });
   } catch (err) {
@@ -261,12 +264,12 @@ router.post('/upload', authenticateToken, upload.single('resume'), async (req, r
 // GET /api/resume/list — get this user's recent resumes
 router.get('/list', authenticateToken, async (req, res, next) => {
   try {
-    const [rows] = await pool.query(
+    const rows = await pool.query(
       `SELECT id, file_name, file_size, overall_score, scores, created_at
-       FROM resumes WHERE user_id = ? ORDER BY created_at DESC LIMIT 20`,
+       FROM resumes WHERE user_id = $1 ORDER BY created_at DESC LIMIT 20`,
       [req.user.id]
     );
-    res.json({ success: true, data: rows.map(parseJsonFields) });
+    res.json({ success: true, data: rows.rows.map(parseJsonFields) });
   } catch (err) {
     next(err);
   }
@@ -275,13 +278,13 @@ router.get('/list', authenticateToken, async (req, res, next) => {
 // GET /api/resume/scores — latest scores for the logged-in user
 router.get('/scores', authenticateToken, async (req, res, next) => {
   try {
-    const [rows] = await pool.query(
-      `SELECT scores, overall_score FROM resumes WHERE user_id = ? ORDER BY created_at DESC LIMIT 1`,
+    const rows = await pool.query(
+      `SELECT scores, overall_score FROM resumes WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
       [req.user.id]
     );
-    if (rows.length === 0) return res.json({ success: true, data: null });
+    if (rows.rows.length === 0) return res.json({ success: true, data: null });
 
-    const row = rows[0];
+    const row = rows.rows[0];
     res.json({
       success: true,
       data: {
@@ -297,14 +300,14 @@ router.get('/scores', authenticateToken, async (req, res, next) => {
 // GET /api/resume/:id — get a specific resume with full analysis
 router.get('/:id', authenticateToken, async (req, res, next) => {
   try {
-    const [rows] = await pool.query(
-      'SELECT * FROM resumes WHERE id = ? AND user_id = ?',
+    const rows = await pool.query(
+      'SELECT * FROM resumes WHERE id = $1 AND user_id = $2',
       [req.params.id, req.user.id]
     );
-    if (rows.length === 0) {
+    if (rows.rows.length === 0) {
       return res.status(404).json({ error: 'Resume not found' });
     }
-    res.json({ success: true, data: parseJsonFields(rows[0]) });
+    res.json({ success: true, data: parseJsonFields(rows.rows[0]) });
   } catch (err) {
     next(err);
   }
@@ -313,15 +316,15 @@ router.get('/:id', authenticateToken, async (req, res, next) => {
 // DELETE /api/resume/:id — delete a specific resume
 router.delete('/:id', authenticateToken, async (req, res, next) => {
   try {
-    const [result] = await pool.query(
-      'DELETE FROM resumes WHERE id = ? AND user_id = ?',
+    const result = await pool.query(
+      'DELETE FROM resumes WHERE id = $1 AND user_id = $2',
       [req.params.id, req.user.id]
     );
-    
-    if (result.affectedRows === 0) {
+
+    if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Resume not found or you do not have permission to delete it.' });
     }
-    
+
     res.json({ success: true, message: 'Resume deleted successfully.' });
   } catch (err) {
     next(err);

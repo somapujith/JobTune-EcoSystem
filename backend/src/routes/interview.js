@@ -9,12 +9,12 @@ const { callAI, extractJSON } = require('../utils/aiClient');
   try {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS mock_interviews (
-        id          INT AUTO_INCREMENT PRIMARY KEY,
-        user_id     INT NOT NULL,
+        id          SERIAL PRIMARY KEY,
+        user_id     INTEGER NOT NULL,
         role        VARCHAR(255) NOT NULL,
-        messages    JSON,
-        feedback    JSON,
-        score       INT DEFAULT 0,
+        messages    JSONB,
+        feedback    JSONB,
+        score       INTEGER DEFAULT 0,
         created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -145,15 +145,15 @@ router.post('/start', authenticateToken, async (req, res, next) => {
       { role: 'interviewer', content: response.next_question, type: response.question_type }
     ];
 
-    const [result] = await pool.query(
-      'INSERT INTO mock_interviews (user_id, role, messages, score) VALUES (?, ?, ?, ?)',
+    const result = await pool.query(
+      'INSERT INTO mock_interviews (user_id, role, messages, score) VALUES ($1, $2, $3, $4) RETURNING id',
       [req.user.id, targetRole, JSON.stringify(messages), 0]
     );
 
     res.json({
       success: true,
       data: {
-        interviewId: result.insertId,
+        interviewId: result.rows[0].id,
         question: response.next_question,
         question_type: response.question_type,
         tips: response.tips || [],
@@ -177,16 +177,16 @@ router.post('/:id/respond', authenticateToken, async (req, res, next) => {
     }
 
     // Fetch existing interview
-    const [rows] = await pool.query(
-      'SELECT * FROM mock_interviews WHERE id = ? AND user_id = ?',
+    const rows = await pool.query(
+      'SELECT * FROM mock_interviews WHERE id = $1 AND user_id = $2',
       [interviewId, req.user.id]
     );
 
-    if (rows.length === 0) {
+    if (rows.rows.length === 0) {
       return res.status(404).json({ error: 'Interview not found' });
     }
 
-    const interview = rows[0];
+    const interview = rows.rows[0];
     const messages = typeof interview.messages === 'string'
       ? JSON.parse(interview.messages) : interview.messages;
 
@@ -235,7 +235,7 @@ router.post('/:id/respond', authenticateToken, async (req, res, next) => {
     }) : null;
 
     await pool.query(
-      'UPDATE mock_interviews SET messages = ?, score = ?, feedback = ? WHERE id = ?',
+      'UPDATE mock_interviews SET messages = $1, score = $2, feedback = $3 WHERE id = $4',
       [JSON.stringify(messages), score, feedback, interviewId]
     );
 
@@ -262,11 +262,11 @@ router.post('/:id/respond', authenticateToken, async (req, res, next) => {
 // GET /api/interview/history
 router.get('/history', authenticateToken, async (req, res, next) => {
   try {
-    const [rows] = await pool.query(
-      'SELECT id, role, score, created_at FROM mock_interviews WHERE user_id = ? ORDER BY created_at DESC LIMIT 20',
+    const rows = await pool.query(
+      'SELECT id, role, score, created_at FROM mock_interviews WHERE user_id = $1 ORDER BY created_at DESC LIMIT 20',
       [req.user.id]
     );
-    res.json({ success: true, data: rows });
+    res.json({ success: true, data: rows.rows });
   } catch (err) {
     next(err);
   }

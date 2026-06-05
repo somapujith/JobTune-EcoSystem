@@ -9,17 +9,17 @@ const { callAI, extractJSON } = require('../utils/aiClient');
   try {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS career_roadmaps (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL,
         current_role VARCHAR(255),
         target_role VARCHAR(255) NOT NULL,
         timeframe VARCHAR(50),
-        roadmap JSON NOT NULL,
+        roadmap JSONB NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        INDEX (user_id)
-      )
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+      CREATE INDEX IF NOT EXISTS idx_career_roadmaps_user_id ON career_roadmaps(user_id);
     `);
     console.log('✅ career_roadmaps table ready');
   } catch (err) {
@@ -116,11 +116,11 @@ Return ONLY valid JSON in this exact format:
 
     // Save to database
     try {
-      const [result] = await pool.query(
-        'INSERT INTO career_roadmaps (user_id, current_role, target_role, timeframe, roadmap) VALUES (?, ?, ?, ?, ?)',
+      const result = await pool.query(
+        'INSERT INTO career_roadmaps (user_id, current_role, target_role, timeframe, roadmap) VALUES ($1, $2, $3, $4, $5) RETURNING id',
         [userId, currentRole || 'Fresher', targetRole, selectedTimeframe, JSON.stringify(roadmap)]
       );
-      roadmap.id = result.insertId;
+      roadmap.id = result.rows[0].id;
     } catch (dbErr) {
       console.warn('Could not save roadmap to database:', dbErr.message);
       // Continue anyway, return the roadmap
@@ -139,16 +139,16 @@ router.get('/roadmap/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
 
-    const [rows] = await pool.query(
-      'SELECT * FROM career_roadmaps WHERE id = ? AND user_id = ?',
+    const rows = await pool.query(
+      'SELECT * FROM career_roadmaps WHERE id = $1 AND user_id = $2',
       [id, userId]
     );
 
-    if (rows.length === 0) {
+    if (rows.rows.length === 0) {
       return res.status(404).json({ error: 'Roadmap not found' });
     }
 
-    const roadmap = rows[0];
+    const roadmap = rows.rows[0];
     roadmap.roadmap = typeof roadmap.roadmap === 'string'
       ? JSON.parse(roadmap.roadmap)
       : roadmap.roadmap;
@@ -165,16 +165,16 @@ router.get('/roadmap', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const [rows] = await pool.query(
-      'SELECT * FROM career_roadmaps WHERE user_id = ? ORDER BY created_at DESC LIMIT 1',
+    const rows = await pool.query(
+      'SELECT * FROM career_roadmaps WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
       [userId]
     );
 
-    if (rows.length === 0) {
+    if (rows.rows.length === 0) {
       return res.status(404).json({ error: 'No roadmap found. Generate one first.' });
     }
 
-    const roadmap = rows[0];
+    const roadmap = rows.rows[0];
     roadmap.roadmap = typeof roadmap.roadmap === 'string'
       ? JSON.parse(roadmap.roadmap)
       : roadmap.roadmap;
