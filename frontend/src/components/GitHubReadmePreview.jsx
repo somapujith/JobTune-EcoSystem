@@ -71,15 +71,6 @@ export default function GitHubReadmePreview({ markdown, onCopy, onDownload, copi
         />
       </div>
 
-      {/* Raw Markdown */}
-      <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-        <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Raw Markdown:</p>
-        <textarea
-          readOnly
-          value={markdown}
-          className="w-full h-32 p-3 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-lg border border-slate-200 dark:border-slate-700 font-mono text-xs"
-        />
-      </div>
     </div>
   );
 }
