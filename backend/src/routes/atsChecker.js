@@ -3,9 +3,6 @@ const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
-const { Packer, Document } = require('docx');
-const fs = require('fs');
-const path = require('path');
 const { callAI } = require('../utils/aiClient');
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
@@ -24,8 +21,7 @@ async function extractTextFromFile(file) {
       const xmlFile = zip.file('word/document.xml');
       if (!xmlFile) throw new Error('Invalid DOCX file');
       const xmlContent = await xmlFile.async('text');
-      const text = xmlContent.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-      return text;
+      return xmlContent.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
     } else {
       throw new Error('Unsupported file type');
     }
@@ -35,37 +31,36 @@ async function extractTextFromFile(file) {
   }
 }
 
-async function calculateATSScoreWithAI(resumeText, jobDescription) {
-  const systemPrompt = `You are an expert ATS (Applicant Tracking System) analyzer. Analyze the resume against the job description and provide a detailed ATS score analysis.
+async function analyzeResumeWithAI(resumeText, fileName) {
+  const systemPrompt = `You are an expert ATS (Applicant Tracking System) specialist. Analyze this resume for ATS-friendliness and overall quality.
 
-Return ONLY valid JSON (no markdown, no code blocks):
+Return ONLY valid JSON:
 {
-  "atsScore": number (0-100),
+  "atsScore": number (0-100, overall ATS optimization score),
   "scoreLabel": "Excellent|Good|Fair|Poor",
-  "analysis": {
-    "hardSkillMatch": number (0-100, % of required skills found),
-    "softSkillMatch": number (0-100, behavioral/soft skills),
-    "experienceMatch": number (0-100, relevant experience level),
-    "matchedSkills": [string array of skills that match],
-    "missingSkills": [string array of critical missing skills],
-    "strengths": [string array of resume strengths relevant to job],
-    "gaps": [string array of skill gaps to address]
+  "sections": {
+    "formatting": { score: number, feedback: string },
+    "structure": { score: number, feedback: string },
+    "keywords": { score: number, feedback: string },
+    "length": { score: number, feedback: string },
+    "clarity": { score: number, feedback: string }
   },
-  "recommendations": [string array of 3-4 actionable improvements]
+  "strengths": [string array, 3-4 items],
+  "improvements": [string array, 3-5 actionable items],
+  "atsIssues": [string array of critical ATS parsing issues if any, empty array if none]
 }`;
 
-  const userPrompt = `RESUME:
+  const userPrompt = `Analyze this resume for ATS optimization. Check: formatting (no tables/images/columns), structure (clear sections), keyword density, length (1-2 pages), clarity, and common ATS blocking issues.
+
+RESUME:
 ${resumeText}
 
-JOB DESCRIPTION:
-${jobDescription}
-
-Analyze this resume against the job description. Be strict but fair. Weight hard skills 50%, soft skills 30%, experience 20%.`;
+Score each section 0-100. Overall ATS score is weighted: formatting 25%, structure 25%, keywords 30%, length 10%, clarity 10%.`;
 
   const aiResult = await callAI({
     systemPrompt,
     userPrompt,
-    maxTokens: 800,
+    maxTokens: 1000,
     temperature: 0.3,
     model: process.env.LM_STUDIO_MODEL_INTERVIEW
   });
@@ -75,72 +70,68 @@ Analyze this resume against the job description. Be strict but fair. Weight hard
   }
 
   try {
-    const parsed = JSON.parse(aiResult.data);
-    return {
-      atsScore: parsed.atsScore,
-      scoreLabel: parsed.scoreLabel,
-      hardSkillMatch: parsed.analysis.hardSkillMatch,
-      softSkillMatch: parsed.analysis.softSkillMatch,
-      experienceMatch: parsed.analysis.experienceMatch,
-      matchedKeywords: parsed.analysis.matchedSkills,
-      missingKeywords: parsed.analysis.missingSkills,
-      strengths: parsed.analysis.strengths,
-      gaps: parsed.analysis.gaps,
-      recommendations: parsed.recommendations,
-      aiPowered: true
-    };
+    return JSON.parse(aiResult.data);
   } catch (e) {
-    console.warn('Failed to parse AI response, using fallback');
-    return calculateFallbackScore(resumeText, jobDescription);
+    console.warn('Failed to parse AI response');
+    throw e;
   }
 }
 
-function calculateFallbackScore(resumeText, jobDescription) {
-  const techKeywords = [
-    'react', 'vue', 'angular', 'svelte', 'nextjs', 'nuxt',
-    'nodejs', 'python', 'java', 'csharp', 'golang', 'rust',
-    'typescript', 'javascript', 'sql', 'mongodb', 'postgresql',
-    'docker', 'kubernetes', 'aws', 'azure', 'gcp',
-    'git', 'cicd', 'jenkins', 'github', 'gitlab',
-    'agile', 'scrum', 'rest', 'graphql', 'api',
-    'html', 'css', 'tailwind', 'bootstrap', 'sass',
-    'express', 'django', 'flask', 'spring', 'fastapi',
-    'redis', 'elasticsearch', 'rabbitmq', 'kafka'
-  ];
+function calculateFallbackScore(resumeText) {
+  const wordCount = resumeText.split(/\s+/).length;
+  const hasMultipleColumns = /\s{2,}/.test(resumeText);
+  const hasTables = /\||\+\-/.test(resumeText);
+  const hasImages = /image|photo|figure/.test(resumeText.toLowerCase());
+  const hasContact = /email|phone|linkedin|github/.test(resumeText.toLowerCase());
+  const hasExperience = /experience|worked|developed/.test(resumeText.toLowerCase());
+  const hasEducation = /bachelor|master|degree|university|college/.test(resumeText.toLowerCase());
 
-  const resumeLower = resumeText.toLowerCase();
-  const jobLower = jobDescription.toLowerCase();
+  let formattingScore = 100;
+  if (hasMultipleColumns) formattingScore -= 25;
+  if (hasTables) formattingScore -= 20;
+  if (hasImages) formattingScore -= 30;
 
-  const resumeKeywords = techKeywords.filter(kw => resumeLower.includes(kw));
-  const jobKeywords = techKeywords.filter(kw => jobLower.includes(kw));
+  let structureScore = 100;
+  if (!hasContact) structureScore -= 20;
+  if (!hasExperience) structureScore -= 25;
+  if (!hasEducation) structureScore -= 15;
 
-  const matchedKeywords = jobKeywords.filter(kw => resumeKeywords.includes(kw));
-  const missingKeywords = jobKeywords.filter(kw => !resumeKeywords.includes(kw));
+  const keywordsScore = Math.min((wordCount / 500) * 100, 100);
+  const lengthScore = wordCount > 250 && wordCount < 1000 ? 100 : wordCount > 1500 ? 60 : 80;
+  const clarityScore = resumeText.length > 500 ? 75 : 60;
 
-  const hardSkillScore = jobKeywords.length > 0 ? (matchedKeywords.length / jobKeywords.length) * 100 : 50;
-  const softSkillScore = 50;
-  const experienceScore = resumeLower.includes('experience') || resumeLower.includes('project') ? 60 : 30;
+  const atsScore = Math.round(
+    (formattingScore * 0.25) +
+    (structureScore * 0.25) +
+    (keywordsScore * 0.3) +
+    (lengthScore * 0.1) +
+    (clarityScore * 0.1)
+  );
 
-  const atsScore = Math.round((hardSkillScore * 0.5) + (softSkillScore * 0.3) + (experienceScore * 0.2));
   const scoreLabel = atsScore >= 80 ? 'Excellent' : atsScore >= 60 ? 'Good' : atsScore >= 40 ? 'Fair' : 'Poor';
 
   return {
     atsScore,
     scoreLabel,
-    hardSkillMatch: Math.round(hardSkillScore),
-    softSkillMatch: Math.round(softSkillScore),
-    experienceMatch: Math.round(experienceScore),
-    recommendations: generateRecommendations(missingKeywords, resumeText)
+    sections: {
+      formatting: { score: Math.min(formattingScore, 100), feedback: 'Resume formatting' },
+      structure: { score: Math.min(structureScore, 100), feedback: 'Section structure' },
+      keywords: { score: Math.min(keywordsScore, 100), feedback: 'Keyword optimization' },
+      length: { score: lengthScore, feedback: 'Resume length' },
+      clarity: { score: clarityScore, feedback: 'Content clarity' }
+    },
+    strengths: ['Resume exists', 'Parseable format'],
+    improvements: ['Ensure ATS-friendly formatting', 'Add more specific achievements'],
+    atsIssues: [],
+    aiPowered: false
   };
 }
 
 router.post('/check-ats-score', authenticateToken, upload.single('resume'), async (req, res) => {
   try {
-    const { jobDescription } = req.body;
-
-    if (!req.file || !jobDescription) {
+    if (!req.file) {
       return res.status(400).json({
-        error: 'Resume file and job description are required'
+        error: 'Resume file is required'
       });
     }
 
@@ -159,13 +150,13 @@ router.post('/check-ats-score', authenticateToken, upload.single('resume'), asyn
       });
     }
 
-    // Use AI-powered analysis, fallback to basic calculation if AI fails
     let result;
     try {
-      result = await calculateATSScoreWithAI(resumeText, jobDescription);
+      const aiAnalysis = await analyzeResumeWithAI(resumeText, req.file.originalname);
+      result = { ...aiAnalysis, aiPowered: true };
     } catch (err) {
       console.warn('AI analysis failed, using fallback:', err.message);
-      result = calculateFallbackScore(resumeText, jobDescription);
+      result = calculateFallbackScore(resumeText);
     }
 
     res.json({

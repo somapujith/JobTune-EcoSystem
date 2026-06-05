@@ -30,8 +30,8 @@ export default function ATSChecker() {
 
   const handleCheck = async (e) => {
     e.preventDefault();
-    if (!resumeFile || !jobDescription.trim()) {
-      setError('Resume file and job description are required');
+    if (!resumeFile) {
+      setError('Please upload your resume');
       return;
     }
 
@@ -40,7 +40,6 @@ export default function ATSChecker() {
     try {
       const formData = new FormData();
       formData.append('resume', resumeFile);
-      formData.append('jobDescription', jobDescription);
 
       const { data } = await api.post('/jobs/check-ats-score', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -69,90 +68,52 @@ export default function ATSChecker() {
 
   const loadTestData = () => {
     // Create a test resume file
-    const testResumeText = `John Doe
-Senior Software Engineer
+    const testResumeText = `PUJITH KRISHNA SOMA
+Email: somapujith@gmail.com | Phone: +91 7993429539 | LinkedIn: linkedin.com/in/pujith | GitHub: github.com/somapujith
 
-CONTACT
-Email: john.doe@example.com | Phone: (555) 123-4567 | LinkedIn: linkedin.com/in/johndoe | GitHub: github.com/johndoe
+PROFESSIONAL SUMMARY
+B.Tech 2nd-year student with strong skills in coding and modern web development. Built multiple projects using React, JavaScript, and other advanced frontend tools. Proficient in Python, UI/UX design, and problem-solving. Quick learner motivated to gain real-world experience through internships and technical projects.
 
-SUMMARY
-Experienced Full Stack Engineer with 6 years building scalable web applications using React, Node.js, and cloud technologies. Passionate about clean code, performance optimization, and mentoring junior developers.
+TECHNICAL SKILLS
+Languages: JavaScript, Python, Java, C++
+Frontend: React, HTML5, CSS3, Tailwind
+Backend: Node.js, Express, MongoDB
+Database: PostgreSQL, SQL
+DevOps: Git, GitHub, Docker
+Tools: VS Code, Figma, Photoshop
 
 EXPERIENCE
-Senior Software Engineer | TechCorp (2021 - Present)
-- Led development of microservices architecture using Node.js and Docker
-- Implemented React components with TypeScript achieving 95% test coverage
-- Optimized database queries reducing load time by 40%
-- Mentored 3 junior developers on best practices
+Web Developer Intern | TechStartup (Jun 2024 - Present)
+- Developed React components for e-commerce platform
+- Built responsive UI with Tailwind CSS
+- Integrated backend APIs using Axios
+- Collaborated with team using Git version control
 
-Full Stack Developer | WebSolutions (2018 - 2021)
-- Built RESTful APIs using Express.js and MongoDB
-- Developed responsive UI with React and Tailwind CSS
-- Deployed applications on AWS EC2 and S3
-- Collaborated with cross-functional teams using Agile/Scrum
-
-Junior Web Developer | StartupXYZ (2016 - 2018)
-- Created HTML/CSS templates and basic JavaScript interactions
-- Assisted in database design and optimization
-- Participated in code reviews and testing
-
-SKILLS
-Languages: JavaScript, TypeScript, Python, SQL
-Frontend: React, Vue.js, HTML5, CSS3, Tailwind CSS
-Backend: Node.js, Express, MongoDB, PostgreSQL, REST APIs
-DevOps: Docker, Kubernetes, AWS, Git, CI/CD
-Tools: Jest, Git, Linux, Postman, VS Code
+Freelance Developer | Self-employed (Jan 2024 - Present)
+- Created 3 full-stack web applications
+- Managed projects from design to deployment
+- Optimized performance and UX
 
 EDUCATION
-Bachelor of Science in Computer Science
-University of Technology (2016)
+B.Tech in Computer Science | University (2024-2028) CGPA: 8.9
+Intermediate | Excellencia Junior College (2024) - 77%
+CBSE 10th | Vikas The Concept School (2022) - 81%
+
+PROJECTS
+JobTube Eco System - Full stack platform with React, Node.js, MongoDB
+Resume Optimizer - AI-powered resume enhancement tool
+Portfolio Website - Personal portfolio with responsive design
 
 CERTIFICATIONS
-AWS Certified Solutions Architect - Associate (2022)
-Scrum Master Certification (2021)`;
+Google Cloud Associate Cloud Engineer (2024)
 
-    const testJobDescription = `Senior Software Engineer - Full Stack
+ADDITIONAL SKILLS
+UI/UX Design, Figma, Photoshop, Video Editing, Project Management`;
 
-About the Role
-We are seeking an experienced Senior Software Engineer to join our growing team. You will be responsible for designing and implementing scalable solutions, mentoring junior developers, and driving technical excellence across our organization.
-
-Key Responsibilities
-- Design and develop high-performance web applications using modern frameworks
-- Lead architectural decisions and code reviews
-- Mentor junior team members and contribute to team growth
-- Collaborate with product managers and designers to deliver user-centric solutions
-- Implement and maintain CI/CD pipelines
-- Optimize application performance and scalability
-
-Required Qualifications
-- 5+ years of professional software development experience
-- Strong proficiency in JavaScript/TypeScript and React
-- Backend development experience with Node.js or similar frameworks
-- Experience with SQL and NoSQL databases (PostgreSQL, MongoDB)
-- Understanding of RESTful API design and microservices architecture
-- Experience with Docker and cloud platforms (AWS, GCP, or Azure)
-- Strong problem-solving skills and attention to detail
-
-Nice-to-Have Qualifications
-- Experience with Kubernetes
-- AWS or GCP certifications
-- Experience with GraphQL
-- Contributing to open-source projects
-- Knowledge of machine learning concepts
-
-Compensation & Benefits
-- Competitive salary: $120,000 - $160,000
-- Health insurance and 401(k) matching
-- Remote work flexibility
-- Professional development budget
-- Generous PTO policy`;
-
-    // Create test file
     const blob = new Blob([testResumeText], { type: 'application/pdf' });
     const testFile = new File([blob], 'test_resume.pdf', { type: 'application/pdf' });
 
     setResumeFile(testFile);
-    setJobDescription(testJobDescription);
     setError('');
     setResult(null);
   };
@@ -167,7 +128,7 @@ Compensation & Benefits
           ATS Score Checker
         </h1>
         <p className="text-lg text-on-surface-variant font-medium max-w-2xl mx-auto">
-          Check how well your resume matches a job description. Get a score and recommendations for improvement.
+          Upload your resume and get an instant AI-powered analysis of your ATS optimization. Identify issues and get actionable improvements.
         </p>
       </div>
 
@@ -179,17 +140,18 @@ Compensation & Benefits
         </h3>
         <div className="space-y-3 text-slate-700 dark:text-slate-300">
           <p><strong>1. Upload Your Resume:</strong> Click the upload area and select your PDF or DOCX resume file (max 5MB)</p>
-          <p><strong>2. Paste Job Description:</strong> Copy and paste the complete job posting you want to match against</p>
+          <p><strong>2. Click "Check ATS Score":</strong> Our AI instantly analyzes your resume for ATS optimization</p>
           <div>
-            <p className="mb-2"><strong>3. Get Your Score:</strong> The tool analyzes your resume against the job and calculates:</p>
+            <p className="mb-2"><strong>3. Get Detailed Analysis:</strong> Receive scores across 5 key areas:</p>
             <ul className="list-disc list-inside ml-4 space-y-1">
-              <li><strong>Overall ATS Score (0-100):</strong> How well your resume matches the job</li>
-              <li><strong>Hard Skills Match (%):</strong> Technical skills alignment</li>
-              <li><strong>Soft Skills Match (%):</strong> Behavioral skills alignment</li>
-              <li><strong>Experience Match (%):</strong> Years of experience fit</li>
+              <li><strong>Formatting (25%):</strong> ATS-friendly layout, no tables/images/columns</li>
+              <li><strong>Structure (25%):</strong> Clear sections and proper organization</li>
+              <li><strong>Keywords (30%):</strong> Keyword density and optimization</li>
+              <li><strong>Length (10%):</strong> Optimal resume length (1-2 pages)</li>
+              <li><strong>Clarity (10%):</strong> Clear writing and readability</li>
             </ul>
           </div>
-          <p><strong>4. Review Results:</strong> See which keywords matched (✓) and which are missing (✗), plus actionable recommendations</p>
+          <p><strong>4. Review Feedback:</strong> See strengths, get actionable improvements, and identify any ATS-blocking issues</p>
         </div>
       </div>
 
@@ -200,22 +162,22 @@ Compensation & Benefits
         </div>
       )}
 
-      <form onSubmit={handleCheck} className="max-w-3xl mx-auto mb-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-100 dark:border-slate-700 shadow-sm">
+      <form onSubmit={handleCheck} className="max-w-2xl mx-auto mb-12">
+        <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-100 dark:border-slate-700 shadow-sm">
           {/* Resume Section - File Upload */}
           <div>
-            <label className="block text-sm font-bold text-on-surface mb-3">Your Resume (PDF or DOCX)</label>
+            <label className="block text-sm font-bold text-on-surface mb-3">Upload Your Resume</label>
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-8 text-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-16 text-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             >
               {resumeFile ? (
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-blue-600 text-3xl">description</span>
+                  <div className="flex items-center gap-4">
+                    <span className="material-symbols-outlined text-blue-600 text-5xl">description</span>
                     <div className="text-left">
-                      <p className="font-semibold text-on-surface">{resumeFile.name}</p>
-                      <p className="text-xs text-slate-400">{(resumeFile.size / 1024).toFixed(2)} KB</p>
+                      <p className="font-semibold text-on-surface text-lg">{resumeFile.name}</p>
+                      <p className="text-sm text-slate-400">{(resumeFile.size / 1024).toFixed(2)} KB</p>
                     </div>
                   </div>
                   <button
@@ -231,9 +193,9 @@ Compensation & Benefits
                 </div>
               ) : (
                 <div>
-                  <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-on-surface">Click to upload resume</p>
-                  <p className="text-xs text-slate-400 mt-1">PDF or DOCX, max 5MB</p>
+                  <Upload className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                  <p className="text-lg font-semibold text-on-surface">Click to upload resume</p>
+                  <p className="text-sm text-slate-400 mt-2">PDF or DOCX, max 5MB</p>
                 </div>
               )}
             </div>
@@ -244,19 +206,6 @@ Compensation & Benefits
               onChange={handleFileUpload}
               className="hidden"
             />
-          </div>
-
-          {/* Job Description Section */}
-          <div>
-            <label className="block text-sm font-bold text-on-surface mb-3">Job Description</label>
-            <textarea
-              value={jobDescription}
-              onChange={(e) => setJobDescription(e.target.value)}
-              placeholder="Paste the job description here..."
-              rows={12}
-              className="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-on-surface dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-            />
-            <p className="text-xs text-slate-400 mt-2">{jobDescription.length} characters</p>
           </div>
         </div>
 
@@ -306,52 +255,37 @@ Compensation & Benefits
               </div>
             </div>
 
-            {/* Component Scores */}
-            <div className="grid grid-cols-3 gap-4">
-              {[
-                { label: 'Hard Skills', score: result.hardSkillMatch, icon: '💻' },
-                { label: 'Soft Skills', score: result.softSkillMatch, icon: '🤝' },
-                { label: 'Experience', score: result.experienceMatch, icon: '📈' }
-              ].map(item => (
-                <div key={item.label} className="bg-white dark:bg-slate-700 rounded-xl p-4">
-                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">{item.label}</p>
-                  <p className="text-2xl font-black text-on-surface">{item.score}%</p>
-                </div>
-              ))}
-            </div>
+            {/* Section Scores */}
+            {result.sections && (
+              <div className="grid grid-cols-2 gap-3 mt-6">
+                {Object.entries(result.sections).map(([key, section]) => (
+                  <div key={key} className="bg-white dark:bg-slate-700 rounded-xl p-4">
+                    <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2 capitalize">{section.feedback}</p>
+                    <div className="flex items-end gap-2">
+                      <p className="text-3xl font-black text-on-surface">{section.score}</p>
+                      <p className="text-xs text-slate-500 mb-1">%</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Matched Keywords */}
-          {result.matchedKeywords.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-emerald-200 dark:border-emerald-900">
+          {/* ATS Issues */}
+          {result.atsIssues && result.atsIssues.length > 0 && (
+            <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-red-200 dark:border-red-900">
               <div className="flex items-center gap-3 mb-4">
-                <CheckCircle2 className="w-6 h-6 text-emerald-600" />
-                <h3 className="text-xl font-bold text-emerald-600">Matched Keywords ({result.matchedKeywords.length})</h3>
+                <AlertCircle className="w-6 h-6 text-red-600" />
+                <h3 className="text-xl font-bold text-red-600">ATS-Blocking Issues ({result.atsIssues.length})</h3>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {result.matchedKeywords.map(keyword => (
-                  <span key={keyword} className="px-3 py-1 bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 rounded-full text-sm font-semibold">
-                    ✓ {keyword}
-                  </span>
+              <ul className="space-y-2">
+                {result.atsIssues.map((issue, i) => (
+                  <li key={i} className="flex gap-3 text-slate-700 dark:text-slate-300">
+                    <span className="text-red-600 flex-shrink-0">⚠</span>
+                    <span>{issue}</span>
+                  </li>
                 ))}
-              </div>
-            </div>
-          )}
-
-          {/* Missing Keywords */}
-          {result.missingKeywords.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-rose-200 dark:border-rose-900">
-              <div className="flex items-center gap-3 mb-4">
-                <AlertCircle className="w-6 h-6 text-rose-600" />
-                <h3 className="text-xl font-bold text-rose-600">Missing Keywords ({result.missingKeywords.length})</h3>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {result.missingKeywords.map(keyword => (
-                  <span key={keyword} className="px-3 py-1 bg-rose-100 dark:bg-rose-900 text-rose-700 dark:text-rose-300 rounded-full text-sm font-semibold">
-                    ✗ {keyword}
-                  </span>
-                ))}
-              </div>
+              </ul>
             </div>
           )}
 
@@ -373,18 +307,18 @@ Compensation & Benefits
             </div>
           )}
 
-          {/* AI Gaps */}
-          {result.gaps && result.gaps.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-orange-200 dark:border-orange-900">
+          {/* Improvements */}
+          {result.improvements && result.improvements.length > 0 && (
+            <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-blue-200 dark:border-blue-900">
               <div className="flex items-center gap-3 mb-4">
-                <span className="material-symbols-outlined text-orange-600 text-xl">warning</span>
-                <h3 className="text-xl font-bold text-orange-600">Skill Gaps (AI Analysis)</h3>
+                <span className="material-symbols-outlined text-blue-600 text-xl">lightbulb</span>
+                <h3 className="text-xl font-bold text-blue-600">How to Improve</h3>
               </div>
               <ul className="space-y-2">
-                {result.gaps.map((gap, i) => (
+                {result.improvements.map((improvement, i) => (
                   <li key={i} className="flex gap-3 text-slate-700 dark:text-slate-300">
-                    <span className="text-orange-600 flex-shrink-0">!</span>
-                    <span>{gap}</span>
+                    <span className="text-blue-600 flex-shrink-0">{i + 1}.</span>
+                    <span>{improvement}</span>
                   </li>
                 ))}
               </ul>
