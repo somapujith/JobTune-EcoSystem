@@ -11,6 +11,9 @@ const adminRoutes = require('./routes/admin');
 const interviewRoutes = require('./routes/interview');
 const resumeChatRoutes = require('./routes/resumeChat');
 const careerRoadmapRoutes = require('./routes/careerRoadmap');
+const atsCheckerRoutes = require('./routes/atsChecker');
+const jobAnalyzerRoutes = require('./routes/jobAnalyzer');
+const coverLetterRoutes = require('./routes/coverLetter');
 const { errorHandler } = require('./middleware/errorHandler');
 const { auditLogger } = require('./middleware/auditLogger');
 const path = require('path');
@@ -36,6 +39,9 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/interview', interviewRoutes);
 app.use('/api/resume-chat', resumeChatRoutes);
 app.use('/api/career', careerRoadmapRoutes);
+app.use('/api/jobs', atsCheckerRoutes);
+app.use('/api/jobs', jobAnalyzerRoutes);
+app.use('/api/jobs', coverLetterRoutes);
 
 // Admin UI Route
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));

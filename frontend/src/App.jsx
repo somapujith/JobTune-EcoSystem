@@ -22,6 +22,9 @@ import ResumeHistory from './pages/ResumeHistory';
 import ResumeComparison from './pages/ResumeComparison';
 import ResumeSend from './pages/ResumeSend';
 import CareerRoadmap from './pages/CareerRoadmap';
+import ATSChecker from './pages/ATSChecker';
+import JobAnalyzer from './pages/JobAnalyzer';
+import CoverLetterGenerator from './pages/CoverLetterGenerator';
 import useAuthStore from './store/useAuthStore';
 
 function ProtectedRoute({ children, requireOnboarding = false }) {
@@ -83,6 +86,9 @@ function App() {
           <Route path="jobmatch" element={<JobMatcher />} />
           <Route path="jobs" element={<JobTracker />} />
           <Route path="career" element={<CareerRoadmap />} />
+          <Route path="job-analyzer" element={<JobAnalyzer />} />
+          <Route path="ats-checker" element={<ATSChecker />} />
+          <Route path="cover-letter" element={<CoverLetterGenerator />} />
         </Route>
         <Route path="/login" element={<Login />} />
       </Routes>

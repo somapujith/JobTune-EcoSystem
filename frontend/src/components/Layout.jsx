@@ -9,6 +9,11 @@ const NAV_GROUPS = [
     { label: 'Job Tracker',      path: '/jobs',      desc: 'Track applications' },
     { label: 'Job Matcher',      path: '/jobmatch',  desc: 'Find matching roles' },
   ]},
+  { label: 'Job Tools', items: [
+    { label: 'Job Analyzer',     path: '/job-analyzer', desc: 'Extract skills from postings' },
+    { label: 'ATS Checker',      path: '/ats-checker',  desc: 'Resume-job match score' },
+    { label: 'Cover Letter',     path: '/cover-letter', desc: 'AI-generated letters' },
+  ]},
   { label: 'Portfolios', items: [
     { label: 'GitHub Profile',   path: '/github',    desc: 'Audit & generate README' },
     { label: 'LinkedIn Profile', path: '/linkedin',  desc: 'Score your LinkedIn presence' },
