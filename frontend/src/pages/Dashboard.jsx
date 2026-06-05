@@ -55,7 +55,7 @@ export default function Dashboard() {
            </h1>
            <p className="text-slate-500 mt-2 font-medium">Your professional ecosystem is currenty <span className="text-emerald-600">45% optimized</span>.</p>
         </div>
-        <div className="flex items-center gap-4 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+        <div className="flex items-center gap-4 glass-card p-2 rounded-2xl">
            <div className="flex -space-x-2 px-2">
               {[1, 2, 3].map(i => (
                  <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center overflow-hidden">
@@ -79,7 +79,7 @@ export default function Dashboard() {
           { label: 'Resume Score', val: overview ? `${overview.resumeScore}/100` : '70/100', icon: Star, color: 'text-amber-600', bg: 'bg-amber-50' },
           { label: 'Interviews Done', val: overview ? overview.interviewsCompleted || '0' : '0', icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
         ].map((stat, i) => (
-          <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 group hover:border-blue-200 transition-colors">
+          <div key={i} className="glass-card p-6 rounded-3xl flex items-center gap-5 group transition-colors">
             <div className={`w-14 h-14 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
               <stat.icon className="w-7 h-7" />
             </div>
@@ -105,7 +105,7 @@ export default function Dashboard() {
                  tool.locked ? (
                    <div 
                     key={i} 
-                    className="flex items-center justify-between p-6 bg-slate-50 rounded-3xl border border-slate-100 cursor-not-allowed opacity-75"
+                    className="flex items-center justify-between p-6 glass-card rounded-3xl cursor-not-allowed opacity-75"
                     title="Undergoing maintenance"
                    >
                      <div className="flex items-center gap-4">
@@ -122,7 +122,7 @@ export default function Dashboard() {
                      <Lock className="w-5 h-5 text-slate-300" />
                    </div>
                  ) : (
-                   <Link key={i} to={tool.path} className="group flex items-center justify-between p-6 bg-white rounded-3xl border border-slate-200/60 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300">
+                   <Link key={i} to={tool.path} className="group flex items-center justify-between p-6 glass-card rounded-3xl transition-all duration-300">
                       <div className="flex items-center gap-4">
                          <div className={`w-12 h-12 ${tool.color} rounded-xl flex items-center justify-center text-white shadow-lg shadow-${tool.color.split('-')[1]}-500/20`}>
                             <tool.icon className="w-6 h-6" />
@@ -164,14 +164,14 @@ export default function Dashboard() {
                        </p>
                     </div>
                  </div>
-                 <Link to="/skills" className="flex items-center justify-center gap-2 w-full py-4 bg-white text-slate-900 rounded-2xl font-black hover:bg-slate-50 transition-all active:scale-95 text-sm">
+                 <Link to="/skills" className="flex items-center justify-center gap-2 w-full py-4 glass-card text-slate-900 rounded-2xl font-black hover:bg-white/80 transition-all active:scale-95 text-sm">
                     Continue Placement Path <ArrowRight className="w-4 h-4" />
                  </Link>
               </div>
            </div>
 
            {/* Activity Log */}
-           <div className="bg-white rounded-[2rem] border border-slate-100 p-8">
+           <div className="glass-card rounded-3xl p-8">
               <div className="flex items-center justify-between mb-6">
                  <h4 className="font-black text-slate-900 tracking-tight">Recent Activity</h4>
                  <Clock className="w-4 h-4 text-slate-400" />

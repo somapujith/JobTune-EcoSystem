@@ -11,10 +11,10 @@ function getScoreColor(score) {
 }
 
 function getScoreBg(score) {
-  if (score >= 80) return 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/55';
-  if (score >= 60) return 'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900/55';
-  if (score >= 40) return 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/55';
-  return 'bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/55';
+  if (score >= 80) return 'border-emerald-200/50 dark:border-emerald-900/50';
+  if (score >= 60) return 'border-blue-200/50 dark:border-blue-900/50';
+  if (score >= 40) return 'border-amber-200/50 dark:border-amber-900/50';
+  return 'border-rose-200/50 dark:border-rose-900/50';
 }
 
 export default function JobFitAnalysis() {
@@ -113,7 +113,7 @@ export default function JobFitAnalysis() {
       </div>
 
       {error && (
-        <div className="max-w-3xl mx-auto mb-6 bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/55 p-4 rounded-2xl text-rose-600 dark:text-rose-400 text-sm font-medium flex items-center gap-3">
+        <div className="max-w-3xl mx-auto mb-6 glass-card border-rose-200/50 p-4 rounded-2xl text-rose-600 dark:text-rose-400 text-sm font-medium flex items-center gap-3">
           <AlertCircle className="w-5 h-5 flex-shrink-0" />
           {error}
         </div>
@@ -121,7 +121,7 @@ export default function JobFitAnalysis() {
 
       <form onSubmit={handleAnalyze} className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-12">
         {/* Resume Input Area */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col">
+        <div className="glass-card p-6 rounded-3xl flex flex-col">
           <div className="flex justify-between items-center mb-4">
             <label className="block text-sm font-bold text-on-surface">Your Resume</label>
             <button
@@ -188,7 +188,7 @@ export default function JobFitAnalysis() {
         </div>
 
         {/* Job Description Input Area */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+        <div className="glass-card p-6 rounded-3xl flex flex-col justify-between">
           <div className="flex-1 flex flex-col mb-4">
             <label className="block text-sm font-bold text-on-surface mb-2">Job Description</label>
             <textarea
@@ -226,7 +226,7 @@ export default function JobFitAnalysis() {
         <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           
           {/* Main Score Board */}
-          <div className={`border rounded-3xl p-8 shadow-sm flex flex-col md:flex-row items-center gap-8 ${getScoreBg(report.score)}`}>
+          <div className={`glass-card rounded-3xl p-8 flex flex-col md:flex-row items-center gap-8 ${getScoreBg(report.score)}`}>
             
             {/* Score Ring Display */}
             <div className="relative shrink-0">
@@ -278,7 +278,7 @@ export default function JobFitAnalysis() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             
             {/* Recharts Radar Chart */}
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm md:col-span-5 flex flex-col items-center justify-center min-h-[300px]">
+            <div className="glass-card p-6 rounded-3xl md:col-span-5 flex flex-col items-center justify-center min-h-[300px]">
               <h3 className="text-base font-bold text-on-surface mb-4 self-start font-headline">Match Profile</h3>
               <ResponsiveContainer width="100%" height={240}>
                 <RadarChart cx="50%" cy="50%" outerRadius="75%" data={radarData}>
@@ -295,7 +295,7 @@ export default function JobFitAnalysis() {
             <div className="space-y-4 md:col-span-7">
               
               {/* Domain Fit details */}
-              <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-start gap-4">
+              <div className="glass-card p-5 rounded-2xl flex items-start gap-4">
                 <div className="p-3 bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 rounded-xl shrink-0">
                   <Briefcase className="w-5 h-5" />
                 </div>
@@ -311,7 +311,7 @@ export default function JobFitAnalysis() {
               </div>
 
               {/* Seniority Fit details */}
-              <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-start gap-4">
+              <div className="glass-card p-5 rounded-2xl flex items-start gap-4">
                 <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 rounded-xl shrink-0">
                   <Award className="w-5 h-5" />
                 </div>
@@ -327,7 +327,7 @@ export default function JobFitAnalysis() {
               </div>
 
               {/* Skill Overlap details */}
-              <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-start gap-4">
+              <div className="glass-card p-5 rounded-2xl flex items-start gap-4">
                 <div className="p-3 bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 rounded-xl shrink-0">
                   <Code className="w-5 h-5" />
                 </div>

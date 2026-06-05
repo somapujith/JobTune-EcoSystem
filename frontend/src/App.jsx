@@ -17,6 +17,7 @@ import ProjectIdeas from './pages/ProjectIdeas';
 import MockInterview from './pages/MockInterview';
 import JobMatcher from './pages/JobMatcher';
 import JobTracker from './pages/JobTracker';
+import JobDiscovery from './pages/JobDiscovery';
 import ResumeBuilder from './pages/ResumeBuilder';
 import ResumeHistory from './pages/ResumeHistory';
 import ResumeComparison from './pages/ResumeComparison';
@@ -86,6 +87,7 @@ function App() {
           />
           <Route path="interview" element={<MockInterview />} />
           <Route path="jobmatch" element={<JobMatcher />} />
+          <Route path="discover" element={<JobDiscovery />} />
           <Route path="jobs" element={<JobTracker />} />
           <Route path="career" element={<CareerRoadmap />} />
           <Route path="job-analyzer" element={<JobAnalyzer />} />

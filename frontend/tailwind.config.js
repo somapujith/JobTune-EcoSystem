@@ -62,12 +62,30 @@ export default {
         "xl": "0.75rem",
         "2xl": "1rem",
         "3xl": "1.5rem",
+        "4xl": "2rem",
         "full": "9999px"
       },
       fontFamily: {
         "headline": ["'Plus Jakarta Sans'", "sans-serif"],
         "body": ["'Inter'", "sans-serif"],
         "label": ["'Inter'", "sans-serif"]
+      },
+      boxShadow: {
+        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+        'glass-hover': '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+        'glass-inset': 'inset 0 0 0 1px rgba(255, 255, 255, 0.5)',
+      },
+      animation: {
+        'blob': 'blob 7s infinite',
+        'pulse-slow': 'pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      },
+      keyframes: {
+        blob: {
+          '0%': { transform: 'translate(0px, 0px) scale(1)' },
+          '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+          '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+          '100%': { transform: 'translate(0px, 0px) scale(1)' },
+        }
       }
     },
   },

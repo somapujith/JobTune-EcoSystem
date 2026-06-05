@@ -64,15 +64,12 @@ router.get('/discover', authenticateToken, async (req, res) => {
   try {
     jobs = await source.search(query, location);
 
-    // Fallback to mock if source returned nothing or threw
-    if (!Array.isArray(jobs) || jobs.length === 0) {
-      if (sourceName !== 'mock') {
-        source = new MockJobSource();
-        jobs = await source.search(query, location);
-        usedSource = 'mock';
-      }
+    // No fallback on 0 results, only on error
+    if (!Array.isArray(jobs)) {
+      jobs = [];
     }
-  } catch (_err) {
+  } catch (err) {
+    console.error(`Error searching jobs with ${sourceName}:`, err);
     // Fallback to mock on any error
     source = new MockJobSource();
     jobs = await source.search(query, location);

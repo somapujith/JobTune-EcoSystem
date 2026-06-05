@@ -104,7 +104,7 @@ export default function SkillAssessment() {
 
         <div className="space-y-8">
           {roadmap.weeks?.map((week, wi) => (
-            <div key={wi} className="bg-surface-container-lowest rounded-3xl p-8 shadow-[0px_10px_30px_rgba(0,78,159,0.06)]">
+            <div key={wi} className="glass-card rounded-3xl p-8">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-container rounded-2xl flex items-center justify-center text-on-primary font-black text-lg">
                   {week.week}
@@ -135,7 +135,7 @@ export default function SkillAssessment() {
         </div>
 
         {roadmap.milestones && (
-          <div className="mt-10 bg-emerald-500/5 p-8 rounded-3xl">
+          <div className="mt-10 glass-card p-8 rounded-3xl border-emerald-500/20">
             <h3 className="text-xl font-bold text-on-surface mb-4 flex items-center gap-3">
               <span className="material-symbols-outlined text-emerald-600 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>flag</span>
               Milestones
@@ -186,7 +186,7 @@ export default function SkillAssessment() {
         </div>
 
         {/* Score Rings */}
-        <div className="bg-surface-container-lowest p-8 rounded-3xl shadow-[0px_20px_40px_rgba(0,78,159,0.06)] mb-8">
+        <div className="glass-card p-8 rounded-3xl mb-8">
           <h3 className="text-lg font-bold text-on-surface mb-6">Performance Breakdown</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 justify-items-center">
             {scoreLabels.map((label, i) => (
@@ -203,7 +203,7 @@ export default function SkillAssessment() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          <div className="bg-surface-container-lowest p-8 rounded-3xl shadow-[0px_20px_40px_rgba(0,78,159,0.06)]">
+          <div className="glass-card p-8 rounded-3xl">
             <h3 className="text-xl font-bold text-on-surface mb-6 flex items-center gap-3">
               <span className="material-symbols-outlined text-emerald-500 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
               Strengths
@@ -217,7 +217,7 @@ export default function SkillAssessment() {
               ))}
             </ul>
           </div>
-          <div className="bg-surface-container-lowest p-8 rounded-3xl shadow-[0px_20px_40px_rgba(0,78,159,0.06)]">
+          <div className="glass-card p-8 rounded-3xl">
             <h3 className="text-xl font-bold text-on-surface mb-6 flex items-center gap-3">
               <span className="material-symbols-outlined text-rose-500 text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>warning</span>
               Skill Gaps Identified
@@ -281,7 +281,7 @@ export default function SkillAssessment() {
             AI-Powered Technical Evaluation
           </p>
         </div>
-        <div className="bg-surface-container-lowest px-6 py-3 rounded-2xl shadow-sm">
+        <div className="glass-card px-6 py-3 rounded-2xl">
           <div className="text-sm font-bold text-outline uppercase tracking-wider mb-1">Progress</div>
           <div className="text-2xl font-black text-on-surface">
             {currentQ + 1} / {questions.length}
@@ -296,7 +296,7 @@ export default function SkillAssessment() {
         />
       </div>
 
-      <div className="bg-surface-container-lowest p-8 rounded-3xl shadow-[0px_20px_40px_rgba(0,78,159,0.06)] min-h-[400px] flex flex-col">
+      <div className="glass-card p-8 rounded-3xl min-h-[400px] flex flex-col">
         <div className="flex items-center gap-3 mb-6">
           <span className="material-symbols-outlined text-primary text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>category</span>
           <span className="inline-block px-4 py-2 bg-primary/10 text-primary text-sm font-bold rounded-xl uppercase tracking-wider">{q.category}</span>

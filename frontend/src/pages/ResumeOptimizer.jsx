@@ -122,7 +122,7 @@ function RecentUploads({ resumes, onResumeClick, onDeleteClick }) {
         Recent Uploads
       </h2>
       {resumes.length === 0 ? (
-        <div className="bg-surface-container-lowest rounded-2xl p-8 text-center text-on-surface-variant text-sm">
+        <div className="glass-card rounded-2xl p-8 text-center text-on-surface-variant text-sm">
           <span className="material-symbols-outlined text-3xl mb-3 block opacity-40">description</span>
           No resumes analyzed yet. Upload your first one!
         </div>
@@ -134,7 +134,7 @@ function RecentUploads({ resumes, onResumeClick, onDeleteClick }) {
             return (
               <div key={r.id} className="relative group w-full">
                 <button onClick={() => onResumeClick(r.id)}
-                  className="w-full bg-surface-container-lowest p-5 rounded-2xl shadow-[0px_10px_30px_rgba(0,78,159,0.04)] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 text-left">
+                  className="w-full glass-card p-5 rounded-2xl transition-all duration-300 text-left">
                   <div className="flex items-start justify-between mb-3 pr-8">
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-12 ${isPdf ? 'bg-red-50' : 'bg-blue-50'} rounded-md flex items-center justify-center shrink-0`}>
@@ -322,7 +322,7 @@ export default function ResumeOptimizer() {
       </header>
 
       {/* Tab Switcher */}
-      <div className="flex gap-1 p-1 bg-surface-container rounded-2xl w-fit mb-10">
+      <div className="flex gap-1 p-1 glass-card rounded-2xl w-fit mb-10">
         <button onClick={() => setActiveTab('analyze')}
           className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${activeTab === 'analyze' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
           <span className="flex items-center gap-2">
@@ -347,7 +347,7 @@ export default function ResumeOptimizer() {
           {/* Left column — upload + results */}
           <div className="lg:col-span-2 space-y-8">
             {/* Upload Card */}
-            <div className="bg-surface-container-lowest rounded-3xl shadow-[0px_20px_40px_rgba(0,78,159,0.06)] overflow-hidden">
+            <div className="glass-card rounded-3xl overflow-hidden">
               <div className="p-8">
                 <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
                   <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 0" }}>upload_file</span>
@@ -399,7 +399,7 @@ export default function ResumeOptimizer() {
             {analysis && (
               <>
                 {/* Scores grid */}
-                <div className="bg-surface-container-lowest rounded-3xl p-8 shadow-[0px_20px_40px_rgba(0,78,159,0.06)]">
+                <div className="glass-card rounded-3xl p-8">
                   <div className="flex flex-col sm:flex-row gap-8 items-center sm:items-start mb-8">
                     <ScoreRing score={analysis.overall_score} />
                     <div>
@@ -430,7 +430,7 @@ export default function ResumeOptimizer() {
 
                 {/* Suggestions */}
                 {analysis.suggestions?.length > 0 && (
-                  <div className="bg-surface-container-lowest rounded-3xl p-8 shadow-[0px_20px_40px_rgba(0,78,159,0.06)]">
+                  <div className="glass-card rounded-3xl p-8">
                     <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
                       <span className="material-symbols-outlined text-amber-500" style={{ fontVariationSettings: "'FILL' 1" }}>lightbulb</span>
                       Improvement Suggestions
@@ -464,7 +464,7 @@ export default function ResumeOptimizer() {
 
           {/* Right column — recent uploads */}
           <div className="lg:col-span-1">
-            <div className="bg-surface-container-lowest rounded-3xl p-8 shadow-[0px_20px_40px_rgba(0,78,159,0.06)] sticky top-8">
+            <div className="glass-card rounded-3xl p-8 sticky top-8">
               <RecentUploads resumes={recentResumes} onResumeClick={handleResumeClick} onDeleteClick={handleDeleteClick} />
             </div>
           </div>
@@ -481,7 +481,7 @@ export default function ResumeOptimizer() {
         return (
           <div className="space-y-8">
             {/* Mode Switcher */}
-            <div className="bg-surface-container-lowest rounded-3xl p-4 shadow-[0px_20px_40px_rgba(16,185,129,0.05)] border border-outline/10 flex gap-2">
+            <div className="glass-card rounded-3xl p-4 flex gap-2">
               <button
                 onClick={() => setForgeMode('optimize')}
                 className={`flex-1 py-3 px-6 rounded-2xl font-bold flex justify-center items-center gap-3 transition-all duration-200 ${
@@ -507,7 +507,7 @@ export default function ResumeOptimizer() {
             </div>
 
             {/* Input Panel */}
-            <div className="bg-surface-container-lowest rounded-3xl p-8 shadow-[0px_20px_40px_rgba(16,185,129,0.08)]">
+            <div className="glass-card rounded-3xl p-8">
               {forgeMode === 'optimize' ? (
                 <>
                   <h2 className="text-xl font-bold mb-2 flex items-center gap-3">
@@ -701,7 +701,7 @@ export default function ResumeOptimizer() {
                 {/* ATS Score + Keyword Stats Row */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* ATS Ring */}
-                  <div className="bg-surface-container-lowest rounded-3xl p-8 shadow-[0px_20px_40px_rgba(16,185,129,0.08)] flex flex-col items-center justify-center text-center">
+                  <div className="glass-card rounded-3xl p-8 flex flex-col items-center justify-center text-center">
                     <ATSRing score={resultToRender.atsScore} label={resultToRender.atsLabel} />
                     <p className="text-sm text-on-surface-variant mt-4 max-w-[180px]">
                       {resultToRender.totalJdKeywords} tech keywords found in the job description
@@ -709,7 +709,7 @@ export default function ResumeOptimizer() {
                   </div>
 
                   {/* Matched Keywords */}
-                  <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-[0px_20px_40px_rgba(16,185,129,0.08)]">
+                  <div className="glass-card rounded-3xl p-6">
                     <h3 className="text-sm font-bold text-emerald-700 mb-3 flex items-center gap-2">
                       <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                       Optimized Keywords ({resultToRender.matchedKeywords?.length || 0})
@@ -724,7 +724,7 @@ export default function ResumeOptimizer() {
                   </div>
 
                   {/* Missing Keywords */}
-                  <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-[0px_20px_40px_rgba(16,185,129,0.08)]">
+                  <div className="glass-card rounded-3xl p-6">
                     <h3 className="text-sm font-bold text-red-700 mb-3 flex items-center gap-2">
                       <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0" }}>cancel</span>
                       Still Missing ({resultToRender.missingKeywords?.length || 0})
@@ -740,7 +740,7 @@ export default function ResumeOptimizer() {
                 </div>
 
                 {/* AI-Tuned Resume */}
-                <div className="bg-slate-900 rounded-3xl shadow-[0px_25px_50px_rgba(15,23,42,0.25)] overflow-hidden">
+                <div className="glass-card bg-slate-900/80 rounded-3xl overflow-hidden">
                   <div className="bg-slate-800 px-8 py-5 flex justify-between items-center">
                     <div className="flex items-center gap-4">
                       <span className="material-symbols-outlined text-emerald-400 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>auto_fix_high</span>
@@ -785,7 +785,7 @@ export default function ResumeOptimizer() {
                 </div>
 
                 {/* How it was tuned note */}
-                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6 flex gap-4">
+                <div className="glass-card border-emerald-200/50 rounded-2xl p-6 flex gap-4">
                   <span className="material-symbols-outlined text-emerald-600 text-xl shrink-0 mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>info</span>
                   <div>
                     <p className="text-sm font-bold text-emerald-800 mb-1">How Resume Forge works</p>

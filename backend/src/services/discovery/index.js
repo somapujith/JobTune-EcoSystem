@@ -1,9 +1,11 @@
 const MockJobSource = require('./MockJobSource');
 const RemotiveSource = require('./RemotiveSource');
+const AdzunaSource = require('./AdzunaSource');
 
 const SOURCES = {
   mock: MockJobSource,
-  remotive: RemotiveSource
+  remotive: RemotiveSource,
+  adzuna: AdzunaSource
 };
 
 /**

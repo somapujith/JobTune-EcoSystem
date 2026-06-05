@@ -6,6 +6,7 @@ import { useDarkMode } from '../hooks/useDarkMode';
 
 const NAV_GROUPS = [
   { label: 'Job Search', items: [
+    { label: 'Job Discovery',    path: '/discover',  desc: 'Find new opportunities' },
     { label: 'Job Tracker',      path: '/jobs',      desc: 'Track applications' },
     { label: 'Job Matcher',      path: '/jobmatch',  desc: 'Find matching roles' },
   ]},
@@ -67,7 +68,7 @@ const Navbar = () => {
   const isGroupActive = (group) => group.items.some(item => location.pathname.startsWith(item.path));
 
   return (
-    <header className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-xl shadow-[0px_4px_24px_rgba(0,78,159,0.08)] border-b border-slate-100">
+    <header className="fixed top-0 w-full z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl shadow-glass border-b border-white/50 dark:border-slate-800/50">
       <div className="flex justify-between items-center px-6 lg:px-8 h-20 max-w-7xl mx-auto">
         <div className="flex items-center gap-10">
           <Link to="/" className="text-2xl font-black tracking-tight text-blue-800 font-headline">
@@ -274,14 +275,27 @@ const Navbar = () => {
 };
 
 const Layout = () => {
+  const location = useLocation();
+  const isInternalPage = location.pathname !== '/';
+
   return (
-    <div className="min-h-screen flex flex-col font-body bg-surface text-on-surface antialiased overflow-x-hidden">
-      <Navbar />
-      <div className="flex-grow flex pt-20">
-        <Outlet />
-      </div>
+    <div className={`min-h-screen flex flex-col font-body ${isInternalPage ? 'bg-slate-50 dark:bg-slate-950' : 'bg-surface'} text-on-surface antialiased overflow-x-hidden relative`}>
+      {isInternalPage && (
+        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-400/20 mix-blend-multiply filter blur-[100px] opacity-70 animate-blob dark:bg-blue-900/20"></div>
+          <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-400/20 mix-blend-multiply filter blur-[100px] opacity-70 animate-blob" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute bottom-[-20%] left-[20%] w-[50%] h-[50%] rounded-full bg-sky-400/20 mix-blend-multiply filter blur-[100px] opacity-70 animate-blob dark:bg-sky-900/20" style={{ animationDelay: '4s' }}></div>
+        </div>
+      )}
       
-      <footer className="w-full border-t-0 bg-slate-50 dark:bg-slate-950 flex justify-between items-center px-8 py-12 font-body text-sm">
+      <div className="relative z-10 w-full flex flex-col flex-grow">
+        <Navbar />
+        <div className="flex-grow flex pt-20">
+          <Outlet />
+        </div>
+
+      
+      <footer className="w-full border-t-0 bg-transparent flex justify-between items-center px-8 py-12 font-body text-sm relative z-10">
         <div className="text-slate-500 dark:text-slate-400">
             &copy; 2024 JobTune AI. Professional Vanguard System.
         </div>
@@ -292,6 +306,7 @@ const Layout = () => {
           <a className="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors duration-300" href="#">API</a>
         </div>
       </footer>
+      </div>
     </div>
   );
 };

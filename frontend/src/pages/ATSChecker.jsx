@@ -133,7 +133,7 @@ UI/UX Design, Figma, Photoshop, Video Editing, Project Management`;
       </div>
 
       {/* How It Works Guide */}
-      <div className="max-w-3xl mx-auto mb-12 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-3xl p-8">
+      <div className="max-w-3xl mx-auto mb-12 glass-card border-blue-200/50 dark:border-blue-800/50 rounded-3xl p-8">
         <h3 className="text-xl font-bold text-on-surface mb-4 flex items-center gap-2">
           <span className="material-symbols-outlined text-blue-600">info</span>
           How It Works
@@ -156,14 +156,14 @@ UI/UX Design, Figma, Photoshop, Video Editing, Project Management`;
       </div>
 
       {error && (
-        <div className="max-w-3xl mx-auto mb-6 bg-rose-50 border border-rose-100 p-4 rounded-2xl text-rose-600 text-sm font-medium flex items-center gap-3">
+        <div className="max-w-3xl mx-auto mb-6 glass-card border-rose-200/50 p-4 rounded-2xl text-rose-600 text-sm font-medium flex items-center gap-3">
           <AlertCircle className="w-5 h-5 flex-shrink-0" />
           {error}
         </div>
       )}
 
       <form onSubmit={handleCheck} className="max-w-2xl mx-auto mb-12">
-        <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-100 dark:border-slate-700 shadow-sm">
+        <div className="glass-card rounded-3xl p-8">
           {/* Resume Section - File Upload */}
           <div>
             <label className="block text-sm font-bold text-on-surface mb-3">Upload Your Resume</label>
@@ -242,7 +242,7 @@ UI/UX Design, Figma, Photoshop, Video Editing, Project Management`;
       {result && !loading && (
         <div className="max-w-3xl mx-auto space-y-8">
           {/* Score Card */}
-          <div className={`${getScoreBg(result.atsScore)} border border-slate-200 dark:border-slate-700 rounded-3xl p-8 text-center`}>
+          <div className={`glass-card rounded-3xl p-8 text-center`}>
             <div className="flex items-center justify-center gap-4 mb-6">
               <div className="text-6xl font-black" style={{ color: result.atsScore >= 80 ? '#10b981' : result.atsScore >= 60 ? '#0ea5e9' : result.atsScore >= 40 ? '#f59e0b' : '#ef4444' }}>
                 {result.atsScore}
@@ -259,7 +259,7 @@ UI/UX Design, Figma, Photoshop, Video Editing, Project Management`;
             {result.sections && (
               <div className="grid grid-cols-2 gap-3 mt-6">
                 {Object.entries(result.sections).map(([key, section]) => (
-                  <div key={key} className="bg-white dark:bg-slate-700 rounded-xl p-4">
+                  <div key={key} className="glass-card rounded-2xl p-4">
                     <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2 capitalize">{section.feedback}</p>
                     <div className="flex items-end gap-2">
                       <p className="text-3xl font-black text-on-surface">{section.score}</p>
@@ -273,7 +273,7 @@ UI/UX Design, Figma, Photoshop, Video Editing, Project Management`;
 
           {/* ATS Issues */}
           {result.atsIssues && result.atsIssues.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-red-200 dark:border-red-900">
+            <div className="glass-card rounded-3xl p-8 border border-red-200/50 dark:border-red-900/50">
               <div className="flex items-center gap-3 mb-4">
                 <AlertCircle className="w-6 h-6 text-red-600" />
                 <h3 className="text-xl font-bold text-red-600">ATS-Blocking Issues ({result.atsIssues.length})</h3>
@@ -291,7 +291,7 @@ UI/UX Design, Figma, Photoshop, Video Editing, Project Management`;
 
           {/* AI Strengths */}
           {result.strengths && result.strengths.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-cyan-200 dark:border-cyan-900">
+            <div className="glass-card rounded-3xl p-8 border border-cyan-200/50 dark:border-cyan-900/50">
               <div className="flex items-center gap-3 mb-4">
                 <span className="material-symbols-outlined text-cyan-600 text-xl">star</span>
                 <h3 className="text-xl font-bold text-cyan-600">Your Strengths (AI Analysis)</h3>
@@ -309,7 +309,7 @@ UI/UX Design, Figma, Photoshop, Video Editing, Project Management`;
 
           {/* Improvements */}
           {result.improvements && result.improvements.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-blue-200 dark:border-blue-900">
+            <div className="glass-card rounded-3xl p-8 border border-blue-200/50 dark:border-blue-900/50">
               <div className="flex items-center gap-3 mb-4">
                 <span className="material-symbols-outlined text-blue-600 text-xl">lightbulb</span>
                 <h3 className="text-xl font-bold text-blue-600">How to Improve</h3>
@@ -327,7 +327,7 @@ UI/UX Design, Figma, Photoshop, Video Editing, Project Management`;
 
           {/* Recommendations */}
           {result.recommendations && result.recommendations.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-amber-200 dark:border-amber-900">
+            <div className="glass-card rounded-3xl p-8 border border-amber-200/50 dark:border-amber-900/50">
               <div className="flex items-center justify-between gap-3 mb-4">
                 <div className="flex items-center gap-3">
                   <TrendingUp className="w-6 h-6 text-amber-600" />

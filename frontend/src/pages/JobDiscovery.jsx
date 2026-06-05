@@ -4,7 +4,8 @@ import { Search, MapPin, Briefcase, ExternalLink, Plus, Loader2, AlertCircle, Ch
 
 const SOURCES = [
   { value: 'mock', label: 'Sample Jobs (Demo)' },
-  { value: 'remotive', label: 'Remotive (Remote Jobs)' }
+  { value: 'remotive', label: 'Remotive (Remote Jobs)' },
+  { value: 'adzuna', label: 'Adzuna (Local/Global Jobs)' }
 ];
 
 function JobCard({ job, onAddToTracker, addedIds }) {
@@ -179,15 +180,21 @@ export default function JobDiscovery() {
               Location
             </label>
             <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              <select
                 id="location"
-                type="text"
                 value={location}
                 onChange={e => setLocation(e.target.value)}
-                placeholder="e.g. Remote, New York"
-                className="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              />
+                className="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white appearance-none"
+              >
+                <option value="">Any Location</option>
+                <option value="Hyderabad">Hyderabad</option>
+                <option value="Bangalore">Bangalore</option>
+                <option value="Chennai">Chennai</option>
+                <option value="Mumbai">Mumbai</option>
+                <option value="Pune">Pune</option>
+                <option value="Delhi">Delhi</option>
+              </select>
             </div>
           </div>
 

@@ -92,7 +92,7 @@ export default function JobTracker() {
     try {
       const { data } = await api.get('/jobs');
       setJobs(data.jobs || []);
-      setStats(data.stats);
+      setStats(data.stats || { total: 0, interviews: 0, offers: 0, replyRate: 0 });
     } catch (err) {
       console.error('Failed to fetch jobs:', err);
     }
@@ -171,10 +171,10 @@ export default function JobTracker() {
         {/* Quick stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[
-            { label: 'Total Applied', value: stats.total, icon: TrendingUp, color: 'text-blue-600' },
-            { label: 'Interviews', value: stats.interviews, icon: CheckCircle2, color: 'text-amber-600' },
-            { label: 'Offers', value: stats.offers, icon: CheckCircle2, color: 'text-green-600' },
-            { label: 'Reply Rate', value: `${stats.replyRate}%`, icon: TrendingUp, color: 'text-purple-600' },
+            { label: 'Total Applied', value: stats?.total || 0, icon: TrendingUp, color: 'text-blue-600' },
+            { label: 'Interviews', value: stats?.interviews || 0, icon: CheckCircle2, color: 'text-amber-600' },
+            { label: 'Offers', value: stats?.offers || 0, icon: CheckCircle2, color: 'text-green-600' },
+            { label: 'Reply Rate', value: `${stats?.replyRate || 0}%`, icon: TrendingUp, color: 'text-purple-600' },
           ].map((stat, i) => (
             <div key={i} className="bg-white p-4 rounded-xl border border-slate-200">
               <p className="text-xs font-bold text-slate-500 uppercase mb-2">{stat.label}</p>
