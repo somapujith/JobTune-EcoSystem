@@ -1,14 +1,18 @@
 require('dotenv').config();
 const app = require('./app');
 const { pool } = require('./config/database');
+const { initializeTables } = require('./utils/initializeTables');
 
 const PORT = process.env.PORT || 5000;
 
-// Test DB Connection
+// Test DB Connection & Initialize Tables
 const startServer = async () => {
   try {
     await pool.query('SELECT 1');
     console.log('✅ Successfully connected to PostgreSQL database');
+
+    // Initialize all tables
+    await initializeTables();
   } catch (err) {
     console.warn('⚠️ WARNING: Could not connect to the database. The server will start, but API endpoints relying on DB will fail.');
     console.warn('Please ensure PostgreSQL is running, user/pass is correct, and the database "fresher_ecosystem" exists.');

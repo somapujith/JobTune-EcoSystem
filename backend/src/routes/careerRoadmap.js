@@ -4,29 +4,6 @@ const { authenticateToken } = require('../middleware/auth');
 const { pool } = require('../config/database');
 const { callAI, extractJSON } = require('../utils/aiClient');
 
-// ── Initialize career_roadmaps table ──────────────────────────────────────
-(async () => {
-  try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS career_roadmaps (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL,
-        "current_role" VARCHAR(255),
-        target_role VARCHAR(255) NOT NULL,
-        timeframe VARCHAR(50),
-        roadmap JSONB NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-      );
-      CREATE INDEX IF NOT EXISTS idx_career_roadmaps_user_id ON career_roadmaps(user_id);
-    `);
-    console.log('✅ career_roadmaps table ready');
-  } catch (err) {
-    console.error('Career roadmaps table migration error:', err.message);
-  }
-})();
-
 // ── POST /api/career/roadmap - Generate personalized career roadmap ────────
 router.post('/roadmap', authenticateToken, async (req, res) => {
   try {

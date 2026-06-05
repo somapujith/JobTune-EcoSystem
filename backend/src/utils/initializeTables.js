@@ -1,0 +1,142 @@
+const { pool } = require('../config/database');
+
+const tables = [
+  {
+    name: 'users',
+    query: `
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password_hash VARCHAR(255) NOT NULL,
+        github_username VARCHAR(255),
+        linkedin_url VARCHAR(255),
+        role VARCHAR(50) DEFAULT 'user',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+    `
+  },
+  {
+    name: 'resumes',
+    query: `
+      CREATE TABLE IF NOT EXISTS resumes (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        file_name VARCHAR(255),
+        file_size INTEGER,
+        overall_score INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_resumes_user_id ON resumes(user_id);
+    `
+  },
+  {
+    name: 'mock_interviews',
+    query: `
+      CREATE TABLE IF NOT EXISTS mock_interviews (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        role VARCHAR(255),
+        messages JSONB,
+        score INTEGER,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_mock_interviews_user_id ON mock_interviews(user_id);
+    `
+  },
+  {
+    name: 'skill_assessments',
+    query: `
+      CREATE TABLE IF NOT EXISTS skill_assessments (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        skills JSONB,
+        strengths TEXT,
+        gaps TEXT,
+        role_matches JSONB,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_skill_assessments_user_id ON skill_assessments(user_id);
+    `
+  },
+  {
+    name: 'learning_roadmaps',
+    query: `
+      CREATE TABLE IF NOT EXISTS learning_roadmaps (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        gaps TEXT,
+        target_role VARCHAR(255),
+        roadmap JSONB,
+        ai_powered BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_learning_roadmaps_user_id ON learning_roadmaps(user_id);
+    `
+  },
+  {
+    name: 'career_roadmaps',
+    query: `
+      CREATE TABLE IF NOT EXISTS career_roadmaps (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        "current_role" VARCHAR(255),
+        target_role VARCHAR(255) NOT NULL,
+        timeframe VARCHAR(50),
+        roadmap JSONB NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_career_roadmaps_user_id ON career_roadmaps(user_id);
+    `
+  },
+  {
+    name: 'resume_embeddings',
+    query: `
+      CREATE TABLE IF NOT EXISTS resume_embeddings (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        resume_id INTEGER NOT NULL,
+        chunk_index INTEGER NOT NULL,
+        chunk_text TEXT NOT NULL,
+        embedding JSONB NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_resume_embeddings_user_resume ON resume_embeddings(user_id, resume_id);
+    `
+  },
+  {
+    name: 'audit_logs',
+    query: `
+      CREATE TABLE IF NOT EXISTS audit_logs (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER,
+        action VARCHAR(255),
+        resource VARCHAR(255),
+        details TEXT,
+        ip_address VARCHAR(45),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON audit_logs(user_id);
+    `
+  }
+];
+
+async function initializeTables() {
+  console.log('🔄 Initializing database tables...');
+
+  for (const table of tables) {
+    try {
+      await pool.query(table.query);
+      console.log(`✅ ${table.name} table ready`);
+    } catch (err) {
+      console.error(`❌ ${table.name} table error:`, err.message);
+    }
+  }
+
+  console.log('✅ All tables initialized');
+}
+
+module.exports = { initializeTables };

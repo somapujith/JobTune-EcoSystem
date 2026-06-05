@@ -5,28 +5,6 @@ const jwt = require('jsonwebtoken');
 const { pool } = require('../config/database');
 const { authenticateToken } = require('../middleware/auth');
 
-// Initialize users table
-(async () => {
-  try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        password_hash VARCHAR(255) NOT NULL,
-        github_username VARCHAR(255),
-        linkedin_url VARCHAR(255),
-        role VARCHAR(50) DEFAULT 'user',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-      CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-    `);
-    console.log('✅ users table ready');
-  } catch (err) {
-    console.error('Users table migration error:', err.message);
-  }
-})();
-
 // Signup
 router.post('/signup', async (req, res, next) => {
   try {

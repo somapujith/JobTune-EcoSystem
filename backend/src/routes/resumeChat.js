@@ -5,27 +5,6 @@ const { pool } = require('../config/database');
 const { callAI } = require('../utils/aiClient');
 const { embedText, findTopSimilarChunks, chunkText } = require('../utils/embeddings');
 
-// ── Initialize resume_embeddings table ─────────────────────────────────────
-(async () => {
-  try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS resume_embeddings (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL,
-        resume_id INTEGER NOT NULL,
-        chunk_index INTEGER NOT NULL,
-        chunk_text TEXT NOT NULL,
-        embedding JSONB NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-      CREATE INDEX IF NOT EXISTS idx_resume_embeddings_user_resume ON resume_embeddings(user_id, resume_id);
-    `);
-    console.log('✅ resume_embeddings table ready');
-  } catch (err) {
-    console.error('Resume embeddings table migration error:', err.message);
-  }
-})();
-
 // ── Embed and store a resume's text chunks ─────────────────────────────────
 async function embedAndStoreResume(userId, resumeId, resumeText) {
   try {
