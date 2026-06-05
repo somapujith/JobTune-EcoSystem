@@ -61,6 +61,49 @@ export default function CoverLetterGenerator() {
     document.body.removeChild(element);
   };
 
+  const loadTestData = () => {
+    setFormData({
+      companyName: 'TechCorp',
+      position: 'Senior Software Engineer',
+      yourName: 'John Doe',
+      jobDescription: `Senior Software Engineer - Full Stack
+
+About Us
+TechCorp is a fast-growing SaaS company specializing in AI-powered analytics. We're looking for talented engineers to help us scale our platform.
+
+Key Responsibilities
+- Design and develop new features using React and Node.js
+- Optimize database queries and API performance
+- Implement CI/CD pipelines
+- Mentor junior engineers
+- Troubleshoot production issues
+
+Required Qualifications
+- 5+ years of professional software development
+- Strong proficiency in JavaScript/TypeScript
+- React and Node.js expertise
+- SQL and NoSQL database experience
+- Docker and AWS knowledge
+- REST API and microservices architecture experience
+
+Nice-to-Have
+- GraphQL experience
+- Kubernetes knowledge
+- AWS certifications
+- Open source contributions
+
+Compensation
+- Salary: $130,000 - $180,000
+- 100% remote
+- Full benefits package
+- Unlimited PTO`,
+      experience: 'I have 6 years of full-stack development experience. At my current company, I led the development of a microservices architecture that improved performance by 40%. I\'m proficient in React, Node.js, TypeScript, and have extensive experience with AWS and Docker. I\'ve also mentored 3 junior developers on best practices and code quality.',
+      tone: 'formal'
+    });
+    setLetter(null);
+    setError('');
+  };
+
   return (
     <div className="w-full max-w-5xl mx-auto py-16 px-4 sm:px-6">
       <div className="text-center mb-16">
@@ -186,23 +229,33 @@ export default function CoverLetterGenerator() {
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-3"
-          >
-            {loading ? (
-              <>
-                <span className="material-symbols-outlined animate-spin text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>sync</span>
-                Generating...
-              </>
-            ) : (
-              <>
-                <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>mail</span>
-                Generate Cover Letter
-              </>
-            )}
-          </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-3"
+            >
+              {loading ? (
+                <>
+                  <span className="material-symbols-outlined animate-spin text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>sync</span>
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>mail</span>
+                  Generate Cover Letter
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={loadTestData}
+              className="px-8 py-3 bg-slate-400 hover:bg-slate-500 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-3"
+            >
+              <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>dataset</span>
+              Load Test Data
+            </button>
+          </div>
         </form>
 
         {/* Letter Display */}

@@ -67,6 +67,96 @@ export default function ATSChecker() {
     return 'bg-rose-50';
   };
 
+  const loadTestData = () => {
+    // Create a test resume file
+    const testResumeText = `John Doe
+Senior Software Engineer
+
+CONTACT
+Email: john.doe@example.com | Phone: (555) 123-4567 | LinkedIn: linkedin.com/in/johndoe | GitHub: github.com/johndoe
+
+SUMMARY
+Experienced Full Stack Engineer with 6 years building scalable web applications using React, Node.js, and cloud technologies. Passionate about clean code, performance optimization, and mentoring junior developers.
+
+EXPERIENCE
+Senior Software Engineer | TechCorp (2021 - Present)
+- Led development of microservices architecture using Node.js and Docker
+- Implemented React components with TypeScript achieving 95% test coverage
+- Optimized database queries reducing load time by 40%
+- Mentored 3 junior developers on best practices
+
+Full Stack Developer | WebSolutions (2018 - 2021)
+- Built RESTful APIs using Express.js and MongoDB
+- Developed responsive UI with React and Tailwind CSS
+- Deployed applications on AWS EC2 and S3
+- Collaborated with cross-functional teams using Agile/Scrum
+
+Junior Web Developer | StartupXYZ (2016 - 2018)
+- Created HTML/CSS templates and basic JavaScript interactions
+- Assisted in database design and optimization
+- Participated in code reviews and testing
+
+SKILLS
+Languages: JavaScript, TypeScript, Python, SQL
+Frontend: React, Vue.js, HTML5, CSS3, Tailwind CSS
+Backend: Node.js, Express, MongoDB, PostgreSQL, REST APIs
+DevOps: Docker, Kubernetes, AWS, Git, CI/CD
+Tools: Jest, Git, Linux, Postman, VS Code
+
+EDUCATION
+Bachelor of Science in Computer Science
+University of Technology (2016)
+
+CERTIFICATIONS
+AWS Certified Solutions Architect - Associate (2022)
+Scrum Master Certification (2021)`;
+
+    const testJobDescription = `Senior Software Engineer - Full Stack
+
+About the Role
+We are seeking an experienced Senior Software Engineer to join our growing team. You will be responsible for designing and implementing scalable solutions, mentoring junior developers, and driving technical excellence across our organization.
+
+Key Responsibilities
+- Design and develop high-performance web applications using modern frameworks
+- Lead architectural decisions and code reviews
+- Mentor junior team members and contribute to team growth
+- Collaborate with product managers and designers to deliver user-centric solutions
+- Implement and maintain CI/CD pipelines
+- Optimize application performance and scalability
+
+Required Qualifications
+- 5+ years of professional software development experience
+- Strong proficiency in JavaScript/TypeScript and React
+- Backend development experience with Node.js or similar frameworks
+- Experience with SQL and NoSQL databases (PostgreSQL, MongoDB)
+- Understanding of RESTful API design and microservices architecture
+- Experience with Docker and cloud platforms (AWS, GCP, or Azure)
+- Strong problem-solving skills and attention to detail
+
+Nice-to-Have Qualifications
+- Experience with Kubernetes
+- AWS or GCP certifications
+- Experience with GraphQL
+- Contributing to open-source projects
+- Knowledge of machine learning concepts
+
+Compensation & Benefits
+- Competitive salary: $120,000 - $160,000
+- Health insurance and 401(k) matching
+- Remote work flexibility
+- Professional development budget
+- Generous PTO policy`;
+
+    // Create test file
+    const blob = new Blob([testResumeText], { type: 'application/pdf' });
+    const testFile = new File([blob], 'test_resume.pdf', { type: 'application/pdf' });
+
+    setResumeFile(testFile);
+    setJobDescription(testJobDescription);
+    setError('');
+    setResult(null);
+  };
+
   return (
     <div className="w-full max-w-5xl mx-auto py-16 px-4 sm:px-6">
       <div className="text-center mb-16">
@@ -169,11 +259,11 @@ export default function ATSChecker() {
           </div>
         </div>
 
-        <div className="max-w-3xl mx-auto mt-6 text-center">
+        <div className="max-w-3xl mx-auto mt-6 flex flex-col sm:flex-row gap-3 justify-center">
           <button
             type="submit"
             disabled={loading}
-            className="px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-bold transition-colors flex items-center gap-3 mx-auto"
+            className="px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-3"
           >
             {loading ? (
               <>
@@ -186,6 +276,14 @@ export default function ATSChecker() {
                 Check ATS Score
               </>
             )}
+          </button>
+          <button
+            type="button"
+            onClick={loadTestData}
+            className="px-8 py-3 bg-slate-400 hover:bg-slate-500 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-3"
+          >
+            <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>dataset</span>
+            Load Test Data
           </button>
         </div>
       </form>

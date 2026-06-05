@@ -29,6 +29,60 @@ export default function JobAnalyzer() {
     }
   };
 
+  const loadTestData = () => {
+    const testJobDescription = `Senior Full Stack Engineer - Remote
+
+About Us
+TechCorp is a fast-growing SaaS company specializing in AI-powered analytics. We're looking for talented engineers to help us scale our platform to serve thousands of customers worldwide.
+
+About the Role
+We are seeking a Senior Full Stack Engineer to join our 15-person engineering team. You will own full product features from concept to production, working across our React frontend and Node.js backend. You'll have the opportunity to mentor junior developers and shape our technical culture.
+
+Key Responsibilities
+- Design and develop new features for our web application using React and Node.js
+- Optimize database queries and API performance for millions of users
+- Implement and maintain automated testing and CI/CD pipelines
+- Participate in architectural decisions and design reviews
+- Mentor junior engineers and conduct code reviews
+- Troubleshoot production issues and implement monitoring solutions
+- Collaborate with product and design teams to deliver exceptional user experiences
+
+Required Qualifications
+- 5+ years of professional software development experience
+- Strong proficiency in JavaScript/TypeScript
+- Demonstrated expertise in React and modern frontend frameworks
+- Backend experience with Node.js, Express, or similar frameworks
+- Solid understanding of SQL and NoSQL databases (PostgreSQL, MongoDB)
+- Experience with REST APIs and microservices architecture
+- Familiarity with Docker and AWS or similar cloud platforms
+- Experience with Git and collaborative development workflows
+- Strong problem-solving and communication skills
+
+Nice-to-Have Qualifications
+- Experience with GraphQL
+- Kubernetes and container orchestration
+- AWS certifications or GCP experience
+- Open source contributions
+- Experience with payment processing systems
+- Knowledge of data pipeline and ETL tools
+
+Compensation & Benefits
+- Competitive salary: $130,000 - $180,000 based on experience
+- 100% remote work
+- Comprehensive health insurance
+- 401(k) with company matching
+- Unlimited PTO
+- $3,000 annual professional development budget
+- Equity options
+
+Location
+Remote (US-based preferred, but global candidates considered)`;
+
+    setJobDescription(testJobDescription);
+    setError('');
+    setResult(null);
+  };
+
   return (
     <div className="w-full max-w-5xl mx-auto py-16 px-4 sm:px-6">
       <div className="text-center mb-16">
@@ -84,11 +138,11 @@ export default function JobAnalyzer() {
           <p className="text-xs text-slate-400 mt-2">{jobDescription.length} characters</p>
         </div>
 
-        <div className="max-w-3xl mx-auto mt-6 text-center">
+        <div className="max-w-3xl mx-auto mt-6 flex flex-col sm:flex-row gap-3 justify-center">
           <button
             type="submit"
             disabled={loading}
-            className="px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-bold transition-colors flex items-center gap-3 mx-auto"
+            className="px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-3"
           >
             {loading ? (
               <>
@@ -101,6 +155,14 @@ export default function JobAnalyzer() {
                 Analyze Job Description
               </>
             )}
+          </button>
+          <button
+            type="button"
+            onClick={loadTestData}
+            className="px-8 py-3 bg-slate-400 hover:bg-slate-500 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-3"
+          >
+            <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>dataset</span>
+            Load Test Data
           </button>
         </div>
       </form>
