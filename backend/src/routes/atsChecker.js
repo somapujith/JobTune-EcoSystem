@@ -6,6 +6,7 @@ const pdfParse = require('pdf-parse');
 const { Packer, Document } = require('docx');
 const fs = require('fs');
 const path = require('path');
+const { callAI } = require('../utils/aiClient');
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
@@ -17,14 +18,12 @@ async function extractTextFromFile(file) {
       const pdfData = await pdfParse(file.buffer);
       return pdfData.text;
     } else if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-      // For DOCX, we'll use a simple approach by reading the XML
       const JSZip = require('jszip');
       const zip = new JSZip();
       await zip.loadAsync(file.buffer);
       const xmlFile = zip.file('word/document.xml');
       if (!xmlFile) throw new Error('Invalid DOCX file');
       const xmlContent = await xmlFile.async('text');
-      // Extract text between XML tags (simple approach)
       const text = xmlContent.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
       return text;
     } else {
@@ -36,8 +35,67 @@ async function extractTextFromFile(file) {
   }
 }
 
-function extractKeywords(text) {
-  const words = text.toLowerCase().match(/\b[a-z]+(?:\+\+|#)?\b/g) || [];
+async function calculateATSScoreWithAI(resumeText, jobDescription) {
+  const systemPrompt = `You are an expert ATS (Applicant Tracking System) analyzer. Analyze the resume against the job description and provide a detailed ATS score analysis.
+
+Return ONLY valid JSON (no markdown, no code blocks):
+{
+  "atsScore": number (0-100),
+  "scoreLabel": "Excellent|Good|Fair|Poor",
+  "analysis": {
+    "hardSkillMatch": number (0-100, % of required skills found),
+    "softSkillMatch": number (0-100, behavioral/soft skills),
+    "experienceMatch": number (0-100, relevant experience level),
+    "matchedSkills": [string array of skills that match],
+    "missingSkills": [string array of critical missing skills],
+    "strengths": [string array of resume strengths relevant to job],
+    "gaps": [string array of skill gaps to address]
+  },
+  "recommendations": [string array of 3-4 actionable improvements]
+}`;
+
+  const userPrompt = `RESUME:
+${resumeText}
+
+JOB DESCRIPTION:
+${jobDescription}
+
+Analyze this resume against the job description. Be strict but fair. Weight hard skills 50%, soft skills 30%, experience 20%.`;
+
+  const aiResult = await callAI({
+    systemPrompt,
+    userPrompt,
+    maxTokens: 800,
+    temperature: 0.3,
+    model: process.env.LM_STUDIO_MODEL_INTERVIEW
+  });
+
+  if (!aiResult.ok || !aiResult.data) {
+    throw new Error('AI analysis failed');
+  }
+
+  try {
+    const parsed = JSON.parse(aiResult.data);
+    return {
+      atsScore: parsed.atsScore,
+      scoreLabel: parsed.scoreLabel,
+      hardSkillMatch: parsed.analysis.hardSkillMatch,
+      softSkillMatch: parsed.analysis.softSkillMatch,
+      experienceMatch: parsed.analysis.experienceMatch,
+      matchedKeywords: parsed.analysis.matchedSkills,
+      missingKeywords: parsed.analysis.missingSkills,
+      strengths: parsed.analysis.strengths,
+      gaps: parsed.analysis.gaps,
+      recommendations: parsed.recommendations,
+      aiPowered: true
+    };
+  } catch (e) {
+    console.warn('Failed to parse AI response, using fallback');
+    return calculateFallbackScore(resumeText, jobDescription);
+  }
+}
+
+function calculateFallbackScore(resumeText, jobDescription) {
   const techKeywords = [
     'react', 'vue', 'angular', 'svelte', 'nextjs', 'nuxt',
     'nodejs', 'python', 'java', 'csharp', 'golang', 'rust',
@@ -47,118 +105,33 @@ function extractKeywords(text) {
     'agile', 'scrum', 'rest', 'graphql', 'api',
     'html', 'css', 'tailwind', 'bootstrap', 'sass',
     'express', 'django', 'flask', 'spring', 'fastapi',
-    'redis', 'elasticsearch', 'rabbitmq', 'kafka',
-    'microservices', 'devops', 'testing', 'unittest'
+    'redis', 'elasticsearch', 'rabbitmq', 'kafka'
   ];
 
-  const found = new Set();
-  techKeywords.forEach(keyword => {
-    if (text.toLowerCase().includes(keyword)) {
-      found.add(keyword);
-    }
-  });
+  const resumeLower = resumeText.toLowerCase();
+  const jobLower = jobDescription.toLowerCase();
 
-  return Array.from(found);
-}
+  const resumeKeywords = techKeywords.filter(kw => resumeLower.includes(kw));
+  const jobKeywords = techKeywords.filter(kw => jobLower.includes(kw));
 
-function calculateATSScore(resumeText, jobDescription) {
-  const resumeKeywords = extractKeywords(resumeText);
-  const jobKeywords = extractKeywords(jobDescription);
-
-  // Extract key sections from job description
-  const hardSkillsMatch = jobKeywords.filter(kw => resumeKeywords.includes(kw));
+  const matchedKeywords = jobKeywords.filter(kw => resumeKeywords.includes(kw));
   const missingKeywords = jobKeywords.filter(kw => !resumeKeywords.includes(kw));
 
-  // Experience level matching
-  const experienceLevelMatch = extractExperienceMatch(resumeText, jobDescription);
+  const hardSkillScore = jobKeywords.length > 0 ? (matchedKeywords.length / jobKeywords.length) * 100 : 50;
+  const softSkillScore = 50;
+  const experienceScore = resumeLower.includes('experience') || resumeLower.includes('project') ? 60 : 30;
 
-  // Calculate component scores
-  const hardSkillScore = jobKeywords.length > 0
-    ? (hardSkillsMatch.length / jobKeywords.length) * 100
-    : 50;
-
-  const softSkillScore = calculateSoftSkillMatch(resumeText, jobDescription);
-  const experienceScore = experienceLevelMatch;
-
-  // Weighted average: 50% hard skills, 30% soft skills, 20% experience
-  const overallScore = Math.round(
-    (hardSkillScore * 0.5) +
-    (softSkillScore * 0.3) +
-    (experienceScore * 0.2)
-  );
-
-  const scoreLabel = overallScore >= 80 ? 'Excellent'
-    : overallScore >= 60 ? 'Good'
-    : overallScore >= 40 ? 'Fair'
-    : 'Poor';
+  const atsScore = Math.round((hardSkillScore * 0.5) + (softSkillScore * 0.3) + (experienceScore * 0.2));
+  const scoreLabel = atsScore >= 80 ? 'Excellent' : atsScore >= 60 ? 'Good' : atsScore >= 40 ? 'Fair' : 'Poor';
 
   return {
-    atsScore: overallScore,
+    atsScore,
     scoreLabel,
-    matchedKeywords: hardSkillsMatch,
-    missingKeywords: missingKeywords.slice(0, 10),
     hardSkillMatch: Math.round(hardSkillScore),
     softSkillMatch: Math.round(softSkillScore),
     experienceMatch: Math.round(experienceScore),
     recommendations: generateRecommendations(missingKeywords, resumeText)
   };
-}
-
-function extractExperienceMatch(resumeText, jobDescription) {
-  const resumeLower = resumeText.toLowerCase();
-  const jobLower = jobDescription.toLowerCase();
-
-  // Extract years of experience from job description
-  const jobExpMatch = jobDescription.match(/(\d+)\s*-?\s*(\d+)?\s*years?/i);
-  const requiredYears = jobExpMatch ? parseInt(jobExpMatch[1]) : 0;
-
-  // Extract years from resume
-  const resumeExpMatch = resumeText.match(/(\d+)\s*\+?\s*years?/i);
-  const yourYears = resumeExpMatch ? parseInt(resumeExpMatch[1]) : 0;
-
-  // Calculate match (full match = 100%, short by 1 year = 80%, etc)
-  if (requiredYears === 0) return 75;
-  const match = Math.min((yourYears / requiredYears) * 100, 100);
-  return Math.max(match, 30);
-}
-
-function calculateSoftSkillMatch(resumeText, jobDescription) {
-  const softSkills = [
-    'leadership', 'communication', 'teamwork', 'collaboration',
-    'problem solving', 'analytical', 'creative', 'adaptable',
-    'detail oriented', 'organized', 'proactive', 'mentor'
-  ];
-
-  const resumeLower = resumeText.toLowerCase();
-  const jobLower = jobDescription.toLowerCase();
-
-  const requiredSoftSkills = softSkills.filter(skill => jobLower.includes(skill));
-  const matchedSoftSkills = requiredSoftSkills.filter(skill => resumeLower.includes(skill));
-
-  if (requiredSoftSkills.length === 0) return 60;
-  return (matchedSoftSkills.length / requiredSoftSkills.length) * 100;
-}
-
-function generateRecommendations(missingKeywords, resumeText) {
-  const recommendations = [];
-
-  if (missingKeywords.length > 0) {
-    recommendations.push(`Add these missing skills to your resume: ${missingKeywords.slice(0, 3).join(', ')}`);
-  }
-
-  if (!resumeText.toLowerCase().includes('project')) {
-    recommendations.push('Highlight specific projects and achievements, not just responsibilities');
-  }
-
-  if (!resumeText.toLowerCase().includes('impact') && !resumeText.toLowerCase().includes('improved')) {
-    recommendations.push('Use action verbs and quantify your impact (e.g., "improved performance by 30%")');
-  }
-
-  if (resumeText.length < 500) {
-    recommendations.push('Expand your resume with more details about your experience');
-  }
-
-  return recommendations.slice(0, 4);
 }
 
 router.post('/check-ats-score', authenticateToken, upload.single('resume'), async (req, res) => {
@@ -171,7 +144,6 @@ router.post('/check-ats-score', authenticateToken, upload.single('resume'), asyn
       });
     }
 
-    // Extract text from file
     let resumeText;
     try {
       resumeText = await extractTextFromFile(req.file);
@@ -187,7 +159,14 @@ router.post('/check-ats-score', authenticateToken, upload.single('resume'), asyn
       });
     }
 
-    const result = calculateATSScore(resumeText, jobDescription);
+    // Use AI-powered analysis, fallback to basic calculation if AI fails
+    let result;
+    try {
+      result = await calculateATSScoreWithAI(resumeText, jobDescription);
+    } catch (err) {
+      console.warn('AI analysis failed, using fallback:', err.message);
+      result = calculateFallbackScore(resumeText, jobDescription);
+    }
 
     res.json({
       success: true,
