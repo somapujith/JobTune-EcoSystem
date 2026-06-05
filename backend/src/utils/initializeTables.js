@@ -108,6 +108,26 @@ const tables = [
     `
   },
   {
+    name: 'job_applications',
+    query: `
+      CREATE TABLE IF NOT EXISTS job_applications (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        company VARCHAR(255) NOT NULL,
+        role VARCHAR(255) NOT NULL,
+        job_description TEXT,
+        job_url VARCHAR(1000),
+        status VARCHAR(50) DEFAULT 'applied',
+        notes TEXT,
+        source VARCHAR(100),
+        applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_job_applications_user_id ON job_applications(user_id, status);
+    `
+  },
+  {
     name: 'audit_logs',
     query: `
       CREATE TABLE IF NOT EXISTS audit_logs (
