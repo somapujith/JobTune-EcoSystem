@@ -1,0 +1,52 @@
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  github_username VARCHAR(100),
+  linkedin_url VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS skill_assessments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT,
+  skills JSON NOT NULL,
+  strengths JSON,
+  gaps JSON,
+  role_matches JSON,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS resumes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT,
+  content TEXT,
+  scores JSON,
+  sections JSON,
+  file_url VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS learning_progress (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT,
+  content_id VARCHAR(100),
+  status VARCHAR(50),
+  progress INT DEFAULT 0,
+  dates JSON,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS projects (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT,
+  project_id VARCHAR(100),
+  status VARCHAR(50),
+  progress INT DEFAULT 0,
+  dates JSON,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
