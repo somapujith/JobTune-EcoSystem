@@ -128,6 +128,84 @@ const tables = [
     `
   },
   {
+    name: 'discovered_jobs',
+    query: `
+      CREATE TABLE IF NOT EXISTS discovered_jobs (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER,
+        external_id VARCHAR(255),
+        source VARCHAR(100),
+        title VARCHAR(500) NOT NULL,
+        company VARCHAR(255),
+        location VARCHAR(255),
+        description TEXT,
+        url VARCHAR(1000),
+        tags JSONB,
+        fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(source, external_id)
+      );
+      CREATE INDEX IF NOT EXISTS idx_discovered_jobs_user_id ON discovered_jobs(user_id);
+      CREATE INDEX IF NOT EXISTS idx_discovered_jobs_source ON discovered_jobs(source);
+    `
+  },
+  {
+    name: 'job_guides',
+    query: `
+      CREATE TABLE IF NOT EXISTS job_guides (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        application_id INTEGER,
+        guide JSONB,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_job_guides_user_id ON job_guides(user_id);
+    `
+  },
+  {
+    name: 'scorer_benchmarks',
+    query: `
+      CREATE TABLE IF NOT EXISTS scorer_benchmarks (
+        id SERIAL PRIMARY KEY,
+        scorer_name VARCHAR(100),
+        dataset_name VARCHAR(100),
+        metrics JSONB,
+        sample_size INTEGER,
+        run_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `
+  },
+  {
+    name: 'evidence_bullets',
+    query: `
+      CREATE TABLE IF NOT EXISTS evidence_bullets (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        bullet_text TEXT NOT NULL,
+        bullet_hash VARCHAR(64),
+        source_section VARCHAR(100),
+        skills JSONB,
+        embedding JSONB,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, bullet_hash)
+      );
+      CREATE INDEX IF NOT EXISTS idx_evidence_bullets_user_id ON evidence_bullets(user_id);
+    `
+  },
+  {
+    name: 'evidence_usage',
+    query: `
+      CREATE TABLE IF NOT EXISTS evidence_usage (
+        id SERIAL PRIMARY KEY,
+        bullet_id INTEGER NOT NULL,
+        application_id INTEGER,
+        used_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        context VARCHAR(100)
+      );
+      CREATE INDEX IF NOT EXISTS idx_bullet_id ON evidence_usage(bullet_id);
+      CREATE INDEX IF NOT EXISTS idx_application_id ON evidence_usage(application_id);
+    `
+  },
+  {
     name: 'audit_logs',
     query: `
       CREATE TABLE IF NOT EXISTS audit_logs (
@@ -140,6 +218,20 @@ const tables = [
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
       CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON audit_logs(user_id);
+    `
+  },
+  {
+    name: 'pii_redactions',
+    query: `
+      CREATE TABLE IF NOT EXISTS pii_redactions (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        context_type VARCHAR(50),
+        context_id INTEGER,
+        redaction_map JSONB,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_pii_redactions_user_id ON pii_redactions(user_id);
     `
   }
 ];

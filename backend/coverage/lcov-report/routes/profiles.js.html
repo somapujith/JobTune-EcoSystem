@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">2.63% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/266</span>
+                <span class='fraction'>7/266</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">3.39% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/206</span>
+                <span class='fraction'>7/206</span>
             </div>
         
             
@@ -504,9 +504,9 @@
 <a name='L439'></a><a href='#L439'>439</a>
 <a name='L440'></a><a href='#L440'>440</a>
 <a name='L441'></a><a href='#L441'>441</a>
-<a name='L442'></a><a href='#L442'>442</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<a name='L442'></a><a href='#L442'>442</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -699,7 +699,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -728,8 +728,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -828,10 +828,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -944,10 +944,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const express = <span class="cstat-no" title="statement not covered" >require('express');</span>
-const router = <span class="cstat-no" title="statement not covered" >express.Router();</span>
-const { authenticateToken } = <span class="cstat-no" title="statement not covered" >require('../middleware/auth');</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const express = require('express');
+const router = express.Router();
+const { authenticateToken } = require('../middleware/auth');
 &nbsp;
 // Fetch real GitHub user data from public API
 async function <span class="fstat-no" title="function not covered" >fetchGitHubData(</span>username) {
@@ -1140,7 +1140,7 @@ ${connect}`;
 }
 &nbsp;
 // POST /profiles/github/analyze
-<span class="cstat-no" title="statement not covered" >router.post('/github/analyze', authenticateToken, <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
+router.post('/github/analyze', authenticateToken, <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
   const { username } = <span class="cstat-no" title="statement not covered" >req.body;</span>
 <span class="cstat-no" title="statement not covered" >  if (!username) <span class="cstat-no" title="statement not covered" >return res.status(400).json({ error: 'GitHub username is required' });</span></span>
 &nbsp;
@@ -1169,7 +1169,7 @@ ${connect}`;
 });
 &nbsp;
 // POST /profiles/linkedin/analyze
-<span class="cstat-no" title="statement not covered" >router.post('/linkedin/analyze', authenticateToken, <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
+router.post('/linkedin/analyze', authenticateToken, <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
   const { headline, about, skills, experienceCount, yearsOfExperience, connections, hasPhoto, hasFeatured } = <span class="cstat-no" title="statement not covered" >req.body;</span>
   
   const headlineStr = <span class="cstat-no" title="statement not covered" >(headline || '').trim();</span>
@@ -1269,7 +1269,7 @@ ${connect}`;
 });
 &nbsp;
 // POST /profiles/jobmatch
-<span class="cstat-no" title="statement not covered" >router.post('/jobmatch', authenticateToken, <span class="fstat-no" title="function not covered" >(r</span>eq, res) =&gt; {</span>
+router.post('/jobmatch', authenticateToken, <span class="fstat-no" title="function not covered" >(r</span>eq, res) =&gt; {
   const { jobDescription, userSkills } = <span class="cstat-no" title="statement not covered" >req.body;</span>
 <span class="cstat-no" title="statement not covered" >  if (!jobDescription || !userSkills) {</span>
 <span class="cstat-no" title="statement not covered" >    return res.status(400).json({ error: 'Job description and user skills are required' });</span>
@@ -1385,7 +1385,7 @@ ${connect}`;
   });
 });
 &nbsp;
-<span class="cstat-no" title="statement not covered" >module.exports = router;</span>
+module.exports = router;
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -1393,7 +1393,7 @@ ${connect}`;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-05T21:02:57.396Z
+                at 2026-06-05T21:18:19.511Z
             </div>
         <script src="../prettify.js"></script>
         <script>
