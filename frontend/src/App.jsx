@@ -52,19 +52,11 @@ function ProtectedRoute({ children, requireOnboarding = false }) {
 
 function ProtectedToolRoute({ children, toolPath }) {
   const { isAuthenticated, hasCompletedOnboarding } = useAuthStore();
-  const toolName = getToolForRoute(toolPath);
-  const requiredPlan = toolName ? getRequiredPlan(toolName) : 'Learn & Build';
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (!hasCompletedOnboarding) return <Navigate to="/onboarding" replace />;
 
-  if (!toolName) return children; // No plan restriction
-
-  return (
-    <PlanGate toolName={toolName} requiredPlan={requiredPlan}>
-      {children}
-    </PlanGate>
-  );
+  return children;
 }
 
 function App() {
