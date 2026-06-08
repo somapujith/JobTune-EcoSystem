@@ -38,6 +38,7 @@ import ZeroToHeroTrack from './pages/ZeroToHeroTrack';
 import LearnAndBuildTrack from './pages/LearnAndBuildTrack';
 import useAuthStore from './store/useAuthStore';
 import useSubscriptionStore from './store/useSubscriptionStore';
+import SessionBlocked from './components/SessionBlocked';
 import { isBrowser } from './lib/browser';
 
 function ProtectedRoute({ children, requireOnboarding = false }) {
@@ -90,13 +91,17 @@ function ProtectedToolRoute({ children, toolPath }) {
 }
 
 function App() {
-  const { checkAuth, isLoading } = useAuthStore();
+  const { checkAuth, isLoading, sessionBlocked } = useAuthStore();
   const { checkOnboarded } = useSubscriptionStore();
 
   useEffect(() => {
     if (!isBrowser) return;
     checkAuth().then(() => checkOnboarded());
   }, [checkAuth, checkOnboarded]);
+
+  if (isBrowser && sessionBlocked) {
+    return <SessionBlocked />;
+  }
 
   // SSR: render route shell immediately. CSR: wait for auth bootstrap.
   if (isBrowser && isLoading) {

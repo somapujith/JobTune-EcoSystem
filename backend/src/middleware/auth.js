@@ -13,7 +13,10 @@ const authenticateToken = async (req, res, next) => {
     if (user.sessionId) {
       const active = await sessionService.isSessionActive(user.sessionId);
       if (!active) {
-        return res.status(401).json({ error: 'Session expired or revoked' });
+        return res.status(401).json({
+          error: 'This account was signed in on another device. Sign in again to use JobTune on this device.',
+          code: 'SESSION_SUPERSEDED',
+        });
       }
       sessionService.touchSession(user.sessionId).catch(() => {});
     }

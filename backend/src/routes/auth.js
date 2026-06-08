@@ -18,6 +18,17 @@ function getRequestMeta(req) {
   };
 }
 
+function handleAccountInUse(err, res, next) {
+  if (err.code === 'ACCOUNT_IN_USE') {
+    return res.status(409).json({
+      error: err.message,
+      code: 'ACCOUNT_IN_USE',
+      activeSession: err.activeSession,
+    });
+  }
+  next(err);
+}
+
 // Signup
 router.post('/signup', async (req, res, next) => {
   try {
@@ -56,14 +67,14 @@ router.post('/signup', async (req, res, next) => {
       session: session.session,
     });
   } catch (err) {
-    next(err);
+    handleAccountInUse(err, res, next);
   }
 });
 
-// Login
+// Login — one active device per account (pass replaceDevice: true to take over)
 router.post('/login', async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, replaceDevice } = req.body;
 
     const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     if (result.rows.length === 0) {
@@ -76,7 +87,11 @@ router.post('/login', async (req, res, next) => {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
 
-    const session = await sessionService.createSession(user.id, getRequestMeta(req));
+    const session = await sessionService.createSession(
+      user.id,
+      getRequestMeta(req),
+      { replaceExisting: !!replaceDevice }
+    );
 
     res.json({
       user: sanitizeUser(user),
@@ -85,7 +100,7 @@ router.post('/login', async (req, res, next) => {
       session: session.session,
     });
   } catch (err) {
-    next(err);
+    handleAccountInUse(err, res, next);
   }
 });
 
@@ -99,7 +114,10 @@ router.post('/refresh', async (req, res, next) => {
 
     const refreshed = await sessionService.refreshSession(refreshToken);
     if (!refreshed) {
-      return res.status(401).json({ error: 'Invalid or expired session' });
+      return res.status(401).json({
+        error: 'This account was signed in on another device. Sign in again to use JobTune on this device.',
+        code: 'SESSION_SUPERSEDED',
+      });
     }
 
     res.json({

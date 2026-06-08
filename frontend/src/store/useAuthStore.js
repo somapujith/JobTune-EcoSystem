@@ -22,6 +22,13 @@ function clearSession() {
   removeSafeLocalStorage('sessionId');
 }
 
+function handleSessionSuperseded(message) {
+  clearSession();
+  useAuthStore.getState().setSessionBlocked(
+    message || 'This account was signed in on another device.'
+  );
+}
+
 api.interceptors.request.use((config) => {
   const token = safeLocalStorage('token');
   if (token) {
@@ -45,8 +52,14 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const original = error.config;
-    if (!original || original._retry) return Promise.reject(error);
+    const code = error.response?.data?.code;
 
+    if (code === 'SESSION_SUPERSEDED') {
+      handleSessionSuperseded(error.response?.data?.error);
+      return Promise.reject(error);
+    }
+
+    if (!original || original._retry) return Promise.reject(error);
     if (error.response?.status !== 401) return Promise.reject(error);
 
     const refreshToken = safeLocalStorage('refreshToken');
@@ -70,15 +83,24 @@ api.interceptors.response.use(
 
     try {
       const { data } = await axios.post(`${apiBase}/auth/refresh`, { refreshToken });
+      if (data.code === 'SESSION_SUPERSEDED') {
+        handleSessionSuperseded(data.error);
+        return Promise.reject(error);
+      }
       setSafeLocalStorage('token', data.token);
       if (data.session?.id) setSafeLocalStorage('sessionId', String(data.session.id));
       processRefreshQueue(null, data.token);
       original.headers.Authorization = `Bearer ${data.token}`;
       return api(original);
     } catch (refreshError) {
+      const refreshCode = refreshError.response?.data?.code;
+      if (refreshCode === 'SESSION_SUPERSEDED') {
+        handleSessionSuperseded(refreshError.response?.data?.error);
+      } else {
+        clearSession();
+        useAuthStore.getState().resetAuth();
+      }
       processRefreshQueue(refreshError, null);
-      clearSession();
-      useAuthStore.getState().resetAuth();
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;
@@ -93,6 +115,9 @@ const useAuthStore = create((set) => ({
   isLoading: isBrowser,
   error: null,
   hasCompletedOnboarding: false,
+  sessionBlocked: false,
+  sessionBlockedMessage: null,
+  accountInUse: null,
 
   resetAuth: () => set({
     user: null,
@@ -100,12 +125,33 @@ const useAuthStore = create((set) => ({
     isAuthenticated: false,
     isLoading: false,
     hasCompletedOnboarding: false,
+    sessionBlocked: false,
+    sessionBlockedMessage: null,
+    accountInUse: null,
   }),
 
-  login: async (credentials) => {
-    set({ isLoading: true, error: null });
+  setSessionBlocked: (message) => set({
+    sessionBlocked: true,
+    sessionBlockedMessage: message,
+    isAuthenticated: false,
+    user: null,
+    sessionId: null,
+    isLoading: false,
+  }),
+
+  clearSessionBlocked: () => set({
+    sessionBlocked: false,
+    sessionBlockedMessage: null,
+    accountInUse: null,
+    error: null,
+  }),
+
+  clearAccountInUse: () => set({ accountInUse: null, error: null }),
+
+  login: async (credentials, { replaceDevice = false } = {}) => {
+    set({ isLoading: true, error: null, accountInUse: null });
     try {
-      const { data } = await api.post('/auth/login', credentials);
+      const { data } = await api.post('/auth/login', { ...credentials, replaceDevice });
       persistSession(data);
       set({
         user: data.user,
@@ -113,9 +159,23 @@ const useAuthStore = create((set) => ({
         isAuthenticated: true,
         isLoading: false,
         error: null,
+        accountInUse: null,
+        sessionBlocked: false,
+        sessionBlockedMessage: null,
       });
       return data;
     } catch (err) {
+      if (err.response?.status === 409 && err.response?.data?.code === 'ACCOUNT_IN_USE') {
+        set({
+          accountInUse: err.response.data.activeSession,
+          error: err.response.data.error,
+          isLoading: false,
+          isAuthenticated: false,
+        });
+        const blocked = new Error('ACCOUNT_IN_USE');
+        blocked.code = 'ACCOUNT_IN_USE';
+        throw blocked;
+      }
       const message = err.response?.data?.error || 'Login failed';
       set({ error: message, isLoading: false, isAuthenticated: false });
       throw new Error(message);
@@ -148,7 +208,15 @@ const useAuthStore = create((set) => ({
       // still clear local session
     }
     clearSession();
-    set({ user: null, sessionId: null, isAuthenticated: false, hasCompletedOnboarding: false });
+    set({
+      user: null,
+      sessionId: null,
+      isAuthenticated: false,
+      hasCompletedOnboarding: false,
+      sessionBlocked: false,
+      sessionBlockedMessage: null,
+      accountInUse: null,
+    });
   },
 
   setOnboardingComplete: (complete) => {
@@ -165,8 +233,13 @@ const useAuthStore = create((set) => ({
         sessionId: data.sessionId || safeLocalStorage('sessionId'),
         isAuthenticated: true,
         isLoading: false,
+        sessionBlocked: false,
       });
     } catch (err) {
+      if (err.response?.data?.code === 'SESSION_SUPERSEDED') {
+        handleSessionSuperseded(err.response?.data?.error);
+        return;
+      }
       clearSession();
       set({ isLoading: false, isAuthenticated: false });
     }

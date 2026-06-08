@@ -51,7 +51,36 @@ class SessionService {
     `);
   }
 
-  async createSession(userId, { userAgent, ipAddress, deviceName } = {}) {
+  async getActiveSession(userId) {
+    const result = await pool.query(
+      `SELECT id, device_name, ip_address, last_active_at, created_at
+       FROM user_sessions
+       WHERE user_id = $1 AND revoked_at IS NULL AND expires_at > CURRENT_TIMESTAMP
+       ORDER BY last_active_at DESC
+       LIMIT 1`,
+      [userId]
+    );
+    return result.rows[0] || null;
+  }
+
+  async createSession(userId, { userAgent, ipAddress, deviceName } = {}, { replaceExisting = false } = {}) {
+    const existing = await this.getActiveSession(userId);
+    if (existing && !replaceExisting) {
+      const err = new Error('This account is already active on another device.');
+      err.code = 'ACCOUNT_IN_USE';
+      err.activeSession = {
+        deviceName: existing.device_name,
+        ipAddress: existing.ip_address,
+        lastActiveAt: existing.last_active_at,
+        since: existing.created_at,
+      };
+      throw err;
+    }
+
+    if (existing && replaceExisting) {
+      await this.revokeAllSessions(userId);
+    }
+
     const refreshToken = crypto.randomBytes(48).toString('hex');
     const refreshTokenHash = hashToken(refreshToken);
     const expiresAt = new Date(Date.now() + REFRESH_TOKEN_DAYS * 24 * 60 * 60 * 1000);

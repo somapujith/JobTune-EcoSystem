@@ -40,8 +40,8 @@ export default function PlanSettings() {
   const [pendingPlan, setPendingPlan] = useState(null);
   const [switchError, setSwitchError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
-  const [sessions, setSessions] = useState([]);
-  const [sessionsLoading, setSessionsLoading] = useState(true);
+  const [currentSession, setCurrentSession] = useState(null);
+  const [sessionLoading, setSessionLoading] = useState(true);
 
   const highlightPlan = location.state?.highlightPlan || null;
   const fromTool = location.state?.fromTool || null;
@@ -58,19 +58,13 @@ export default function PlanSettings() {
 
   useEffect(() => {
     api.get('/auth/sessions')
-      .then(({ data }) => setSessions(data.sessions || []))
-      .catch(() => setSessions([]))
-      .finally(() => setSessionsLoading(false));
+      .then(({ data }) => {
+        const sessions = data.sessions || [];
+        setCurrentSession(sessions.find((s) => s.isCurrent) || sessions[0] || null);
+      })
+      .catch(() => setCurrentSession(null))
+      .finally(() => setSessionLoading(false));
   }, []);
-
-  const revokeSession = async (sessionId) => {
-    try {
-      await api.delete(`/auth/sessions/${sessionId}`);
-      setSessions((prev) => prev.filter((s) => s.id !== sessionId));
-    } catch (err) {
-      console.error('Failed to revoke session:', err);
-    }
-  };
 
   const sortedPlans = useMemo(
     () => [...plans].sort((a, b) => (PLAN_META[a.name]?.tier || 0) - (PLAN_META[b.name]?.tier || 0)),
@@ -295,44 +289,28 @@ export default function PlanSettings() {
             })}
       </div>
 
-      {/* Active sessions */}
+      {/* Single-device session */}
       <div className="glass-card rounded-3xl p-8 mb-16 max-w-3xl">
-        <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">Active devices</h3>
+        <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">Device session</h3>
         <p className="text-sm text-slate-500 mb-6">
-          Each device you sign in from gets its own session. Sign out remotely if you switch or lose a device.
+          Your account allows one active device at a time. Signing in elsewhere ends this session. To switch computers, sign in on the new device and choose &quot;Use this device instead&quot; on the login screen.
         </p>
-        {sessionsLoading ? (
-          <p className="text-sm text-slate-400">Loading sessions…</p>
-        ) : sessions.length === 0 ? (
-          <p className="text-sm text-slate-400">No active sessions found.</p>
+        {sessionLoading ? (
+          <p className="text-sm text-slate-400">Loading session…</p>
+        ) : !currentSession ? (
+          <p className="text-sm text-slate-400">No active session found.</p>
         ) : (
-          <div className="space-y-3">
-            {sessions.map((session) => (
-              <div
-                key={session.id}
-                className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700"
-              >
-                <div>
-                  <p className="font-bold text-slate-900 dark:text-white">
-                    {session.deviceName}
-                    {session.isCurrent && (
-                      <span className="ml-2 text-xs font-bold text-emerald-600">This device</span>
-                    )}
-                  </p>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Last active {new Date(session.lastActiveAt).toLocaleString()}
-                  </p>
-                </div>
-                {!session.isCurrent && (
-                  <button
-                    onClick={() => revokeSession(session.id)}
-                    className="text-sm font-bold text-rose-600 hover:text-rose-700 px-3 py-1.5 rounded-lg hover:bg-rose-50"
-                  >
-                    Sign out
-                  </button>
-                )}
-              </div>
-            ))}
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+            <p className="font-bold text-slate-900 dark:text-white">
+              {currentSession.deviceName}
+              <span className="ml-2 text-xs font-bold text-emerald-600">This device</span>
+            </p>
+            {currentSession.ipAddress && (
+              <p className="text-xs text-slate-500 mt-1">IP: {currentSession.ipAddress}</p>
+            )}
+            <p className="text-xs text-slate-500 mt-1">
+              Last active {new Date(currentSession.lastActiveAt).toLocaleString()}
+            </p>
           </div>
         )}
       </div>
