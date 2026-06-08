@@ -1,7 +1,9 @@
 import React from 'react';
-import { Lock, Crown, TrendingUp, Zap } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Lock, Crown, TrendingUp, Zap, ArrowRight } from 'lucide-react';
 import useSubscriptionStore from '../store/useSubscriptionStore';
 import { PLAN_TIERS, TOOL_ACCESS } from '../config/toolAccess';
+import { PLAN_META } from '../config/planDetails';
 
 const PLAN_COLORS = {
   'Learn & Build': { icon: Zap, color: 'blue', label: 'Entry Plan' },
@@ -62,18 +64,26 @@ export default function PlanGate({ toolName, requiredPlan = 'Tune & Polish', chi
           </div>
         </div>
 
-        <button
-          onClick={() => window.location.href = '/dashboard/settings/plans'}
-          className="w-full py-3 px-6 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all mb-3"
+        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 mb-6 text-left">
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Upgrade to unlock</p>
+          <p className="font-bold text-slate-900 dark:text-white">{requiredPlan}</p>
+          <p className="text-sm text-slate-500 mt-1">{PLAN_META[requiredPlan]?.tagline}</p>
+        </div>
+
+        <Link
+          to="/dashboard/settings/plans"
+          state={{ highlightPlan: requiredPlan, fromTool: toolName }}
+          className="w-full py-3 px-6 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all mb-3 flex items-center justify-center gap-2"
         >
-          Upgrade Plan
-        </button>
+          View plans & upgrade
+          <ArrowRight className="w-4 h-4" />
+        </Link>
 
         <button
           onClick={() => window.history.back()}
           className="w-full py-3 px-6 bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white rounded-xl font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all"
         >
-          Go Back
+          Go back
         </button>
       </div>
     </div>

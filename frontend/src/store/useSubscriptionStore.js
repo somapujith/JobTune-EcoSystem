@@ -1,11 +1,18 @@
 import { create } from 'zustand';
 import { api } from './useAuthStore';
 
+const syncOnboardingFlag = (onboarded) => {
+  if (onboarded) {
+    localStorage.setItem('onboarded', 'true');
+  }
+};
+
 const useSubscriptionStore = create((set, get) => ({
   userPlan: null,
   plans: [],
   recommendation: null,
   onboardingComplete: false,
+  onboardingChecked: false,
   isLoading: false,
 
   fetchPlans: async () => {
@@ -29,10 +36,13 @@ const useSubscriptionStore = create((set, get) => ({
   checkOnboarded: async () => {
     try {
       const { data } = await api.get('/subscriptions/onboarded');
-      set({ onboardingComplete: data.onboarded });
-      return data.onboarded;
+      const onboarded = !!data.onboarded;
+      syncOnboardingFlag(onboarded);
+      set({ onboardingComplete: onboarded, onboardingChecked: true });
+      return onboarded;
     } catch (err) {
       console.error('Failed to check onboarding status:', err);
+      set({ onboardingChecked: true });
       return false;
     }
   },
@@ -58,7 +68,8 @@ const useSubscriptionStore = create((set, get) => ({
     set({ isLoading: true });
     try {
       const { data } = await api.post('/subscriptions/select-plan', { planId });
-      set({ userPlan: data.plan, onboardingComplete: true, isLoading: false });
+      syncOnboardingFlag(true);
+      set({ userPlan: data.plan, onboardingComplete: true, onboardingChecked: true, isLoading: false });
       return data.plan;
     } catch (err) {
       console.error('Failed to select plan:', err);

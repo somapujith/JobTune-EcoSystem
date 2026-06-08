@@ -85,8 +85,11 @@ router.post('/select-plan', authenticateToken, async (req, res, next) => {
 // Check onboarding completion
 router.get('/onboarded', authenticateToken, async (req, res, next) => {
   try {
-    const response = await planService.getUserOnboardingResponse(req.user.id);
-    res.json({ onboarded: !!response });
+    const [response, plan] = await Promise.all([
+      planService.getUserOnboardingResponse(req.user.id),
+      planService.getUserPlan(req.user.id),
+    ]);
+    res.json({ onboarded: !!response || !!plan });
   } catch (err) {
     next(err);
   }

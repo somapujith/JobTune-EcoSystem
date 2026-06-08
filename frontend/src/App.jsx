@@ -51,22 +51,57 @@ function ProtectedRoute({ children, requireOnboarding = false }) {
 }
 
 function ProtectedToolRoute({ children, toolPath }) {
-  const { isAuthenticated, hasCompletedOnboarding } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
+  const { onboardingComplete, onboardingChecked, getUserPlan } = useSubscriptionStore();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      getUserPlan();
+    }
+  }, [isAuthenticated, getUserPlan]);
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (!hasCompletedOnboarding) return <Navigate to="/onboarding" replace />;
 
-  return children;
+  if (!onboardingChecked) {
+    return (
+      <div className="w-full min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 mb-4 animate-spin">
+            <div className="w-8 h-8 rounded-full border-2 border-white border-t-transparent" />
+          </div>
+          <p className="text-slate-600 font-semibold">Loading your tools...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!onboardingComplete) return <Navigate to="/onboarding" replace />;
+
+  const toolName = getToolForRoute(toolPath);
+  if (!toolName) return children;
+
+  const requiredPlan = getRequiredPlan(toolName);
+  return (
+    <PlanGate toolName={toolName} requiredPlan={requiredPlan}>
+      {children}
+    </PlanGate>
+  );
 }
 
 function App() {
-  const { checkAuth, isLoading } = useAuthStore();
-  const { checkOnboarded } = useSubscriptionStore();
+  const { checkAuth, isLoading, markOnboardingComplete } = useAuthStore();
+  const { checkOnboarded, onboardingComplete } = useSubscriptionStore();
 
   useEffect(() => {
     checkAuth();
     checkOnboarded();
   }, []);
+
+  useEffect(() => {
+    if (onboardingComplete) {
+      markOnboardingComplete();
+    }
+  }, [onboardingComplete, markOnboardingComplete]);
 
   if (isLoading) {
     return (
@@ -98,9 +133,9 @@ function App() {
           <Route path="github" element={<ProtectedToolRoute toolPath="/github"><GitHubOptimizer /></ProtectedToolRoute>} />
           <Route path="portfolio" element={<ProtectedToolRoute toolPath="/portfolio"><PortfolioBuilder /></ProtectedToolRoute>} />
           <Route path="preparation" element={<ProtectedToolRoute toolPath="/preparation"><JobPreparation /></ProtectedToolRoute>} />
-          <Route path="preparation/tune-and-polish" element={<ProtectedToolRoute toolPath="/preparation"><TuneAndPolishTrack /></ProtectedToolRoute>} />
-          <Route path="preparation/zero-to-hero" element={<ProtectedToolRoute toolPath="/preparation"><ZeroToHeroTrack /></ProtectedToolRoute>} />
-          <Route path="preparation/learn-and-build" element={<ProtectedToolRoute toolPath="/preparation"><LearnAndBuildTrack /></ProtectedToolRoute>} />
+          <Route path="preparation/tune-and-polish" element={<ProtectedToolRoute toolPath="/preparation/tune-and-polish"><TuneAndPolishTrack /></ProtectedToolRoute>} />
+          <Route path="preparation/zero-to-hero" element={<ProtectedToolRoute toolPath="/preparation/zero-to-hero"><ZeroToHeroTrack /></ProtectedToolRoute>} />
+          <Route path="preparation/learn-and-build" element={<ProtectedToolRoute toolPath="/preparation/learn-and-build"><LearnAndBuildTrack /></ProtectedToolRoute>} />
           <Route path="learning" element={<ProtectedToolRoute toolPath="/learning"><ContentVault /></ProtectedToolRoute>} />
           <Route path="projects" element={<ProtectedToolRoute toolPath="/projects"><ProjectIdeas /></ProtectedToolRoute>} />
           <Route path="blog" element={<Blog />} />
@@ -125,8 +160,8 @@ function App() {
           <Route path="discover" element={<ProtectedToolRoute toolPath="/discover"><JobDiscovery /></ProtectedToolRoute>} />
           <Route path="jobs" element={<ProtectedToolRoute toolPath="/jobs"><JobTracker /></ProtectedToolRoute>} />
           <Route path="career" element={<ProtectedToolRoute toolPath="/career"><CareerRoadmap /></ProtectedToolRoute>} />
-          <Route path="job-analyzer" element={<ProtectedToolRoute toolPath="/career"><JobAnalyzer /></ProtectedToolRoute>} />
-          <Route path="ats-checker" element={<ProtectedToolRoute toolPath="/career"><ATSChecker /></ProtectedToolRoute>} />
+          <Route path="job-analyzer" element={<ProtectedToolRoute toolPath="/job-analyzer"><JobAnalyzer /></ProtectedToolRoute>} />
+          <Route path="ats-checker" element={<ProtectedToolRoute toolPath="/ats-checker"><ATSChecker /></ProtectedToolRoute>} />
           <Route path="job-fit" element={<ProtectedToolRoute toolPath="/job-fit"><JobFitAnalysis /></ProtectedToolRoute>} />
           <Route path="cover-letter" element={<ProtectedToolRoute toolPath="/cover-letter"><CoverLetterGenerator /></ProtectedToolRoute>} />
           <Route

@@ -1,174 +1,311 @@
-import React, { useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import useAuthStore from '../store/useAuthStore';
 import useSubscriptionStore from '../store/useSubscriptionStore';
-import { Check, Crown, TrendingUp, Zap } from 'lucide-react';
+import PlanChangeModal from '../components/PlanChangeModal';
+import LoadingButton from '../components/LoadingButton';
+import { formatPrice, getChangeType, PLAN_META } from '../config/planDetails';
+import {
+  ArrowLeft,
+  Check,
+  ChevronRight,
+  Crown,
+  Sparkles,
+} from 'lucide-react';
 
-const PLAN_DETAILS = {
+const PLAN_STYLES = {
   'Learn & Build': {
-    tier: 1,
-    price: 0,
-    icon: Zap,
-    description: 'For service role learners',
-    features: ['Learning Resources', 'Project Ideas', 'Skill Assessment']
+    ring: 'ring-blue-500/30',
+    badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+    button: 'bg-blue-600 hover:bg-blue-700',
   },
   'Tune & Polish': {
-    tier: 2,
-    price: 29,
-    icon: TrendingUp,
-    description: 'For resume & portfolio refinement',
-    features: ['All Learn & Build features', 'Resume Optimizer', 'LinkedIn Optimizer', 'GitHub Optimizer', 'Portfolio Builder']
+    ring: 'ring-purple-500/30',
+    badge: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+    button: 'bg-purple-600 hover:bg-purple-700',
   },
   'Zero to Hero': {
-    tier: 3,
-    price: 79,
-    icon: Crown,
-    description: 'All tools & premium features',
-    features: ['All Tune & Polish features', 'Interview Prep', 'Job Tracker', 'Career Roadmap', 'ATS Checker', 'Cover Letter Generator', 'Mock Interview']
-  }
+    ring: 'ring-amber-500/30',
+    badge: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+    button: 'bg-amber-600 hover:bg-amber-700',
+  },
 };
 
 export default function PlanSettings() {
   const { isAuthenticated } = useAuthStore();
-  const { userPlan, plans, selectPlan, isLoading, fetchPlans } = useSubscriptionStore();
+  const { userPlan, plans, selectPlan, isLoading, fetchPlans, getUserPlan } = useSubscriptionStore();
+  const location = useLocation();
+
+  const [pageLoading, setPageLoading] = useState(true);
+  const [pendingPlan, setPendingPlan] = useState(null);
+  const [switchError, setSwitchError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
+
+  const highlightPlan = location.state?.highlightPlan || null;
+  const fromTool = location.state?.fromTool || null;
 
   useEffect(() => {
-    fetchPlans();
-  }, [fetchPlans]);
+    let mounted = true;
+    (async () => {
+      setPageLoading(true);
+      await Promise.all([fetchPlans(), getUserPlan()]);
+      if (mounted) setPageLoading(false);
+    })();
+    return () => { mounted = false; };
+  }, [fetchPlans, getUserPlan]);
+
+  const sortedPlans = useMemo(
+    () => [...plans].sort((a, b) => (PLAN_META[a.name]?.tier || 0) - (PLAN_META[b.name]?.tier || 0)),
+    [plans]
+  );
+
+  useEffect(() => {
+    if (!highlightPlan || pageLoading || sortedPlans.length === 0) return;
+    const slug = highlightPlan.replace(/\s+/g, '-').toLowerCase();
+    const el = document.getElementById(`plan-${slug}`);
+    if (el) {
+      setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+    }
+  }, [highlightPlan, pageLoading, sortedPlans.length]);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  const handleUpgrade = async (planId) => {
+  const openSwitchModal = (plan) => {
+    if (!userPlan || plan.id === userPlan.id) return;
+    setSwitchError(null);
+    setPendingPlan(plan);
+  };
+
+  const closeSwitchModal = () => {
+    if (isLoading) return;
+    setPendingPlan(null);
+    setSwitchError(null);
+  };
+
+  const confirmSwitch = async () => {
+    if (!pendingPlan) return;
+    setSwitchError(null);
     try {
-      await selectPlan(planId);
-      window.location.reload();
+      await selectPlan(pendingPlan.id);
+      setPendingPlan(null);
+      setSuccessMessage(`You're now on ${pendingPlan.name}. Your tools have been updated.`);
+      setTimeout(() => setSuccessMessage(null), 6000);
     } catch (err) {
-      console.error('Failed to change plan:', err);
+      setSwitchError(err.response?.data?.error || 'Failed to switch plans. Please try again.');
     }
   };
 
+  const getActionLabel = (plan) => {
+    if (!userPlan) return 'Select plan';
+    if (plan.id === userPlan.id) return 'Current plan';
+    const changeType = getChangeType(userPlan.name, plan.name);
+    if (changeType === 'upgrade') return `Upgrade to ${plan.name}`;
+    if (changeType === 'downgrade') return `Switch to ${plan.name}`;
+    return `Switch to ${plan.name}`;
+  };
+
   return (
-    <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-      <div className="mb-12">
-        <h1 className="text-4xl font-black text-slate-900 dark:text-white mb-3">Subscription Plans</h1>
-        <p className="text-lg text-slate-600 dark:text-slate-400">Manage your plan and access tools</p>
+    <div className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 w-full">
+      {/* Back + header */}
+      <div className="mb-10">
+        <Link
+          to="/dashboard"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors mb-6"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to dashboard
+        </Link>
+
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-blue-600 mb-2">Subscription</p>
+            <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">Manage your plan</h1>
+            <p className="text-lg text-slate-500 mt-2 max-w-xl">
+              Compare tiers, preview what changes, and switch instantly — no page reload needed.
+            </p>
+          </div>
+
+          {fromTool && highlightPlan && (
+            <div className="glass-card rounded-2xl px-5 py-4 flex items-start gap-3 max-w-md">
+              <Sparkles className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">Unlock {fromTool}</p>
+                <p className="text-sm text-slate-500">
+                  {highlightPlan} includes this tool. Review the plan below to upgrade.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Current Plan */}
-      {userPlan && (
-        <div className="mb-12 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-200 dark:border-blue-800">
-          <p className="text-sm font-bold text-blue-600 dark:text-blue-400 mb-2">CURRENT PLAN</p>
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2">{userPlan.name}</h2>
-          <p className="text-slate-600 dark:text-slate-400">
-            You have access to {userPlan.features.length} tools
-          </p>
+      {/* Success banner */}
+      {successMessage && (
+        <div className="mb-8 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+          <Check className="w-5 h-5 text-emerald-600 shrink-0" />
+          <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">{successMessage}</p>
+          <Link to="/dashboard" className="ml-auto text-sm font-bold text-emerald-700 hover:underline shrink-0">
+            Go to dashboard
+          </Link>
         </div>
       )}
 
-      {/* Plans Grid */}
-      <div className="grid md:grid-cols-3 gap-8">
-        {plans.map(plan => {
-          const details = PLAN_DETAILS[plan.name] || {};
-          const PlanIcon = details.icon || Crown;
-          const isCurrentPlan = userPlan?.id === plan.id;
-          const canDowngrade = userPlan && PLAN_DETAILS[userPlan.name]?.tier > details.tier;
-          const canUpgrade = userPlan && PLAN_DETAILS[userPlan.name]?.tier < details.tier;
-
-          return (
-            <div
-              key={plan.id}
-              className={`rounded-2xl p-8 transition-all ${
-                isCurrentPlan
-                  ? 'bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-600'
-                  : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:shadow-lg'
-              }`}
-            >
-              {/* Icon & Name */}
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center">
-                  <PlanIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">{plan.name}</h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">{details.description}</p>
-                </div>
+      {/* Current plan hero */}
+      {pageLoading ? (
+        <div className="glass-card rounded-3xl p-8 mb-10 animate-pulse">
+          <div className="h-6 w-32 bg-slate-200 dark:bg-slate-700 rounded mb-4" />
+          <div className="h-10 w-64 bg-slate-200 dark:bg-slate-700 rounded" />
+        </div>
+      ) : userPlan ? (
+        <div className="glass-card rounded-3xl p-8 mb-10 border-2 border-blue-500/20 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/5 rounded-full -mr-16 -mt-16" />
+          <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-lg">
+                <Crown className="w-7 h-7" />
               </div>
-
-              {/* Price */}
-              <div className="mb-6">
-                {plan.price === 0 ? (
-                  <p className="text-3xl font-black text-blue-600 dark:text-blue-400">Free</p>
-                ) : (
-                  <>
-                    <p className="text-4xl font-black text-slate-900 dark:text-white">${plan.price}</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">/month</p>
-                  </>
-                )}
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-blue-600 mb-1">Your current plan</p>
+                <h2 className="text-3xl font-black text-slate-900 dark:text-white">{userPlan.name}</h2>
+                <p className="text-slate-500 mt-1">
+                  {formatPrice(userPlan.price)} · {userPlan.features?.length || 0} tools unlocked
+                </p>
               </div>
-
-              {/* Features */}
-              <div className="mb-8 space-y-3">
-                {plan.features.map((feature, idx) => (
-                  <div key={idx} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-slate-700 dark:text-slate-300">{feature}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Action Button */}
-              <button
-                onClick={() => handleUpgrade(plan.id)}
-                disabled={isCurrentPlan || isLoading}
-                className={`w-full py-3 px-4 rounded-xl font-bold transition-all ${
-                  isCurrentPlan
-                    ? 'bg-blue-600 text-white cursor-default'
-                    : canUpgrade
-                    ? 'bg-green-600 text-white hover:bg-green-700'
-                    : canDowngrade
-                    ? 'bg-amber-600 text-white hover:bg-amber-700'
-                    : 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white'
-                } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                {isCurrentPlan
-                  ? '✓ Current Plan'
-                  : canUpgrade
-                  ? 'Upgrade to ' + plan.name
-                  : canDowngrade
-                  ? 'Change to ' + plan.name
-                  : 'Select Plan'}
-              </button>
             </div>
-          );
-        })}
-      </div>
-
-      {/* FAQ */}
-      <div className="mt-16 max-w-2xl">
-        <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-8">FAQ</h3>
-        <div className="space-y-6">
-          <div>
-            <h4 className="font-bold text-slate-900 dark:text-white mb-2">Can I change my plan anytime?</h4>
-            <p className="text-slate-600 dark:text-slate-400">
-              Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately.
-            </p>
-          </div>
-          <div>
-            <h4 className="font-bold text-slate-900 dark:text-white mb-2">What happens if I downgrade?</h4>
-            <p className="text-slate-600 dark:text-slate-400">
-              You'll lose access to tools not available in your new plan. Your data will be preserved.
-            </p>
-          </div>
-          <div>
-            <h4 className="font-bold text-slate-900 dark:text-white mb-2">Is there a free trial?</h4>
-            <p className="text-slate-600 dark:text-slate-400">
-              Yes! Learn & Build is completely free and gives you access to core learning features.
-            </p>
+            <div className="flex flex-wrap gap-2">
+              {(userPlan.features || []).slice(0, 4).map((f) => (
+                <span key={f} className="px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-xs font-semibold text-blue-700 dark:text-blue-300">
+                  {f}
+                </span>
+              ))}
+              {(userPlan.features?.length || 0) > 4 && (
+                <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-500">
+                  +{userPlan.features.length - 4} more
+                </span>
+              )}
+            </div>
           </div>
         </div>
+      ) : null}
+
+      {/* Plan cards */}
+      <div className="grid md:grid-cols-3 gap-6 mb-16">
+        {pageLoading
+          ? [1, 2, 3].map((i) => (
+              <div key={i} className="glass-card rounded-3xl p-8 animate-pulse h-96" />
+            ))
+          : sortedPlans.map((plan) => {
+              const meta = PLAN_META[plan.name] || {};
+              const PlanIcon = meta.icon || Crown;
+              const styles = PLAN_STYLES[plan.name] || PLAN_STYLES['Learn & Build'];
+              const isCurrent = userPlan?.id === plan.id;
+              const isHighlighted = highlightPlan === plan.name && !isCurrent;
+              const changeType = userPlan ? getChangeType(userPlan.name, plan.name) : 'same';
+
+              return (
+                <div
+                  key={plan.id}
+                  id={`plan-${plan.name.replace(/\s+/g, '-').toLowerCase()}`}
+                  className={`relative glass-card rounded-3xl p-8 flex flex-col transition-all duration-300 ${
+                    isCurrent
+                      ? `ring-2 ring-blue-600 shadow-lg ${styles.ring}`
+                      : isHighlighted
+                      ? 'ring-2 ring-amber-500 shadow-xl scale-[1.02]'
+                      : 'hover:shadow-lg hover:-translate-y-1'
+                  }`}
+                >
+                  {isCurrent && (
+                    <span className="absolute -top-3 left-6 px-3 py-1 rounded-full bg-blue-600 text-white text-xs font-bold">
+                      Active
+                    </span>
+                  )}
+                  {isHighlighted && (
+                    <span className="absolute -top-3 right-6 px-3 py-1 rounded-full bg-amber-500 text-white text-xs font-bold">
+                      Recommended
+                    </span>
+                  )}
+
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${styles.badge}`}>
+                      <PlanIcon className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-black text-slate-900 dark:text-white">{plan.name}</h3>
+                      <p className="text-sm text-slate-500">{meta.tagline || plan.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <p className="text-4xl font-black text-slate-900 dark:text-white">
+                      {plan.price === 0 ? 'Free' : `$${plan.price}`}
+                    </p>
+                    {plan.price > 0 && <p className="text-sm text-slate-500">per month</p>}
+                  </div>
+
+                  <div className="flex-1 space-y-2.5 mb-8">
+                    {(plan.features || []).map((feature) => (
+                      <div key={feature} className="flex items-start gap-2.5">
+                        <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                        <span className="text-sm text-slate-700 dark:text-slate-300">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {isCurrent ? (
+                    <div className="w-full py-3.5 px-4 rounded-xl font-bold text-center bg-blue-600/10 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                      ✓ Current plan
+                    </div>
+                  ) : (
+                    <LoadingButton
+                      loading={isLoading && pendingPlan?.id === plan.id}
+                      disabled={isLoading}
+                      onClick={() => openSwitchModal(plan)}
+                      className={`w-full py-3.5 px-4 rounded-xl font-bold text-white transition-all active:scale-[0.98] ${
+                        changeType === 'downgrade'
+                          ? 'bg-slate-700 hover:bg-slate-800'
+                          : styles.button
+                      }`}
+                    >
+                      {getActionLabel(plan)}
+                      <ChevronRight className="w-4 h-4" />
+                    </LoadingButton>
+                  )}
+                </div>
+              );
+            })}
       </div>
+
+      {/* How it works */}
+      <div className="glass-card rounded-3xl p-8 max-w-3xl">
+        <h3 className="text-xl font-black text-slate-900 dark:text-white mb-6">How plan changes work</h3>
+        <div className="grid sm:grid-cols-3 gap-6">
+          {[
+            { step: '1', title: 'Preview changes', desc: 'See exactly which tools you gain or lose before confirming.' },
+            { step: '2', title: 'Instant activation', desc: 'Your new plan applies immediately — no reload or re-login.' },
+            { step: '3', title: 'Data preserved', desc: 'Downgrading locks tools but keeps all your saved work.' },
+          ].map((item) => (
+            <div key={item.step}>
+              <div className="w-8 h-8 rounded-full bg-blue-600 text-white text-sm font-black flex items-center justify-center mb-3">
+                {item.step}
+              </div>
+              <p className="font-bold text-slate-900 dark:text-white mb-1">{item.title}</p>
+              <p className="text-sm text-slate-500">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <PlanChangeModal
+        isOpen={!!pendingPlan}
+        currentPlan={userPlan}
+        targetPlan={pendingPlan}
+        onConfirm={confirmSwitch}
+        onCancel={closeSwitchModal}
+        isLoading={isLoading}
+        error={switchError}
+      />
     </div>
   );
 }

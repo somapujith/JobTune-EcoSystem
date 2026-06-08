@@ -158,11 +158,11 @@ const Navbar = () => {
                 {userPlan && (
                   <Link
                     to="/dashboard/settings/plans"
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
-                    title={userPlan.name}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors group"
+                    title="Manage or switch your plan"
                   >
                     <Crown className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    <span className="text-xs font-bold text-blue-700 dark:text-blue-300 hidden sm:inline">{userPlan.name}</span>
+                    <span className="text-xs font-bold text-blue-700 dark:text-blue-300 hidden sm:inline group-hover:underline">{userPlan.name}</span>
                   </Link>
                 )}
                 <button
