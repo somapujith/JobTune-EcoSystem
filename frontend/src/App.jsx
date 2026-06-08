@@ -37,12 +37,15 @@ import TuneAndPolishTrack from './pages/TuneAndPolishTrack';
 import ZeroToHeroTrack from './pages/ZeroToHeroTrack';
 import LearnAndBuildTrack from './pages/LearnAndBuildTrack';
 import useAuthStore from './store/useAuthStore';
+import useSubscriptionStore from './store/useSubscriptionStore';
 
 function ProtectedRoute({ children, requireOnboarding = false }) {
   const { isAuthenticated, hasCompletedOnboarding } = useAuthStore();
+  const { onboardingComplete } = useSubscriptionStore();
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (requireOnboarding && !hasCompletedOnboarding) return <Navigate to="/onboarding" replace />;
+  if (requireOnboarding && !onboardingComplete) return <Navigate to="/onboarding" replace />;
 
   return children;
 }
@@ -66,9 +69,11 @@ function ProtectedToolRoute({ children, toolPath }) {
 
 function App() {
   const { checkAuth, isLoading } = useAuthStore();
+  const { checkOnboarded } = useSubscriptionStore();
 
   useEffect(() => {
     checkAuth();
+    checkOnboarded();
   }, []);
 
   if (isLoading) {
