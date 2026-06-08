@@ -3,6 +3,7 @@ const app = require('./app');
 const { pool } = require('./config/database');
 const { initializeTables } = require('./utils/initializeTables');
 const { runMigrations } = require('./utils/runMigrations');
+const sessionService = require('./services/sessionService');
 
 const PORT = process.env.PORT || 5000;
 
@@ -17,6 +18,9 @@ const startServer = async () => {
 
     // Run subscription migrations
     await runMigrations();
+
+    // User sessions + cross-device progress tables
+    await sessionService.ensureTables();
   } catch (err) {
     console.warn('⚠️ WARNING: Could not connect to the database. The server will start, but API endpoints relying on DB will fail.');
     console.warn('Please ensure PostgreSQL is running, user/pass is correct, and the database "fresher_ecosystem" exists.');

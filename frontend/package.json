@@ -5,9 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build:client": "vite build",
+    "build:server": "vite build --ssr src/entry-server.jsx --outDir dist/server",
+    "build": "npm run build:client && npm run build:server",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
+    "preview:ssr": "node server/preview.mjs",
     "start": "vite"
   },
   "dependencies": {
@@ -25,6 +28,7 @@
     "zustand": "^4.5.1"
   },
   "devDependencies": {
+    "express": "^5.2.1",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
     "@vitejs/plugin-react": "^4.2.1",

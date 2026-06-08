@@ -1,22 +1,40 @@
 import { useState } from 'react';
 import { Wrench, Plus, Loader2, Code2, ArrowRight, X, Terminal, FileCode2 } from 'lucide-react';
 import { api } from '../store/useAuthStore';
+import { useUserProgress } from '../hooks/useUserProgress';
+
+const LEARN_BUILD_DEFAULTS = {
+  targetRole: '',
+  currentSkills: '',
+  projectIdeas: [],
+  tasks: [
+    { id: 't1', title: 'Personal Portfolio', status: 'done' },
+    { id: 't2', title: 'React Weather App', status: 'in-progress' },
+  ],
+};
 
 export default function LearnAndBuildTrack() {
-  const [targetRole, setTargetRole] = useState('');
-  const [currentSkills, setCurrentSkills] = useState('');
-  const [loadingProjects, setLoadingProjects] = useState(false);
-  const [projectIdeas, setProjectIdeas] = useState([]);
-  
-  // Kanban State
-  const [tasks, setTasks] = useState([
-    { id: 't1', title: 'Personal Portfolio', status: 'done' },
-    { id: 't2', title: 'React Weather App', status: 'in-progress' }
-  ]);
+  const { data: progress, updateProgress, isLoading: progressLoading, isSaving } = useUserProgress(
+    'learn-and-build',
+    LEARN_BUILD_DEFAULTS
+  );
 
-  // Blueprint Modal State
+  const targetRole = progress.targetRole;
+  const currentSkills = progress.currentSkills;
+  const projectIdeas = progress.projectIdeas;
+  const tasks = progress.tasks;
+
+  const [loadingProjects, setLoadingProjects] = useState(false);
   const [activeBlueprint, setActiveBlueprint] = useState(null);
   const [loadingBlueprint, setLoadingBlueprint] = useState(false);
+
+  if (progressLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-24 flex justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-orange-600" />
+      </div>
+    );
+  }
 
   const handleGenerateProjects = async (e) => {
     e.preventDefault();
@@ -25,7 +43,7 @@ export default function LearnAndBuildTrack() {
     setLoadingProjects(true);
     try {
       const res = await api.post('/job-prep/projects', { role: targetRole, skills: currentSkills });
-      setProjectIdeas(res.data.data.projects);
+      updateProgress({ projectIdeas: res.data.data.projects });
     } catch (err) {
       console.error(err);
     } finally {
@@ -47,7 +65,9 @@ export default function LearnAndBuildTrack() {
       
       // Auto-add to Kanban 'todo' if not there
       if (!tasks.find(t => t.title === project.title)) {
-        setTasks(prev => [...prev, { id: Date.now().toString(), title: project.title, status: 'todo' }]);
+        updateProgress({
+          tasks: [...tasks, { id: Date.now().toString(), title: project.title, status: 'todo' }],
+        });
       }
     } catch (err) {
       setActiveBlueprint(null);
@@ -62,7 +82,9 @@ export default function LearnAndBuildTrack() {
 
   const handleDrop = (e, status) => {
     const id = e.dataTransfer.getData('taskId');
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, status } : t));
+    updateProgress({
+      tasks: tasks.map(t => t.id === id ? { ...t, status } : t),
+    });
   };
 
   const handleDragOver = (e) => {
@@ -77,7 +99,10 @@ export default function LearnAndBuildTrack() {
           <Wrench className="w-8 h-8" />
         </div>
         <div>
-          <h1 className="text-3xl font-black text-slate-900">Learn & Build Track</h1>
+          <h1 className="text-3xl font-black text-slate-900">
+            Learn & Build Track
+            {isSaving && <span className="ml-2 text-orange-600 text-sm font-semibold">Saving…</span>}
+          </h1>
           <p className="text-slate-500 mt-1 text-lg">Build hyper-targeted projects to fill your resume skill gaps.</p>
         </div>
       </div>
@@ -101,7 +126,7 @@ export default function LearnAndBuildTrack() {
                 <input
                   type="text"
                   value={targetRole}
-                  onChange={e => setTargetRole(e.target.value)}
+                  onChange={e => updateProgress({ targetRole: e.target.value })}
                   placeholder="e.g. React Developer"
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-orange-500"
                 />
@@ -111,7 +136,7 @@ export default function LearnAndBuildTrack() {
                 <input
                   type="text"
                   value={currentSkills}
-                  onChange={e => setCurrentSkills(e.target.value)}
+                  onChange={e => updateProgress({ currentSkills: e.target.value })}
                   placeholder="e.g. HTML, CSS, JS"
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-orange-500"
                 />

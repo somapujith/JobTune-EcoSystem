@@ -38,6 +38,7 @@ import ZeroToHeroTrack from './pages/ZeroToHeroTrack';
 import LearnAndBuildTrack from './pages/LearnAndBuildTrack';
 import useAuthStore from './store/useAuthStore';
 import useSubscriptionStore from './store/useSubscriptionStore';
+import { isBrowser } from './lib/browser';
 
 function ProtectedRoute({ children, requireOnboarding = false }) {
   const { isAuthenticated, hasCompletedOnboarding } = useAuthStore();
@@ -89,21 +90,16 @@ function ProtectedToolRoute({ children, toolPath }) {
 }
 
 function App() {
-  const { checkAuth, isLoading, markOnboardingComplete } = useAuthStore();
-  const { checkOnboarded, onboardingComplete } = useSubscriptionStore();
+  const { checkAuth, isLoading } = useAuthStore();
+  const { checkOnboarded } = useSubscriptionStore();
 
   useEffect(() => {
-    checkAuth();
-    checkOnboarded();
-  }, []);
+    if (!isBrowser) return;
+    checkAuth().then(() => checkOnboarded());
+  }, [checkAuth, checkOnboarded]);
 
-  useEffect(() => {
-    if (onboardingComplete) {
-      markOnboardingComplete();
-    }
-  }, [onboardingComplete, markOnboardingComplete]);
-
-  if (isLoading) {
+  // SSR: render route shell immediately. CSR: wait for auth bootstrap.
+  if (isBrowser && isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
         <div className="text-center">

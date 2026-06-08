@@ -1,11 +1,6 @@
 import { create } from 'zustand';
 import { api } from './useAuthStore';
-
-const syncOnboardingFlag = (onboarded) => {
-  if (onboarded) {
-    localStorage.setItem('onboarded', 'true');
-  }
-};
+import useAuthStore from './useAuthStore';
 
 const useSubscriptionStore = create((set, get) => ({
   userPlan: null,
@@ -37,7 +32,7 @@ const useSubscriptionStore = create((set, get) => ({
     try {
       const { data } = await api.get('/subscriptions/onboarded');
       const onboarded = !!data.onboarded;
-      syncOnboardingFlag(onboarded);
+      useAuthStore.getState().setOnboardingComplete(onboarded);
       set({ onboardingComplete: onboarded, onboardingChecked: true });
       return onboarded;
     } catch (err) {
@@ -53,7 +48,7 @@ const useSubscriptionStore = create((set, get) => ({
       const { data } = await api.post('/subscriptions/recommend', {
         careerGoal,
         experienceLevel,
-        painPoints
+        painPoints,
       });
       set({ recommendation: data.recommendation, isLoading: false });
       return data.recommendation;
@@ -68,7 +63,7 @@ const useSubscriptionStore = create((set, get) => ({
     set({ isLoading: true });
     try {
       const { data } = await api.post('/subscriptions/select-plan', { planId });
-      syncOnboardingFlag(true);
+      useAuthStore.getState().setOnboardingComplete(true);
       set({ userPlan: data.plan, onboardingComplete: true, onboardingChecked: true, isLoading: false });
       return data.plan;
     } catch (err) {
@@ -82,7 +77,7 @@ const useSubscriptionStore = create((set, get) => ({
     const { userPlan } = get();
     if (!userPlan) return false;
     return userPlan.features && userPlan.features.includes(toolName);
-  }
+  },
 }));
 
 export default useSubscriptionStore;

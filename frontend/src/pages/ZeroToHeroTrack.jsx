@@ -1,6 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
 import { Rocket, Loader2, CheckCircle, ChevronDown, ChevronUp, Bot, Send, Info, User, Play, Briefcase, GraduationCap } from 'lucide-react';
 import { api } from '../store/useAuthStore';
+import { useUserProgress } from '../hooks/useUserProgress';
+
+const DEFAULT_TUTOR_MESSAGE = {
+  role: 'assistant',
+  content: "Hi! I'm your AI Tutor. Ask me to explain any concept from your roadmap!",
+};
+
+const ZERO_TO_HERO_DEFAULTS = {
+  step: 'intro',
+  collectedData: {},
+  wizardCurrentQIndex: 0,
+  wizardMessages: [],
+  expandedPhases: {},
+  messages: [DEFAULT_TUTOR_MESSAGE],
+  targetRole: '',
+};
 
 // --- Chat Wizard Configuration ---
 const WIZARD_QUESTIONS = [
@@ -50,25 +66,25 @@ const WIZARD_QUESTIONS = [
 
 
 export default function ZeroToHeroTrack() {
-  const [step, setStep] = useState('intro'); // intro | chat-wizard | generating | display
+  const { data: progress, updateProgress, isLoading: progressLoading, isSaving } = useUserProgress(
+    'zero-to-hero',
+    ZERO_TO_HERO_DEFAULTS
+  );
+
+  const step = progress.step;
+  const collectedData = progress.collectedData;
+  const wizardCurrentQIndex = progress.wizardCurrentQIndex;
+  const wizardMessages = progress.wizardMessages;
+  const expandedPhases = progress.expandedPhases;
+  const messages = progress.messages;
+  const targetRole = progress.targetRole;
+
   const [roadmap, setRoadmap] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [expandedPhases, setExpandedPhases] = useState({});
-  const [targetRole, setTargetRole] = useState('');
-  
-  // --- Chat Wizard State ---
-  const [wizardMessages, setWizardMessages] = useState([]);
-  const [wizardCurrentQIndex, setWizardCurrentQIndex] = useState(0);
   const [wizardInput, setWizardInput] = useState('');
   const [isBotTyping, setIsBotTyping] = useState(false);
-  const [collectedData, setCollectedData] = useState({});
   const chatEndRef = useRef(null);
-
-  // --- Tutor Chat State (in Display mode) ---
   const [chatInput, setChatInput] = useState('');
-  const [messages, setMessages] = useState([
-    { role: 'assistant', content: "Hi! I'm your AI Tutor. Ask me to explain any concept from your roadmap!" }
-  ]);
   const [chatLoading, setChatLoading] = useState(false);
 
   useEffect(() => {
@@ -76,11 +92,18 @@ export default function ZeroToHeroTrack() {
   }, []);
 
   useEffect(() => {
-    // Scroll to bottom of chat wizard whenever messages change
     if (step === 'chat-wizard' && chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [wizardMessages, isBotTyping, step]);
+
+  if (progressLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-24 flex justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+      </div>
+    );
+  }
 
   async function loadSavedRoadmap() {
     try {
@@ -97,18 +120,29 @@ export default function ZeroToHeroTrack() {
 
   // --- Intro Handlers ---
   const startWizard = () => {
-    setStep('chat-wizard');
+    updateProgress({
+      step: 'chat-wizard',
+      wizardCurrentQIndex: 0,
+      collectedData: {},
+      wizardMessages: [],
+      targetRole: '',
+    });
     setIsBotTyping(true);
     setTimeout(() => {
       setIsBotTyping(false);
-      setWizardMessages([{ role: 'bot', text: "Welcome to your personal career prep journey! Let's build a roadmap tailored just for you." }]);
-      
+      updateProgress((p) => ({
+        ...p,
+        wizardMessages: [{ role: 'bot', text: "Welcome to your personal career prep journey! Let's build a roadmap tailored just for you." }],
+      }));
+
       setIsBotTyping(true);
       setTimeout(() => {
         setIsBotTyping(false);
-        setWizardMessages(prev => [...prev, { role: 'bot', text: WIZARD_QUESTIONS[0].text }]);
+        updateProgress((p) => ({
+          ...p,
+          wizardMessages: [...p.wizardMessages, { role: 'bot', text: WIZARD_QUESTIONS[0].text }],
+        }));
       }, 1000);
-
     }, 1500);
   };
 
@@ -118,31 +152,46 @@ export default function ZeroToHeroTrack() {
     const answer = val !== null ? val : wizardInput;
     if (!answer.trim()) return;
 
-    setWizardMessages(prev => [...prev, { role: 'user', text: answer }]);
+    updateProgress((p) => ({
+      ...p,
+      wizardMessages: [...p.wizardMessages, { role: 'user', text: answer }],
+    }));
     setWizardInput('');
 
     const currentQ = WIZARD_QUESTIONS[wizardCurrentQIndex];
     const newData = { ...collectedData, [currentQ.id]: answer };
-    setCollectedData(newData);
-
-    if (currentQ.id === 'role') {
-      setTargetRole(answer);
-    }
+    const roleUpdate = currentQ.id === 'role' ? { targetRole: answer } : {};
 
     const nextIndex = wizardCurrentQIndex + 1;
     if (nextIndex < WIZARD_QUESTIONS.length) {
-      setWizardCurrentQIndex(nextIndex);
+      updateProgress((p) => ({
+        ...p,
+        collectedData: newData,
+        wizardCurrentQIndex: nextIndex,
+        ...roleUpdate,
+      }));
       setIsBotTyping(true);
       setTimeout(() => {
         setIsBotTyping(false);
-        setWizardMessages(prev => [...prev, { role: 'bot', text: WIZARD_QUESTIONS[nextIndex].text }]);
+        updateProgress((p) => ({
+          ...p,
+          wizardMessages: [...p.wizardMessages, { role: 'bot', text: WIZARD_QUESTIONS[nextIndex].text }],
+        }));
       }, 1000);
     } else {
+      updateProgress((p) => ({
+        ...p,
+        collectedData: newData,
+        ...roleUpdate,
+      }));
       setIsBotTyping(true);
       setTimeout(() => {
         setIsBotTyping(false);
-        setWizardMessages(prev => [...prev, { role: 'bot', text: "Perfect! I have all the details I need. Generating your custom roadmap..." }]);
-        
+        updateProgress((p) => ({
+          ...p,
+          wizardMessages: [...p.wizardMessages, { role: 'bot', text: "Perfect! I have all the details I need. Generating your custom roadmap..." }],
+        }));
+
         setTimeout(() => {
           generateRoadmap(newData);
         }, 1500);
@@ -152,7 +201,7 @@ export default function ZeroToHeroTrack() {
 
   const generateRoadmap = async (data) => {
     setLoading(true);
-    setStep('generating');
+    updateProgress({ step: 'generating' });
 
     try {
       const res = await api.post('/career/roadmap', {
@@ -162,11 +211,10 @@ export default function ZeroToHeroTrack() {
         timeframe: data.monthsToPrepare ? `${data.monthsToPrepare} months` : '6 months',
       });
       setRoadmap(res.data);
-      setStep('display');
-      setExpandedPhases({});
+      updateProgress({ step: 'display', expandedPhases: {} });
     } catch (err) {
       console.error(err);
-      setStep('intro');
+      updateProgress({ step: 'intro' });
     } finally {
       setLoading(false);
     }
@@ -177,25 +225,32 @@ export default function ZeroToHeroTrack() {
     if (!chatInput.trim()) return;
 
     const userMsg = { role: 'user', content: chatInput };
-    setMessages(prev => [...prev, userMsg]);
+    const historyWithUser = [...messages, userMsg];
+    updateProgress({ messages: historyWithUser });
     setChatInput('');
     setChatLoading(true);
 
     try {
       const res = await api.post('/job-prep/tutor', {
         message: userMsg.content,
-        history: messages
+        history: messages,
       });
-      setMessages(prev => [...prev, { role: 'assistant', content: res.data.data.reply }]);
+      updateProgress({
+        messages: [...historyWithUser, { role: 'assistant', content: res.data.data.reply }],
+      });
     } catch (err) {
-      setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I couldn't process that right now." }]);
+      updateProgress({
+        messages: [...historyWithUser, { role: 'assistant', content: "Sorry, I couldn't process that right now." }],
+      });
     } finally {
       setChatLoading(false);
     }
   };
 
   const togglePhase = (idx) => {
-    setExpandedPhases(prev => ({ ...prev, [idx]: !prev[idx] }));
+    updateProgress({
+      expandedPhases: { ...expandedPhases, [idx]: !expandedPhases[idx] },
+    });
   };
 
   return (
@@ -207,7 +262,10 @@ export default function ZeroToHeroTrack() {
         </div>
         <div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">Zero to Hero Track</h1>
-          <p className="text-slate-500 mt-1 text-lg">Your complete guided journey from beginner to hired.</p>
+          <p className="text-slate-500 mt-1 text-lg">
+            Your complete guided journey from beginner to hired.
+            {isSaving && <span className="ml-2 text-emerald-600 text-sm">Saving…</span>}
+          </p>
         </div>
       </div>
 
@@ -258,7 +316,7 @@ export default function ZeroToHeroTrack() {
                 <div className="flex flex-wrap gap-4 mt-6">
                   {roadmap && (
                     <button 
-                      onClick={() => setStep('display')}
+                      onClick={() => updateProgress({ step: 'display' })}
                       className="flex items-center justify-center gap-2 px-8 py-4 bg-emerald-600 text-white rounded-2xl font-bold text-lg hover:bg-emerald-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-emerald-900/20"
                     >
                       <Play className="w-5 h-5 fill-current" />

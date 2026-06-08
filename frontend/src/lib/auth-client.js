@@ -2,22 +2,27 @@
 // Bridges axios calls to the backend auth API
 
 import axios from 'axios';
+import { setSafeLocalStorage, safeLocalStorage, removeSafeLocalStorage } from './browser';
 
-const apiURL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const apiURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const authApi = axios.create({
   baseURL: `${apiURL}/auth`,
   withCredentials: true,
 });
 
+function persistSession({ token, refreshToken, sessionId }) {
+  if (token) setSafeLocalStorage('token', token);
+  if (refreshToken) setSafeLocalStorage('refreshToken', refreshToken);
+  if (sessionId) setSafeLocalStorage('sessionId', String(sessionId));
+}
+
 export const authClient = {
   signIn: {
     email: async ({ email, password }) => {
       try {
         const res = await authApi.post('/login', { email, password });
-        if (res.data.token) {
-          localStorage.setItem('token', res.data.token);
-        }
+        persistSession(res.data);
         return { data: { user: res.data.user }, error: null };
       } catch (err) {
         return {
@@ -38,9 +43,7 @@ export const authClient = {
           password,
           github_username: githubUsername,
         });
-        if (res.data.token) {
-          localStorage.setItem('token', res.data.token);
-        }
+        persistSession(res.data);
         return { data: { user: res.data.user }, error: null };
       } catch (err) {
         return {
@@ -54,21 +57,33 @@ export const authClient = {
   },
 
   signOut: async () => {
-    localStorage.removeItem('token');
+    try {
+      const token = safeLocalStorage('token');
+      if (token) {
+        await authApi.post('/logout', {}, { headers: { Authorization: `Bearer ${token}` } });
+      }
+    } catch {
+      // ignore
+    }
+    removeSafeLocalStorage('token');
+    removeSafeLocalStorage('refreshToken');
+    removeSafeLocalStorage('sessionId');
     return { data: null, error: null };
   },
 
   getSession: async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = safeLocalStorage('token');
       if (!token) return { data: null, error: null };
 
       const res = await authApi.get('/me', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      return { data: { user: res.data.user }, error: null };
+      return { data: { user: res.data.user, sessionId: res.data.sessionId }, error: null };
     } catch (err) {
-      localStorage.removeItem('token');
+      removeSafeLocalStorage('token');
+      removeSafeLocalStorage('refreshToken');
+      removeSafeLocalStorage('sessionId');
       return { data: null, error: { message: 'Session invalid' } };
     }
   },
