@@ -46,8 +46,13 @@ app.use(express.json());
 app.use('/api', auditLogger('API_REQUEST', 'system'));
 
 // Routes
+console.log('Mounting routes...');
+console.log('Auth routes:', typeof authRoutes);
+console.log('Subscriptions routes:', typeof subscriptionsRoutes);
 app.use('/api/auth', authRoutes);
+console.log('✅ Auth routes mounted');
 app.use('/api/subscriptions', subscriptionsRoutes);
+console.log('✅ Subscriptions routes mounted');
 app.use('/api/skills', skillsRoutes);
 app.use('/api/resume', resumeRoutes);
 app.use('/api/dashboard', dashboardRoutes);

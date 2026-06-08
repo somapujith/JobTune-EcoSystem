@@ -10,7 +10,10 @@
       "Bash(curl -s -X POST http://localhost:3000/api/auth/signup -H 'Content-Type: application/json' -d '{\"email\":\"debugsignup@example.com\",\"password\":\"test\"}')",
       "Bash(curl -v http://localhost:3000/api/health)",
       "Bash(curl -s -X POST http://localhost:3000/api/auth/signup -H 'Content-Type: application/json' -d '{\"email\":\"finalworking@example.com\",\"password\":\"password123\"}')",
-      "Bash(grep -E \"\\\\.\\(jsx?|tsx?\\)$\")"
+      "Bash(grep -E \"\\\\.\\(jsx?|tsx?\\)$\")",
+      "Bash(curl -s http://localhost:3000/api/subscriptions/plans)",
+      "Bash(node -e ' *)",
+      "Bash(curl -v http://localhost:3000/api/subscriptions/plans)"
     ]
   }
 }

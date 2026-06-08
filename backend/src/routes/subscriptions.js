@@ -4,8 +4,11 @@ const planService = require('../services/planService');
 const recommendationEngine = require('../services/recommendationEngine');
 const { authenticateToken } = require('../middleware/auth');
 
+console.log('✅ Subscriptions router loaded');
+
 // Get all plans
 router.get('/plans', async (req, res, next) => {
+  console.log('[SUBSCRIPTIONS] GET /plans');
   try {
     const plans = await planService.getAllPlans();
     res.json({ plans });
