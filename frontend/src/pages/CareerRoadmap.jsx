@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Loader, CheckCircle, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 import { api } from '../store/useAuthStore';
 
@@ -14,6 +14,7 @@ export default function CareerRoadmap() {
   const [expandedPhases, setExpandedPhases] = useState({});
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const generatingRef = useRef(false);
 
   // Load saved roadmap on mount
   useEffect(() => {
@@ -35,11 +36,14 @@ export default function CareerRoadmap() {
     e.preventDefault();
     setError('');
 
+    if (generatingRef.current || loading) return;
+
     if (!formData.targetRole.trim()) {
       setError('Target role is required');
       return;
     }
 
+    generatingRef.current = true;
     setLoading(true);
     setStep('generating');
 
@@ -63,6 +67,7 @@ export default function CareerRoadmap() {
       setError(err.response?.data?.error || 'Failed to generate roadmap');
       setStep('form');
     } finally {
+      generatingRef.current = false;
       setLoading(false);
     }
   }

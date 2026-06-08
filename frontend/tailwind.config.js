@@ -71,12 +71,14 @@ export default {
         "label": ["'Inter'", "sans-serif"]
       },
       boxShadow: {
-        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
-        'glass-hover': '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
-        'glass-inset': 'inset 0 0 0 1px rgba(255, 255, 255, 0.5)',
+        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07), inset 0 0 0 1px rgba(255, 255, 255, 0.3)',
+        'glass-hover': '0 8px 32px 0 rgba(31, 38, 135, 0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.5)',
+        'glass-dark': '0 8px 32px 0 rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.05)',
+        'glass-dark-hover': '0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
+        'glass-strong': '0 16px 48px 0 rgba(31, 38, 135, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.4)',
       },
       animation: {
-        'blob': 'blob 7s infinite',
+        'blob': 'blob 10s infinite',
         'pulse-slow': 'pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
       keyframes: {

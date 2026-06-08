@@ -2,8 +2,11 @@ import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import ErrorBoundary from './components/ErrorBoundary';
+import PlanGate from './components/PlanGate';
+import { getToolForRoute, getRequiredPlan } from './config/toolAccess';
 import Home from './pages/Home';
 import Onboarding from './pages/Onboarding';
+import PlanSettings from './pages/PlanSettings';
 import SkillAssessment from './pages/SkillAssessment';
 import ResumeOptimizer from './pages/ResumeOptimizer';
 import Dashboard from './pages/Dashboard';
@@ -43,6 +46,23 @@ function ProtectedRoute({ children, requireOnboarding = false }) {
   return children;
 }
 
+function ProtectedToolRoute({ children, toolPath }) {
+  const { isAuthenticated, hasCompletedOnboarding } = useAuthStore();
+  const toolName = getToolForRoute(toolPath);
+  const requiredPlan = toolName ? getRequiredPlan(toolName) : 'Learn & Build';
+
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!hasCompletedOnboarding) return <Navigate to="/onboarding" replace />;
+
+  if (!toolName) return children; // No plan restriction
+
+  return (
+    <PlanGate toolName={toolName} requiredPlan={requiredPlan}>
+      {children}
+    </PlanGate>
+  );
+}
+
 function App() {
   const { checkAuth, isLoading } = useAuthStore();
 
@@ -69,21 +89,21 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="onboarding" element={<Onboarding />} />
-          <Route path="skills" element={<SkillAssessment />} />
-          <Route path="resume" element={<ResumeOptimizer />} />
-          <Route path="resume/build" element={<ResumeBuilder />} />
-          <Route path="resume/history" element={<ResumeHistory />} />
-          <Route path="resume/compare" element={<ResumeComparison />} />
-          <Route path="resume/send" element={<ResumeSend />} />
-          <Route path="linkedin" element={<LinkedInOptimizer />} />
-          <Route path="github" element={<GitHubOptimizer />} />
-          <Route path="portfolio" element={<PortfolioBuilder />} />
-          <Route path="preparation" element={<JobPreparation />} />
-          <Route path="preparation/tune-and-polish" element={<TuneAndPolishTrack />} />
-          <Route path="preparation/zero-to-hero" element={<ZeroToHeroTrack />} />
-          <Route path="preparation/learn-and-build" element={<LearnAndBuildTrack />} />
-          <Route path="learning" element={<ContentVault />} />
-          <Route path="projects" element={<ProjectIdeas />} />
+          <Route path="skills" element={<ProtectedToolRoute toolPath="/skills"><SkillAssessment /></ProtectedToolRoute>} />
+          <Route path="resume" element={<ProtectedToolRoute toolPath="/resume"><ResumeOptimizer /></ProtectedToolRoute>} />
+          <Route path="resume/build" element={<ProtectedToolRoute toolPath="/resume/build"><ResumeBuilder /></ProtectedToolRoute>} />
+          <Route path="resume/history" element={<ProtectedToolRoute toolPath="/resume/history"><ResumeHistory /></ProtectedToolRoute>} />
+          <Route path="resume/compare" element={<ProtectedToolRoute toolPath="/resume/compare"><ResumeComparison /></ProtectedToolRoute>} />
+          <Route path="resume/send" element={<ProtectedToolRoute toolPath="/resume/send"><ResumeSend /></ProtectedToolRoute>} />
+          <Route path="linkedin" element={<ProtectedToolRoute toolPath="/linkedin"><LinkedInOptimizer /></ProtectedToolRoute>} />
+          <Route path="github" element={<ProtectedToolRoute toolPath="/github"><GitHubOptimizer /></ProtectedToolRoute>} />
+          <Route path="portfolio" element={<ProtectedToolRoute toolPath="/portfolio"><PortfolioBuilder /></ProtectedToolRoute>} />
+          <Route path="preparation" element={<ProtectedToolRoute toolPath="/preparation"><JobPreparation /></ProtectedToolRoute>} />
+          <Route path="preparation/tune-and-polish" element={<ProtectedToolRoute toolPath="/preparation"><TuneAndPolishTrack /></ProtectedToolRoute>} />
+          <Route path="preparation/zero-to-hero" element={<ProtectedToolRoute toolPath="/preparation"><ZeroToHeroTrack /></ProtectedToolRoute>} />
+          <Route path="preparation/learn-and-build" element={<ProtectedToolRoute toolPath="/preparation"><LearnAndBuildTrack /></ProtectedToolRoute>} />
+          <Route path="learning" element={<ProtectedToolRoute toolPath="/learning"><ContentVault /></ProtectedToolRoute>} />
+          <Route path="projects" element={<ProtectedToolRoute toolPath="/projects"><ProjectIdeas /></ProtectedToolRoute>} />
           <Route path="blog" element={<Blog />} />
           <Route
             path="dashboard"
@@ -93,20 +113,28 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="interview" element={<MockInterview />} />
-          <Route path="jobmatch" element={<JobMatcher />} />
-          <Route path="discover" element={<JobDiscovery />} />
-          <Route path="jobs" element={<JobTracker />} />
-          <Route path="career" element={<CareerRoadmap />} />
-          <Route path="job-analyzer" element={<JobAnalyzer />} />
-          <Route path="ats-checker" element={<ATSChecker />} />
-          <Route path="job-fit" element={<JobFitAnalysis />} />
-          <Route path="cover-letter" element={<CoverLetterGenerator />} />
+          <Route
+            path="dashboard/settings/plans"
+            element={
+              <ProtectedRoute>
+                <PlanSettings />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="interview" element={<ProtectedToolRoute toolPath="/interview"><MockInterview /></ProtectedToolRoute>} />
+          <Route path="jobmatch" element={<ProtectedToolRoute toolPath="/jobmatch"><JobMatcher /></ProtectedToolRoute>} />
+          <Route path="discover" element={<ProtectedToolRoute toolPath="/discover"><JobDiscovery /></ProtectedToolRoute>} />
+          <Route path="jobs" element={<ProtectedToolRoute toolPath="/jobs"><JobTracker /></ProtectedToolRoute>} />
+          <Route path="career" element={<ProtectedToolRoute toolPath="/career"><CareerRoadmap /></ProtectedToolRoute>} />
+          <Route path="job-analyzer" element={<ProtectedToolRoute toolPath="/career"><JobAnalyzer /></ProtectedToolRoute>} />
+          <Route path="ats-checker" element={<ProtectedToolRoute toolPath="/career"><ATSChecker /></ProtectedToolRoute>} />
+          <Route path="job-fit" element={<ProtectedToolRoute toolPath="/job-fit"><JobFitAnalysis /></ProtectedToolRoute>} />
+          <Route path="cover-letter" element={<ProtectedToolRoute toolPath="/cover-letter"><CoverLetterGenerator /></ProtectedToolRoute>} />
           <Route
             path="evidence"
             element={
               <ProtectedRoute>
-                <EvidenceDashboard />
+                <ProtectedToolRoute toolPath="/evidence"><EvidenceDashboard /></ProtectedToolRoute>
               </ProtectedRoute>
             }
           />

@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
+const subscriptionsRoutes = require('./routes/subscriptions');
 const skillsRoutes = require('./routes/skills');
 const resumeRoutes = require('./routes/resume');
 const dashboardRoutes = require('./routes/dashboard');
@@ -46,6 +47,7 @@ app.use('/api', auditLogger('API_REQUEST', 'system'));
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/subscriptions', subscriptionsRoutes);
 app.use('/api/skills', skillsRoutes);
 app.use('/api/resume', resumeRoutes);
 app.use('/api/dashboard', dashboardRoutes);

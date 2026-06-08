@@ -1,0 +1,81 @@
+const express = require('express');
+const router = express.Router();
+const planService = require('../services/planService');
+const recommendationEngine = require('../services/recommendationEngine');
+const { authenticateToken } = require('../middleware/auth');
+
+// Get all plans
+router.get('/plans', async (req, res, next) => {
+  try {
+    const plans = await planService.getAllPlans();
+    res.json({ plans });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Get user current plan
+router.get('/my-plan', authenticateToken, async (req, res, next) => {
+  try {
+    const plan = await planService.getUserPlan(req.user.id);
+    res.json({ plan });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Get recommendation
+router.post('/recommend', authenticateToken, async (req, res, next) => {
+  try {
+    const { careerGoal, experienceLevel, painPoints } = req.body;
+    const recommendation = await recommendationEngine.recommendPlan(careerGoal, experienceLevel, painPoints);
+
+    // Save onboarding response
+    const allPlans = await planService.getAllPlans();
+    const recommendedPlanFromDb = allPlans.find(p => p.name === recommendation.recommendedPlan.name);
+
+    await planService.saveOnboardingResponse(req.user.id, {
+      career_goal: careerGoal,
+      experience_level: experienceLevel,
+      pain_points: painPoints,
+      recommended_plan_id: recommendedPlanFromDb?.id
+    });
+
+    res.json({ recommendation });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Select plan
+router.post('/select-plan', authenticateToken, async (req, res, next) => {
+  try {
+    const { planId } = req.body;
+
+    if (!planId) {
+      return res.status(400).json({ error: 'Plan ID required' });
+    }
+
+    const plan = await planService.getPlanById(planId);
+    if (!plan) {
+      return res.status(404).json({ error: 'Plan not found' });
+    }
+
+    await planService.assignPlan(req.user.id, planId);
+    res.json({ success: true, plan });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Check onboarding completion
+router.get('/onboarded', authenticateToken, async (req, res, next) => {
+  try {
+    const response = await planService.getUserOnboardingResponse(req.user.id);
+    res.json({ onboarded: !!response });
+  } catch (err) {
+    next(err);
+  }
+});
+
+module.exports = router;

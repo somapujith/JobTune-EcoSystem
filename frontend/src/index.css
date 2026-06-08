@@ -18,10 +18,13 @@
   .click-bounce-effect:active { transform: scale(0.98); }
   .scale-102:hover { transform: scale(1.02); }
   .glass-panel {
-    @apply bg-white/70 backdrop-blur-2xl border border-white/50 shadow-glass dark:bg-slate-900/70 dark:border-slate-800/50;
+    @apply bg-gradient-to-br from-white/60 to-white/30 backdrop-blur-3xl shadow-glass dark:from-slate-900/80 dark:to-slate-900/40 dark:shadow-glass-dark;
   }
   .glass-card {
-    @apply bg-white/60 backdrop-blur-xl border border-white/40 shadow-glass hover:shadow-glass-hover hover:bg-white/70 transition-all duration-300 dark:bg-slate-900/60 dark:border-slate-700/40 dark:hover:bg-slate-900/70;
+    @apply bg-gradient-to-br from-white/50 to-white/20 backdrop-blur-2xl shadow-glass hover:shadow-glass-hover hover:from-white/60 hover:to-white/30 transition-all duration-300 dark:from-slate-900/70 dark:to-slate-900/30 dark:shadow-glass-dark dark:hover:shadow-glass-dark-hover dark:hover:from-slate-900/80 dark:hover:to-slate-900/40;
+  }
+  .glass-button {
+    @apply bg-gradient-to-br from-white/40 to-white/10 backdrop-blur-xl shadow-glass hover:shadow-glass-hover hover:from-white/50 hover:to-white/20 transition-all duration-300 active:scale-95 dark:from-slate-800/50 dark:to-slate-800/20 dark:shadow-glass-dark dark:hover:shadow-glass-dark-hover dark:hover:from-slate-800/60 dark:hover:to-slate-800/30;
   }
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600;

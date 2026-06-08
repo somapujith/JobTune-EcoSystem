@@ -20,23 +20,28 @@ const useAuthStore = create((set) => ({
   error: null,
   hasCompletedOnboarding: localStorage.getItem('onboarded') === 'true',
   login: async (credentials) => {
+    set({ isLoading: true, error: null });
     try {
-      set({ isLoading: true, error: null });
       const { data } = await api.post('/auth/login', credentials);
       localStorage.setItem('token', data.token);
-      set({ user: data.user, isAuthenticated: true, isLoading: false });
+      set({ user: data.user, isAuthenticated: true, isLoading: false, error: null });
+      return data;
     } catch (err) {
-      set({ error: err.response?.data?.error || 'Login failed', isLoading: false });
+      const message = err.response?.data?.error || 'Login failed';
+      set({ error: message, isLoading: false, isAuthenticated: false });
+      throw new Error(message);
     }
   },
   signup: async (userData) => {
+    set({ isLoading: true, error: null });
     try {
-      set({ isLoading: true, error: null });
       const { data } = await api.post('/auth/signup', userData);
       localStorage.setItem('token', data.token);
-      set({ user: data.user, isAuthenticated: true, isLoading: false });
+      set({ user: data.user, isAuthenticated: true, isLoading: false, error: null });
     } catch (err) {
-      set({ error: err.response?.data?.error || 'Signup failed', isLoading: false });
+      const message = err.response?.data?.error || 'Signup failed';
+      set({ error: message, isLoading: false, isAuthenticated: false });
+      throw new Error(message);
     }
   },
   logout: () => {

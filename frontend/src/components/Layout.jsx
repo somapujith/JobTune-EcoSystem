@@ -68,7 +68,7 @@ const Navbar = () => {
   const isGroupActive = (group) => group.items.some(item => location.pathname.startsWith(item.path));
 
   return (
-    <header className="fixed top-0 w-full z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl shadow-glass border-b border-white/50 dark:border-slate-800/50">
+    <header className="fixed top-0 w-full z-50 glass-panel border-b border-white/40 dark:border-slate-800/50">
       <div className="flex justify-between items-center px-6 lg:px-8 h-20 max-w-7xl mx-auto">
         <div className="flex items-center gap-10">
           <Link to="/" className="text-2xl font-black tracking-tight text-blue-800 font-headline">
@@ -279,14 +279,12 @@ const Layout = () => {
   const isInternalPage = location.pathname !== '/';
 
   return (
-    <div className={`min-h-screen flex flex-col font-body ${isInternalPage ? 'bg-slate-50 dark:bg-slate-950' : 'bg-surface'} text-on-surface antialiased overflow-x-hidden relative`}>
-      {isInternalPage && (
-        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-400/20 mix-blend-multiply filter blur-[100px] opacity-70 animate-blob dark:bg-blue-900/20"></div>
-          <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-400/20 mix-blend-multiply filter blur-[100px] opacity-70 animate-blob" style={{ animationDelay: '2s' }}></div>
-          <div className="absolute bottom-[-20%] left-[20%] w-[50%] h-[50%] rounded-full bg-sky-400/20 mix-blend-multiply filter blur-[100px] opacity-70 animate-blob dark:bg-sky-900/20" style={{ animationDelay: '4s' }}></div>
-        </div>
-      )}
+    <div className={`min-h-screen flex flex-col font-body bg-slate-50 dark:bg-[#030712] text-slate-900 dark:text-slate-100 antialiased overflow-x-hidden relative transition-colors duration-500`}>
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-blue-400/30 mix-blend-multiply filter blur-[120px] opacity-70 animate-blob dark:bg-blue-900/40 dark:mix-blend-screen"></div>
+        <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-indigo-400/30 mix-blend-multiply filter blur-[120px] opacity-70 animate-blob dark:bg-indigo-900/40 dark:mix-blend-screen" style={{ animationDelay: '3s' }}></div>
+        <div className="absolute bottom-[-20%] left-[20%] w-[60%] h-[60%] rounded-full bg-cyan-400/30 mix-blend-multiply filter blur-[120px] opacity-70 animate-blob dark:bg-cyan-900/40 dark:mix-blend-screen" style={{ animationDelay: '6s' }}></div>
+      </div>
       
       <div className="relative z-10 w-full flex flex-col flex-grow">
         <Navbar />

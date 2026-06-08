@@ -74,7 +74,7 @@ function StatCounter({ value, suffix = '', label }) {
   const [count, ref] = useCounter(value);
   return (
     <div ref={ref} className="text-center">
-      <p className="text-4xl md:text-5xl font-black text-white tracking-tighter">
+      <p className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tighter">
         {count.toLocaleString()}{suffix}
       </p>
       <p className="text-slate-500 text-sm font-medium mt-1">{label}</p>
@@ -92,7 +92,7 @@ function AssessmentVisual() {
     { label: 'Behavioral',     pct: 91, color: '#8b5cf6' },
   ];
   return (
-    <div className="bg-[#0d1117] rounded-2xl p-6 space-y-4 border border-white/8 shadow-2xl">
+    <div className="bg-slate-900/80 rounded-2xl p-6 space-y-4 shadow-glass backdrop-blur-md border border-white/10">
       <div className="flex items-center justify-between">
         <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Skill Radar</span>
         <span className="text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2.5 py-1 rounded-full">
@@ -130,7 +130,7 @@ function AssessmentVisual() {
 
 function ResumeVisual() {
   return (
-    <div className="bg-[#0d1117] rounded-2xl p-6 border border-white/8 shadow-2xl space-y-4">
+    <div className="bg-slate-900/80 rounded-2xl p-6 border border-white/10 shadow-glass backdrop-blur-md space-y-4">
       <div className="flex items-center gap-4">
         <div className="relative w-16 h-16 shrink-0">
           <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
@@ -174,7 +174,7 @@ function VaultVisual() {
     { title: 'Behavioral Interview Guide',type: 'PDF',         dur: '1h',  c: '#f59e0b' },
   ];
   return (
-    <div className="bg-[#0d1117] rounded-2xl p-6 border border-white/8 shadow-2xl space-y-2">
+    <div className="bg-slate-900/80 rounded-2xl p-6 border border-white/10 shadow-glass backdrop-blur-md space-y-2">
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">For you</span>
         <span className="text-[11px] text-blue-400 font-semibold">4 new</span>
@@ -232,10 +232,10 @@ export default function Home() {
       <section
         className="relative min-h-screen flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8 overflow-hidden"
         style={{
-          background: '#030712',
+          background: 'transparent',
           backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)
+            linear-gradient(rgba(128,128,128,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(128,128,128,0.05) 1px, transparent 1px)
           `,
           backgroundSize: '72px 72px',
         }}
@@ -249,7 +249,7 @@ export default function Home() {
             <Sparkles className="w-3 h-3" /> The Complete Career OS for Freshers
           </DarkBadge>
 
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white leading-[0.95] tracking-tighter">
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-slate-900 dark:text-white leading-[0.95] tracking-tighter drop-shadow-sm">
             Stop applying.<br />
             <span
               className="bg-clip-text text-transparent"
@@ -259,7 +259,7 @@ export default function Home() {
             </span>
           </h1>
 
-          <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed font-light">
+          <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed font-light">
             7 interconnected tools that take you from confused fresher to job-ready professional.
             Built for CS graduates. Free, forever.
           </p>
@@ -295,8 +295,8 @@ export default function Home() {
                   <Star key={i} className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
                 ))}
               </div>
-              <span className="text-slate-400 text-sm">
-                <span className="text-white font-bold">50,000+</span> students improving
+              <span className="text-slate-600 dark:text-slate-400 text-sm">
+                <span className="text-slate-900 dark:text-white font-bold">50,000+</span> students improving
               </span>
             </div>
           </div>
@@ -308,11 +308,11 @@ export default function Home() {
             {TOOLS.map(t => (
               <div
                 key={t.name}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg border backdrop-blur-sm ${t.locked ? 'bg-white/2 border-white/4 grayscale' : 'bg-white/4 border-white/8'}`}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg border backdrop-blur-sm ${t.locked ? 'bg-slate-200/50 dark:bg-white/2 border-slate-300 dark:border-white/4 grayscale' : 'bg-slate-200/50 dark:bg-white/4 border-slate-300 dark:border-white/8'}`}
                 title={t.locked ? 'Under maintenance' : ''}
               >
-                {t.locked ? <Lock className="w-3.5 h-3.5 text-slate-600" /> : <t.icon className="w-3.5 h-3.5" style={{ color: t.accent }} />}
-                <span className="text-xs text-slate-400 font-medium whitespace-nowrap flex items-center gap-1">
+                {t.locked ? <Lock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-600" /> : <t.icon className="w-3.5 h-3.5" style={{ color: t.accent }} />}
+                <span className="text-xs text-slate-700 dark:text-slate-400 font-medium whitespace-nowrap flex items-center gap-1">
                   {t.name}
                 </span>
               </div>
@@ -322,8 +322,8 @@ export default function Home() {
       </section>
 
       {/* ── Stats Bar ────────────────────────────────────────────────────── */}
-      <section className="bg-[#030712] border-t border-white/5 border-b border-white/5">
-        <div className="max-w-5xl mx-auto px-4 py-16 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0 md:divide-x md:divide-white/8">
+      <section className="glass-panel border-t border-white/20 border-b border-white/20 dark:border-white/5 relative z-10">
+        <div className="max-w-5xl mx-auto px-4 py-16 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0 md:divide-x md:divide-slate-300 dark:md:divide-white/10">
           <StatCounter value={50000} suffix="+" label="Students enrolled" />
           <StatCounter value={87}    suffix="%" label="Reported better interviews" />
           <StatCounter value={7}     suffix=""  label="Interconnected tools" />
@@ -335,14 +335,14 @@ export default function Home() {
       {FEATURES.map((f, idx) => {
         const isEven = idx % 2 === 0;
         return (
-          <section key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+          <section key={idx} className="relative z-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
               <div className={`grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center ${!isEven ? 'lg:grid-flow-dense' : ''}`}>
 
                 {/* Text */}
                 <div className={`space-y-6 ${!isEven ? 'lg:col-start-2' : ''}`}>
                   <SectionBadge>{f.badge}</SectionBadge>
-                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 leading-tight tracking-tight whitespace-pre-line">
+                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white leading-tight tracking-tight whitespace-pre-line">
                     {f.title}
                   </h2>
                   <p className="text-lg text-slate-500 leading-relaxed">
@@ -359,16 +359,16 @@ export default function Home() {
 
                 {/* Visual */}
                 <div className={`${!isEven ? 'lg:col-start-1 lg:row-start-1' : ''}`}>
-                  <div className="rounded-2xl overflow-hidden shadow-2xl shadow-slate-200">
-                    <div className="bg-slate-800 px-4 py-3 flex items-center gap-2">
+                  <div className="rounded-2xl overflow-hidden glass-card border border-white/30 dark:border-white/10">
+                    <div className="bg-slate-200/50 dark:bg-slate-800/50 px-4 py-3 flex items-center gap-2 border-b border-white/20 dark:border-white/5">
                       <div className="flex gap-1.5">
                         <div className="w-3 h-3 rounded-full bg-rose-400/80" />
                         <div className="w-3 h-3 rounded-full bg-amber-400/80" />
                         <div className="w-3 h-3 rounded-full bg-emerald-400/80" />
                       </div>
-                      <div className="flex-grow h-5 bg-slate-700/50 rounded mx-8" />
+                      <div className="flex-grow h-5 bg-white/40 dark:bg-slate-700/50 rounded mx-8" />
                     </div>
-                    <div className="p-4 bg-[#0d1117]">
+                    <div className="p-4 bg-transparent">
                       <f.Visual />
                     </div>
                   </div>
@@ -383,8 +383,7 @@ export default function Home() {
       {/* ── All 7 Tools ──────────────────────────────────────────────────── */}
       <section
         id="tools"
-        className="py-24 lg:py-32 relative overflow-hidden"
-        style={{ background: '#030712' }}
+        className="py-24 lg:py-32 relative overflow-hidden glass-panel border-y border-white/20 dark:border-white/5"
       >
         <div className="absolute inset-0"
           style={{
@@ -395,7 +394,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center space-y-4 mb-16">
             <DarkBadge>Every tool you need</DarkBadge>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white tracking-tight">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight drop-shadow-sm">
               The complete 7-tool ecosystem
             </h2>
             <p className="text-slate-500 text-lg max-w-xl mx-auto">
@@ -423,7 +422,7 @@ export default function Home() {
                   </div>
                   <div className="relative z-10">
                     <h3 className="text-base font-bold text-slate-500 mb-1">{tool.name}</h3>
-                    <p className="text-sm text-slate-700 leading-relaxed italic">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed italic">
                       Temporarily unavailable while undergoing a massive AI upgrade.
                     </p>
                   </div>
@@ -432,7 +431,7 @@ export default function Home() {
                 <Link
                   key={tool.name}
                   to={tool.path}
-                  className={`group relative p-6 rounded-2xl border border-white/8 bg-white/3 hover:bg-white/6 hover:border-white/15 transition-all duration-300 flex flex-col gap-4 overflow-hidden ${isFeatured ? 'sm:col-span-2 lg:col-span-1' : ''}`}
+                  className={`group relative p-6 rounded-2xl glass-button flex flex-col gap-4 overflow-hidden ${isFeatured ? 'sm:col-span-2 lg:col-span-1' : ''}`}
                 >
                   <div
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"
@@ -450,10 +449,10 @@ export default function Home() {
                     </span>
                   </div>
                   <div className="relative z-10">
-                    <h3 className="text-base font-bold text-white mb-1 group-hover:text-slate-100">
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">
                       {tool.name}
                     </h3>
-                    <p className="text-sm text-slate-500 leading-relaxed">
+                    <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                       {[
                         'Interactive quiz covering 25+ skills. Get a 360° view of your technical standing.',
                         'ATS-focused scoring and impact analysis. Upload any format.',
@@ -476,11 +475,11 @@ export default function Home() {
       </section>
 
       {/* ── How it Works ─────────────────────────────────────────────────── */}
-      <section id="how-it-works" className="bg-white py-24 lg:py-32">
+      <section id="how-it-works" className="relative z-10 py-24 lg:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-4 mb-16">
             <SectionBadge>The process</SectionBadge>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
               From day one to offer letter
             </h2>
           </div>
@@ -492,8 +491,8 @@ export default function Home() {
             {STEPS.map((step, i) => (
               <div key={i} className="relative flex flex-col items-center text-center group">
                 <div className="relative mb-6">
-                  <div className="w-20 h-20 rounded-full bg-slate-50 border-2 border-slate-100 flex items-center justify-center group-hover:border-blue-200 group-hover:bg-blue-50 transition-all duration-300">
-                    <span className="text-2xl font-black text-slate-300 group-hover:text-blue-500 transition-colors">
+                  <div className="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center group-hover:border-blue-200 dark:group-hover:border-blue-500 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 transition-all duration-300">
+                    <span className="text-2xl font-black text-slate-300 dark:text-slate-600 group-hover:text-blue-500 transition-colors">
                       {step.num}
                     </span>
                   </div>
@@ -501,7 +500,7 @@ export default function Home() {
                     <div className="lg:hidden absolute top-1/2 left-full w-8 h-px bg-slate-200 -translate-y-1/2" />
                   )}
                 </div>
-                <h3 className="text-xl font-black text-slate-900 mb-2">{step.title}</h3>
+                <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">{step.title}</h3>
                 <p className="text-slate-500 text-sm leading-relaxed max-w-[200px]">{step.desc}</p>
               </div>
             ))}
@@ -510,13 +509,10 @@ export default function Home() {
       </section>
 
       {/* ── CTA ──────────────────────────────────────────────────────────── */}
-      <section className="bg-slate-50 py-24 px-4 sm:px-6 lg:px-8">
+      <section className="relative z-10 py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <div
-            className="rounded-3xl p-12 md:p-20 text-center relative overflow-hidden"
-            style={{
-              background: 'linear-gradient(135deg, #1e3a5f 0%, #1e1b4b 50%, #0f172a 100%)',
-            }}
+            className="rounded-3xl p-12 md:p-20 text-center relative overflow-hidden glass-card"
           >
             {/* Subtle grid overlay */}
             <div
@@ -534,11 +530,11 @@ export default function Home() {
                   <CheckCircle2 key={i} className="w-4 h-4 text-emerald-400" />
                 ))}
               </div>
-              <h2 className="text-3xl md:text-5xl font-black text-white leading-tight tracking-tight">
+              <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">
                 Your career doesn't wait.<br />
-                <span className="text-blue-300">Neither should you.</span>
+                <span className="text-blue-600 dark:text-blue-300">Neither should you.</span>
               </h2>
-              <p className="text-slate-400 text-lg max-w-lg mx-auto font-light leading-relaxed">
+              <p className="text-slate-600 dark:text-slate-400 text-lg max-w-lg mx-auto font-light leading-relaxed">
                 Join 50,000+ freshers who stopped guessing and started building a profile that actually gets interviews.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
@@ -558,7 +554,7 @@ export default function Home() {
                   Take the assessment first
                 </Link>
               </div>
-              <p className="text-slate-600 text-xs">No credit card. No paywall. No BS.</p>
+              <p className="text-slate-500 dark:text-slate-400 text-xs">No credit card. No paywall. No BS.</p>
             </div>
           </div>
         </div>

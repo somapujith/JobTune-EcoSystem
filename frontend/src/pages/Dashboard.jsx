@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import useAuthStore, { api } from '../store/useAuthStore';
+import useSubscriptionStore from '../store/useSubscriptionStore';
 import { Navigate, Link } from 'react-router-dom';
-import { 
-  Target, 
-  Activity, 
-  FileText, 
-  CheckCircle2, 
-  TrendingUp, 
+import {
+  Target,
+  Activity,
+  FileText,
+  CheckCircle2,
+  TrendingUp,
   ArrowRight,
   Zap,
   Star,
@@ -17,28 +18,54 @@ import {
   Layout as LayoutIcon,
   BookOpen,
   Lightbulb,
-  Lock
+  Lock,
+  Crown,
+  TrendingUp as TrendingUpIcon
 } from 'lucide-react';
 
-const tools = [
-  { name: 'Skill Assessment', icon: Activity, path: '/skills', color: 'bg-blue-500', tier: 'Foundation' },
-  { name: 'Resume Optimizer', icon: FileText, path: '/resume', color: 'bg-emerald-500', tier: 'Profile' },
-  { name: 'LinkedIn Optimizer', icon: Linkedin, path: '/linkedin', color: 'bg-sky-500', tier: 'Profile' },
-  { name: 'GitHub Optimizer', icon: Github, path: '/github', color: 'bg-slate-900', tier: 'Profile' },
-  { name: 'Portfolio Builder', icon: LayoutIcon, path: '/portfolio', color: 'bg-indigo-500', tier: 'Profile' },
-  { name: 'Content Vault', icon: BookOpen, path: '/learning', color: 'bg-amber-500', tier: 'Growth' },
-  { name: 'Project Ideas', icon: Lightbulb, path: '/projects', color: 'bg-rose-500', tier: 'Growth' },
+const ALL_TOOLS = [
+  { name: 'Skill Assessment', icon: Activity, path: '/skills', color: 'bg-blue-500', tier: 'Foundation', plan: 'Learn & Build' },
+  { name: 'Resume Optimizer', icon: FileText, path: '/resume', color: 'bg-emerald-500', tier: 'Profile', plan: 'Tune & Polish' },
+  { name: 'LinkedIn Optimizer', icon: Linkedin, path: '/linkedin', color: 'bg-sky-500', tier: 'Profile', plan: 'Tune & Polish' },
+  { name: 'GitHub Optimizer', icon: Github, path: '/github', color: 'bg-slate-900', tier: 'Profile', plan: 'Tune & Polish' },
+  { name: 'Portfolio Builder', icon: LayoutIcon, path: '/portfolio', color: 'bg-indigo-500', tier: 'Profile', plan: 'Tune & Polish' },
+  { name: 'Content Vault', icon: BookOpen, path: '/learning', color: 'bg-amber-500', tier: 'Growth', plan: 'Learn & Build' },
+  { name: 'Project Ideas', icon: Lightbulb, path: '/projects', color: 'bg-rose-500', tier: 'Growth', plan: 'Learn & Build' },
+  { name: 'Interview Prep', icon: Zap, path: '/interview', color: 'bg-purple-500', tier: 'Advanced', plan: 'Zero to Hero' },
+  { name: 'Job Tracker', icon: TrendingUpIcon, path: '/jobs', color: 'bg-cyan-500', tier: 'Advanced', plan: 'Zero to Hero' },
+  { name: 'Career Roadmap', icon: TrendingUpIcon, path: '/career', color: 'bg-teal-500', tier: 'Advanced', plan: 'Zero to Hero' },
+  { name: 'ATS Checker', icon: CheckCircle2, path: '/ats-checker', color: 'bg-green-500', tier: 'Advanced', plan: 'Zero to Hero' },
+  { name: 'Cover Letter Generator', icon: FileText, path: '/cover-letter', color: 'bg-orange-500', tier: 'Advanced', plan: 'Zero to Hero' },
 ];
+
+const PLAN_TIERS = {
+  'Learn & Build': 1,
+  'Tune & Polish': 2,
+  'Zero to Hero': 3,
+};
 
 export default function Dashboard() {
   const { user, isAuthenticated } = useAuthStore();
+  const { userPlan } = useSubscriptionStore();
   const [overview, setOverview] = useState(null);
+  const [visibleTools, setVisibleTools] = useState([]);
 
   useEffect(() => {
     api.get('/dashboard/overview')
       .then(({ data }) => setOverview(data))
       .catch(() => {/* keep static fallback */});
   }, []);
+
+  useEffect(() => {
+    if (userPlan) {
+      const userTier = PLAN_TIERS[userPlan.name] || 0;
+      const available = ALL_TOOLS.filter(tool => {
+        const toolTier = PLAN_TIERS[tool.plan] || 0;
+        return toolTier <= userTier;
+      });
+      setVisibleTools(available);
+    }
+  }, [userPlan]);
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
@@ -53,21 +80,35 @@ export default function Dashboard() {
            <h1 className="text-4xl font-black text-slate-900 tracking-tight">
               Hello, {user?.email?.split('@')[0] || 'Professional'}!
            </h1>
-           <p className="text-slate-500 mt-2 font-medium">Your professional ecosystem is currenty <span className="text-emerald-600">45% optimized</span>.</p>
+           <p className="text-slate-500 mt-2 font-medium">
+             Your plan: <span className="font-bold text-blue-600">{userPlan?.name || 'Loading...'}</span>
+             {userPlan && <span className="text-emerald-600 ml-2">• {visibleTools.length} tools available</span>}
+           </p>
         </div>
-        <div className="flex items-center gap-4 glass-card p-2 rounded-2xl">
-           <div className="flex -space-x-2 px-2">
-              {[1, 2, 3].map(i => (
-                 <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center overflow-hidden">
-                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i + 42}`} alt="User" />
-                 </div>
-              ))}
-           </div>
-           <div className="h-8 w-px bg-slate-100 mx-2"></div>
-           <div className="pr-4">
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Your Network</p>
-              <p className="text-sm font-black text-slate-900">+124 Peers</p>
-           </div>
+        <div className="flex flex-col gap-3">
+          {userPlan && (
+            <div className="flex items-center gap-3 glass-card p-4 rounded-2xl">
+              <Crown className="w-5 h-5 text-amber-500" />
+              <div>
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-tighter">Current Plan</p>
+                <p className="text-sm font-black text-slate-900">{userPlan.name}</p>
+              </div>
+            </div>
+          )}
+          <div className="flex items-center gap-4 glass-card p-2 rounded-2xl">
+             <div className="flex -space-x-2 px-2">
+                {[1, 2, 3].map(i => (
+                   <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center overflow-hidden">
+                      <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i + 42}`} alt="User" />
+                   </div>
+                ))}
+             </div>
+             <div className="h-8 w-px bg-slate-100 mx-2"></div>
+             <div className="pr-4">
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Your Network</p>
+                <p className="text-sm font-black text-slate-900">+124 Peers</p>
+             </div>
+          </div>
         </div>
       </div>
 
@@ -95,18 +136,32 @@ export default function Dashboard() {
         {/* Main Tool Applications Hub */}
         <div className="lg:col-span-2 space-y-8">
            <div className="flex justify-between items-center">
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight">Your Tool Ecosystem</h3>
+              <h3 className="text-2xl font-black text-slate-900 tracking-tight">Your Tool Ecosystem ({visibleTools.length})</h3>
               <Link to="/" className="text-sm font-bold text-blue-600 flex items-center gap-1 hover:underline">
                  View Introduction <ExternalLink className="w-3 h-3" />
               </Link>
            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               {tools.map((tool, i) => (
-                 tool.locked ? (
-                   <div 
-                    key={i} 
-                    className="flex items-center justify-between p-6 glass-card rounded-3xl cursor-not-allowed opacity-75"
-                    title="Undergoing maintenance"
+               {ALL_TOOLS.map((tool, i) => {
+                 const isAvailable = visibleTools.some(t => t.name === tool.name);
+                 return isAvailable ? (
+                   <Link key={i} to={tool.path} className="group flex items-center justify-between p-6 glass-card rounded-3xl transition-all duration-300 hover:shadow-lg">
+                      <div className="flex items-center gap-4">
+                         <div className={`w-12 h-12 ${tool.color} rounded-xl flex items-center justify-center text-white shadow-lg`}>
+                            <tool.icon className="w-6 h-6" />
+                         </div>
+                         <div>
+                            <p className="text-[10px] font-black uppercase tracking-tighter text-slate-400">{tool.tier}</p>
+                            <h4 className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{tool.name}</h4>
+                         </div>
+                      </div>
+                      <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                   </Link>
+                 ) : (
+                   <div
+                    key={i}
+                    className="flex items-center justify-between p-6 glass-card rounded-3xl cursor-not-allowed opacity-50"
+                    title={`Available in ${tool.plan} plan or higher`}
                    >
                      <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-slate-200 rounded-xl flex items-center justify-center text-slate-400">
@@ -117,32 +172,20 @@ export default function Dashboard() {
                              {tool.tier} <Lock className="w-2.5 h-2.5" />
                            </p>
                            <h4 className="font-bold text-slate-400">{tool.name}</h4>
+                           <p className="text-xs text-slate-400 mt-1">{tool.plan}+</p>
                         </div>
                      </div>
                      <Lock className="w-5 h-5 text-slate-300" />
                    </div>
-                 ) : (
-                   <Link key={i} to={tool.path} className="group flex items-center justify-between p-6 glass-card rounded-3xl transition-all duration-300">
-                      <div className="flex items-center gap-4">
-                         <div className={`w-12 h-12 ${tool.color} rounded-xl flex items-center justify-center text-white shadow-lg shadow-${tool.color.split('-')[1]}-500/20`}>
-                            <tool.icon className="w-6 h-6" />
-                         </div>
-                         <div>
-                            <p className="text-[10px] font-black uppercase tracking-tighter text-slate-400">{tool.tier}</p>
-                            <h4 className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{tool.name}</h4>
-                         </div>
-                      </div>
-                      <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
-                   </Link>
-                 )
-               ))}
+                 );
+               })}
             </div>
         </div>
 
         {/* Action Center & Walkthrough */}
         <div className="space-y-8">
            <h3 className="text-2xl font-black text-slate-900 tracking-tight">Priority Actions</h3>
-           <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden">
+           <div className="glass-panel border border-white/20 dark:border-white/10 rounded-[2.5rem] p-8 text-slate-900 dark:text-white relative overflow-hidden">
               <div className="absolute top-0 right-0 p-4 opacity-10">
                  <Zap className="w-32 h-32 text-blue-400" />
               </div>
@@ -152,15 +195,15 @@ export default function Dashboard() {
                  </div>
                  <div className="space-y-4">
                     <div className="flex gap-4">
-                       <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-black border-2 border-slate-900 shrink-0 relative z-20">1</div>
-                       <p className="text-sm font-medium text-slate-300 leading-snug">
-                          Complete the <span className="text-white">Technical Assessment</span> to unlock your learning path.
+                       <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-black border-2 border-slate-100 dark:border-slate-900 shrink-0 relative z-20 text-white">1</div>
+                       <p className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-snug">
+                          Complete the <span className="text-slate-900 dark:text-white font-bold">Technical Assessment</span> to unlock your learning path.
                        </p>
                     </div>
                     <div className="flex gap-4">
-                       <div className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-black border-2 border-slate-900 shrink-0 relative z-20">2</div>
-                       <p className="text-sm font-medium text-slate-400 leading-snug">
-                          Optimize your <span className="text-white/60">LinkedIn Headline</span> based on suggested keywords.
+                       <div className="w-6 h-6 rounded-full bg-slate-300 dark:bg-slate-800 flex items-center justify-center text-[10px] font-black border-2 border-slate-100 dark:border-slate-900 shrink-0 relative z-20 text-slate-600 dark:text-slate-400">2</div>
+                       <p className="text-sm font-medium text-slate-600 dark:text-slate-400 leading-snug">
+                          Optimize your <span className="text-slate-800 dark:text-white/60 font-bold">LinkedIn Headline</span> based on suggested keywords.
                        </p>
                     </div>
                  </div>

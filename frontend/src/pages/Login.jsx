@@ -29,8 +29,16 @@ export default function Login() {
     try {
       if (isLogin) {
         await login({ email: formData.email, password: formData.password });
+        // Redirect to onboarding after successful login
+        setTimeout(() => {
+          window.location.href = '/onboarding';
+        }, 500);
       } else {
         await signup(formData);
+        // Redirect to onboarding after successful signup
+        setTimeout(() => {
+          window.location.href = '/onboarding';
+        }, 500);
       }
     } catch (err) {
       setLocalError('Authentication failed. Please verify your credentials.');
@@ -38,13 +46,12 @@ export default function Login() {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto py-8 px-4 sm:px-6 flex items-center justify-center min-h-[calc(100vh-100px)]">
-      <div className="w-full flex flex-col lg:flex-row glass-card rounded-[3rem] overflow-hidden shadow-2xl border border-outline/10">
+    <div className="w-full min-h-screen flex flex-col lg:flex-row bg-white dark:bg-slate-950">
       {/* Left Side: Visual/Walkthrough Reinforcement */}
-      <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-center px-12 lg:px-16 overflow-hidden bg-gradient-to-br from-blue-900/80 to-indigo-900/80 border-r border-outline/10">
-         <div className="absolute inset-0">
-            <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-600/20 blur-[130px] rounded-full"></div>
-            <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-indigo-600/20 blur-[130px] rounded-full"></div>
+      <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-center px-12 lg:px-24 overflow-hidden bg-gradient-to-br from-[#4b5a96] to-[#3a477a] dark:from-blue-900 dark:to-indigo-950">
+         <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-400/20 blur-[100px] rounded-full mix-blend-overlay"></div>
+            <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-indigo-400/20 blur-[100px] rounded-full mix-blend-overlay"></div>
          </div>
          
          <div className="relative z-10 space-y-12">
@@ -58,7 +65,7 @@ export default function Login() {
             <div className="space-y-4">
                <h2 className="text-5xl font-extrabold text-white leading-tight">
                   Your journey to <br />
-                  <span className="text-blue-400">FAANG</span> begins here.
+                  <span className="text-[#8bb4f7]">FAANG</span> begins here.
                </h2>
                <p className="text-xl text-slate-400 font-light max-w-md">
                    Join 50,000+ students already utilizing our 7-tool ecosystem to land their dream placements.
@@ -89,13 +96,13 @@ export default function Login() {
       </div>
 
       {/* Right Side: Auth Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-16 relative bg-surface-container-lowest/30 backdrop-blur-xl">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-24 relative bg-white dark:bg-slate-900">
          <div className="max-w-md w-full space-y-8 animate-in fade-in slide-in-from-right duration-500">
             <div className="text-center lg:text-left space-y-2">
-               <h3 className="text-3xl font-black text-on-surface font-headline tracking-tight">
+                <h3 className="text-4xl font-black text-slate-900 dark:text-white font-headline tracking-tight">
                   {isLogin ? 'Welcome Back!' : 'Create your Account'}
                </h3>
-               <p className="text-on-surface-variant font-medium">
+               <p className="text-slate-500 dark:text-slate-400 font-medium">
                   {isLogin ? 'Pick up where you left off.' : 'Start your professional journey today.'}
                </p>
             </div>
@@ -115,7 +122,7 @@ export default function Login() {
                         type="email"
                         required
                         placeholder="Email Address"
-                        className="w-full pl-12 pr-4 py-4 bg-surface-container/50 border border-outline/20 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-on-surface placeholder:text-outline font-medium"
+                        className="w-full pl-12 pr-4 py-4 bg-[#f4f7fc] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-[#4255f4]/50 focus:border-[#4255f4] transition-all text-slate-900 dark:text-white placeholder:text-slate-400 font-medium"
                         value={formData.email}
                         onChange={e => setFormData({...formData, email: e.target.value})}
                      />
@@ -126,7 +133,7 @@ export default function Login() {
                         type="password"
                         required
                         placeholder="Password"
-                        className="w-full pl-12 pr-4 py-4 bg-surface-container/50 border border-outline/20 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-on-surface placeholder:text-outline font-medium"
+                        className="w-full pl-12 pr-4 py-4 bg-[#f4f7fc] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-[#4255f4]/50 focus:border-[#4255f4] transition-all text-slate-900 dark:text-white placeholder:text-slate-400 font-medium"
                         value={formData.password}
                         onChange={e => setFormData({...formData, password: e.target.value})}
                      />
@@ -137,7 +144,7 @@ export default function Login() {
                        <input
                           type="text"
                           placeholder="GitHub Username"
-                          className="w-full pl-12 pr-4 py-4 bg-surface-container/50 border border-outline/20 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-on-surface placeholder:text-outline font-medium"
+                          className="w-full pl-12 pr-4 py-4 bg-[#f4f7fc] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-[#4255f4]/50 focus:border-[#4255f4] transition-all text-slate-900 dark:text-white placeholder:text-slate-400 font-medium"
                           value={formData.github_username}
                           onChange={e => setFormData({...formData, github_username: e.target.value})}
                        />
@@ -148,7 +155,7 @@ export default function Login() {
                <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black py-4 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+                  className="w-full bg-[#4255f4] hover:bg-[#3244d6] text-white font-black py-4 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
                >
                   {isLoading ? 'Authenticating...' : (isLogin ? 'Sign In' : 'Create Account')}
                   <ArrowRight className="w-5 h-5" />
@@ -160,13 +167,13 @@ export default function Login() {
                   <div className="w-full border-t border-outline/10"></div>
                </div>
                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 py-1 glass-panel rounded-full text-outline font-bold">New to the Ecosystem?</span>
+                  <span className="px-4 py-1 bg-white dark:bg-slate-900 rounded-full text-slate-400 dark:text-slate-500 text-xs font-bold">New to the Ecosystem?</span>
                </div>
             </div>
 
             <button
                onClick={() => setIsLogin(!isLogin)}
-               className="w-full py-4 glass-card border-outline/20 rounded-2xl font-bold text-on-surface hover:bg-white/40 transition-all active:scale-95"
+               className="w-full py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 transition-all active:scale-95 shadow-sm"
             >
                {isLogin ? 'Create an Account' : 'Return to Login'}
             </button>
@@ -175,7 +182,6 @@ export default function Login() {
                By joining, you agree to our Terms of Service and Professional Conduct Guidelines.
             </p>
          </div>
-      </div>
       </div>
     </div>
   );
