@@ -68,15 +68,26 @@ export default function OnboardingQuestionnaire({ onComplete }) {
   };
 
   const handleSubmit = async () => {
+    if (!answers['career-goal'] || !answers['experience'] || answers['pain-points'].length === 0) {
+      alert('Please answer all questions before continuing');
+      return;
+    }
+
     try {
-      await getRecommendation(
+      const result = await getRecommendation(
         answers['career-goal'],
         answers['experience'],
         answers['pain-points']
       );
-      onComplete();
+
+      if (result) {
+        onComplete();
+      } else {
+        alert('Failed to get recommendation. Please try again.');
+      }
     } catch (err) {
       console.error('Failed to get recommendation:', err);
+      alert('Error: ' + (err.message || 'Failed to get recommendation'));
     }
   };
 

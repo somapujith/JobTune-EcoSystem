@@ -55,13 +55,20 @@ class RecommendationEngine {
       .sort((a, b) => b[1] - a[1])
       .map(([plan, pts]) => ({ plan, score: pts }));
 
-    // Get plan ID for recommended plan
+    // Get full plan details for all plans
+    const allPlansData = await planService.getAllPlans();
     const recommendedPlanName = ranked[0].plan;
-    const recommendedPlan = await planService.getPlanByName(recommendedPlanName);
+    const recommendedPlan = allPlansData.find(p => p.name === recommendedPlanName);
+
+    // Enrich ranked list with full plan details
+    const enrichedPlans = ranked.map(r => {
+      const fullPlan = allPlansData.find(p => p.name === r.plan);
+      return fullPlan || { name: r.plan, id: null };
+    });
 
     return {
       recommendedPlan: recommendedPlan,
-      allPlans: ranked.map(r => ({ ...r, details: null })),
+      allPlans: enrichedPlans,
       scores: score
     };
   }

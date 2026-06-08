@@ -31,8 +31,14 @@ export default function PlanSelection({ recommendation, onPlanSelected }) {
     }
   };
 
-  const isRecommended = (planId) => recommendation?.recommendedPlan?.id === planId;
-  const plans = allPlans.length > 0 ? allPlans : recommendation?.allPlans || [];
+  const isRecommended = (plan) => {
+    if (!recommendation?.recommendedPlan) return false;
+    return recommendation.recommendedPlan.id === plan.id ||
+           recommendation.recommendedPlan.name === plan.name;
+  };
+
+  // Use allPlans from store if available, otherwise use enriched plans from recommendation
+  const plans = allPlans.length > 0 ? allPlans : (recommendation?.allPlans || []);
 
   return (
     <div className="w-full h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-12 px-6 overflow-y-auto">
@@ -48,13 +54,13 @@ export default function PlanSelection({ recommendation, onPlanSelected }) {
         {/* Plans Grid */}
         <div className="grid md:grid-cols-3 gap-8 mb-8">
           {plans.map(plan => {
-            const planData = plan.details || plan;
-            const isSelected = selectedPlanId === (plan.id || plan.plan);
-            const recommended = isRecommended(plan.id || plan.plan);
+            const planData = plan;
+            const isSelected = selectedPlanId === plan.id;
+            const recommended = isRecommended(plan);
 
             return (
               <div
-                key={plan.id || plan.plan}
+                key={plan.id}
                 className={`relative rounded-2xl transition-all ${
                   recommended
                     ? 'ring-2 ring-blue-600 transform scale-105 shadow-2xl'

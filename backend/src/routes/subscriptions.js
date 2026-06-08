@@ -28,21 +28,32 @@ router.get('/my-plan', authenticateToken, async (req, res, next) => {
 router.post('/recommend', authenticateToken, async (req, res, next) => {
   try {
     const { careerGoal, experienceLevel, painPoints } = req.body;
+
+    if (!careerGoal || !experienceLevel || !painPoints || painPoints.length === 0) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
     const recommendation = await recommendationEngine.recommendPlan(careerGoal, experienceLevel, painPoints);
 
     // Save onboarding response
-    const allPlans = await planService.getAllPlans();
-    const recommendedPlanFromDb = allPlans.find(p => p.name === recommendation.recommendedPlan.name);
+    try {
+      const allPlans = await planService.getAllPlans();
+      const recommendedPlanFromDb = allPlans.find(p => p.name === recommendation.recommendedPlan.name);
 
-    await planService.saveOnboardingResponse(req.user.id, {
-      career_goal: careerGoal,
-      experience_level: experienceLevel,
-      pain_points: painPoints,
-      recommended_plan_id: recommendedPlanFromDb?.id
-    });
+      await planService.saveOnboardingResponse(req.user.id, {
+        career_goal: careerGoal,
+        experience_level: experienceLevel,
+        pain_points: painPoints,
+        recommended_plan_id: recommendedPlanFromDb?.id
+      });
+    } catch (dbErr) {
+      console.warn('Warning: Could not save onboarding response:', dbErr.message);
+      // Continue anyway - recommendation is still valid
+    }
 
     res.json({ recommendation });
   } catch (err) {
+    console.error('Recommendation error:', err);
     next(err);
   }
 });
