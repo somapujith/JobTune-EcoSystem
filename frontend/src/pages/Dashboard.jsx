@@ -46,9 +46,14 @@ const PLAN_TIERS = {
 
 export default function Dashboard() {
   const { user, isAuthenticated } = useAuthStore();
-  const { userPlan } = useSubscriptionStore();
+  const { userPlan, getUserPlan } = useSubscriptionStore();
   const [overview, setOverview] = useState(null);
   const [visibleTools, setVisibleTools] = useState([]);
+
+  useEffect(() => {
+    // Fetch user's plan on mount
+    getUserPlan();
+  }, []);
 
   useEffect(() => {
     api.get('/dashboard/overview')

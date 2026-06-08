@@ -13,7 +13,11 @@
       "Bash(grep -E \"\\\\.\\(jsx?|tsx?\\)$\")",
       "Bash(curl -s http://localhost:3000/api/subscriptions/plans)",
       "Bash(node -e ' *)",
-      "Bash(curl -v http://localhost:3000/api/subscriptions/plans)"
+      "Bash(curl -v http://localhost:3000/api/subscriptions/plans)",
+      "Bash(curl -s http://localhost:3000/api/auth/register -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"test@test.com\",\"password\":\"test\"}')",
+      "Bash(PORT=5000 npm start)",
+      "Bash(curl -s http://localhost:5000/api/subscriptions/plans)",
+      "Bash(curl -s http://localhost:5000/api/health)"
     ]
   }
 }
