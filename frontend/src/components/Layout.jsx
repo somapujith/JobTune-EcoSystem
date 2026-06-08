@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown, Moon, Sun } from 'lucide-react';
+import { Menu, X, ChevronDown, Moon, Sun, Crown } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
+import useSubscriptionStore from '../store/useSubscriptionStore';
 import { useDarkMode } from '../hooks/useDarkMode';
 
 const NAV_GROUPS = [
@@ -30,6 +31,7 @@ const NAV_GROUPS = [
 
 const Navbar = () => {
   const { user, logout, isAuthenticated, checkAuth } = useAuthStore();
+  const { userPlan } = useSubscriptionStore();
   const [isDark, setIsDark] = useDarkMode();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -151,10 +153,20 @@ const Navbar = () => {
           <div className="hidden md:flex items-center gap-3 border-l pl-4 border-slate-200 dark:border-slate-700">
             {isAuthenticated ? (
               <>
+                {userPlan && (
+                  <Link
+                    to="/dashboard/settings/plans"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                    title={userPlan.name}
+                  >
+                    <Crown className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    <span className="text-xs font-bold text-blue-700 dark:text-blue-300 hidden sm:inline">{userPlan.name}</span>
+                  </Link>
+                )}
                 <button
                   onClick={logout}
                   title="Logout"
-                  className="flex items-center gap-2 text-sm text-slate-500 hover:text-rose-600 font-medium transition-colors px-3 py-2 rounded-lg hover:bg-rose-50"
+                  className="flex items-center gap-2 text-sm text-slate-500 hover:text-rose-600 font-medium transition-colors px-3 py-2 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20"
                 >
                   <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>logout</span>
                   <span className="hidden lg:inline">Sign Out</span>

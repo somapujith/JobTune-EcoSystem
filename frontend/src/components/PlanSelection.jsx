@@ -22,7 +22,10 @@ export default function PlanSelection({ recommendation, onPlanSelected }) {
     setSelectedPlanId(planId);
     try {
       await selectPlan(planId);
-      onPlanSelected();
+      // Redirect to payment confirmation page instead of dashboard
+      setTimeout(() => {
+        window.location.href = '/payment-confirm';
+      }, 500);
     } catch (err) {
       console.error('Failed to select plan:', err);
     }

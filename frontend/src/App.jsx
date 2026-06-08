@@ -6,6 +6,7 @@ import PlanGate from './components/PlanGate';
 import { getToolForRoute, getRequiredPlan } from './config/toolAccess';
 import Home from './pages/Home';
 import Onboarding from './pages/Onboarding';
+import PaymentConfirm from './pages/PaymentConfirm';
 import PlanSettings from './pages/PlanSettings';
 import SkillAssessment from './pages/SkillAssessment';
 import ResumeOptimizer from './pages/ResumeOptimizer';
@@ -89,6 +90,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="onboarding" element={<Onboarding />} />
+          <Route path="payment-confirm" element={<PaymentConfirm />} />
           <Route path="skills" element={<ProtectedToolRoute toolPath="/skills"><SkillAssessment /></ProtectedToolRoute>} />
           <Route path="resume" element={<ProtectedToolRoute toolPath="/resume"><ResumeOptimizer /></ProtectedToolRoute>} />
           <Route path="resume/build" element={<ProtectedToolRoute toolPath="/resume/build"><ResumeBuilder /></ProtectedToolRoute>} />

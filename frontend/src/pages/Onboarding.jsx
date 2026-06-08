@@ -37,8 +37,8 @@ export default function Onboarding() {
   const handlePlanSelected = () => {
     setCurrentStep(STEPS.COMPLETE);
     setTimeout(() => {
-      window.location.href = '/dashboard';
-    }, 1500);
+      window.location.href = '/payment-confirm';
+    }, 500);
   };
 
   return (
