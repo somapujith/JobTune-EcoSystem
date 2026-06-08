@@ -4,9 +4,38 @@
  * Designed for local LLMs running in LM Studio — no cloud dependencies
  */
 
-async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature = 0.4, model }) {
+const REASONING_MODEL_PATTERN = /reasoning|qwq|deepseek-r1|r1-distill/i;
+
+function isReasoningModel(model) {
+  return REASONING_MODEL_PATTERN.test(model || '');
+}
+
+/** Prefer a fast instruct model for structured JSON — reasoning models blow the context window. */
+function modelForStructuredJson(preferredModel) {
+  if (preferredModel && !isReasoningModel(preferredModel)) {
+    return preferredModel;
+  }
+  return (
+    process.env.LM_STUDIO_MODEL_RESUME
+    || process.env.LM_STUDIO_MODEL_JOB
+    || process.env.LM_STUDIO_MODEL
+    || 'mistralai/mistral-7b-instruct-v0.3'
+  );
+}
+
+async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature = 0.4, model, structuredJson = false }) {
   const baseURL = process.env.LM_STUDIO_URL || 'http://172.19.80.1:1234/v1';
-  const selectedModel = model || process.env.LM_STUDIO_MODEL || 'mistral-7b-instruct-v0.3';
+  let selectedModel = model || process.env.LM_STUDIO_MODEL || 'mistral-7b-instruct-v0.3';
+
+  if (structuredJson && isReasoningModel(selectedModel)) {
+    const fallback = modelForStructuredJson(null);
+    console.warn(`⚠️ Reasoning model "${selectedModel}" is a poor fit for JSON output. Using "${fallback}" instead.`);
+    selectedModel = fallback;
+  }
+
+  const effectiveMaxTokens = structuredJson
+    ? Math.min(maxTokens, 1200)
+    : maxTokens;
 
   // Fallback to mock if explicitly enabled
   const isMock = process.env.MOCK_AI === 'true';
@@ -40,16 +69,24 @@ async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature 
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        max_tokens: maxTokens,
+        max_tokens: effectiveMaxTokens,
         temperature: temperature,
         stream: false
       }),
-      timeout: 60000 // 60 second timeout for inference
+      signal: AbortSignal.timeout(120000)
     });
 
     if (!response.ok) {
       const errText = await response.text();
       console.warn(`LM Studio error: ${response.status}`, errText);
+
+      if (/context size|context length|token limit|channel error/i.test(errText)) {
+        return {
+          ok: false,
+          error: 'LM Studio context limit exceeded. Try a smaller prompt or use a non-reasoning model.',
+          data: null
+        };
+      }
 
       // Self-healing: if "system" role is rejected, retry by merging prompts into a single user message
       if (response.status === 400 && (errText.toLowerCase().includes('role') || errText.toLowerCase().includes('system') || errText.toLowerCase().includes('template'))) {
@@ -65,11 +102,11 @@ async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature 
             messages: [
               { role: 'user', content: mergedPrompt }
             ],
-            max_tokens: maxTokens,
+            max_tokens: effectiveMaxTokens,
             temperature: temperature,
             stream: false
           }),
-          timeout: 60000
+          signal: AbortSignal.timeout(120000)
         });
 
         if (!response.ok) {
@@ -100,10 +137,14 @@ async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature 
     console.log(`✅ LM Studio response received (${content.length} chars)`);
     return { ok: true, error: null, data: content };
   } catch (err) {
-    console.error(`❌ LM Studio connection error: ${err.message}`);
+    const message = err.message || String(err);
+    console.error(`❌ LM Studio connection error: ${message}`);
+    const contextExceeded = /context size|context length|token limit|channel error/i.test(message);
     return {
       ok: false,
-      error: `Cannot connect to LM Studio at ${baseURL}. Ensure LM Studio is running and accessible.`,
+      error: contextExceeded
+        ? 'LM Studio context limit exceeded. Try a smaller prompt or use a non-reasoning model.'
+        : `Cannot connect to LM Studio at ${baseURL}. Ensure LM Studio is running and accessible.`,
       data: null
     };
   }
@@ -131,4 +172,4 @@ function extractJSON(text) {
   }
 }
 
-module.exports = { callAI, extractJSON };
+module.exports = { callAI, extractJSON, isReasoningModel, modelForStructuredJson };

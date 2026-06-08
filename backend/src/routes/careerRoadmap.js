@@ -4,11 +4,20 @@ const { authenticateToken } = require('../middleware/auth');
 const { pool } = require('../config/database');
 const { callAI, extractJSON } = require('../utils/aiClient');
 
+const activeGenerations = new Map();
+
 // ── POST /api/career/roadmap - Generate personalized career roadmap ────────
 router.post('/roadmap', authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+
+  if (activeGenerations.has(userId)) {
+    return res.status(429).json({ error: 'Roadmap generation already in progress. Please wait.' });
+  }
+
+  activeGenerations.set(userId, true);
+
   try {
     const { currentRole, targetRole, currentSkills, timeframe } = req.body;
-    const userId = req.user.id;
 
     if (!targetRole) {
       return res.status(400).json({ error: 'Target role is required' });
@@ -30,64 +39,36 @@ router.post('/roadmap', authenticateToken, async (req, res) => {
       ? currentSkills.join(', ')
       : currentSkills || 'General programming';
 
-    // Create AI prompt
-    const systemPrompt = `You are a senior career coach and tech mentor. Your job is to create detailed, actionable career roadmaps
-for developers transitioning into new roles. Be specific about skills, projects, resources, and realistic timelines.`;
+    const systemPrompt = `You are a senior career coach. Output ONLY valid JSON — no reasoning, no markdown, no explanation. Keep each phase concise (max 2 goals, 3 skills, 1 project, 2 resources). Use exactly 3 phases.`;
 
-    const userPrompt = `Create a comprehensive ${timeframeDisplay} career roadmap.
+    const userPrompt = `Build a ${timeframeDisplay} roadmap to become a ${targetRole}.
+Current role: ${currentRole || 'Fresher'}. Skills: ${skillsText}.
 
-Current Situation:
-- Current Role: ${currentRole || 'Entry-level / Fresher'}
-- Current Skills: ${skillsText}
-- Target Role: ${targetRole}
-
-Please generate a detailed roadmap with:
-1. Clear phases with weekly/monthly milestones
-2. Specific skills to develop
-3. Recommended projects to build
-4. Learning resources (courses, books, communities)
-5. Key metrics to track progress
-6. Tips for staying motivated
-
-Return ONLY valid JSON in this exact format:
-{
-  "title": "Your Path to [Target Role]",
-  "summary": "Brief overview of the journey",
-  "estimatedHours": 200,
-  "phases": [
-    {
-      "phase": 1,
-      "title": "Phase Title",
-      "duration": "1-2 months",
-      "description": "What you'll accomplish",
-      "goals": ["goal1", "goal2"],
-      "skills": ["skill1", "skill2"],
-      "projects": [{"name": "Project", "description": "Desc", "difficulty": "beginner"}],
-      "resources": [{"title": "Resource", "type": "course|article|book|project", "url": "link"}],
-      "milestones": ["Milestone 1", "Milestone 2"]
-    }
-  ],
-  "keyMetrics": ["Metric 1", "Metric 2"],
-  "tips": ["Tip 1", "Tip 2"],
-  "roleDescription": "What a [Target Role] does and why you're ready"
-}`;
+JSON schema:
+{"title":"string","summary":"string","estimatedHours":number,"phases":[{"phase":number,"title":"string","duration":"string","description":"string","goals":["string"],"skills":["string"],"projects":[{"name":"string","description":"string","difficulty":"beginner|intermediate|advanced"}],"resources":[{"title":"string","type":"course|article|book|project","url":"string"}],"milestones":["string"]}],"keyMetrics":["string"],"tips":["string"],"roleDescription":"string"}`;
 
     const aiResult = await callAI({
       systemPrompt,
       userPrompt,
-      maxTokens: 2000,
-      temperature: 0.7,
-      model: process.env.LM_STUDIO_MODEL_ROADMAP
+      maxTokens: 1200,
+      temperature: 0.5,
+      model: process.env.LM_STUDIO_MODEL_ROADMAP,
+      structuredJson: true
     });
 
-    if (!aiResult.ok) {
-      return res.status(502).json({ error: aiResult.error || 'AI service unavailable' });
-    }
+    let roadmap;
+    let aiPowered = false;
 
-    // Extract and validate JSON
-    let roadmap = extractJSON(aiResult.data);
-    if (!roadmap) {
-      console.warn('Failed to parse roadmap JSON, using fallback');
+    if (aiResult.ok) {
+      roadmap = extractJSON(aiResult.data);
+      if (roadmap?.phases?.length) {
+        aiPowered = true;
+      } else {
+        console.warn('Failed to parse roadmap JSON, using fallback');
+        roadmap = generateFallbackRoadmap(targetRole, skillsText, selectedTimeframe);
+      }
+    } else {
+      console.warn('AI roadmap generation failed, using fallback:', aiResult.error);
       roadmap = generateFallbackRoadmap(targetRole, skillsText, selectedTimeframe);
     }
 
@@ -103,10 +84,12 @@ Return ONLY valid JSON in this exact format:
       // Continue anyway, return the roadmap
     }
 
-    res.json(roadmap);
+    res.json({ ...roadmap, aiPowered });
   } catch (err) {
     console.error('Career roadmap generation error:', err.message);
     res.status(500).json({ error: 'Failed to generate career roadmap' });
+  } finally {
+    activeGenerations.delete(userId);
   }
 });
 

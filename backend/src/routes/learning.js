@@ -127,8 +127,9 @@ router.post('/generate-roadmap', authenticateToken, async (req, res, next) => {
     const aiResult = await callAI({
       systemPrompt: SYSTEM_PROMPT_ROADMAP,
       userPrompt,
-      maxTokens: 1500,
-      model: process.env.LM_STUDIO_MODEL_ROADMAP
+      maxTokens: 1200,
+      model: process.env.LM_STUDIO_MODEL_ROADMAP,
+      structuredJson: true
     });
 
     let roadmap;
