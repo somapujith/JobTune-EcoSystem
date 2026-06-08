@@ -72,11 +72,13 @@ const Navbar = () => {
   return (
     <header className="fixed top-0 w-full z-50 glass-panel border-b border-white/40 dark:border-slate-800/50">
       <div className="flex justify-between items-center px-6 lg:px-12 h-20 w-full">
-        <div className="flex items-center gap-10">
-          <Link to="/" className="text-2xl font-black tracking-tight text-blue-800 font-headline">
-            JobTune
-          </Link>
-          <nav className="hidden lg:flex items-center gap-8" ref={dropdownRef}>
+        {/* Logo - Left */}
+        <Link to="/" className="text-2xl font-black tracking-tight text-blue-800 font-headline flex-shrink-0">
+          JobTune
+        </Link>
+
+        {/* Nav - Center */}
+        <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 transform -translate-x-1/2" ref={dropdownRef}>
             <Link
               to="/dashboard"
               className={`text-sm font-semibold transition-all duration-200 ${
@@ -139,9 +141,9 @@ const Navbar = () => {
               );
             })}
           </nav>
-        </div>
 
-        <div className="flex items-center gap-4">
+        {/* Right - Buttons & User Menu */}
+        <div className="flex items-center gap-4 flex-shrink-0">
           <button
             onClick={() => setIsDark(!isDark)}
             title={isDark ? 'Light mode' : 'Dark mode'}
