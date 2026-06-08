@@ -1,6 +1,7 @@
 import React from 'react';
 import { Lock, Crown, TrendingUp, Zap } from 'lucide-react';
 import useSubscriptionStore from '../store/useSubscriptionStore';
+import { PLAN_TIERS, TOOL_ACCESS } from '../config/toolAccess';
 
 const PLAN_COLORS = {
   'Learn & Build': { icon: Zap, color: 'blue', label: 'Entry Plan' },
@@ -25,8 +26,10 @@ export default function PlanGate({ toolName, requiredPlan = 'Tune & Polish', chi
     );
   }
 
-  // Check if user has access
-  const hasAccess = userPlan && userPlan.features && userPlan.features.includes(toolName);
+  // Check if user has access using tier-based comparison
+  const userTier = userPlan ? (PLAN_TIERS[userPlan.name] || 0) : 0;
+  const requiredTier = PLAN_TIERS[requiredPlan] || PLAN_TIERS[TOOL_ACCESS[toolName]] || 1;
+  const hasAccess = userTier >= requiredTier;
 
   if (hasAccess) {
     return children;

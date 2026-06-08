@@ -23,6 +23,7 @@ export const TOOL_ACCESS = {
   'Mock Interview': 'Zero to Hero',
   'Job Fit Analysis': 'Zero to Hero',
   'Evidence Dashboard': 'Zero to Hero',
+  'Job Analyzer': 'Zero to Hero',
 };
 
 // Route -> Tool name mapping
@@ -46,6 +47,9 @@ export const ROUTE_TOOLS = {
   '/preparation': 'Learning Resources',
   '/evidence': 'Evidence Dashboard',
   '/job-fit': 'Job Fit Analysis',
+  '/job-analyzer': 'Job Analyzer',
+  '/ats-checker': 'ATS Checker',
+  '/cover-letter': 'Cover Letter Generator',
 };
 
 export const PLAN_TIERS = {
