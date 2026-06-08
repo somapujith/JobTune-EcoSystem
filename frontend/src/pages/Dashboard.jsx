@@ -53,9 +53,6 @@ export default function Dashboard() {
   useEffect(() => {
     // Fetch user's plan on mount
     getUserPlan();
-  }, []);
-
-  useEffect(() => {
     api.get('/dashboard/overview')
       .then(({ data }) => setOverview(data))
       .catch(() => {/* keep static fallback */});
@@ -68,6 +65,10 @@ export default function Dashboard() {
         const toolTier = PLAN_TIERS[tool.plan] || 0;
         return toolTier <= userTier;
       });
+      setVisibleTools(available);
+    } else {
+      // Show free tools if plan not loaded yet
+      const available = ALL_TOOLS.filter(tool => PLAN_TIERS[tool.plan] === 1);
       setVisibleTools(available);
     }
   }, [userPlan]);
