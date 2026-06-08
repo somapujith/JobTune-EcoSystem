@@ -69,13 +69,6 @@ const Navbar = () => {
 
   const isGroupActive = (group) => group.items.some(item => location.pathname.startsWith(item.path));
 
-  // Hide navbar on onboarding pages
-  const hideNavbar = location.pathname === '/onboarding' || location.pathname === '/payment-confirm';
-
-  if (hideNavbar) {
-    return <Outlet />;
-  }
-
   return (
     <header className="fixed top-0 w-full z-50 glass-panel border-b border-white/40 dark:border-slate-800/50">
       <div className="flex justify-between items-center px-6 lg:px-8 h-20 max-w-7xl mx-auto">
@@ -297,6 +290,13 @@ const Layout = () => {
   const location = useLocation();
   const isInternalPage = location.pathname !== '/';
 
+  // Full screen pages without navbar/footer
+  const isFullScreenPage = location.pathname === '/onboarding' || location.pathname === '/payment-confirm';
+
+  if (isFullScreenPage) {
+    return <Outlet />;
+  }
+
   return (
     <div className={`min-h-screen flex flex-col font-body bg-slate-50 dark:bg-[#030712] text-slate-900 dark:text-slate-100 antialiased overflow-x-hidden relative transition-colors duration-500`}>
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
@@ -304,14 +304,14 @@ const Layout = () => {
         <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-indigo-400/30 mix-blend-multiply filter blur-[120px] opacity-70 animate-blob dark:bg-indigo-900/40 dark:mix-blend-screen" style={{ animationDelay: '3s' }}></div>
         <div className="absolute bottom-[-20%] left-[20%] w-[60%] h-[60%] rounded-full bg-cyan-400/30 mix-blend-multiply filter blur-[120px] opacity-70 animate-blob dark:bg-cyan-900/40 dark:mix-blend-screen" style={{ animationDelay: '6s' }}></div>
       </div>
-      
+
       <div className="relative z-10 w-full flex flex-col flex-grow">
         <Navbar />
         <div className="flex-grow flex pt-20">
           <Outlet />
         </div>
 
-      
+
       <footer className="w-full border-t-0 bg-transparent flex justify-between items-center px-8 py-12 font-body text-sm relative z-10">
         <div className="text-slate-500 dark:text-slate-400">
             &copy; 2024 JobTune AI. Professional Vanguard System.
