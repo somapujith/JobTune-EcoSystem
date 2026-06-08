@@ -42,7 +42,7 @@ export default function Onboarding() {
   };
 
   return (
-    <div>
+    <div className="w-full h-screen overflow-hidden">
       {currentStep === STEPS.QUESTIONNAIRE && (
         <OnboardingQuestionnaire onComplete={handleQuestionnaireComplete} />
       )}
@@ -52,7 +52,7 @@ export default function Onboarding() {
       )}
 
       {currentStep === STEPS.COMPLETE && (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-6">
+        <div className="w-full h-screen bg-gradient-to-br from-green-50 to-emerald-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-6">
           <div className="text-center">
             <div className="text-6xl mb-4">🎉</div>
             <h1 className="text-4xl font-black text-slate-900 dark:text-white mb-3">All Set!</h1>

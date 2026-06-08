@@ -69,6 +69,13 @@ const Navbar = () => {
 
   const isGroupActive = (group) => group.items.some(item => location.pathname.startsWith(item.path));
 
+  // Hide navbar on onboarding pages
+  const hideNavbar = location.pathname === '/onboarding' || location.pathname === '/payment-confirm';
+
+  if (hideNavbar) {
+    return <Outlet />;
+  }
+
   return (
     <header className="fixed top-0 w-full z-50 glass-panel border-b border-white/40 dark:border-slate-800/50">
       <div className="flex justify-between items-center px-6 lg:px-8 h-20 max-w-7xl mx-auto">

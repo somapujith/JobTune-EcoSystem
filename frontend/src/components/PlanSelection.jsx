@@ -35,7 +35,7 @@ export default function PlanSelection({ recommendation, onPlanSelected }) {
   const plans = allPlans.length > 0 ? allPlans : recommendation?.allPlans || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-12 px-6">
+    <div className="w-full h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-12 px-6 overflow-y-auto">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
