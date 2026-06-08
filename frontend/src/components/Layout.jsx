@@ -71,7 +71,7 @@ const Navbar = () => {
 
   return (
     <header className="fixed top-0 w-full z-50 glass-panel border-b border-white/40 dark:border-slate-800/50">
-      <div className="flex justify-between items-center px-6 lg:px-8 h-20 max-w-7xl mx-auto">
+      <div className="flex justify-between items-center px-6 lg:px-12 h-20 w-full">
         <div className="flex items-center gap-10">
           <Link to="/" className="text-2xl font-black tracking-tight text-blue-800 font-headline">
             JobTune
@@ -199,7 +199,7 @@ const Navbar = () => {
       {/* Mobile dropdown menu */}
       {mobileOpen && (
         <div className="lg:hidden bg-white border-t border-slate-100 shadow-lg max-h-[80vh] overflow-y-auto">
-          <nav className="flex flex-col px-6 py-4 gap-2 max-w-7xl mx-auto">
+          <nav className="flex flex-col px-6 py-4 gap-2 w-full">
             <Link
               to="/dashboard"
               className={`py-3 px-4 rounded-xl text-sm font-semibold transition-colors ${
