@@ -249,36 +249,36 @@ export default function ATSChecker() {
             </div>
 
             <div className="glass-card rounded-3xl p-12 space-y-8">
-            {missingFields.map((field, idx) => (
-              <div key={idx}>
-                <label className="block text-sm font-bold text-slate-900 dark:text-white mb-3">
-                  {field.field}
-                  <span className="text-slate-500 text-xs font-normal ml-2">{field.description}</span>
-                </label>
-                {field.type === 'textarea' ? (
-                  <textarea
-                    value={additionalInfo[field.field] || ''}
-                    onChange={(e) =>
-                      setAdditionalInfo({ ...additionalInfo, [field.field]: e.target.value })
-                    }
-                    placeholder="Enter your information..."
-                    className="w-full px-6 py-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                    rows={4}
-                  />
-                ) : (
-                  <input
-                    type={field.type || 'text'}
-                    value={additionalInfo[field.field] || ''}
-                    onChange={(e) =>
-                      setAdditionalInfo({ ...additionalInfo, [field.field]: e.target.value })
-                    }
-                    placeholder="Enter your information..."
-                    className="w-full px-6 py-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                  />
-                )}
-              </div>
-            ))}
-          </div>
+              {missingFields.map((field, idx) => (
+                <div key={idx}>
+                  <label className="block text-sm font-bold text-slate-900 dark:text-white mb-3">
+                    {field.field}
+                    <span className="text-slate-500 text-xs font-normal ml-2">{field.description}</span>
+                  </label>
+                  {field.type === 'textarea' ? (
+                    <textarea
+                      value={additionalInfo[field.field] || ''}
+                      onChange={(e) =>
+                        setAdditionalInfo({ ...additionalInfo, [field.field]: e.target.value })
+                      }
+                      placeholder="Enter your information..."
+                      className="w-full px-6 py-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                      rows={4}
+                    />
+                  ) : (
+                    <input
+                      type={field.type || 'text'}
+                      value={additionalInfo[field.field] || ''}
+                      onChange={(e) =>
+                        setAdditionalInfo({ ...additionalInfo, [field.field]: e.target.value })
+                      }
+                      placeholder="Enter your information..."
+                      className="w-full px-6 py-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
 
             {error && (
               <div className="flex items-center gap-3 p-4 bg-rose-50 dark:bg-rose-900/20 rounded-xl border border-rose-200 dark:border-rose-800">
