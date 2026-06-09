@@ -19,6 +19,7 @@
     "supertest": "^6.3.3"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.103.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "docx": "^9.7.1",
@@ -28,10 +29,12 @@
     "jsonwebtoken": "^9.0.3",
     "jszip": "^3.10.1",
     "multer": "^2.1.1",
-    "pg": "^8.11.0",
+    "p-limit": "^5.0.0",
     "pdf-parse": "^1.1.4",
     "pdfkit": "^0.16.0",
+    "pg": "^8.11.0",
+    "unzipper": "^0.12.3",
     "winston": "^3.19.0",
-    "p-limit": "^5.0.0"
+    "xml2js": "^0.6.2"
   }
 }
