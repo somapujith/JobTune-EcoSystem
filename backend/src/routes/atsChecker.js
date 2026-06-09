@@ -89,7 +89,7 @@ router.post('/optimize', authenticateToken, upload.single('resume'), async (req,
         originalResume: resumeText,
         optimizedResume,
         improvedScore: afterScore.total,
-        scores: {
+        analysis: {
           before: beforeScore.total,
           after: afterScore.total,
           improvement: afterScore.total - beforeScore.total
