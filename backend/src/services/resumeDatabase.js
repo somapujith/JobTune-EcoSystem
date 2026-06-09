@@ -1,4 +1,4 @@
-const pool = require('../lib/db');
+const { pool } = require('../config/database');
 
 class ResumeDatabase {
   /**
