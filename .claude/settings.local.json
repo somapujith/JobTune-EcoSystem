@@ -22,7 +22,9 @@
       "PowerShell(\"Killed node processes\")",
       "PowerShell(cd \"h:\\\\JobTube Eco System\\\\backend\"; Start-Process -NoNewWindow -FilePath \"npm\" -ArgumentList \"start\" -PassThru | Select-Object -Property Id, ProcessName; Write-Host \"Backend started. Waiting 5 seconds...\"; Start-Sleep -Seconds 5; $response = Invoke-WebRequest -Uri \"http://localhost:3000/api/health\" -ErrorAction SilentlyContinue; if \\($response\\) { Write-Host \"✅ Backend running\"; $response.Content } else { Write-Host \"❌ Backend not responding yet\" })",
       "Bash(pkill -f \"node src/server.js\")",
-      "Bash(npm start *)"
+      "Bash(npm start *)",
+      "PowerShell(\"Backend killed\")",
+      "PowerShell(\"Killed\")"
     ]
   }
 }

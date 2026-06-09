@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 const LM_STUDIO_URL = process.env.LM_STUDIO_URL || 'http://172.19.80.1:1234/v1';
-const MODEL = 'deepseek/deepseek-r1-0528-qwen3-8b';
+const MODEL = 'qwen/qwen3.5-9b';
 
 const ANALYSIS_PROMPT = `Analyze this resume and provide:
 1. Current ATS compatibility score (0-100)
