@@ -3,15 +3,7 @@ const axios = require('axios');
 const LM_STUDIO_URL = process.env.LM_STUDIO_URL || 'http://172.19.80.1:1234/v1';
 const MODEL = 'qwen/qwen3.5-9b';
 
-const OPTIMIZE_PROMPT = `Rewrite resume for ATS compatibility:
-1. Use headers: PROFESSIONAL SUMMARY, EXPERIENCE, SKILLS, EDUCATION
-2. Add action verbs: Led, Built, Optimized, Achieved, Managed, Developed
-3. Include metrics: percentages, numbers, monetary values
-4. Date format: MM/YYYY - MM/YYYY
-5. Keep truthful, no fabrication
-6. Clear bullet points, standard formatting
-
-Output plain text only.`;
+const OPTIMIZE_PROMPT = `Rewrite for ATS. Headers: SUMMARY, EXPERIENCE, SKILLS, EDUCATION. Action verbs: Led, Built, Optimized, Achieved. Metrics: %, numbers. Dates: MM/YYYY. Truthful only. Plain text.`;
 
 async function optimizeResume(resumeText, additionalInfo = {}) {
   try {
@@ -34,8 +26,8 @@ async function optimizeResume(resumeText, additionalInfo = {}) {
           content: userContent
         }
       ],
-      temperature: 0.7,
-      max_tokens: 2000
+      temperature: 0.5,
+      max_tokens: 1500
     });
 
     return response.data.choices[0].message.content;

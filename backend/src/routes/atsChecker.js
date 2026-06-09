@@ -78,9 +78,8 @@ router.post('/optimize', authenticateToken, upload.single('resume'), async (req,
     // AI rewriting
     const optimizedResume = await optimizeResume(resumeText, additionalInfo);
 
-    // Get after score
+    // Quick scoring (skip expensive re-analysis)
     const afterScore = ATSScoring.calculateScore(optimizedResume);
-    const afterKeywords = KeywordIntelligence.analyzeKeywordCoverage(optimizedResume, detectedRole);
 
     const duration = Date.now() - start;
     console.log(`[ATS] Optimization complete in ${duration}ms`);
@@ -89,20 +88,11 @@ router.post('/optimize', authenticateToken, upload.single('resume'), async (req,
       data: {
         originalResume: resumeText,
         optimizedResume,
+        improvedScore: afterScore.total,
         scores: {
           before: beforeScore.total,
           after: afterScore.total,
-          improvement: afterScore.total - beforeScore.total,
-          beforeBreakdown: beforeScore.breakdown,
-          afterBreakdown: afterScore.breakdown
-        },
-        analysis: {
-          actionVerbsBefore: beforeScore.details.actionVerbs.count,
-          actionVerbsAfter: afterScore.details.actionVerbs.count,
-          metricsBefore: beforeScore.details.metrics.count,
-          metricsAfter: afterScore.details.metrics.count,
-          keywordCoverageBefore: ATSScoring.calculateScore(resumeText).details,
-          keywordCoverageAfter: afterKeywords
+          improvement: afterScore.total - beforeScore.total
         },
         timing: `${duration}ms`
       }
