@@ -47,9 +47,13 @@ export default function OnboardingQuestionnaire({ onComplete }) {
   });
   const { getRecommendation, isLoading } = useSubscriptionStore();
 
-  const currentQuestion = QUESTIONS[currentQuestionIndex];
-  const isLastQuestion = currentQuestionIndex === QUESTIONS.length - 1;
-  const answeredAll = answers['career-goal'] && answers['experience'] && answers['pain-points'].length > 0;
+  const currentQuestion = QUESTIONS?.[currentQuestionIndex];
+  const isLastQuestion = currentQuestionIndex === (QUESTIONS?.length || 0) - 1;
+  const answeredAll = answers['career-goal'] && answers['experience'] && answers['pain-points']?.length > 0;
+
+  if (!currentQuestion) {
+    return <div className="text-center py-12">Loading questions...</div>;
+  }
 
   const handleAnswer = (value) => {
     if (currentQuestion.type === 'single') {
