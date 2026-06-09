@@ -1,6 +1,7 @@
-const Anthropic = require("@anthropic-ai/sdk");
+const axios = require('axios');
 
-const client = new Anthropic();
+const LM_STUDIO_URL = process.env.LM_STUDIO_URL || 'http://172.19.80.1:1234/v1';
+const MODEL = 'deepseek-r1-0528-qwen3-8b';
 
 const ANALYSIS_PROMPT = `Analyze this resume and provide:
 1. Current ATS compatibility score (0-100)
@@ -54,44 +55,46 @@ Return the optimized resume in plain text format, ready to be converted to DOCX.
 
 async function analyzeResume(resumeText) {
   try {
-    const response = await client.messages.create({
-      model: "claude-opus-4-8",
-      max_tokens: 2000,
+    const response = await axios.post(`${LM_STUDIO_URL}/chat/completions`, {
+      model: MODEL,
       messages: [
         {
           role: "user",
           content: `${ANALYSIS_PROMPT}\n\nResume:\n${resumeText}`
         }
-      ]
+      ],
+      temperature: 0.7,
+      max_tokens: 2000
     });
 
-    const content = response.content[0].text;
+    const content = response.data.choices[0].message.content;
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     return jsonMatch ? JSON.parse(jsonMatch[0]) : { currentScore: 45, error: "Could not parse analysis" };
   } catch (err) {
-    console.error("Resume analysis error:", err);
+    console.error("Resume analysis error:", err.message);
     throw err;
   }
 }
 
 async function detectMissingFields(resumeText) {
   try {
-    const response = await client.messages.create({
-      model: "claude-opus-4-8",
-      max_tokens: 1500,
+    const response = await axios.post(`${LM_STUDIO_URL}/chat/completions`, {
+      model: MODEL,
       messages: [
         {
           role: "user",
           content: `${MISSING_FIELDS_PROMPT}\n\nResume:\n${resumeText}`
         }
-      ]
+      ],
+      temperature: 0.7,
+      max_tokens: 1500
     });
 
-    const content = response.content[0].text;
+    const content = response.data.choices[0].message.content;
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     return jsonMatch ? JSON.parse(jsonMatch[0]) : { missingFields: [] };
   } catch (err) {
-    console.error("Missing fields detection error:", err);
+    console.error("Missing fields detection error:", err.message);
     throw err;
   }
 }
@@ -107,20 +110,21 @@ async function optimizeResume(resumeText, additionalInfo = {}) {
       });
     }
 
-    const response = await client.messages.create({
-      model: "claude-opus-4-8",
-      max_tokens: 3000,
+    const response = await axios.post(`${LM_STUDIO_URL}/chat/completions`, {
+      model: MODEL,
       messages: [
         {
           role: "user",
           content: `${prompt}\n\nResume:\n${resumeText}`
         }
-      ]
+      ],
+      temperature: 0.7,
+      max_tokens: 3000
     });
 
-    return response.content[0].text;
+    return response.data.choices[0].message.content;
   } catch (err) {
-    console.error("Resume optimization error:", err);
+    console.error("Resume optimization error:", err.message);
     throw err;
   }
 }
