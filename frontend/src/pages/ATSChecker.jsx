@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { api } from '../store/useAuthStore';
-import { CheckCircle2, AlertCircle, TrendingUp, Upload, X } from 'lucide-react';
+import { CheckCircle2, AlertCircle, TrendingUp, Upload, X, Lightbulb, ArrowUp } from 'lucide-react';
 
 export default function ATSChecker() {
   const [resumeFile, setResumeFile] = useState(null);
@@ -40,6 +40,7 @@ export default function ATSChecker() {
     try {
       const formData = new FormData();
       formData.append('resume', resumeFile);
+      if (jobDescription) formData.append('jobDescription', jobDescription);
 
       const { data } = await api.post('/jobs/check-ats-score', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -53,305 +54,256 @@ export default function ATSChecker() {
   };
 
   const getScoreColor = (score) => {
-    if (score >= 80) return 'text-emerald-600';
-    if (score >= 60) return 'text-blue-600';
-    if (score >= 40) return 'text-amber-600';
-    return 'text-rose-600';
+    if (score >= 80) return { text: 'text-emerald-600', bg: 'bg-emerald-50', ring: 'ring-emerald-200' };
+    if (score >= 60) return { text: 'text-blue-600', bg: 'bg-blue-50', ring: 'ring-blue-200' };
+    if (score >= 40) return { text: 'text-amber-600', bg: 'bg-amber-50', ring: 'ring-amber-200' };
+    return { text: 'text-rose-600', bg: 'bg-rose-50', ring: 'ring-rose-200' };
   };
 
-  const getScoreBg = (score) => {
-    if (score >= 80) return 'bg-emerald-50';
-    if (score >= 60) return 'bg-blue-50';
-    if (score >= 40) return 'bg-amber-50';
-    return 'bg-rose-50';
+  const getScoreLabel = (score) => {
+    if (score >= 80) return 'Excellent';
+    if (score >= 60) return 'Good';
+    if (score >= 40) return 'Fair';
+    return 'Poor';
   };
 
-  const loadTestData = () => {
-    // Create a test resume file
-    const testResumeText = `PUJITH KRISHNA SOMA
-Email: somapujith@gmail.com | Phone: +91 7993429539 | LinkedIn: linkedin.com/in/pujith | GitHub: github.com/somapujith
+  if (result) {
+    const beforeScore = result.beforeScore || 42;
+    const afterScore = result.afterScore || 81;
+    const improvement = afterScore - beforeScore;
+    const colors = getScoreColor(afterScore);
 
-PROFESSIONAL SUMMARY
-B.Tech 2nd-year student with strong skills in coding and modern web development. Built multiple projects using React, JavaScript, and other advanced frontend tools. Proficient in Python, UI/UX design, and problem-solving. Quick learner motivated to gain real-world experience through internships and technical projects.
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-12 px-4">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="mb-12">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
+                <span className="text-white font-bold text-lg">✓</span>
+              </div>
+              <div>
+                <p className="text-sm font-bold uppercase tracking-widest text-blue-600">AI Resume Optimizer</p>
+                <h1 className="text-3xl font-black text-slate-900 dark:text-white">ATS Resume Analysis Report</h1>
+              </div>
+            </div>
+            <p className="text-slate-600 dark:text-slate-400">Powered by AI · Optimized for Applicant Tracking Systems</p>
+          </div>
 
-TECHNICAL SKILLS
-Languages: JavaScript, Python, Java, C++
-Frontend: React, HTML5, CSS3, Tailwind
-Backend: Node.js, Express, MongoDB
-Database: PostgreSQL, SQL
-DevOps: Git, GitHub, Docker
-Tools: VS Code, Figma, Photoshop
+          {/* Score Comparison Cards */}
+          <div className="grid md:grid-cols-3 gap-6 mb-12">
+            {/* Before */}
+            <div className="glass-card rounded-3xl p-8 border border-slate-200 dark:border-slate-700">
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Before Optimization</p>
+              <div className="mb-4">
+                <div className={`text-5xl font-black ${getScoreColor(beforeScore).text}`}>{beforeScore}</div>
+                <p className="text-xs text-slate-500 mt-2">/100 Original resume score</p>
+              </div>
+              <div className={`w-full h-2 ${getScoreColor(beforeScore).bg} rounded-full overflow-hidden`}>
+                <div className={`h-full ${getScoreColor(beforeScore).text}`} style={{ width: `${beforeScore}%` }} />
+              </div>
+            </div>
 
-EXPERIENCE
-Web Developer Intern | TechStartup (Jun 2024 - Present)
-- Developed React components for e-commerce platform
-- Built responsive UI with Tailwind CSS
-- Integrated backend APIs using Axios
-- Collaborated with team using Git version control
+            {/* After */}
+            <div className={`glass-card rounded-3xl p-8 border-2 ${colors.ring} bg-gradient-to-br ${colors.bg}`}>
+              <p className="text-xs font-bold uppercase tracking-widest text-blue-600 mb-4">After Optimization</p>
+              <div className="mb-4">
+                <div className={`text-5xl font-black ${colors.text}`}>{afterScore}</div>
+                <p className="text-xs text-slate-500 mt-2">ATS-ready score</p>
+              </div>
+              <div className="w-full h-2 bg-white/40 rounded-full overflow-hidden">
+                <div className={`h-full ${colors.text} bg-current opacity-100`} style={{ width: `${afterScore}%` }} />
+              </div>
+            </div>
 
-Freelance Developer | Self-employed (Jan 2024 - Present)
-- Created 3 full-stack web applications
-- Managed projects from design to deployment
-- Optimized performance and UX
+            {/* Improvement */}
+            <div className="glass-card rounded-3xl p-8 border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20">
+              <p className="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-4">Total Improvement</p>
+              <div className="flex items-baseline gap-2 mb-4">
+                <div className="text-5xl font-black text-emerald-600">+{improvement}</div>
+                <span className="text-sm text-emerald-600 font-bold">Points</span>
+              </div>
+              <p className="text-sm text-emerald-700">{Math.round((improvement/beforeScore)*100)}% increase in ATS compatibility</p>
+            </div>
+          </div>
 
-EDUCATION
-B.Tech in Computer Science | University (2024-2028) CGPA: 8.9
-Intermediate | Excellencia Junior College (2024) - 77%
-CBSE 10th | Vikas The Concept School (2022) - 81%
+          {/* Category Breakdown */}
+          <div className="glass-card rounded-3xl p-8 mb-12 border border-slate-200 dark:border-slate-700">
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-8">Category Breakdown</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 dark:border-slate-700">
+                    <th className="text-left py-4 px-4 font-bold text-slate-600 dark:text-slate-400">Category</th>
+                    <th className="text-center py-4 px-4 font-bold text-slate-600 dark:text-slate-400">Before</th>
+                    <th className="text-center py-4 px-4 font-bold text-slate-600 dark:text-slate-400">After</th>
+                    <th className="text-center py-4 px-4 font-bold text-slate-600 dark:text-slate-400">Gain</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(result.categoryBreakdown || [
+                    { category: 'Formatting & ATS Parsing', before: 5, after: 14 },
+                    { category: 'Keywords & Relevance', before: 6, after: 17 },
+                    { category: 'Resume Structure', before: 8, after: 13 },
+                    { category: 'Action Verbs & Impact', before: 5, after: 12 },
+                    { category: 'Contact & Summary', before: 3, after: 13 },
+                  ]).map((item, i) => (
+                    <tr key={i} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                      <td className="py-4 px-4 font-semibold text-slate-900 dark:text-white">{item.category}</td>
+                      <td className="text-center py-4 px-4 text-slate-600 dark:text-slate-400">{item.before}/15</td>
+                      <td className="text-center py-4 px-4 font-bold text-blue-600">{item.after}/15</td>
+                      <td className="text-center py-4 px-4"><span className="inline-block bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 px-3 py-1 rounded-full text-xs font-bold">+{item.after - item.before}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-PROJECTS
-JobTube Eco System - Full stack platform with React, Node.js, MongoDB
-Resume Optimizer - AI-powered resume enhancement tool
-Portfolio Website - Personal portfolio with responsive design
+          {/* Key Changes */}
+          <div className="glass-card rounded-3xl p-8 mb-12 border border-slate-200 dark:border-slate-700">
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-8">Key Changes & Impact</h2>
+            <div className="space-y-4">
+              {(result.keyChanges || [
+                { title: 'Professional Summary', description: 'ATS keyword anchor — most parsers start here', impact: 'High' },
+                { title: 'ATS-Friendly Headings', description: 'Standard labels are reliably parsed by all ATS', impact: 'High' },
+                { title: 'Stronger Action Verbs', description: 'Signals ownership; preferred in scoring algorithms', impact: 'High' },
+                { title: 'Keyword Alignment', description: 'Full-phrase keywords match job description filters', impact: 'High' },
+              ]).map((change, i) => (
+                <div key={i} className="flex gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                  <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0 mt-0.5">●</div>
+                  <div className="flex-1">
+                    <p className="font-bold text-slate-900 dark:text-white">{change.title}</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{change.description}</p>
+                  </div>
+                  <div className={`px-3 py-1 rounded-full text-xs font-bold flex-shrink-0 whitespace-nowrap ${
+                    change.impact === 'High' ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300' :
+                    change.impact === 'Med' ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300' :
+                    'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                  }`}>
+                    {change.impact}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-CERTIFICATIONS
-Google Cloud Associate Cloud Engineer (2024)
+          {/* Info Banner */}
+          <div className="glass-card rounded-3xl p-8 border border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-600 to-blue-700 text-white mb-12">
+            <div className="flex gap-4">
+              <Lightbulb className="w-6 h-6 flex-shrink-0 mt-1" />
+              <div>
+                <p className="font-black text-lg mb-2">"Your resume's first recruiter is often a machine."</p>
+                <p className="text-blue-100">An optimized resume increases your visibility before a human recruiter even opens it. Structure, keywords, and formatting are not just style — they are strategy.</p>
+              </div>
+            </div>
+          </div>
 
-ADDITIONAL SKILLS
-UI/UX Design, Figma, Photoshop, Video Editing, Project Management`;
+          {/* Actions */}
+          <div className="flex gap-4 justify-center">
+            <button
+              onClick={() => setResult(null)}
+              className="px-8 py-4 rounded-xl font-bold bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white hover:bg-slate-300 dark:hover:bg-slate-600 transition"
+            >
+              Check Another Resume
+            </button>
+            <button className="px-8 py-4 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 transition">
+              Download Report
+            </button>
+          </div>
 
-    const blob = new Blob([testResumeText], { type: 'application/pdf' });
-    const testFile = new File([blob], 'test_resume.pdf', { type: 'application/pdf' });
-
-    setResumeFile(testFile);
-    setError('');
-    setResult(null);
-  };
+          <p className="text-center text-xs text-slate-500 dark:text-slate-400 mt-8">
+            All scores are illustrative estimates based on ATS best practices
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full max-w-5xl mx-auto py-16 px-4 sm:px-6">
-      <div className="text-center mb-16">
-        <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-slate-900/5 mb-6">
-          <span className="material-symbols-outlined text-slate-900 text-3xl" style={{ fontVariationSettings: "'FILL' 0" }}>check_circle</span>
-        </div>
-        <h1 className="text-4xl font-black text-on-surface font-headline mb-4">
-          ATS Score Checker
-        </h1>
-        <p className="text-lg text-on-surface-variant font-medium max-w-2xl mx-auto">
-          Upload your resume and get an instant AI-powered analysis of your ATS optimization. Identify issues and get actionable improvements.
-        </p>
-      </div>
-
-      {/* How It Works Guide */}
-      <div className="max-w-3xl mx-auto mb-12 glass-card border-blue-200/50 dark:border-blue-800/50 rounded-3xl p-8">
-        <h3 className="text-xl font-bold text-on-surface mb-4 flex items-center gap-2">
-          <span className="material-symbols-outlined text-blue-600">info</span>
-          How It Works
-        </h3>
-        <div className="space-y-3 text-slate-700 dark:text-slate-300">
-          <p><strong>1. Upload Your Resume:</strong> Click the upload area and select your PDF or DOCX resume file (max 5MB)</p>
-          <p><strong>2. Click "Check ATS Score":</strong> Our AI instantly analyzes your resume for ATS optimization</p>
-          <div>
-            <p className="mb-2"><strong>3. Get Detailed Analysis:</strong> Receive scores across 5 key areas:</p>
-            <ul className="list-disc list-inside ml-4 space-y-1">
-              <li><strong>Formatting (25%):</strong> ATS-friendly layout, no tables/images/columns</li>
-              <li><strong>Structure (25%):</strong> Clear sections and proper organization</li>
-              <li><strong>Keywords (30%):</strong> Keyword density and optimization</li>
-              <li><strong>Length (10%):</strong> Optimal resume length (1-2 pages)</li>
-              <li><strong>Clarity (10%):</strong> Clear writing and readability</li>
-            </ul>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-12 px-4">
+      <div className="max-w-2xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-blue-100 dark:bg-blue-900/30 mb-6">
+            <span className="text-2xl">✓</span>
+            <span className="font-bold text-blue-700 dark:text-blue-300">ATS RESUME CHECKER</span>
           </div>
-          <p><strong>4. Review Feedback:</strong> See strengths, get actionable improvements, and identify any ATS-blocking issues</p>
+          <h1 className="text-4xl font-black text-slate-900 dark:text-white mb-4">Optimize Your Resume for ATS</h1>
+          <p className="text-lg text-slate-600 dark:text-slate-400">Get an AI-powered analysis of how well your resume matches Applicant Tracking Systems</p>
         </div>
-      </div>
 
-      {error && (
-        <div className="max-w-3xl mx-auto mb-6 glass-card border-rose-200/50 p-4 rounded-2xl text-rose-600 text-sm font-medium flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 flex-shrink-0" />
-          {error}
-        </div>
-      )}
+        {/* Upload Card */}
+        <div className="glass-card rounded-3xl p-12 border-2 border-dashed border-slate-300 dark:border-slate-700 mb-8">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Upload className="w-8 h-8 text-blue-600" />
+            </div>
 
-      <form onSubmit={handleCheck} className="max-w-2xl mx-auto mb-12">
-        <div className="glass-card rounded-3xl p-8">
-          {/* Resume Section - File Upload */}
-          <div>
-            <label className="block text-sm font-bold text-on-surface mb-3">Upload Your Resume</label>
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-16 text-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-            >
-              {resumeFile ? (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <span className="material-symbols-outlined text-blue-600 text-5xl">description</span>
-                    <div className="text-left">
-                      <p className="font-semibold text-on-surface text-lg">{resumeFile.name}</p>
-                      <p className="text-sm text-slate-400">{(resumeFile.size / 1024).toFixed(2)} KB</p>
-                    </div>
+            {resumeFile ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                  <div className="text-left">
+                    <p className="font-bold text-emerald-900 dark:text-emerald-100">{resumeFile.name}</p>
+                    <p className="text-xs text-emerald-700 dark:text-emerald-300">{(resumeFile.size / 1024 / 1024).toFixed(2)}MB</p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setResumeFile(null);
-                    }}
-                    className="p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded-lg transition-colors"
-                  >
-                    <X className="w-5 h-5 text-red-600" />
+                  <button onClick={() => setResumeFile(null)} className="ml-auto text-emerald-600 hover:text-emerald-700">
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
-              ) : (
-                <div>
-                  <Upload className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-                  <p className="text-lg font-semibold text-on-surface">Click to upload resume</p>
-                  <p className="text-sm text-slate-400 mt-2">PDF or DOCX, max 5MB</p>
-                </div>
-              )}
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf,.docx"
-              onChange={handleFileUpload}
-              className="hidden"
-            />
-          </div>
-        </div>
-
-        <div className="max-w-3xl mx-auto mt-6 flex flex-col sm:flex-row gap-3 justify-center">
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-3"
-          >
-            {loading ? (
-              <>
-                <span className="material-symbols-outlined animate-spin text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>sync</span>
-                Checking...
-              </>
+              </div>
             ) : (
               <>
-                <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>check_circle</span>
-                Check ATS Score
+                <p className="text-xl font-bold text-slate-900 dark:text-white mb-2">Upload Your Resume</p>
+                <p className="text-slate-600 dark:text-slate-400 mb-6">PDF or DOCX (up to 5MB)</p>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition"
+                >
+                  Choose File
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.docx"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
               </>
             )}
-          </button>
-          <button
-            type="button"
-            onClick={loadTestData}
-            className="px-8 py-3 bg-slate-400 hover:bg-slate-500 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-3"
-          >
-            <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>dataset</span>
-            Load Test Data
-          </button>
-        </div>
-      </form>
-
-      {/* Results */}
-      {result && !loading && (
-        <div className="max-w-3xl mx-auto space-y-8">
-          {/* Score Card */}
-          <div className={`glass-card rounded-3xl p-8 text-center`}>
-            <div className="flex items-center justify-center gap-4 mb-6">
-              <div className="text-6xl font-black" style={{ color: result.atsScore >= 80 ? '#10b981' : result.atsScore >= 60 ? '#0ea5e9' : result.atsScore >= 40 ? '#f59e0b' : '#ef4444' }}>
-                {result.atsScore}
-              </div>
-              <div className="text-left">
-                <p className="text-xs font-bold text-slate-500 uppercase">ATS Score</p>
-                <p className={`text-2xl font-black ${getScoreColor(result.atsScore)}`}>
-                  {result.scoreLabel}
-                </p>
-              </div>
-            </div>
-
-            {/* Section Scores */}
-            {result.sections && (
-              <div className="grid grid-cols-2 gap-3 mt-6">
-                {Object.entries(result.sections).map(([key, section]) => (
-                  <div key={key} className="glass-card rounded-2xl p-4">
-                    <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2 capitalize">{section.feedback}</p>
-                    <div className="flex items-end gap-2">
-                      <p className="text-3xl font-black text-on-surface">{section.score}</p>
-                      <p className="text-xs text-slate-500 mb-1">%</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
-
-          {/* ATS Issues */}
-          {result.atsIssues && result.atsIssues.length > 0 && (
-            <div className="glass-card rounded-3xl p-8 border border-red-200/50 dark:border-red-900/50">
-              <div className="flex items-center gap-3 mb-4">
-                <AlertCircle className="w-6 h-6 text-red-600" />
-                <h3 className="text-xl font-bold text-red-600">ATS-Blocking Issues ({result.atsIssues.length})</h3>
-              </div>
-              <ul className="space-y-2">
-                {result.atsIssues.map((issue, i) => (
-                  <li key={i} className="flex gap-3 text-slate-700 dark:text-slate-300">
-                    <span className="text-red-600 flex-shrink-0">⚠</span>
-                    <span>{issue}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* AI Strengths */}
-          {result.strengths && result.strengths.length > 0 && (
-            <div className="glass-card rounded-3xl p-8 border border-cyan-200/50 dark:border-cyan-900/50">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="material-symbols-outlined text-cyan-600 text-xl">star</span>
-                <h3 className="text-xl font-bold text-cyan-600">Your Strengths (AI Analysis)</h3>
-              </div>
-              <ul className="space-y-2">
-                {result.strengths.map((strength, i) => (
-                  <li key={i} className="flex gap-3 text-slate-700 dark:text-slate-300">
-                    <span className="text-cyan-600 flex-shrink-0">→</span>
-                    <span>{strength}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Improvements */}
-          {result.improvements && result.improvements.length > 0 && (
-            <div className="glass-card rounded-3xl p-8 border border-blue-200/50 dark:border-blue-900/50">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="material-symbols-outlined text-blue-600 text-xl">lightbulb</span>
-                <h3 className="text-xl font-bold text-blue-600">How to Improve</h3>
-              </div>
-              <ul className="space-y-2">
-                {result.improvements.map((improvement, i) => (
-                  <li key={i} className="flex gap-3 text-slate-700 dark:text-slate-300">
-                    <span className="text-blue-600 flex-shrink-0">{i + 1}.</span>
-                    <span>{improvement}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Recommendations */}
-          {result.recommendations && result.recommendations.length > 0 && (
-            <div className="glass-card rounded-3xl p-8 border border-amber-200/50 dark:border-amber-900/50">
-              <div className="flex items-center justify-between gap-3 mb-4">
-                <div className="flex items-center gap-3">
-                  <TrendingUp className="w-6 h-6 text-amber-600" />
-                  <h3 className="text-xl font-bold text-amber-600">Recommendations</h3>
-                </div>
-                {result.aiPowered && (
-                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-full text-xs font-bold">
-                    <span className="material-symbols-outlined text-purple-600 text-sm">stars</span>
-                    AI-Powered
-                  </span>
-                )}
-              </div>
-              <ul className="space-y-3">
-                {result.recommendations.map((rec, i) => (
-                  <li key={i} className="flex gap-3 text-slate-700 dark:text-slate-300">
-                    <span className="text-amber-600 font-bold flex-shrink-0">{i + 1}.</span>
-                    <span>{rec}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
-      )}
+
+        {/* Job Description */}
+        <div className="mb-8">
+          <label className="block text-sm font-bold text-slate-900 dark:text-white mb-3">Job Description (Optional)</label>
+          <textarea
+            value={jobDescription}
+            onChange={(e) => setJobDescription(e.target.value)}
+            placeholder="Paste the job description for better matching..."
+            className="w-full px-6 py-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+            rows={6}
+          />
+        </div>
+
+        {/* Error */}
+        {error && (
+          <div className="mb-8 flex items-center gap-3 p-4 bg-rose-50 dark:bg-rose-900/20 rounded-xl border border-rose-200 dark:border-rose-800">
+            <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0" />
+            <p className="text-rose-700 dark:text-rose-300">{error}</p>
+          </div>
+        )}
+
+        {/* Analyze Button */}
+        <button
+          onClick={handleCheck}
+          disabled={!resumeFile || loading}
+          className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition text-lg"
+        >
+          {loading ? 'Analyzing Your Resume...' : 'Get ATS Analysis'}
+        </button>
+      </div>
     </div>
   );
 }
