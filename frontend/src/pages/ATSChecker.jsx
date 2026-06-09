@@ -129,79 +129,109 @@ export default function ATSChecker() {
   // UPLOAD STAGE
   if (stage === 'upload') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-12 px-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-blue-100 dark:bg-blue-900/30 mb-6">
-              <span className="text-2xl">✓</span>
-              <span className="font-bold text-blue-700 dark:text-blue-300">ATS RESUME CHECKER</span>
-            </div>
-            <h1 className="text-4xl font-black text-slate-900 dark:text-white mb-4">Optimize Your Resume for ATS</h1>
-            <p className="text-lg text-slate-600 dark:text-slate-400">AI-powered analysis + automatic rewriting for 90+ ATS score</p>
-          </div>
-
-          <div className="glass-card rounded-3xl p-12 border-2 border-dashed border-slate-300 dark:border-slate-700 mb-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Upload className="w-8 h-8 text-blue-600" />
+      <div className="w-full h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex flex-col">
+        <div className="flex-1 flex items-center justify-center px-4">
+          <div className="w-full max-w-7xl grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Column */}
+            <div>
+              <div className="mb-12">
+                <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-blue-100 dark:bg-blue-900/30 mb-8">
+                  <span className="text-2xl">✓</span>
+                  <span className="font-bold text-blue-700 dark:text-blue-300">ATS RESUME CHECKER</span>
+                </div>
+                <h1 className="text-5xl lg:text-6xl font-black text-slate-900 dark:text-white mb-6 leading-tight">Optimize Your Resume for ATS</h1>
+                <p className="text-xl text-slate-600 dark:text-slate-400">AI-powered analysis + automatic rewriting for 90+ ATS score</p>
               </div>
 
-              {resumeFile ? (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                    <div className="text-left">
-                      <p className="font-bold text-emerald-900 dark:text-emerald-100">{resumeFile.name}</p>
-                      <p className="text-xs text-emerald-700 dark:text-emerald-300">{(resumeFile.size / 1024 / 1024).toFixed(2)}MB</p>
-                    </div>
-                    <button onClick={() => setResumeFile(null)} className="ml-auto text-emerald-600 hover:text-emerald-700">
-                      <X className="w-5 h-5" />
-                    </button>
+              <div className="glass-card rounded-3xl p-12 border-2 border-dashed border-slate-300 dark:border-slate-700 mb-8">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <Upload className="w-8 h-8 text-blue-600" />
                   </div>
+
+                  {resumeFile ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                        <div className="text-left">
+                          <p className="font-bold text-emerald-900 dark:text-emerald-100">{resumeFile.name}</p>
+                          <p className="text-xs text-emerald-700 dark:text-emerald-300">{(resumeFile.size / 1024 / 1024).toFixed(2)}MB</p>
+                        </div>
+                        <button onClick={() => setResumeFile(null)} className="ml-auto text-emerald-600 hover:text-emerald-700">
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-xl font-bold text-slate-900 dark:text-white mb-2">Upload Your Resume</p>
+                      <p className="text-slate-600 dark:text-slate-400 mb-6">PDF or DOCX (up to 5MB)</p>
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition"
+                      >
+                        Choose File
+                      </button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".pdf,.docx"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                    </>
+                  )}
                 </div>
-              ) : (
-                <>
-                  <p className="text-xl font-bold text-slate-900 dark:text-white mb-2">Upload Your Resume</p>
-                  <p className="text-slate-600 dark:text-slate-400 mb-6">PDF or DOCX (up to 5MB)</p>
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition"
-                  >
-                    Choose File
-                  </button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".pdf,.docx"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                </>
+              </div>
+
+              {error && (
+                <div className="flex items-center gap-3 p-4 bg-rose-50 dark:bg-rose-900/20 rounded-xl border border-rose-200 dark:border-rose-800">
+                  <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0" />
+                  <p className="text-rose-700 dark:text-rose-300">{error}</p>
+                </div>
               )}
+
+              <button
+                onClick={handleAnalyze}
+                disabled={!resumeFile || loading}
+                className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition text-lg flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader className="w-5 h-5 animate-spin" />
+                    Analyzing Resume...
+                  </>
+                ) : (
+                  'Analyze & Optimize Resume'
+                )}
+              </button>
+            </div>
+
+            {/* Right Column - Features */}
+            <div className="hidden lg:block space-y-8">
+              <div className="space-y-6">
+                {[
+                  { icon: '🤖', title: 'AI-Powered Analysis', desc: 'DeepSeek R1 analyzes your resume for ATS compatibility' },
+                  { icon: '✨', title: 'Auto Rewriting', desc: 'Automatically optimizes for 90+ ATS score' },
+                  { icon: '📊', title: 'Detailed Report', desc: 'See before/after scores and improvements' },
+                  { icon: '📥', title: 'Download Resume', desc: 'Get your optimized resume as a file' },
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-4">
+                    <div className="text-3xl">{item.icon}</div>
+                    <div>
+                      <h3 className="font-bold text-slate-900 dark:text-white">{item.title}</h3>
+                      <p className="text-slate-600 dark:text-slate-400 text-sm">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-900/10 rounded-2xl p-6 border border-emerald-200 dark:border-emerald-800">
+                <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 mb-2">✓ 100% Free</p>
+                <p className="text-slate-700 dark:text-slate-300 text-sm">No credit card needed. Powered by your local LM Studio.</p>
+              </div>
             </div>
           </div>
-
-          {error && (
-            <div className="mb-8 flex items-center gap-3 p-4 bg-rose-50 dark:bg-rose-900/20 rounded-xl border border-rose-200 dark:border-rose-800">
-              <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0" />
-              <p className="text-rose-700 dark:text-rose-300">{error}</p>
-            </div>
-          )}
-
-          <button
-            onClick={handleAnalyze}
-            disabled={!resumeFile || loading}
-            className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition text-lg flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <>
-                <Loader className="w-5 h-5 animate-spin" />
-                Analyzing Resume...
-              </>
-            ) : (
-              'Analyze & Optimize Resume'
-            )}
-          </button>
         </div>
       </div>
     );
@@ -210,14 +240,15 @@ export default function ATSChecker() {
   // MISSING FIELDS STAGE
   if (stage === 'missing-fields') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-12 px-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-3xl font-black text-slate-900 dark:text-white mb-4">Complete Your Profile</h1>
-            <p className="text-lg text-slate-600 dark:text-slate-400">Add missing information for better resume optimization</p>
-          </div>
+      <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-12 px-4 flex flex-col">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-full max-w-4xl">
+            <div className="text-center mb-12">
+              <h1 className="text-4xl font-black text-slate-900 dark:text-white mb-4">Complete Your Profile</h1>
+              <p className="text-xl text-slate-600 dark:text-slate-400">Add missing information for better AI optimization</p>
+            </div>
 
-          <div className="glass-card rounded-3xl p-8 space-y-6">
+            <div className="glass-card rounded-3xl p-12 space-y-8">
             {missingFields.map((field, idx) => (
               <div key={idx}>
                 <label className="block text-sm font-bold text-slate-900 dark:text-white mb-3">
@@ -249,34 +280,35 @@ export default function ATSChecker() {
             ))}
           </div>
 
-          {error && (
-            <div className="mt-8 flex items-center gap-3 p-4 bg-rose-50 dark:bg-rose-900/20 rounded-xl border border-rose-200 dark:border-rose-800">
-              <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0" />
-              <p className="text-rose-700 dark:text-rose-300">{error}</p>
-            </div>
-          )}
+            {error && (
+              <div className="flex items-center gap-3 p-4 bg-rose-50 dark:bg-rose-900/20 rounded-xl border border-rose-200 dark:border-rose-800">
+                <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0" />
+                <p className="text-rose-700 dark:text-rose-300">{error}</p>
+              </div>
+            )}
 
-          <div className="mt-8 flex gap-4">
-            <button
-              onClick={() => setStage('upload')}
-              className="flex-1 py-4 px-6 bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white rounded-xl font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition"
-            >
-              Back
-            </button>
-            <button
-              onClick={handleMissingFieldsSubmit}
-              disabled={loading}
-              className="flex-1 py-4 px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <Loader className="w-5 h-5 animate-spin" />
-                  Optimizing...
-                </>
-              ) : (
-                'Optimize Resume'
-              )}
-            </button>
+            <div className="flex gap-4 pt-4">
+              <button
+                onClick={() => setStage('upload')}
+                className="flex-1 py-4 px-6 bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white rounded-xl font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition"
+              >
+                Back
+              </button>
+              <button
+                onClick={handleMissingFieldsSubmit}
+                disabled={loading}
+                className="flex-1 py-4 px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader className="w-5 h-5 animate-spin" />
+                    Optimizing...
+                  </>
+                ) : (
+                  'Optimize Resume'
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -290,8 +322,8 @@ export default function ATSChecker() {
     const colors = getScoreColor(improvedScore);
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-12 px-4">
-        <div className="max-w-6xl mx-auto">
+      <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-16 px-4">
+        <div className="w-full max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-12">
             <div className="flex items-center gap-3 mb-6">
