@@ -53,12 +53,13 @@ export default function ATSChecker() {
 
       if (data.data.missingFields && data.data.missingFields.length > 0) {
         setStage('missing-fields');
+        setLoading(false);
       } else {
-        handleOptimize(data.data);
+        // handleOptimize will manage loading state
+        await handleOptimize(data.data);
       }
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to analyze resume');
-    } finally {
       setLoading(false);
     }
   };
