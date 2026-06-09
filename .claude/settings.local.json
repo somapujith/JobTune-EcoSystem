@@ -17,7 +17,12 @@
       "Bash(curl -s http://localhost:3000/api/auth/register -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"test@test.com\",\"password\":\"test\"}')",
       "Bash(PORT=5000 npm start)",
       "Bash(curl -s http://localhost:5000/api/subscriptions/plans)",
-      "Bash(curl -s http://localhost:5000/api/health)"
+      "Bash(curl -s http://localhost:5000/api/health)",
+      "Bash(pkill -f node)",
+      "PowerShell(\"Killed node processes\")",
+      "PowerShell(cd \"h:\\\\JobTube Eco System\\\\backend\"; Start-Process -NoNewWindow -FilePath \"npm\" -ArgumentList \"start\" -PassThru | Select-Object -Property Id, ProcessName; Write-Host \"Backend started. Waiting 5 seconds...\"; Start-Sleep -Seconds 5; $response = Invoke-WebRequest -Uri \"http://localhost:3000/api/health\" -ErrorAction SilentlyContinue; if \\($response\\) { Write-Host \"✅ Backend running\"; $response.Content } else { Write-Host \"❌ Backend not responding yet\" })",
+      "Bash(pkill -f \"node src/server.js\")",
+      "Bash(npm start *)"
     ]
   }
 }

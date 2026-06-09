@@ -1,5 +1,6 @@
-const { Document, Packer } = require('docx');
 const pdfParse = require('pdf-parse');
+const unzipper = require('unzipper');
+const xml2js = require('xml2js');
 
 async function extractTextFromFile(file) {
   if (!file) throw new Error('No file provided');
@@ -19,48 +20,33 @@ async function extractTextFromFile(file) {
 async function extractTextFromPDF(buffer) {
   try {
     const data = await pdfParse(buffer);
-    return data.text;
+    return data.text || '';
   } catch (err) {
-    console.error('PDF parsing error:', err);
+    console.error('PDF parsing error:', err.message);
     throw new Error('Could not extract text from PDF');
   }
 }
 
-function extractTextFromDOCX(buffer) {
+async function extractTextFromDOCX(buffer) {
   try {
-    const zip = require('unzipper');
-    const xml2js = require('xml2js');
+    const directory = await unzipper.Open.buffer(buffer);
+
+    const docXmlFile = directory.files.find(f => f.path === 'word/document.xml');
+    if (!docXmlFile) {
+      throw new Error('document.xml not found in DOCX');
+    }
+
+    const xmlContent = await docXmlFile.buffer();
+    const xmlString = xmlContent.toString('utf-8');
+
     const parser = new xml2js.Parser();
+    const result = await parser.parseStringPromise(xmlString);
 
-    return new Promise((resolve, reject) => {
-      const chunks = [];
-
-      zip
-        .Open.buffer(buffer)
-        .then((directory) => {
-          return directory.file('word/document.xml').stream();
-        })
-        .then((stream) => {
-          stream.on('data', (chunk) => chunks.push(chunk));
-          stream.on('end', async () => {
-            try {
-              const xmlString = Buffer.concat(chunks).toString('utf-8');
-              const result = await parser.parseStringPromise(xmlString);
-
-              // Extract text from XML
-              const text = extractTextFromXML(result);
-              resolve(text);
-            } catch (err) {
-              reject(new Error('Could not parse DOCX XML'));
-            }
-          });
-          stream.on('error', reject);
-        })
-        .catch(reject);
-    });
+    const text = extractTextFromXML(result);
+    return text || '';
   } catch (err) {
-    console.error('DOCX parsing error:', err);
-    throw new Error('Could not extract text from DOCX');
+    console.error('DOCX parsing error:', err.message);
+    throw new Error('Could not extract text from DOCX: ' + err.message);
   }
 }
 
@@ -69,16 +55,16 @@ function extractTextFromXML(obj) {
 
   function traverse(node) {
     if (typeof node === 'string') {
-      text += node;
+      text += node + ' ';
     } else if (Array.isArray(node)) {
       node.forEach((item) => traverse(item));
-    } else if (typeof node === 'object') {
+    } else if (typeof node === 'object' && node !== null) {
       Object.values(node).forEach((value) => traverse(value));
     }
   }
 
   traverse(obj);
-  return text;
+  return text.trim();
 }
 
 module.exports = {
