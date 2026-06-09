@@ -2,12 +2,16 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const { extractTextFromFile } = require('../utils/fileParser');
-const { analyzeResume, detectMissingFields, optimizeResume, calculateATSScore } = require('../services/resumeOptimizer');
+const { analyzeResume, optimizeResume } = require('../services/resumeOptimizer');
+const ATSScoring = require('../services/atsScoring');
+const ResumeStructure = require('../services/resumeStructure');
+const MissingInfoEngine = require('../services/missingInfoEngine');
+const KeywordIntelligence = require('../services/keywordIntelligence');
 const { authenticateToken } = require('../middleware/auth');
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
-// Analyze resume
+// Analyze resume - Rule-based (no AI)
 router.post('/analyze', authenticateToken, upload.single('resume'), async (req, res, next) => {
   try {
     if (!req.file) {
@@ -15,22 +19,37 @@ router.post('/analyze', authenticateToken, upload.single('resume'), async (req, 
     }
 
     console.log(`[ATS] Analyzing resume: ${req.file.originalname}`);
+    const start = Date.now();
 
     // Extract text from file
     const resumeText = await extractTextFromFile(req.file);
 
-    // Analyze with AI
-    const analysis = await analyzeResume(resumeText);
+    // Rule-based analysis (fast, no AI needed)
+    const atsAnalysis = ATSScoring.calculateScore(resumeText);
+    const detectedRole = KeywordIntelligence.detectRole(resumeText);
+    const keywordCoverage = KeywordIntelligence.analyzeKeywordCoverage(resumeText, detectedRole);
+    const missingInfo = MissingInfoEngine.analyzeMissingInfo(resumeText);
+    const gapScore = MissingInfoEngine.scoreGaps(missingInfo);
+    const recommendations = ATSScoring.generateRecommendations(atsAnalysis);
 
-    // Detect missing fields
-    const missingFields = await detectMissingFields(resumeText);
+    const duration = Date.now() - start;
+    console.log(`[ATS] Analysis complete in ${duration}ms`);
 
     res.json({
       data: {
         resumeText,
-        analysis,
-        missingFields: missingFields.missingFields || [],
-        hasAllRequired: (missingFields.missingFields || []).length === 0
+        score: atsAnalysis.total,
+        breakdown: atsAnalysis.breakdown,
+        role: detectedRole,
+        keywordCoverage,
+        missingInfo: {
+          count: missingInfo.count,
+          fields: missingInfo.fields,
+          severity: gapScore.severity,
+          hasCriticalGaps: missingInfo.hasCriticalGaps
+        },
+        recommendations,
+        timing: `${duration}ms`
       }
     });
   } catch (err) {
@@ -46,29 +65,46 @@ router.post('/optimize', authenticateToken, upload.single('resume'), async (req,
       return res.status(400).json({ error: 'Resume file required' });
     }
 
+    console.log(`[ATS] Optimizing resume with AI...`);
+    const start = Date.now();
+
     const resumeText = await extractTextFromFile(req.file);
     const additionalInfo = req.body.additionalInfo ? JSON.parse(req.body.additionalInfo) : {};
 
-    console.log(`[ATS] Optimizing resume with AI...`);
+    // Get before score
+    const beforeScore = ATSScoring.calculateScore(resumeText);
+    const detectedRole = KeywordIntelligence.detectRole(resumeText);
 
-    // Optimize with AI
+    // AI rewriting
     const optimizedResume = await optimizeResume(resumeText, additionalInfo);
 
-    // Calculate improved score
-    const improvedScore = calculateATSScore(optimizedResume);
+    // Get after score
+    const afterScore = ATSScoring.calculateScore(optimizedResume);
+    const afterKeywords = KeywordIntelligence.analyzeKeywordCoverage(optimizedResume, detectedRole);
 
-    // Analyze optimized resume
-    const analysis = await analyzeResume(optimizedResume);
+    const duration = Date.now() - start;
+    console.log(`[ATS] Optimization complete in ${duration}ms`);
 
     res.json({
       data: {
-        originalText: resumeText,
+        originalResume: resumeText,
         optimizedResume,
-        improvedScore,
+        scores: {
+          before: beforeScore.total,
+          after: afterScore.total,
+          improvement: afterScore.total - beforeScore.total,
+          beforeBreakdown: beforeScore.breakdown,
+          afterBreakdown: afterScore.breakdown
+        },
         analysis: {
-          ...analysis,
-          improvement: improvedScore - (analysis.currentScore || 42)
-        }
+          actionVerbsBefore: beforeScore.details.actionVerbs.count,
+          actionVerbsAfter: afterScore.details.actionVerbs.count,
+          metricsBefore: beforeScore.details.metrics.count,
+          metricsAfter: afterScore.details.metrics.count,
+          keywordCoverageBefore: ATSScoring.calculateScore(resumeText).details,
+          keywordCoverageAfter: afterKeywords
+        },
+        timing: `${duration}ms`
       }
     });
   } catch (err) {
