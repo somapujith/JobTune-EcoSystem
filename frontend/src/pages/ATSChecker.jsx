@@ -1,13 +1,17 @@
 import React, { useState, useRef } from 'react';
 import { api } from '../store/useAuthStore';
-import { CheckCircle2, AlertCircle, TrendingUp, Upload, X, Lightbulb, ArrowUp } from 'lucide-react';
+import { CheckCircle2, AlertCircle, TrendingUp, Upload, X, Lightbulb, Loader } from 'lucide-react';
 
 export default function ATSChecker() {
+  const [stage, setStage] = useState('upload'); // upload | missing-fields | report
   const [resumeFile, setResumeFile] = useState(null);
-  const [jobDescription, setJobDescription] = useState('');
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [analysis, setAnalysis] = useState(null);
+  const [missingFields, setMissingFields] = useState([]);
+  const [additionalInfo, setAdditionalInfo] = useState({});
+  const [optimizedResume, setOptimizedResume] = useState(null);
+  const [improvedScore, setImprovedScore] = useState(0);
   const fileInputRef = useRef(null);
 
   const handleFileUpload = (e) => {
@@ -28,8 +32,7 @@ export default function ATSChecker() {
     setError('');
   };
 
-  const handleCheck = async (e) => {
-    e.preventDefault();
+  const handleAnalyze = async () => {
     if (!resumeFile) {
       setError('Please upload your resume');
       return;
@@ -40,17 +43,80 @@ export default function ATSChecker() {
     try {
       const formData = new FormData();
       formData.append('resume', resumeFile);
-      if (jobDescription) formData.append('jobDescription', jobDescription);
 
-      const { data } = await api.post('/jobs/check-ats-score', formData, {
+      const { data } = await api.post('/jobs/analyze', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      setResult(data.data);
+
+      setAnalysis(data.data.analysis);
+      setMissingFields(data.data.missingFields || []);
+
+      if (data.data.missingFields && data.data.missingFields.length > 0) {
+        setStage('missing-fields');
+      } else {
+        handleOptimize(data.data);
+      }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to check ATS score');
+      setError(err.response?.data?.error || 'Failed to analyze resume');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleMissingFieldsSubmit = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const formData = new FormData();
+      formData.append('resume', resumeFile);
+      formData.append('additionalInfo', JSON.stringify(additionalInfo));
+
+      const { data } = await api.post('/jobs/optimize', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      setOptimizedResume(data.data.optimizedResume);
+      setImprovedScore(data.data.improvedScore);
+      setAnalysis(data.data.analysis);
+      setStage('report');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to optimize resume');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOptimize = async (data) => {
+    setLoading(true);
+    setError('');
+    try {
+      const formData = new FormData();
+      formData.append('resume', resumeFile);
+      formData.append('additionalInfo', JSON.stringify({}));
+
+      const response = await api.post('/jobs/optimize', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      setOptimizedResume(response.data.data.optimizedResume);
+      setImprovedScore(response.data.data.improvedScore);
+      setAnalysis(response.data.data.analysis);
+      setStage('report');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to optimize resume');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const downloadOptimizedResume = () => {
+    const element = document.createElement('a');
+    const file = new Blob([optimizedResume], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = 'optimized-resume.txt';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
   };
 
   const getScoreColor = (score) => {
@@ -60,18 +126,168 @@ export default function ATSChecker() {
     return { text: 'text-rose-600', bg: 'bg-rose-50', ring: 'ring-rose-200' };
   };
 
-  const getScoreLabel = (score) => {
-    if (score >= 80) return 'Excellent';
-    if (score >= 60) return 'Good';
-    if (score >= 40) return 'Fair';
-    return 'Poor';
-  };
+  // UPLOAD STAGE
+  if (stage === 'upload') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-12 px-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-blue-100 dark:bg-blue-900/30 mb-6">
+              <span className="text-2xl">✓</span>
+              <span className="font-bold text-blue-700 dark:text-blue-300">ATS RESUME CHECKER</span>
+            </div>
+            <h1 className="text-4xl font-black text-slate-900 dark:text-white mb-4">Optimize Your Resume for ATS</h1>
+            <p className="text-lg text-slate-600 dark:text-slate-400">AI-powered analysis + automatic rewriting for 90+ ATS score</p>
+          </div>
 
-  if (result) {
-    const beforeScore = result.beforeScore || 42;
-    const afterScore = result.afterScore || 81;
-    const improvement = afterScore - beforeScore;
-    const colors = getScoreColor(afterScore);
+          <div className="glass-card rounded-3xl p-12 border-2 border-dashed border-slate-300 dark:border-slate-700 mb-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Upload className="w-8 h-8 text-blue-600" />
+              </div>
+
+              {resumeFile ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <div className="text-left">
+                      <p className="font-bold text-emerald-900 dark:text-emerald-100">{resumeFile.name}</p>
+                      <p className="text-xs text-emerald-700 dark:text-emerald-300">{(resumeFile.size / 1024 / 1024).toFixed(2)}MB</p>
+                    </div>
+                    <button onClick={() => setResumeFile(null)} className="ml-auto text-emerald-600 hover:text-emerald-700">
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <p className="text-xl font-bold text-slate-900 dark:text-white mb-2">Upload Your Resume</p>
+                  <p className="text-slate-600 dark:text-slate-400 mb-6">PDF or DOCX (up to 5MB)</p>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition"
+                  >
+                    Choose File
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.docx"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </>
+              )}
+            </div>
+          </div>
+
+          {error && (
+            <div className="mb-8 flex items-center gap-3 p-4 bg-rose-50 dark:bg-rose-900/20 rounded-xl border border-rose-200 dark:border-rose-800">
+              <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0" />
+              <p className="text-rose-700 dark:text-rose-300">{error}</p>
+            </div>
+          )}
+
+          <button
+            onClick={handleAnalyze}
+            disabled={!resumeFile || loading}
+            className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition text-lg flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <>
+                <Loader className="w-5 h-5 animate-spin" />
+                Analyzing Resume...
+              </>
+            ) : (
+              'Analyze & Optimize Resume'
+            )}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // MISSING FIELDS STAGE
+  if (stage === 'missing-fields') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-12 px-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-12">
+            <h1 className="text-3xl font-black text-slate-900 dark:text-white mb-4">Complete Your Profile</h1>
+            <p className="text-lg text-slate-600 dark:text-slate-400">Add missing information for better resume optimization</p>
+          </div>
+
+          <div className="glass-card rounded-3xl p-8 space-y-6">
+            {missingFields.map((field, idx) => (
+              <div key={idx}>
+                <label className="block text-sm font-bold text-slate-900 dark:text-white mb-3">
+                  {field.field}
+                  <span className="text-slate-500 text-xs font-normal ml-2">{field.description}</span>
+                </label>
+                {field.type === 'textarea' ? (
+                  <textarea
+                    value={additionalInfo[field.field] || ''}
+                    onChange={(e) =>
+                      setAdditionalInfo({ ...additionalInfo, [field.field]: e.target.value })
+                    }
+                    placeholder="Enter your information..."
+                    className="w-full px-6 py-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                    rows={4}
+                  />
+                ) : (
+                  <input
+                    type={field.type || 'text'}
+                    value={additionalInfo[field.field] || ''}
+                    onChange={(e) =>
+                      setAdditionalInfo({ ...additionalInfo, [field.field]: e.target.value })
+                    }
+                    placeholder="Enter your information..."
+                    className="w-full px-6 py-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+
+          {error && (
+            <div className="mt-8 flex items-center gap-3 p-4 bg-rose-50 dark:bg-rose-900/20 rounded-xl border border-rose-200 dark:border-rose-800">
+              <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0" />
+              <p className="text-rose-700 dark:text-rose-300">{error}</p>
+            </div>
+          )}
+
+          <div className="mt-8 flex gap-4">
+            <button
+              onClick={() => setStage('upload')}
+              className="flex-1 py-4 px-6 bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white rounded-xl font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition"
+            >
+              Back
+            </button>
+            <button
+              onClick={handleMissingFieldsSubmit}
+              disabled={loading}
+              className="flex-1 py-4 px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <Loader className="w-5 h-5 animate-spin" />
+                  Optimizing...
+                </>
+              ) : (
+                'Optimize Resume'
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // REPORT STAGE
+  if (stage === 'report' && optimizedResume) {
+    const beforeScore = analysis?.currentScore || 42;
+    const improvement = improvedScore - beforeScore;
+    const colors = getScoreColor(improvedScore);
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-12 px-4">
@@ -87,12 +303,11 @@ export default function ATSChecker() {
                 <h1 className="text-3xl font-black text-slate-900 dark:text-white">ATS Resume Analysis Report</h1>
               </div>
             </div>
-            <p className="text-slate-600 dark:text-slate-400">Powered by AI · Optimized for Applicant Tracking Systems</p>
+            <p className="text-slate-600 dark:text-slate-400">Powered by DeepSeek R1 · Optimized for Applicant Tracking Systems</p>
           </div>
 
           {/* Score Comparison Cards */}
           <div className="grid md:grid-cols-3 gap-6 mb-12">
-            {/* Before */}
             <div className="glass-card rounded-3xl p-8 border border-slate-200 dark:border-slate-700">
               <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Before Optimization</p>
               <div className="mb-4">
@@ -104,19 +319,17 @@ export default function ATSChecker() {
               </div>
             </div>
 
-            {/* After */}
             <div className={`glass-card rounded-3xl p-8 border-2 ${colors.ring} bg-gradient-to-br ${colors.bg}`}>
               <p className="text-xs font-bold uppercase tracking-widest text-blue-600 mb-4">After Optimization</p>
               <div className="mb-4">
-                <div className={`text-5xl font-black ${colors.text}`}>{afterScore}</div>
+                <div className={`text-5xl font-black ${colors.text}`}>{improvedScore}</div>
                 <p className="text-xs text-slate-500 mt-2">ATS-ready score</p>
               </div>
               <div className="w-full h-2 bg-white/40 rounded-full overflow-hidden">
-                <div className={`h-full ${colors.text} bg-current opacity-100`} style={{ width: `${afterScore}%` }} />
+                <div className={`h-full ${colors.text} bg-current opacity-100`} style={{ width: `${improvedScore}%` }} />
               </div>
             </div>
 
-            {/* Improvement */}
             <div className="glass-card rounded-3xl p-8 border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20">
               <p className="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-4">Total Improvement</p>
               <div className="flex items-baseline gap-2 mb-4">
@@ -127,64 +340,13 @@ export default function ATSChecker() {
             </div>
           </div>
 
-          {/* Category Breakdown */}
-          <div className="glass-card rounded-3xl p-8 mb-12 border border-slate-200 dark:border-slate-700">
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-8">Category Breakdown</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-700">
-                    <th className="text-left py-4 px-4 font-bold text-slate-600 dark:text-slate-400">Category</th>
-                    <th className="text-center py-4 px-4 font-bold text-slate-600 dark:text-slate-400">Before</th>
-                    <th className="text-center py-4 px-4 font-bold text-slate-600 dark:text-slate-400">After</th>
-                    <th className="text-center py-4 px-4 font-bold text-slate-600 dark:text-slate-400">Gain</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(result.categoryBreakdown || [
-                    { category: 'Formatting & ATS Parsing', before: 5, after: 14 },
-                    { category: 'Keywords & Relevance', before: 6, after: 17 },
-                    { category: 'Resume Structure', before: 8, after: 13 },
-                    { category: 'Action Verbs & Impact', before: 5, after: 12 },
-                    { category: 'Contact & Summary', before: 3, after: 13 },
-                  ]).map((item, i) => (
-                    <tr key={i} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                      <td className="py-4 px-4 font-semibold text-slate-900 dark:text-white">{item.category}</td>
-                      <td className="text-center py-4 px-4 text-slate-600 dark:text-slate-400">{item.before}/15</td>
-                      <td className="text-center py-4 px-4 font-bold text-blue-600">{item.after}/15</td>
-                      <td className="text-center py-4 px-4"><span className="inline-block bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 px-3 py-1 rounded-full text-xs font-bold">+{item.after - item.before}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
           {/* Key Changes */}
           <div className="glass-card rounded-3xl p-8 mb-12 border border-slate-200 dark:border-slate-700">
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-8">Key Changes & Impact</h2>
-            <div className="space-y-4">
-              {(result.keyChanges || [
-                { title: 'Professional Summary', description: 'ATS keyword anchor — most parsers start here', impact: 'High' },
-                { title: 'ATS-Friendly Headings', description: 'Standard labels are reliably parsed by all ATS', impact: 'High' },
-                { title: 'Stronger Action Verbs', description: 'Signals ownership; preferred in scoring algorithms', impact: 'High' },
-                { title: 'Keyword Alignment', description: 'Full-phrase keywords match job description filters', impact: 'High' },
-              ]).map((change, i) => (
-                <div key={i} className="flex gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-                  <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0 mt-0.5">●</div>
-                  <div className="flex-1">
-                    <p className="font-bold text-slate-900 dark:text-white">{change.title}</p>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{change.description}</p>
-                  </div>
-                  <div className={`px-3 py-1 rounded-full text-xs font-bold flex-shrink-0 whitespace-nowrap ${
-                    change.impact === 'High' ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300' :
-                    change.impact === 'Med' ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300' :
-                    'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
-                  }`}>
-                    {change.impact}
-                  </div>
-                </div>
-              ))}
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-8">What Changed</h2>
+            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6">
+              <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-mono text-sm max-h-96 overflow-y-auto">
+                {optimizedResume}
+              </p>
             </div>
           </div>
 
@@ -194,7 +356,7 @@ export default function ATSChecker() {
               <Lightbulb className="w-6 h-6 flex-shrink-0 mt-1" />
               <div>
                 <p className="font-black text-lg mb-2">"Your resume's first recruiter is often a machine."</p>
-                <p className="text-blue-100">An optimized resume increases your visibility before a human recruiter even opens it. Structure, keywords, and formatting are not just style — they are strategy.</p>
+                <p className="text-blue-100">This AI-optimized resume is ready to pass ATS filters and reach human recruiters. Download it, customize as needed, and start applying!</p>
               </div>
             </div>
           </div>
@@ -202,108 +364,26 @@ export default function ATSChecker() {
           {/* Actions */}
           <div className="flex gap-4 justify-center">
             <button
-              onClick={() => setResult(null)}
+              onClick={() => setStage('upload')}
               className="px-8 py-4 rounded-xl font-bold bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white hover:bg-slate-300 dark:hover:bg-slate-600 transition"
             >
               Check Another Resume
             </button>
-            <button className="px-8 py-4 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 transition">
-              Download Report
+            <button
+              onClick={downloadOptimizedResume}
+              className="px-8 py-4 rounded-xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 text-white hover:from-emerald-700 hover:to-emerald-800 transition"
+            >
+              Download Optimized Resume
             </button>
           </div>
 
           <p className="text-center text-xs text-slate-500 dark:text-slate-400 mt-8">
-            All scores are illustrative estimates based on ATS best practices
+            Resume optimization powered by DeepSeek R1 via LM Studio
           </p>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-blue-100 dark:bg-blue-900/30 mb-6">
-            <span className="text-2xl">✓</span>
-            <span className="font-bold text-blue-700 dark:text-blue-300">ATS RESUME CHECKER</span>
-          </div>
-          <h1 className="text-4xl font-black text-slate-900 dark:text-white mb-4">Optimize Your Resume for ATS</h1>
-          <p className="text-lg text-slate-600 dark:text-slate-400">Get an AI-powered analysis of how well your resume matches Applicant Tracking Systems</p>
-        </div>
-
-        {/* Upload Card */}
-        <div className="glass-card rounded-3xl p-12 border-2 border-dashed border-slate-300 dark:border-slate-700 mb-8">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Upload className="w-8 h-8 text-blue-600" />
-            </div>
-
-            {resumeFile ? (
-              <div className="space-y-4">
-                <div className="flex items-center justify-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                  <div className="text-left">
-                    <p className="font-bold text-emerald-900 dark:text-emerald-100">{resumeFile.name}</p>
-                    <p className="text-xs text-emerald-700 dark:text-emerald-300">{(resumeFile.size / 1024 / 1024).toFixed(2)}MB</p>
-                  </div>
-                  <button onClick={() => setResumeFile(null)} className="ml-auto text-emerald-600 hover:text-emerald-700">
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <p className="text-xl font-bold text-slate-900 dark:text-white mb-2">Upload Your Resume</p>
-                <p className="text-slate-600 dark:text-slate-400 mb-6">PDF or DOCX (up to 5MB)</p>
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition"
-                >
-                  Choose File
-                </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".pdf,.docx"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Job Description */}
-        <div className="mb-8">
-          <label className="block text-sm font-bold text-slate-900 dark:text-white mb-3">Job Description (Optional)</label>
-          <textarea
-            value={jobDescription}
-            onChange={(e) => setJobDescription(e.target.value)}
-            placeholder="Paste the job description for better matching..."
-            className="w-full px-6 py-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-            rows={6}
-          />
-        </div>
-
-        {/* Error */}
-        {error && (
-          <div className="mb-8 flex items-center gap-3 p-4 bg-rose-50 dark:bg-rose-900/20 rounded-xl border border-rose-200 dark:border-rose-800">
-            <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0" />
-            <p className="text-rose-700 dark:text-rose-300">{error}</p>
-          </div>
-        )}
-
-        {/* Analyze Button */}
-        <button
-          onClick={handleCheck}
-          disabled={!resumeFile || loading}
-          className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition text-lg"
-        >
-          {loading ? 'Analyzing Your Resume...' : 'Get ATS Analysis'}
-        </button>
-      </div>
-    </div>
-  );
+  return null;
 }
