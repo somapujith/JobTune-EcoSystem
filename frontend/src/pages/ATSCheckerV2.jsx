@@ -3,7 +3,8 @@ import axios from 'axios';
 import './ATSCheckerV2.css';
 
 export default function ATSCheckerV2() {
-  const [resumeText, setResumeText] = useState('');
+  const [resumeFile, setResumeFile] = useState(null);
+  const [resumeFileName, setResumeFileName] = useState('');
   const [jobDescriptionText, setJobDescriptionText] = useState('');
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
@@ -12,10 +13,36 @@ export default function ATSCheckerV2() {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('input');
 
-  // Immediate ATS check
+  // Handle resume file upload
+  const handleResumeUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowed = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+    if (!allowed.includes(file.type)) {
+      setError('Only PDF, DOCX, and TXT files allowed');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File too large (max 5MB)');
+      return;
+    }
+
+    setResumeFile(file);
+    setResumeFileName(file.name);
+    setError('');
+  };
+
+  // Immediate ATS check with file upload
   const handleCheck = async () => {
-    if (!resumeText.trim() || !jobDescriptionText.trim()) {
-      setError('Please provide both resume and job description');
+    if (!resumeFile) {
+      setError('Please upload a resume');
+      return;
+    }
+
+    if (!jobDescriptionText.trim()) {
+      setError('Please paste job description');
       return;
     }
 
@@ -24,6 +51,21 @@ export default function ATSCheckerV2() {
     setResults(null);
 
     try {
+      // Step 1: Parse resume file on backend
+      const formData = new FormData();
+      formData.append('resume', resumeFile);
+
+      const parseResponse = await axios.post('/api/ats/v2/parse', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      if (!parseResponse.data.resumeText) {
+        throw new Error('Failed to parse resume');
+      }
+
+      const resumeText = parseResponse.data.resumeText;
+
+      // Step 2: Check ATS score
       const response = await axios.post('/api/ats/v2/check', {
         resumeText,
         jobDescriptionText
@@ -35,10 +77,10 @@ export default function ATSCheckerV2() {
 
         // Start background enhancement immediately
         setAnalyzing(true);
-        enhanceResumeBackground();
+        enhanceResumeBackground(resumeText);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'ATS check failed');
+      setError(err.response?.data?.message || err.message || 'ATS check failed');
       console.error('ATS check error:', err);
     } finally {
       setLoading(false);
@@ -46,7 +88,7 @@ export default function ATSCheckerV2() {
   };
 
   // Background enhancement (non-blocking)
-  const enhanceResumeBackground = async () => {
+  const enhanceResumeBackground = async (resumeText) => {
     try {
       const response = await axios.post('/api/ats/v2/enhance', {
         resumeText,
@@ -117,17 +159,33 @@ export default function ATSCheckerV2() {
         {activeTab === 'input' && (
           <div className="ats-input-section">
             <div className="input-grid">
-              {/* Resume Input */}
+              {/* Resume File Upload */}
               <div className="input-group">
-                <label htmlFor="resume">Your Resume</label>
-                <textarea
-                  id="resume"
-                  placeholder="Paste your resume text here..."
-                  value={resumeText}
-                  onChange={(e) => setResumeText(e.target.value)}
-                  rows={10}
-                />
-                <span className="char-count">{resumeText.length} characters</span>
+                <label htmlFor="resume">Upload Resume</label>
+                <div className="file-upload-box">
+                  <input
+                    id="resume"
+                    type="file"
+                    accept=".pdf,.docx,.txt"
+                    onChange={handleResumeUpload}
+                    style={{ display: 'none' }}
+                  />
+                  <label htmlFor="resume" className="file-upload-label">
+                    {resumeFileName ? (
+                      <>
+                        <span className="file-icon">📄</span>
+                        <span className="file-name">{resumeFileName}</span>
+                        <span className="file-info">Click to change</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="upload-icon">📤</span>
+                        <span className="upload-text">Click to upload or drag & drop</span>
+                        <span className="upload-info">PDF, DOCX, or TXT (max 5MB)</span>
+                      </>
+                    )}
+                  </label>
+                </div>
               </div>
 
               {/* Job Description Input */}
@@ -149,7 +207,7 @@ export default function ATSCheckerV2() {
             <button
               className="btn-check"
               onClick={handleCheck}
-              disabled={loading || !resumeText.trim() || !jobDescriptionText.trim()}
+              disabled={loading || !resumeFile || !jobDescriptionText.trim()}
             >
               {loading ? (
                 <>
