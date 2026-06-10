@@ -45,12 +45,23 @@ export default function ATSCheckerV2() {
     setResults(null);
 
     try {
+      // Get auth token
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Please log in to use this feature');
+        setLoading(false);
+        return;
+      }
+
       // Step 1: Parse resume file on backend
       const formData = new FormData();
       formData.append('resume', resumeFile);
 
       const parseResponse = await axios.post('/api/ats/v2/parse', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (!parseResponse.data.resumeText) {
@@ -62,6 +73,10 @@ export default function ATSCheckerV2() {
       // Step 2: Analyze resume (general ATS quality)
       const response = await axios.post('/api/resume/v2/analyze', {
         resumeText
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (response.data.status === 'success') {
@@ -83,8 +98,13 @@ export default function ATSCheckerV2() {
   // Background enhancement (non-blocking)
   const enhanceResumeBackground = async (resumeText) => {
     try {
+      const token = localStorage.getItem('token');
       const response = await axios.post('/api/resume/v2/optimize', {
         resumeText
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (response.data.status === 'success') {
