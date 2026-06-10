@@ -8,7 +8,7 @@ const router = express.Router();
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
-const auth = require('../middleware/auth');
+const { authenticateToken: auth } = require('../middleware/auth');
 
 // V2 Services
 const JobDescriptionParser = require('../services/v2/jobDescriptionParser');
@@ -105,7 +105,7 @@ router.post('/v2/check', auth, async (req, res) => {
           responsibilities: jobDescription.responsibilities.slice(0, 5)
         }
       },
-      actionItems: this._generateActionItems(atsResult, matchResult, prediction),
+      actionItems: generateActionItems(atsResult, matchResult, prediction),
       processingTimeMs: processingTime,
       next: 'Use /v2/enhance to improve resume for this specific job'
     });
@@ -293,7 +293,7 @@ router.post('/v2/gap-report', auth, async (req, res) => {
 /**
  * Helper: Generate action items
  */
-router._generateActionItems = (atsResult, matchResult, prediction) => {
+function generateActionItems(atsResult, matchResult, prediction) {
   const items = [];
 
   // ATS-based actions
@@ -330,6 +330,6 @@ router._generateActionItems = (atsResult, matchResult, prediction) => {
   }
 
   return items;
-};
+}
 
 module.exports = router;

@@ -24,7 +24,8 @@
       "Bash(pkill -f \"node src/server.js\")",
       "Bash(npm start *)",
       "PowerShell(\"Backend killed\")",
-      "PowerShell(\"Killed\")"
+      "PowerShell(\"Killed\")",
+      "Bash(node -c src/routes/atsCheckerV2.js)"
     ]
   }
 }

@@ -4,11 +4,11 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
 import { jsx, jsxs, Fragment } from "react/jsx-runtime";
 import { renderToString } from "react-dom/server";
 import * as React from "react";
-import { useState, useEffect, useRef, Component, useMemo } from "react";
+import { useState, useEffect, useRef, Component, useMemo, useCallback } from "react";
 import { stripBasename, UNSAFE_warning, UNSAFE_invariant, matchPath, joinPaths, Action } from "@remix-run/router";
 import { UNSAFE_NavigationContext, useHref, useNavigate, useLocation, useResolvedPath, createPath, UNSAFE_DataRouterStateContext, UNSAFE_useRouteId, UNSAFE_RouteContext, UNSAFE_DataRouterContext, parsePath, Router, Outlet, Navigate, Routes, Route } from "react-router";
 import "react-dom";
-import { ChevronDown, Sun, Moon, Crown, X, Menu, AlertTriangle, RotateCcw, TrendingUp, Zap, Lock, ArrowRight, Sparkles, Star, Activity, FileText, Linkedin, Github, Layout as Layout$1, BookOpen, Lightbulb, CheckCircle2, Users, ChevronRight, MessageCircle, Check, Rocket, Loader, Plus, Minus, ArrowLeft, Target, ExternalLink, Clock, Briefcase, ShieldCheck, Mail, Calendar, User, CheckCircle, Copy, Download, XCircle, Trash2, Edit2, Search, MapPin, Loader2, AlertCircle, ChevronLeft, ChevronUp, Upload, Code2, RefreshCw, BarChart2, TrendingDown, HelpCircle, Award, Code, BrainCircuit, Wrench, FileCode2, Mic, Send, Info, GraduationCap, Play, Bot, Terminal } from "lucide-react";
+import { ChevronDown, Sun, Moon, Crown, X, Menu, AlertTriangle, RotateCcw, TrendingUp, Zap, Lock, ArrowRight, Sparkles, Star, Activity, FileText, Linkedin, Github, Layout as Layout$1, BookOpen, Lightbulb, CheckCircle2, Users, ChevronRight, MessageCircle, Check, Rocket, Loader, Plus, Minus, ArrowLeft, Target, ExternalLink, Clock, Briefcase, ShieldCheck, Monitor, Mail, Calendar, User, CheckCircle, Copy, Download, XCircle, Trash2, Edit2, Search, MapPin, Loader2, AlertCircle, ChevronLeft, ChevronUp, Upload, Code2, RefreshCw, BarChart2, TrendingDown, HelpCircle, Award, Code, BrainCircuit, Wrench, FileCode2, Mic, Send, Info, GraduationCap, Play, Bot, Terminal, MonitorOff, LogIn } from "lucide-react";
 import { create } from "zustand";
 import axios from "axios";
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip } from "recharts";
@@ -584,10 +584,26 @@ function removeSafeLocalStorage(key) {
   } catch {
   }
 }
-const apiBase = "http://localhost:5000/api";
+const apiBase = "http://localhost:3000/api";
 const api = axios.create({
   baseURL: apiBase
 });
+function persistSession({ token, refreshToken, sessionId }) {
+  if (token) setSafeLocalStorage("token", token);
+  if (refreshToken) setSafeLocalStorage("refreshToken", refreshToken);
+  if (sessionId) setSafeLocalStorage("sessionId", String(sessionId));
+}
+function clearSession() {
+  removeSafeLocalStorage("token");
+  removeSafeLocalStorage("refreshToken");
+  removeSafeLocalStorage("sessionId");
+}
+function handleSessionSuperseded(message) {
+  clearSession();
+  useAuthStore.getState().setSessionBlocked(
+    message || "This account was signed in on another device."
+  );
+}
 api.interceptors.request.use((config) => {
   const token = safeLocalStorage("token");
   if (token) {
@@ -595,64 +611,199 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+let isRefreshing = false;
+let refreshQueue = [];
+function processRefreshQueue(error, token = null) {
+  refreshQueue.forEach((promise) => {
+    if (error) promise.reject(error);
+    else promise.resolve(token);
+  });
+  refreshQueue = [];
+}
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
+    const original = error.config;
+    const code = (_b = (_a = error.response) == null ? void 0 : _a.data) == null ? void 0 : _b.code;
+    if (code === "SESSION_SUPERSEDED") {
+      handleSessionSuperseded((_d = (_c = error.response) == null ? void 0 : _c.data) == null ? void 0 : _d.error);
+      return Promise.reject(error);
+    }
+    if (!original || original._retry) return Promise.reject(error);
+    if (((_e = error.response) == null ? void 0 : _e.status) !== 401) return Promise.reject(error);
+    const refreshToken = safeLocalStorage("refreshToken");
+    if (!refreshToken) {
+      clearSession();
+      useAuthStore.getState().resetAuth();
+      return Promise.reject(error);
+    }
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        refreshQueue.push({ resolve, reject });
+      }).then((token) => {
+        original.headers.Authorization = `Bearer ${token}`;
+        return api(original);
+      });
+    }
+    original._retry = true;
+    isRefreshing = true;
+    try {
+      const { data } = await axios.post(`${apiBase}/auth/refresh`, { refreshToken });
+      if (data.code === "SESSION_SUPERSEDED") {
+        handleSessionSuperseded(data.error);
+        return Promise.reject(error);
+      }
+      setSafeLocalStorage("token", data.token);
+      if ((_f = data.session) == null ? void 0 : _f.id) setSafeLocalStorage("sessionId", String(data.session.id));
+      processRefreshQueue(null, data.token);
+      original.headers.Authorization = `Bearer ${data.token}`;
+      return api(original);
+    } catch (refreshError) {
+      const refreshCode = (_h = (_g = refreshError.response) == null ? void 0 : _g.data) == null ? void 0 : _h.code;
+      if (refreshCode === "SESSION_SUPERSEDED") {
+        handleSessionSuperseded((_j = (_i = refreshError.response) == null ? void 0 : _i.data) == null ? void 0 : _j.error);
+      } else {
+        clearSession();
+        useAuthStore.getState().resetAuth();
+      }
+      processRefreshQueue(refreshError, null);
+      return Promise.reject(refreshError);
+    } finally {
+      isRefreshing = false;
+    }
+  }
+);
 const useAuthStore = create((set) => ({
   user: null,
+  sessionId: safeLocalStorage("sessionId"),
   isAuthenticated: false,
   isLoading: isBrowser,
   error: null,
-  hasCompletedOnboarding: safeLocalStorage("onboarded") === "true",
-  login: async (credentials) => {
-    var _a, _b;
-    set({ isLoading: true, error: null });
+  hasCompletedOnboarding: false,
+  sessionBlocked: false,
+  sessionBlockedMessage: null,
+  accountInUse: null,
+  resetAuth: () => set({
+    user: null,
+    sessionId: null,
+    isAuthenticated: false,
+    isLoading: false,
+    hasCompletedOnboarding: false,
+    sessionBlocked: false,
+    sessionBlockedMessage: null,
+    accountInUse: null
+  }),
+  setSessionBlocked: (message) => set({
+    sessionBlocked: true,
+    sessionBlockedMessage: message,
+    isAuthenticated: false,
+    user: null,
+    sessionId: null,
+    isLoading: false
+  }),
+  clearSessionBlocked: () => set({
+    sessionBlocked: false,
+    sessionBlockedMessage: null,
+    accountInUse: null,
+    error: null
+  }),
+  clearAccountInUse: () => set({ accountInUse: null, error: null }),
+  login: async (credentials, { replaceDevice = false } = {}) => {
+    var _a, _b, _c, _d, _e, _f;
+    set({ isLoading: true, error: null, accountInUse: null });
     try {
-      const { data } = await api.post("/auth/login", credentials);
-      setSafeLocalStorage("token", data.token);
-      set({ user: data.user, isAuthenticated: true, isLoading: false, error: null });
+      const { data } = await api.post("/auth/login", { ...credentials, replaceDevice });
+      persistSession(data);
+      set({
+        user: data.user,
+        sessionId: ((_a = data.session) == null ? void 0 : _a.id) || null,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+        accountInUse: null,
+        sessionBlocked: false,
+        sessionBlockedMessage: null
+      });
       return data;
     } catch (err) {
-      const message = ((_b = (_a = err.response) == null ? void 0 : _a.data) == null ? void 0 : _b.error) || "Login failed";
+      if (((_b = err.response) == null ? void 0 : _b.status) === 409 && ((_d = (_c = err.response) == null ? void 0 : _c.data) == null ? void 0 : _d.code) === "ACCOUNT_IN_USE") {
+        set({
+          accountInUse: err.response.data.activeSession,
+          error: err.response.data.error,
+          isLoading: false,
+          isAuthenticated: false
+        });
+        const blocked = new Error("ACCOUNT_IN_USE");
+        blocked.code = "ACCOUNT_IN_USE";
+        throw blocked;
+      }
+      const message = ((_f = (_e = err.response) == null ? void 0 : _e.data) == null ? void 0 : _f.error) || "Login failed";
       set({ error: message, isLoading: false, isAuthenticated: false });
       throw new Error(message);
     }
   },
   signup: async (userData) => {
-    var _a, _b;
+    var _a, _b, _c;
     set({ isLoading: true, error: null });
     try {
       const { data } = await api.post("/auth/signup", userData);
-      setSafeLocalStorage("token", data.token);
-      set({ user: data.user, isAuthenticated: true, isLoading: false, error: null });
+      persistSession(data);
+      set({
+        user: data.user,
+        sessionId: ((_a = data.session) == null ? void 0 : _a.id) || null,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null
+      });
     } catch (err) {
-      const message = ((_b = (_a = err.response) == null ? void 0 : _a.data) == null ? void 0 : _b.error) || "Signup failed";
+      const message = ((_c = (_b = err.response) == null ? void 0 : _b.data) == null ? void 0 : _c.error) || "Signup failed";
       set({ error: message, isLoading: false, isAuthenticated: false });
       throw new Error(message);
     }
   },
-  logout: () => {
-    removeSafeLocalStorage("token");
-    set({ user: null, isAuthenticated: false });
+  logout: async () => {
+    try {
+      await api.post("/auth/logout");
+    } catch {
+    }
+    clearSession();
+    set({
+      user: null,
+      sessionId: null,
+      isAuthenticated: false,
+      hasCompletedOnboarding: false,
+      sessionBlocked: false,
+      sessionBlockedMessage: null,
+      accountInUse: null
+    });
   },
-  markOnboardingComplete: () => {
-    setSafeLocalStorage("onboarded", "true");
-    set({ hasCompletedOnboarding: true });
+  setOnboardingComplete: (complete) => {
+    set({ hasCompletedOnboarding: complete });
   },
   checkAuth: async () => {
+    var _a, _b, _c, _d;
     const token = safeLocalStorage("token");
-    if (!token) return set({ isLoading: false });
+    if (!token) return set({ isLoading: false, isAuthenticated: false });
     try {
       const { data } = await api.get("/auth/me");
-      set({ user: data.user, isAuthenticated: true, isLoading: false });
+      set({
+        user: data.user,
+        sessionId: data.sessionId || safeLocalStorage("sessionId"),
+        isAuthenticated: true,
+        isLoading: false,
+        sessionBlocked: false
+      });
     } catch (err) {
-      removeSafeLocalStorage("token");
-      set({ isLoading: false });
+      if (((_b = (_a = err.response) == null ? void 0 : _a.data) == null ? void 0 : _b.code) === "SESSION_SUPERSEDED") {
+        handleSessionSuperseded((_d = (_c = err.response) == null ? void 0 : _c.data) == null ? void 0 : _d.error);
+        return;
+      }
+      clearSession();
+      set({ isLoading: false, isAuthenticated: false });
     }
   }
 }));
-const syncOnboardingFlag = (onboarded) => {
-  if (onboarded) {
-    setSafeLocalStorage("onboarded", "true");
-  }
-};
 const useSubscriptionStore = create((set, get) => ({
   userPlan: null,
   plans: [],
@@ -680,7 +831,7 @@ const useSubscriptionStore = create((set, get) => ({
     try {
       const { data } = await api.get("/subscriptions/onboarded");
       const onboarded = !!data.onboarded;
-      syncOnboardingFlag(onboarded);
+      useAuthStore.getState().setOnboardingComplete(onboarded);
       set({ onboardingComplete: onboarded, onboardingChecked: true });
       return onboarded;
     } catch (err) {
@@ -709,7 +860,7 @@ const useSubscriptionStore = create((set, get) => ({
     set({ isLoading: true });
     try {
       const { data } = await api.post("/subscriptions/select-plan", { planId });
-      syncOnboardingFlag(true);
+      useAuthStore.getState().setOnboardingComplete(true);
       set({ userPlan: data.plan, onboardingComplete: true, onboardingChecked: true, isLoading: false });
       return data.plan;
     } catch (err) {
@@ -1731,6 +1882,7 @@ const QUESTIONS = [
   }
 ];
 function OnboardingQuestionnaire({ onComplete }) {
+  var _a;
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({
     "career-goal": null,
@@ -1738,9 +1890,12 @@ function OnboardingQuestionnaire({ onComplete }) {
     "pain-points": []
   });
   const { getRecommendation, isLoading } = useSubscriptionStore();
-  const currentQuestion = QUESTIONS[currentQuestionIndex];
-  const isLastQuestion = currentQuestionIndex === QUESTIONS.length - 1;
-  const answeredAll = answers["career-goal"] && answers["experience"] && answers["pain-points"].length > 0;
+  const currentQuestion = QUESTIONS == null ? void 0 : QUESTIONS[currentQuestionIndex];
+  const isLastQuestion = currentQuestionIndex === ((QUESTIONS == null ? void 0 : QUESTIONS.length) || 0) - 1;
+  const answeredAll = answers["career-goal"] && answers["experience"] && ((_a = answers["pain-points"]) == null ? void 0 : _a.length) > 0;
+  if (!currentQuestion) {
+    return /* @__PURE__ */ jsx("div", { className: "text-center py-12", children: "Loading questions..." });
+  }
   const handleAnswer = (value) => {
     if (currentQuestion.type === "single") {
       setAnswers((prev) => ({ ...prev, [currentQuestion.id]: value }));
@@ -2166,6 +2321,8 @@ function PlanSettings() {
   const [pendingPlan, setPendingPlan] = useState(null);
   const [switchError, setSwitchError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [currentSession, setCurrentSession] = useState(null);
+  const [sessionLoading, setSessionLoading] = useState(true);
   const highlightPlan = ((_a = location.state) == null ? void 0 : _a.highlightPlan) || null;
   const fromTool = ((_b = location.state) == null ? void 0 : _b.fromTool) || null;
   useEffect(() => {
@@ -2179,6 +2336,12 @@ function PlanSettings() {
       mounted = false;
     };
   }, [fetchPlans, getUserPlan]);
+  useEffect(() => {
+    api.get("/auth/sessions").then(({ data }) => {
+      const sessions = data.sessions || [];
+      setCurrentSession(sessions.find((s) => s.isCurrent) || sessions[0] || null);
+    }).catch(() => setCurrentSession(null)).finally(() => setSessionLoading(false));
+  }, []);
   const sortedPlans = useMemo(
     () => [...plans].sort((a, b) => {
       var _a2, _b2;
@@ -2344,6 +2507,24 @@ function PlanSettings() {
         plan.id
       );
     }) }),
+    /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8 mb-16 max-w-3xl", children: [
+      /* @__PURE__ */ jsx("h3", { className: "text-xl font-black text-slate-900 dark:text-white mb-2", children: "Device session" }),
+      /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500 mb-6", children: 'Your account allows one active device at a time. Signing in elsewhere ends this session. To switch computers, sign in on the new device and choose "Use this device instead" on the login screen.' }),
+      sessionLoading ? /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-400", children: "Loading session…" }) : !currentSession ? /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-400", children: "No active session found." }) : /* @__PURE__ */ jsxs("div", { className: "p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700", children: [
+        /* @__PURE__ */ jsxs("p", { className: "font-bold text-slate-900 dark:text-white", children: [
+          currentSession.deviceName,
+          /* @__PURE__ */ jsx("span", { className: "ml-2 text-xs font-bold text-emerald-600", children: "This device" })
+        ] }),
+        currentSession.ipAddress && /* @__PURE__ */ jsxs("p", { className: "text-xs text-slate-500 mt-1", children: [
+          "IP: ",
+          currentSession.ipAddress
+        ] }),
+        /* @__PURE__ */ jsxs("p", { className: "text-xs text-slate-500 mt-1", children: [
+          "Last active ",
+          new Date(currentSession.lastActiveAt).toLocaleString()
+        ] })
+      ] })
+    ] }),
     /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8 max-w-3xl", children: [
       /* @__PURE__ */ jsx("h3", { className: "text-xl font-black text-slate-900 dark:text-white mb-6", children: "How plan changes work" }),
       /* @__PURE__ */ jsx("div", { className: "grid sm:grid-cols-3 gap-6", children: [
@@ -3744,31 +3925,40 @@ function Dashboard() {
   ] });
 }
 function Login() {
-  const { login, signup, user, isAuthenticated, isLoading, error } = useAuthStore();
+  const { login, signup, isAuthenticated, isLoading, error, accountInUse, clearAccountInUse } = useAuthStore();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ email: "", password: "", github_username: "" });
   const [localError, setLocalError] = useState("");
   if (isAuthenticated) {
     return /* @__PURE__ */ jsx(Navigate, { to: "/dashboard", replace: true });
   }
-  const handleSubmit = async (e) => {
+  const redirectAfterAuth = () => {
+    setTimeout(() => {
+      window.location.href = "/onboarding";
+    }, 500);
+  };
+  const handleSubmit = async (e, replaceDevice = false) => {
     e.preventDefault();
     setLocalError("");
+    clearAccountInUse();
     try {
       if (isLogin) {
-        await login({ email: formData.email, password: formData.password });
-        setTimeout(() => {
-          window.location.href = "/onboarding";
-        }, 500);
+        await login(
+          { email: formData.email, password: formData.password },
+          { replaceDevice }
+        );
+        redirectAfterAuth();
       } else {
         await signup(formData);
-        setTimeout(() => {
-          window.location.href = "/onboarding";
-        }, 500);
+        redirectAfterAuth();
       }
     } catch (err) {
+      if (err.code === "ACCOUNT_IN_USE") return;
       setLocalError("Authentication failed. Please verify your credentials.");
     }
+  };
+  const handleReplaceDevice = (e) => {
+    handleSubmit(e, true);
   };
   return /* @__PURE__ */ jsxs("div", { className: "w-full min-h-screen flex flex-col lg:flex-row bg-white dark:bg-slate-950", children: [
     /* @__PURE__ */ jsxs("div", { className: "hidden lg:flex lg:w-1/2 relative flex-col justify-center px-12 lg:px-24 overflow-hidden bg-gradient-to-br from-[#4b5a96] to-[#3a477a] dark:from-blue-900 dark:to-indigo-950", children: [
@@ -3788,7 +3978,7 @@ function Login() {
             /* @__PURE__ */ jsx("span", { className: "text-[#8bb4f7]", children: "FAANG" }),
             " begins here."
           ] }),
-          /* @__PURE__ */ jsx("p", { className: "text-xl text-slate-400 font-light max-w-md", children: "Join 50,000+ students already utilizing our 7-tool ecosystem to land their dream placements." })
+          /* @__PURE__ */ jsx("p", { className: "text-xl text-slate-400 font-light max-w-md", children: "One account, one active device — built to keep your preparation personal and secure." })
         ] }),
         /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 gap-6 pt-8", children: [
           { title: "Personalized Skill Gap Analysis", icon: Activity },
@@ -3801,7 +3991,7 @@ function Login() {
       ] }),
       /* @__PURE__ */ jsxs("div", { className: "absolute bottom-12 left-16 flex items-center gap-2 text-slate-500 text-sm", children: [
         /* @__PURE__ */ jsx(ShieldCheck, { className: "w-4 h-4 text-emerald-500" }),
-        "End-to-end Encrypted Preparation"
+        "Single-device session protection"
       ] })
     ] }),
     /* @__PURE__ */ jsx("div", { className: "w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-24 relative bg-white dark:bg-slate-900", children: /* @__PURE__ */ jsxs("div", { className: "max-w-md w-full space-y-8 animate-in fade-in slide-in-from-right duration-500", children: [
@@ -3809,7 +3999,46 @@ function Login() {
         /* @__PURE__ */ jsx("h3", { className: "text-4xl font-black text-slate-900 dark:text-white font-headline tracking-tight", children: isLogin ? "Welcome Back!" : "Create your Account" }),
         /* @__PURE__ */ jsx("p", { className: "text-slate-500 dark:text-slate-400 font-medium", children: isLogin ? "Pick up where you left off." : "Start your professional journey today." })
       ] }),
-      (error || localError) && /* @__PURE__ */ jsxs("div", { className: "glass-card border-rose-200/50 p-4 rounded-xl text-rose-600 font-bold text-sm flex items-center gap-3", children: [
+      accountInUse && /* @__PURE__ */ jsxs("div", { className: "rounded-2xl border-2 border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700 p-5 space-y-4", children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-3", children: [
+          /* @__PURE__ */ jsx(AlertTriangle, { className: "w-6 h-6 text-amber-600 shrink-0 mt-0.5" }),
+          /* @__PURE__ */ jsxs("div", { children: [
+            /* @__PURE__ */ jsx("p", { className: "font-bold text-slate-900 dark:text-white", children: "Account already in use" }),
+            /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-600 dark:text-slate-300 mt-1", children: "This account is active on another device. Sign-in from a second computer or IP is blocked to prevent account sharing." })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 p-3 rounded-xl bg-white/80 dark:bg-slate-800/80 text-sm", children: [
+          /* @__PURE__ */ jsx(Monitor, { className: "w-5 h-5 text-slate-500 shrink-0" }),
+          /* @__PURE__ */ jsxs("div", { children: [
+            /* @__PURE__ */ jsx("p", { className: "font-semibold text-slate-800 dark:text-slate-200", children: accountInUse.deviceName || "Another device" }),
+            accountInUse.ipAddress && /* @__PURE__ */ jsxs("p", { className: "text-slate-500 text-xs mt-0.5", children: [
+              "IP: ",
+              accountInUse.ipAddress
+            ] })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-500", children: "If this is your device and you want to switch here, use the button below. The other session will be signed out immediately." }),
+        /* @__PURE__ */ jsx(
+          "button",
+          {
+            type: "button",
+            onClick: handleReplaceDevice,
+            disabled: isLoading,
+            className: "w-full py-3 px-4 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold transition-colors disabled:opacity-50",
+            children: isLoading ? "Switching device…" : "Use this device instead"
+          }
+        ),
+        /* @__PURE__ */ jsx(
+          "button",
+          {
+            type: "button",
+            onClick: clearAccountInUse,
+            className: "w-full text-sm font-semibold text-slate-500 hover:text-slate-700",
+            children: "Cancel"
+          }
+        )
+      ] }),
+      (error || localError) && !accountInUse && /* @__PURE__ */ jsxs("div", { className: "glass-card border-rose-200/50 p-4 rounded-xl text-rose-600 font-bold text-sm flex items-center gap-3", children: [
         /* @__PURE__ */ jsx("div", { className: "w-2 h-2 rounded-full bg-rose-500" }),
         error || localError
       ] }),
@@ -3861,7 +4090,7 @@ function Login() {
           "button",
           {
             type: "submit",
-            disabled: isLoading,
+            disabled: isLoading || !!accountInUse,
             className: "w-full bg-[#4255f4] hover:bg-[#3244d6] text-white font-black py-4 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50",
             children: [
               isLoading ? "Authenticating..." : isLogin ? "Sign In" : "Create Account",
@@ -3882,7 +4111,7 @@ function Login() {
           children: isLogin ? "Create an Account" : "Return to Login"
         }
       ),
-      /* @__PURE__ */ jsx("p", { className: "text-center text-xs text-on-surface-variant font-medium px-8", children: "By joining, you agree to our Terms of Service and Professional Conduct Guidelines." })
+      /* @__PURE__ */ jsx("p", { className: "text-center text-xs text-on-surface-variant font-medium px-8", children: "By joining, you agree to our Terms of Service and single-device session policy." })
     ] }) })
   ] });
 }
@@ -6790,11 +7019,15 @@ function CareerRoadmap() {
   ] }) });
 }
 function ATSChecker() {
+  const [stage, setStage] = useState("upload");
   const [resumeFile, setResumeFile] = useState(null);
-  const [jobDescription, setJobDescription] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
   const [error, setError] = useState("");
+  const [analysis, setAnalysis] = useState(null);
+  const [missingFields, setMissingFields] = useState([]);
+  const [additionalInfo, setAdditionalInfo] = useState({});
+  const [optimizedResume, setOptimizedResume] = useState(null);
+  const [improvedScore, setImprovedScore] = useState(0);
   const fileInputRef = useRef(null);
   const handleFileUpload = (e) => {
     var _a;
@@ -6811,9 +7044,8 @@ function ATSChecker() {
     setResumeFile(file);
     setError("");
   };
-  const handleCheck = async (e) => {
+  const handleAnalyze = async () => {
     var _a, _b;
-    e.preventDefault();
     if (!resumeFile) {
       setError("Please upload your resume");
       return;
@@ -6823,285 +7055,733 @@ function ATSChecker() {
     try {
       const formData = new FormData();
       formData.append("resume", resumeFile);
-      const { data } = await api.post("/jobs/check-ats-score", formData, {
+      const { data } = await api.post("/jobs/analyze", formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
-      setResult(data.data);
+      setAnalysis(data.data.analysis);
+      setMissingFields(data.data.missingFields || []);
+      if (data.data.missingFields && data.data.missingFields.length > 0) {
+        setStage("missing-fields");
+        setLoading(false);
+      } else {
+        await handleOptimize(data.data);
+      }
     } catch (err) {
-      setError(((_b = (_a = err.response) == null ? void 0 : _a.data) == null ? void 0 : _b.error) || "Failed to check ATS score");
+      setError(((_b = (_a = err.response) == null ? void 0 : _a.data) == null ? void 0 : _b.error) || "Failed to analyze resume");
+      setLoading(false);
+    }
+  };
+  const handleMissingFieldsSubmit = async () => {
+    var _a, _b;
+    setLoading(true);
+    setError("");
+    try {
+      const formData = new FormData();
+      formData.append("resume", resumeFile);
+      formData.append("additionalInfo", JSON.stringify(additionalInfo));
+      const { data } = await api.post("/jobs/optimize", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      setOptimizedResume(data.data.optimizedResume);
+      setImprovedScore(data.data.improvedScore);
+      setAnalysis(data.data.analysis);
+      setStage("report");
+    } catch (err) {
+      setError(((_b = (_a = err.response) == null ? void 0 : _a.data) == null ? void 0 : _b.error) || "Failed to optimize resume");
     } finally {
       setLoading(false);
     }
   };
-  const getScoreColor2 = (score) => {
-    if (score >= 80) return "text-emerald-600";
-    if (score >= 60) return "text-blue-600";
-    if (score >= 40) return "text-amber-600";
-    return "text-rose-600";
-  };
-  const loadTestData = () => {
-    const testResumeText = `PUJITH KRISHNA SOMA
-Email: somapujith@gmail.com | Phone: +91 7993429539 | LinkedIn: linkedin.com/in/pujith | GitHub: github.com/somapujith
-
-PROFESSIONAL SUMMARY
-B.Tech 2nd-year student with strong skills in coding and modern web development. Built multiple projects using React, JavaScript, and other advanced frontend tools. Proficient in Python, UI/UX design, and problem-solving. Quick learner motivated to gain real-world experience through internships and technical projects.
-
-TECHNICAL SKILLS
-Languages: JavaScript, Python, Java, C++
-Frontend: React, HTML5, CSS3, Tailwind
-Backend: Node.js, Express, MongoDB
-Database: PostgreSQL, SQL
-DevOps: Git, GitHub, Docker
-Tools: VS Code, Figma, Photoshop
-
-EXPERIENCE
-Web Developer Intern | TechStartup (Jun 2024 - Present)
-- Developed React components for e-commerce platform
-- Built responsive UI with Tailwind CSS
-- Integrated backend APIs using Axios
-- Collaborated with team using Git version control
-
-Freelance Developer | Self-employed (Jan 2024 - Present)
-- Created 3 full-stack web applications
-- Managed projects from design to deployment
-- Optimized performance and UX
-
-EDUCATION
-B.Tech in Computer Science | University (2024-2028) CGPA: 8.9
-Intermediate | Excellencia Junior College (2024) - 77%
-CBSE 10th | Vikas The Concept School (2022) - 81%
-
-PROJECTS
-JobTube Eco System - Full stack platform with React, Node.js, MongoDB
-Resume Optimizer - AI-powered resume enhancement tool
-Portfolio Website - Personal portfolio with responsive design
-
-CERTIFICATIONS
-Google Cloud Associate Cloud Engineer (2024)
-
-ADDITIONAL SKILLS
-UI/UX Design, Figma, Photoshop, Video Editing, Project Management`;
-    const blob = new Blob([testResumeText], { type: "application/pdf" });
-    const testFile = new File([blob], "test_resume.pdf", { type: "application/pdf" });
-    setResumeFile(testFile);
+  const handleOptimize = async (data) => {
+    var _a, _b;
+    setLoading(true);
     setError("");
-    setResult(null);
+    try {
+      const formData = new FormData();
+      formData.append("resume", resumeFile);
+      formData.append("additionalInfo", JSON.stringify({}));
+      const response = await api.post("/jobs/optimize", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      setOptimizedResume(response.data.data.optimizedResume);
+      setImprovedScore(response.data.data.improvedScore);
+      setAnalysis(response.data.data.analysis);
+      setStage("report");
+    } catch (err) {
+      setError(((_b = (_a = err.response) == null ? void 0 : _a.data) == null ? void 0 : _b.error) || "Failed to optimize resume");
+    } finally {
+      setLoading(false);
+    }
   };
-  return /* @__PURE__ */ jsxs("div", { className: "w-full max-w-5xl mx-auto py-16 px-4 sm:px-6", children: [
-    /* @__PURE__ */ jsxs("div", { className: "text-center mb-16", children: [
-      /* @__PURE__ */ jsx("div", { className: "inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-slate-900/5 mb-6", children: /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-slate-900 text-3xl", style: { fontVariationSettings: "'FILL' 0" }, children: "check_circle" }) }),
-      /* @__PURE__ */ jsx("h1", { className: "text-4xl font-black text-on-surface font-headline mb-4", children: "ATS Score Checker" }),
-      /* @__PURE__ */ jsx("p", { className: "text-lg text-on-surface-variant font-medium max-w-2xl mx-auto", children: "Upload your resume and get an instant AI-powered analysis of your ATS optimization. Identify issues and get actionable improvements." })
-    ] }),
-    /* @__PURE__ */ jsxs("div", { className: "max-w-3xl mx-auto mb-12 glass-card border-blue-200/50 dark:border-blue-800/50 rounded-3xl p-8", children: [
-      /* @__PURE__ */ jsxs("h3", { className: "text-xl font-bold text-on-surface mb-4 flex items-center gap-2", children: [
-        /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-blue-600", children: "info" }),
-        "How It Works"
-      ] }),
-      /* @__PURE__ */ jsxs("div", { className: "space-y-3 text-slate-700 dark:text-slate-300", children: [
-        /* @__PURE__ */ jsxs("p", { children: [
-          /* @__PURE__ */ jsx("strong", { children: "1. Upload Your Resume:" }),
-          " Click the upload area and select your PDF or DOCX resume file (max 5MB)"
-        ] }),
-        /* @__PURE__ */ jsxs("p", { children: [
-          /* @__PURE__ */ jsx("strong", { children: '2. Click "Check ATS Score":' }),
-          " Our AI instantly analyzes your resume for ATS optimization"
-        ] }),
-        /* @__PURE__ */ jsxs("div", { children: [
-          /* @__PURE__ */ jsxs("p", { className: "mb-2", children: [
-            /* @__PURE__ */ jsx("strong", { children: "3. Get Detailed Analysis:" }),
-            " Receive scores across 5 key areas:"
+  const downloadOptimizedResume = () => {
+    const element = document.createElement("a");
+    const file = new Blob([optimizedResume], { type: "text/plain" });
+    element.href = URL.createObjectURL(file);
+    element.download = "optimized-resume.txt";
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+  const getScoreColor2 = (score) => {
+    if (score >= 80) return { text: "text-emerald-600", bg: "bg-emerald-50", ring: "ring-emerald-200" };
+    if (score >= 60) return { text: "text-blue-600", bg: "bg-blue-50", ring: "ring-blue-200" };
+    if (score >= 40) return { text: "text-amber-600", bg: "bg-amber-50", ring: "ring-amber-200" };
+    return { text: "text-rose-600", bg: "bg-rose-50", ring: "ring-rose-200" };
+  };
+  if (stage === "upload") {
+    return /* @__PURE__ */ jsx("div", { className: "w-full h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex flex-col", children: /* @__PURE__ */ jsx("div", { className: "flex-1 flex items-center justify-center px-4", children: /* @__PURE__ */ jsxs("div", { className: "w-full max-w-7xl grid lg:grid-cols-2 gap-12 items-center", children: [
+      /* @__PURE__ */ jsxs("div", { children: [
+        /* @__PURE__ */ jsxs("div", { className: "mb-12", children: [
+          /* @__PURE__ */ jsxs("div", { className: "inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-blue-100 dark:bg-blue-900/30 mb-8", children: [
+            /* @__PURE__ */ jsx("span", { className: "text-2xl", children: "✓" }),
+            /* @__PURE__ */ jsx("span", { className: "font-bold text-blue-700 dark:text-blue-300", children: "ATS RESUME CHECKER" })
           ] }),
-          /* @__PURE__ */ jsxs("ul", { className: "list-disc list-inside ml-4 space-y-1", children: [
-            /* @__PURE__ */ jsxs("li", { children: [
-              /* @__PURE__ */ jsx("strong", { children: "Formatting (25%):" }),
-              " ATS-friendly layout, no tables/images/columns"
-            ] }),
-            /* @__PURE__ */ jsxs("li", { children: [
-              /* @__PURE__ */ jsx("strong", { children: "Structure (25%):" }),
-              " Clear sections and proper organization"
-            ] }),
-            /* @__PURE__ */ jsxs("li", { children: [
-              /* @__PURE__ */ jsx("strong", { children: "Keywords (30%):" }),
-              " Keyword density and optimization"
-            ] }),
-            /* @__PURE__ */ jsxs("li", { children: [
-              /* @__PURE__ */ jsx("strong", { children: "Length (10%):" }),
-              " Optimal resume length (1-2 pages)"
-            ] }),
-            /* @__PURE__ */ jsxs("li", { children: [
-              /* @__PURE__ */ jsx("strong", { children: "Clarity (10%):" }),
-              " Clear writing and readability"
-            ] })
-          ] })
+          /* @__PURE__ */ jsx("h1", { className: "text-5xl lg:text-6xl font-black text-slate-900 dark:text-white mb-6 leading-tight", children: "Optimize Your Resume for ATS" }),
+          /* @__PURE__ */ jsx("p", { className: "text-xl text-slate-600 dark:text-slate-400", children: "AI-powered analysis + automatic rewriting for 90+ ATS score" })
         ] }),
-        /* @__PURE__ */ jsxs("p", { children: [
-          /* @__PURE__ */ jsx("strong", { children: "4. Review Feedback:" }),
-          " See strengths, get actionable improvements, and identify any ATS-blocking issues"
+        /* @__PURE__ */ jsx("div", { className: "glass-card rounded-3xl p-12 border-2 border-dashed border-slate-300 dark:border-slate-700 mb-8", children: /* @__PURE__ */ jsxs("div", { className: "text-center", children: [
+          /* @__PURE__ */ jsx("div", { className: "w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6", children: /* @__PURE__ */ jsx(Upload, { className: "w-8 h-8 text-blue-600" }) }),
+          resumeFile ? /* @__PURE__ */ jsx("div", { className: "space-y-4", children: /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl", children: [
+            /* @__PURE__ */ jsx(CheckCircle2, { className: "w-5 h-5 text-emerald-600" }),
+            /* @__PURE__ */ jsxs("div", { className: "text-left", children: [
+              /* @__PURE__ */ jsx("p", { className: "font-bold text-emerald-900 dark:text-emerald-100", children: resumeFile.name }),
+              /* @__PURE__ */ jsxs("p", { className: "text-xs text-emerald-700 dark:text-emerald-300", children: [
+                (resumeFile.size / 1024 / 1024).toFixed(2),
+                "MB"
+              ] })
+            ] }),
+            /* @__PURE__ */ jsx("button", { onClick: () => setResumeFile(null), className: "ml-auto text-emerald-600 hover:text-emerald-700", children: /* @__PURE__ */ jsx(X, { className: "w-5 h-5" }) })
+          ] }) }) : /* @__PURE__ */ jsxs(Fragment, { children: [
+            /* @__PURE__ */ jsx("p", { className: "text-xl font-bold text-slate-900 dark:text-white mb-2", children: "Upload Your Resume" }),
+            /* @__PURE__ */ jsx("p", { className: "text-slate-600 dark:text-slate-400 mb-6", children: "PDF or DOCX (up to 5MB)" }),
+            /* @__PURE__ */ jsx(
+              "button",
+              {
+                onClick: () => {
+                  var _a;
+                  return (_a = fileInputRef.current) == null ? void 0 : _a.click();
+                },
+                className: "px-8 py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition",
+                children: "Choose File"
+              }
+            ),
+            /* @__PURE__ */ jsx(
+              "input",
+              {
+                ref: fileInputRef,
+                type: "file",
+                accept: ".pdf,.docx",
+                onChange: handleFileUpload,
+                className: "hidden"
+              }
+            )
+          ] })
+        ] }) }),
+        error && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 p-4 bg-rose-50 dark:bg-rose-900/20 rounded-xl border border-rose-200 dark:border-rose-800", children: [
+          /* @__PURE__ */ jsx(AlertCircle, { className: "w-5 h-5 text-rose-600 flex-shrink-0" }),
+          /* @__PURE__ */ jsx("p", { className: "text-rose-700 dark:text-rose-300", children: error })
+        ] }),
+        /* @__PURE__ */ jsx(
+          "button",
+          {
+            onClick: handleAnalyze,
+            disabled: !resumeFile || loading,
+            className: "w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition text-lg flex items-center justify-center gap-2",
+            children: loading ? /* @__PURE__ */ jsxs(Fragment, { children: [
+              /* @__PURE__ */ jsx(Loader, { className: "w-5 h-5 animate-spin" }),
+              "Analyzing Resume..."
+            ] }) : "Analyze & Optimize Resume"
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "hidden lg:block space-y-8", children: [
+        /* @__PURE__ */ jsx("div", { className: "space-y-6", children: [
+          { icon: "🤖", title: "AI-Powered Analysis", desc: "DeepSeek R1 analyzes your resume for ATS compatibility" },
+          { icon: "✨", title: "Auto Rewriting", desc: "Automatically optimizes for 90+ ATS score" },
+          { icon: "📊", title: "Detailed Report", desc: "See before/after scores and improvements" },
+          { icon: "📥", title: "Download Resume", desc: "Get your optimized resume as a file" }
+        ].map((item, i) => /* @__PURE__ */ jsxs("div", { className: "flex gap-4", children: [
+          /* @__PURE__ */ jsx("div", { className: "text-3xl", children: item.icon }),
+          /* @__PURE__ */ jsxs("div", { children: [
+            /* @__PURE__ */ jsx("h3", { className: "font-bold text-slate-900 dark:text-white", children: item.title }),
+            /* @__PURE__ */ jsx("p", { className: "text-slate-600 dark:text-slate-400 text-sm", children: item.desc })
+          ] })
+        ] }, i)) }),
+        /* @__PURE__ */ jsxs("div", { className: "bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-900/10 rounded-2xl p-6 border border-emerald-200 dark:border-emerald-800", children: [
+          /* @__PURE__ */ jsx("p", { className: "text-sm font-bold text-emerald-700 dark:text-emerald-300 mb-2", children: "✓ 100% Free" }),
+          /* @__PURE__ */ jsx("p", { className: "text-slate-700 dark:text-slate-300 text-sm", children: "No credit card needed. Powered by your local LM Studio." })
         ] })
       ] })
-    ] }),
-    error && /* @__PURE__ */ jsxs("div", { className: "max-w-3xl mx-auto mb-6 glass-card border-rose-200/50 p-4 rounded-2xl text-rose-600 text-sm font-medium flex items-center gap-3", children: [
-      /* @__PURE__ */ jsx(AlertCircle, { className: "w-5 h-5 flex-shrink-0" }),
-      error
-    ] }),
-    /* @__PURE__ */ jsxs("form", { onSubmit: handleCheck, className: "max-w-2xl mx-auto mb-12", children: [
-      /* @__PURE__ */ jsx("div", { className: "glass-card rounded-3xl p-8", children: /* @__PURE__ */ jsxs("div", { children: [
-        /* @__PURE__ */ jsx("label", { className: "block text-sm font-bold text-on-surface mb-3", children: "Upload Your Resume" }),
-        /* @__PURE__ */ jsx(
-          "div",
+    ] }) }) });
+  }
+  if (stage === "missing-fields") {
+    return /* @__PURE__ */ jsx("div", { className: "w-full min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-12 px-4 flex flex-col", children: /* @__PURE__ */ jsx("div", { className: "flex-1 flex items-center justify-center", children: /* @__PURE__ */ jsxs("div", { className: "w-full max-w-4xl", children: [
+      /* @__PURE__ */ jsxs("div", { className: "text-center mb-12", children: [
+        /* @__PURE__ */ jsx("h1", { className: "text-4xl font-black text-slate-900 dark:text-white mb-4", children: "Complete Your Profile" }),
+        /* @__PURE__ */ jsx("p", { className: "text-xl text-slate-600 dark:text-slate-400", children: "Add missing information for better AI optimization" })
+      ] }),
+      /* @__PURE__ */ jsx("div", { className: "glass-card rounded-3xl p-12 space-y-8", children: missingFields.map((field, idx) => /* @__PURE__ */ jsxs("div", { children: [
+        /* @__PURE__ */ jsxs("label", { className: "block text-sm font-bold text-slate-900 dark:text-white mb-3", children: [
+          field.field,
+          /* @__PURE__ */ jsx("span", { className: "text-slate-500 text-xs font-normal ml-2", children: field.description })
+        ] }),
+        field.type === "textarea" ? /* @__PURE__ */ jsx(
+          "textarea",
           {
-            onClick: () => {
-              var _a;
-              return (_a = fileInputRef.current) == null ? void 0 : _a.click();
-            },
-            className: "border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-16 text-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors",
-            children: resumeFile ? /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
-              /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4", children: [
-                /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-blue-600 text-5xl", children: "description" }),
-                /* @__PURE__ */ jsxs("div", { className: "text-left", children: [
-                  /* @__PURE__ */ jsx("p", { className: "font-semibold text-on-surface text-lg", children: resumeFile.name }),
-                  /* @__PURE__ */ jsxs("p", { className: "text-sm text-slate-400", children: [
-                    (resumeFile.size / 1024).toFixed(2),
-                    " KB"
-                  ] })
-                ] })
-              ] }),
-              /* @__PURE__ */ jsx(
-                "button",
-                {
-                  type: "button",
-                  onClick: (e) => {
-                    e.stopPropagation();
-                    setResumeFile(null);
-                  },
-                  className: "p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded-lg transition-colors",
-                  children: /* @__PURE__ */ jsx(X, { className: "w-5 h-5 text-red-600" })
-                }
-              )
-            ] }) : /* @__PURE__ */ jsxs("div", { children: [
-              /* @__PURE__ */ jsx(Upload, { className: "w-12 h-12 text-slate-400 mx-auto mb-4" }),
-              /* @__PURE__ */ jsx("p", { className: "text-lg font-semibold text-on-surface", children: "Click to upload resume" }),
-              /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-400 mt-2", children: "PDF or DOCX, max 5MB" })
-            ] })
+            value: additionalInfo[field.field] || "",
+            onChange: (e) => setAdditionalInfo({ ...additionalInfo, [field.field]: e.target.value }),
+            placeholder: "Enter your information...",
+            className: "w-full px-6 py-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-600 focus:border-transparent",
+            rows: 4
           }
-        ),
-        /* @__PURE__ */ jsx(
+        ) : /* @__PURE__ */ jsx(
           "input",
           {
-            ref: fileInputRef,
-            type: "file",
-            accept: ".pdf,.docx",
-            onChange: handleFileUpload,
-            className: "hidden"
+            type: field.type || "text",
+            value: additionalInfo[field.field] || "",
+            onChange: (e) => setAdditionalInfo({ ...additionalInfo, [field.field]: e.target.value }),
+            placeholder: "Enter your information...",
+            className: "w-full px-6 py-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
           }
         )
-      ] }) }),
-      /* @__PURE__ */ jsxs("div", { className: "max-w-3xl mx-auto mt-6 flex flex-col sm:flex-row gap-3 justify-center", children: [
+      ] }, idx)) }),
+      error && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 p-4 bg-rose-50 dark:bg-rose-900/20 rounded-xl border border-rose-200 dark:border-rose-800", children: [
+        /* @__PURE__ */ jsx(AlertCircle, { className: "w-5 h-5 text-rose-600 flex-shrink-0" }),
+        /* @__PURE__ */ jsx("p", { className: "text-rose-700 dark:text-rose-300", children: error })
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "flex gap-4 pt-4", children: [
         /* @__PURE__ */ jsx(
           "button",
           {
-            type: "submit",
-            disabled: loading,
-            className: "px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-3",
-            children: loading ? /* @__PURE__ */ jsxs(Fragment, { children: [
-              /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined animate-spin text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "sync" }),
-              "Checking..."
-            ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
-              /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "check_circle" }),
-              "Check ATS Score"
-            ] })
+            onClick: () => setStage("upload"),
+            className: "flex-1 py-4 px-6 bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white rounded-xl font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition",
+            children: "Back"
           }
         ),
-        /* @__PURE__ */ jsxs(
+        /* @__PURE__ */ jsx(
           "button",
           {
-            type: "button",
-            onClick: loadTestData,
-            className: "px-8 py-3 bg-slate-400 hover:bg-slate-500 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-3",
-            children: [
-              /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "dataset" }),
-              "Load Test Data"
-            ]
+            onClick: handleMissingFieldsSubmit,
+            disabled: loading,
+            className: "flex-1 py-4 px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2",
+            children: loading ? /* @__PURE__ */ jsxs(Fragment, { children: [
+              /* @__PURE__ */ jsx(Loader, { className: "w-5 h-5 animate-spin" }),
+              "Optimizing..."
+            ] }) : "Optimize Resume"
           }
         )
       ] })
+    ] }) }) });
+  }
+  if (stage === "report" && optimizedResume) {
+    const beforeScore = (analysis == null ? void 0 : analysis.currentScore) || 42;
+    const improvement = improvedScore - beforeScore;
+    const colors = getScoreColor2(improvedScore);
+    return /* @__PURE__ */ jsx("div", { className: "w-full min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-16 px-4", children: /* @__PURE__ */ jsxs("div", { className: "w-full max-w-7xl mx-auto", children: [
+      /* @__PURE__ */ jsxs("div", { className: "mb-12", children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 mb-6", children: [
+          /* @__PURE__ */ jsx("div", { className: "w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center", children: /* @__PURE__ */ jsx("span", { className: "text-white font-bold text-lg", children: "✓" }) }),
+          /* @__PURE__ */ jsxs("div", { children: [
+            /* @__PURE__ */ jsx("p", { className: "text-sm font-bold uppercase tracking-widest text-blue-600", children: "AI Resume Optimizer" }),
+            /* @__PURE__ */ jsx("h1", { className: "text-3xl font-black text-slate-900 dark:text-white", children: "ATS Resume Analysis Report" })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsx("p", { className: "text-slate-600 dark:text-slate-400", children: "Powered by DeepSeek R1 · Optimized for Applicant Tracking Systems" })
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "grid md:grid-cols-3 gap-6 mb-12", children: [
+        /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8 border border-slate-200 dark:border-slate-700", children: [
+          /* @__PURE__ */ jsx("p", { className: "text-xs font-bold uppercase tracking-widest text-slate-400 mb-4", children: "Before Optimization" }),
+          /* @__PURE__ */ jsxs("div", { className: "mb-4", children: [
+            /* @__PURE__ */ jsx("div", { className: `text-5xl font-black ${getScoreColor2(beforeScore).text}`, children: beforeScore }),
+            /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-500 mt-2", children: "/100 Original resume score" })
+          ] }),
+          /* @__PURE__ */ jsx("div", { className: `w-full h-2 ${getScoreColor2(beforeScore).bg} rounded-full overflow-hidden`, children: /* @__PURE__ */ jsx("div", { className: `h-full ${getScoreColor2(beforeScore).text}`, style: { width: `${beforeScore}%` } }) })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: `glass-card rounded-3xl p-8 border-2 ${colors.ring} bg-gradient-to-br ${colors.bg}`, children: [
+          /* @__PURE__ */ jsx("p", { className: "text-xs font-bold uppercase tracking-widest text-blue-600 mb-4", children: "After Optimization" }),
+          /* @__PURE__ */ jsxs("div", { className: "mb-4", children: [
+            /* @__PURE__ */ jsx("div", { className: `text-5xl font-black ${colors.text}`, children: improvedScore }),
+            /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-500 mt-2", children: "ATS-ready score" })
+          ] }),
+          /* @__PURE__ */ jsx("div", { className: "w-full h-2 bg-white/40 rounded-full overflow-hidden", children: /* @__PURE__ */ jsx("div", { className: `h-full ${colors.text} bg-current opacity-100`, style: { width: `${improvedScore}%` } }) })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8 border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20", children: [
+          /* @__PURE__ */ jsx("p", { className: "text-xs font-bold uppercase tracking-widest text-emerald-600 mb-4", children: "Total Improvement" }),
+          /* @__PURE__ */ jsxs("div", { className: "flex items-baseline gap-2 mb-4", children: [
+            /* @__PURE__ */ jsxs("div", { className: "text-5xl font-black text-emerald-600", children: [
+              "+",
+              improvement
+            ] }),
+            /* @__PURE__ */ jsx("span", { className: "text-sm text-emerald-600 font-bold", children: "Points" })
+          ] }),
+          /* @__PURE__ */ jsxs("p", { className: "text-sm text-emerald-700", children: [
+            Math.round(improvement / beforeScore * 100),
+            "% increase in ATS compatibility"
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8 mb-12 border border-slate-200 dark:border-slate-700", children: [
+        /* @__PURE__ */ jsx("h2", { className: "text-2xl font-black text-slate-900 dark:text-white mb-8", children: "What Changed" }),
+        /* @__PURE__ */ jsx("div", { className: "bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6", children: /* @__PURE__ */ jsx("p", { className: "text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-mono text-sm max-h-96 overflow-y-auto", children: optimizedResume }) })
+      ] }),
+      /* @__PURE__ */ jsx("div", { className: "glass-card rounded-3xl p-8 border border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-600 to-blue-700 text-white mb-12", children: /* @__PURE__ */ jsxs("div", { className: "flex gap-4", children: [
+        /* @__PURE__ */ jsx(Lightbulb, { className: "w-6 h-6 flex-shrink-0 mt-1" }),
+        /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsx("p", { className: "font-black text-lg mb-2", children: `"Your resume's first recruiter is often a machine."` }),
+          /* @__PURE__ */ jsx("p", { className: "text-blue-100", children: "This AI-optimized resume is ready to pass ATS filters and reach human recruiters. Download it, customize as needed, and start applying!" })
+        ] })
+      ] }) }),
+      /* @__PURE__ */ jsxs("div", { className: "flex gap-4 justify-center", children: [
+        /* @__PURE__ */ jsx(
+          "button",
+          {
+            onClick: () => setStage("upload"),
+            className: "px-8 py-4 rounded-xl font-bold bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white hover:bg-slate-300 dark:hover:bg-slate-600 transition",
+            children: "Check Another Resume"
+          }
+        ),
+        /* @__PURE__ */ jsx(
+          "button",
+          {
+            onClick: downloadOptimizedResume,
+            className: "px-8 py-4 rounded-xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 text-white hover:from-emerald-700 hover:to-emerald-800 transition",
+            children: "Download Optimized Resume"
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsx("p", { className: "text-center text-xs text-slate-500 dark:text-slate-400 mt-8", children: "Resume optimization powered by DeepSeek R1 via LM Studio" })
+    ] }) });
+  }
+  return null;
+}
+function ATSCheckerV2() {
+  const [resumeText, setResumeText] = useState("");
+  const [jobDescriptionText, setJobDescriptionText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [results, setResults] = useState(null);
+  const [enhancedResume, setEnhancedResume] = useState(null);
+  const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState("input");
+  const handleCheck = async () => {
+    var _a, _b;
+    if (!resumeText.trim() || !jobDescriptionText.trim()) {
+      setError("Please provide both resume and job description");
+      return;
+    }
+    setError("");
+    setLoading(true);
+    setResults(null);
+    try {
+      const response = await axios.post("/api/ats/v2/check", {
+        resumeText,
+        jobDescriptionText
+      });
+      if (response.data.status === "success") {
+        setResults(response.data.analysis);
+        setActiveTab("results");
+        setAnalyzing(true);
+        enhanceResumeBackground();
+      }
+    } catch (err) {
+      setError(((_b = (_a = err.response) == null ? void 0 : _a.data) == null ? void 0 : _b.message) || "ATS check failed");
+      console.error("ATS check error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const enhanceResumeBackground = async () => {
+    try {
+      const response = await axios.post("/api/ats/v2/enhance", {
+        resumeText,
+        jobDescriptionText
+      });
+      if (response.data.status === "success") {
+        setEnhancedResume(response.data);
+      }
+    } catch (err) {
+      console.error("Enhancement error:", err);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+  const getScoreColor2 = (score) => {
+    if (score >= 90) return "#10b981";
+    if (score >= 80) return "#3b82f6";
+    if (score >= 70) return "#f59e0b";
+    if (score >= 60) return "#ef4444";
+    return "#7f1d1d";
+  };
+  const getScoreInterpretation = (score) => {
+    if (score >= 90) return "Excellent - Very likely to pass ATS";
+    if (score >= 80) return "Good - Likely to pass ATS";
+    if (score >= 70) return "Fair - May pass ATS";
+    if (score >= 60) return "Poor - Unlikely to pass ATS";
+    return "Critical - Will likely be filtered";
+  };
+  return /* @__PURE__ */ jsx("div", { className: "ats-checker-v2", children: /* @__PURE__ */ jsxs("div", { className: "ats-container", children: [
+    /* @__PURE__ */ jsxs("div", { className: "ats-header", children: [
+      /* @__PURE__ */ jsx("h1", { children: "ATS Checker V2" }),
+      /* @__PURE__ */ jsx("p", { children: "Analyze your resume against job descriptions for ATS compatibility" })
     ] }),
-    result && !loading && /* @__PURE__ */ jsxs("div", { className: "max-w-3xl mx-auto space-y-8", children: [
-      /* @__PURE__ */ jsxs("div", { className: `glass-card rounded-3xl p-8 text-center`, children: [
-        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-center gap-4 mb-6", children: [
-          /* @__PURE__ */ jsx("div", { className: "text-6xl font-black", style: { color: result.atsScore >= 80 ? "#10b981" : result.atsScore >= 60 ? "#0ea5e9" : result.atsScore >= 40 ? "#f59e0b" : "#ef4444" }, children: result.atsScore }),
-          /* @__PURE__ */ jsxs("div", { className: "text-left", children: [
-            /* @__PURE__ */ jsx("p", { className: "text-xs font-bold text-slate-500 uppercase", children: "ATS Score" }),
-            /* @__PURE__ */ jsx("p", { className: `text-2xl font-black ${getScoreColor2(result.atsScore)}`, children: result.scoreLabel })
+    /* @__PURE__ */ jsxs("div", { className: "ats-tabs", children: [
+      /* @__PURE__ */ jsx(
+        "button",
+        {
+          className: `tab ${activeTab === "input" ? "active" : ""}`,
+          onClick: () => setActiveTab("input"),
+          children: "Input"
+        }
+      ),
+      /* @__PURE__ */ jsx(
+        "button",
+        {
+          className: `tab ${activeTab === "results" ? "active" : ""}`,
+          onClick: () => setActiveTab("results"),
+          disabled: !results,
+          children: "Results"
+        }
+      ),
+      /* @__PURE__ */ jsxs(
+        "button",
+        {
+          className: `tab ${activeTab === "enhanced" ? "active" : ""}`,
+          onClick: () => setActiveTab("enhanced"),
+          disabled: !enhancedResume,
+          children: [
+            "Enhanced ",
+            enhancedResume && /* @__PURE__ */ jsx("span", { className: "badge", children: "Ready" })
+          ]
+        }
+      )
+    ] }),
+    activeTab === "input" && /* @__PURE__ */ jsxs("div", { className: "ats-input-section", children: [
+      /* @__PURE__ */ jsxs("div", { className: "input-grid", children: [
+        /* @__PURE__ */ jsxs("div", { className: "input-group", children: [
+          /* @__PURE__ */ jsx("label", { htmlFor: "resume", children: "Your Resume" }),
+          /* @__PURE__ */ jsx(
+            "textarea",
+            {
+              id: "resume",
+              placeholder: "Paste your resume text here...",
+              value: resumeText,
+              onChange: (e) => setResumeText(e.target.value),
+              rows: 10
+            }
+          ),
+          /* @__PURE__ */ jsxs("span", { className: "char-count", children: [
+            resumeText.length,
+            " characters"
           ] })
         ] }),
-        result.sections && /* @__PURE__ */ jsx("div", { className: "grid grid-cols-2 gap-3 mt-6", children: Object.entries(result.sections).map(([key, section]) => /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-2xl p-4", children: [
-          /* @__PURE__ */ jsx("p", { className: "text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2 capitalize", children: section.feedback }),
-          /* @__PURE__ */ jsxs("div", { className: "flex items-end gap-2", children: [
-            /* @__PURE__ */ jsx("p", { className: "text-3xl font-black text-on-surface", children: section.score }),
-            /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-500 mb-1", children: "%" })
+        /* @__PURE__ */ jsxs("div", { className: "input-group", children: [
+          /* @__PURE__ */ jsx("label", { htmlFor: "jd", children: "Job Description" }),
+          /* @__PURE__ */ jsx(
+            "textarea",
+            {
+              id: "jd",
+              placeholder: "Paste the job description here...",
+              value: jobDescriptionText,
+              onChange: (e) => setJobDescriptionText(e.target.value),
+              rows: 10
+            }
+          ),
+          /* @__PURE__ */ jsxs("span", { className: "char-count", children: [
+            jobDescriptionText.length,
+            " characters"
           ] })
-        ] }, key)) })
+        ] })
       ] }),
-      result.atsIssues && result.atsIssues.length > 0 && /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8 border border-red-200/50 dark:border-red-900/50", children: [
-        /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 mb-4", children: [
-          /* @__PURE__ */ jsx(AlertCircle, { className: "w-6 h-6 text-red-600" }),
-          /* @__PURE__ */ jsxs("h3", { className: "text-xl font-bold text-red-600", children: [
-            "ATS-Blocking Issues (",
-            result.atsIssues.length,
-            ")"
-          ] })
-        ] }),
-        /* @__PURE__ */ jsx("ul", { className: "space-y-2", children: result.atsIssues.map((issue, i) => /* @__PURE__ */ jsxs("li", { className: "flex gap-3 text-slate-700 dark:text-slate-300", children: [
-          /* @__PURE__ */ jsx("span", { className: "text-red-600 flex-shrink-0", children: "⚠" }),
-          /* @__PURE__ */ jsx("span", { children: issue })
-        ] }, i)) })
-      ] }),
-      result.strengths && result.strengths.length > 0 && /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8 border border-cyan-200/50 dark:border-cyan-900/50", children: [
-        /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 mb-4", children: [
-          /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-cyan-600 text-xl", children: "star" }),
-          /* @__PURE__ */ jsx("h3", { className: "text-xl font-bold text-cyan-600", children: "Your Strengths (AI Analysis)" })
-        ] }),
-        /* @__PURE__ */ jsx("ul", { className: "space-y-2", children: result.strengths.map((strength, i) => /* @__PURE__ */ jsxs("li", { className: "flex gap-3 text-slate-700 dark:text-slate-300", children: [
-          /* @__PURE__ */ jsx("span", { className: "text-cyan-600 flex-shrink-0", children: "→" }),
-          /* @__PURE__ */ jsx("span", { children: strength })
-        ] }, i)) })
-      ] }),
-      result.improvements && result.improvements.length > 0 && /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8 border border-blue-200/50 dark:border-blue-900/50", children: [
-        /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 mb-4", children: [
-          /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-blue-600 text-xl", children: "lightbulb" }),
-          /* @__PURE__ */ jsx("h3", { className: "text-xl font-bold text-blue-600", children: "How to Improve" })
-        ] }),
-        /* @__PURE__ */ jsx("ul", { className: "space-y-2", children: result.improvements.map((improvement, i) => /* @__PURE__ */ jsxs("li", { className: "flex gap-3 text-slate-700 dark:text-slate-300", children: [
-          /* @__PURE__ */ jsxs("span", { className: "text-blue-600 flex-shrink-0", children: [
-            i + 1,
-            "."
+      error && /* @__PURE__ */ jsx("div", { className: "error-message", children: error }),
+      /* @__PURE__ */ jsx(
+        "button",
+        {
+          className: "btn-check",
+          onClick: handleCheck,
+          disabled: loading || !resumeText.trim() || !jobDescriptionText.trim(),
+          children: loading ? /* @__PURE__ */ jsxs(Fragment, { children: [
+            /* @__PURE__ */ jsx("span", { className: "spinner" }),
+            "Analyzing..."
+          ] }) : "Check ATS Score"
+        }
+      )
+    ] }),
+    activeTab === "results" && results && /* @__PURE__ */ jsxs("div", { className: "ats-results-section", children: [
+      /* @__PURE__ */ jsxs("div", { className: "score-card", children: [
+        /* @__PURE__ */ jsxs("div", { className: "score-circle", children: [
+          /* @__PURE__ */ jsxs("svg", { viewBox: "0 0 100 100", children: [
+            /* @__PURE__ */ jsx(
+              "circle",
+              {
+                cx: "50",
+                cy: "50",
+                r: "45",
+                fill: "none",
+                stroke: "#e5e7eb",
+                strokeWidth: "8"
+              }
+            ),
+            /* @__PURE__ */ jsx(
+              "circle",
+              {
+                cx: "50",
+                cy: "50",
+                r: "45",
+                fill: "none",
+                stroke: getScoreColor2(results.atsScore.score),
+                strokeWidth: "8",
+                strokeDasharray: `${results.atsScore.score / 100 * 282.7} 282.7`,
+                style: { transition: "stroke-dasharray 0.6s ease" }
+              }
+            )
           ] }),
-          /* @__PURE__ */ jsx("span", { children: improvement })
-        ] }, i)) })
-      ] }),
-      result.recommendations && result.recommendations.length > 0 && /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8 border border-amber-200/50 dark:border-amber-900/50", children: [
-        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between gap-3 mb-4", children: [
-          /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
-            /* @__PURE__ */ jsx(TrendingUp, { className: "w-6 h-6 text-amber-600" }),
-            /* @__PURE__ */ jsx("h3", { className: "text-xl font-bold text-amber-600", children: "Recommendations" })
-          ] }),
-          result.aiPowered && /* @__PURE__ */ jsxs("span", { className: "inline-flex items-center gap-1 px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-full text-xs font-bold", children: [
-            /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-purple-600 text-sm", children: "stars" }),
-            "AI-Powered"
+          /* @__PURE__ */ jsxs("div", { className: "score-text", children: [
+            /* @__PURE__ */ jsx("span", { className: "score-number", children: results.atsScore.score }),
+            /* @__PURE__ */ jsx("span", { className: "score-max", children: "/100" })
           ] })
         ] }),
-        /* @__PURE__ */ jsx("ul", { className: "space-y-3", children: result.recommendations.map((rec, i) => /* @__PURE__ */ jsxs("li", { className: "flex gap-3 text-slate-700 dark:text-slate-300", children: [
-          /* @__PURE__ */ jsxs("span", { className: "text-amber-600 font-bold flex-shrink-0", children: [
-            i + 1,
-            "."
+        /* @__PURE__ */ jsxs("div", { className: "score-info", children: [
+          /* @__PURE__ */ jsx("h3", { children: "ATS Compatibility Score" }),
+          /* @__PURE__ */ jsx("p", { className: "interpretation", children: getScoreInterpretation(results.atsScore.score) }),
+          /* @__PURE__ */ jsxs("div", { className: "score-breakdown", children: [
+            /* @__PURE__ */ jsxs("div", { className: "breakdown-item", children: [
+              /* @__PURE__ */ jsx("span", { children: "Keyword Match" }),
+              /* @__PURE__ */ jsx("div", { className: "progress-bar", children: /* @__PURE__ */ jsx(
+                "div",
+                {
+                  className: "progress-fill",
+                  style: { width: `${results.atsScore.breakdown.keywordMatch / 30 * 100}%` }
+                }
+              ) }),
+              /* @__PURE__ */ jsxs("span", { className: "score-value", children: [
+                results.atsScore.breakdown.keywordMatch,
+                "/30"
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxs("div", { className: "breakdown-item", children: [
+              /* @__PURE__ */ jsx("span", { children: "Skills Coverage" }),
+              /* @__PURE__ */ jsx("div", { className: "progress-bar", children: /* @__PURE__ */ jsx(
+                "div",
+                {
+                  className: "progress-fill",
+                  style: { width: `${results.atsScore.breakdown.skillsCoverage / 30 * 100}%` }
+                }
+              ) }),
+              /* @__PURE__ */ jsxs("span", { className: "score-value", children: [
+                results.atsScore.breakdown.skillsCoverage,
+                "/30"
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxs("div", { className: "breakdown-item", children: [
+              /* @__PURE__ */ jsx("span", { children: "Experience Alignment" }),
+              /* @__PURE__ */ jsx("div", { className: "progress-bar", children: /* @__PURE__ */ jsx(
+                "div",
+                {
+                  className: "progress-fill",
+                  style: { width: `${results.atsScore.breakdown.experienceAlignment / 20 * 100}%` }
+                }
+              ) }),
+              /* @__PURE__ */ jsxs("span", { className: "score-value", children: [
+                results.atsScore.breakdown.experienceAlignment,
+                "/20"
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxs("div", { className: "breakdown-item", children: [
+              /* @__PURE__ */ jsx("span", { children: "ATS Formatting" }),
+              /* @__PURE__ */ jsx("div", { className: "progress-bar", children: /* @__PURE__ */ jsx(
+                "div",
+                {
+                  className: "progress-fill",
+                  style: { width: `${results.atsScore.breakdown.atsFormatting / 10 * 100}%` }
+                }
+              ) }),
+              /* @__PURE__ */ jsxs("span", { className: "score-value", children: [
+                results.atsScore.breakdown.atsFormatting,
+                "/10"
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxs("div", { className: "breakdown-item", children: [
+              /* @__PURE__ */ jsx("span", { children: "Resume Quality" }),
+              /* @__PURE__ */ jsx("div", { className: "progress-bar", children: /* @__PURE__ */ jsx(
+                "div",
+                {
+                  className: "progress-fill",
+                  style: { width: `${results.atsScore.breakdown.resumeQuality / 10 * 100}%` }
+                }
+              ) }),
+              /* @__PURE__ */ jsxs("span", { className: "score-value", children: [
+                results.atsScore.breakdown.resumeQuality,
+                "/10"
+              ] })
+            ] })
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "analysis-grid", children: [
+        /* @__PURE__ */ jsxs("div", { className: "analysis-card", children: [
+          /* @__PURE__ */ jsx("h3", { children: "Job Match" }),
+          /* @__PURE__ */ jsx("div", { className: "match-display", children: /* @__PURE__ */ jsxs("div", { className: "match-circle", style: { color: getScoreColor2(results.jobMatch.overall) }, children: [
+            results.jobMatch.overall,
+            "%"
+          ] }) }),
+          /* @__PURE__ */ jsx("p", { children: results.jobMatch.interpretation }),
+          /* @__PURE__ */ jsxs("div", { className: "match-breakdown", children: [
+            /* @__PURE__ */ jsxs("div", { className: "match-item", children: [
+              /* @__PURE__ */ jsx("span", { children: "Skill Match" }),
+              /* @__PURE__ */ jsxs("span", { className: "match-percent", children: [
+                results.jobMatch.skillMatch,
+                "%"
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxs("div", { className: "match-item", children: [
+              /* @__PURE__ */ jsx("span", { children: "Responsibility Match" }),
+              /* @__PURE__ */ jsxs("span", { className: "match-percent", children: [
+                results.jobMatch.responsibilityMatch,
+                "%"
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxs("div", { className: "match-item", children: [
+              /* @__PURE__ */ jsx("span", { children: "Experience Match" }),
+              /* @__PURE__ */ jsxs("span", { className: "match-percent", children: [
+                results.jobMatch.experienceMatch,
+                "%"
+              ] })
+            ] })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "analysis-card", children: [
+          /* @__PURE__ */ jsx("h3", { children: "Interview Probability" }),
+          /* @__PURE__ */ jsx("div", { className: "probability-display", children: /* @__PURE__ */ jsxs(
+            "div",
+            {
+              className: "probability-circle",
+              style: { color: getScoreColor2(results.interviewProbability.probability) },
+              children: [
+                results.interviewProbability.probability,
+                "%"
+              ]
+            }
+          ) }),
+          /* @__PURE__ */ jsxs("div", { className: "recommendation-box", style: {
+            borderLeft: `4px solid ${getScoreColor2(results.interviewProbability.probability)}`
+          }, children: [
+            /* @__PURE__ */ jsx("h4", { children: results.interviewProbability.recommendation.action }),
+            /* @__PURE__ */ jsx("p", { children: results.interviewProbability.recommendation.reasoning }),
+            /* @__PURE__ */ jsxs("p", { className: "next-step", children: [
+              /* @__PURE__ */ jsx("strong", { children: "Next:" }),
+              " ",
+              results.interviewProbability.recommendation.next
+            ] })
           ] }),
-          /* @__PURE__ */ jsx("span", { children: rec })
-        ] }, i)) })
+          /* @__PURE__ */ jsxs("div", { className: "timeline", children: [
+            /* @__PURE__ */ jsxs("span", { children: [
+              "⏱️ ",
+              results.interviewProbability.timeline.estimatedDaysToResponse,
+              " days expected response"
+            ] }),
+            /* @__PURE__ */ jsxs("span", { children: [
+              "📊 Confidence: ",
+              results.interviewProbability.timeline.confidenceLevel
+            ] })
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "keywords-section", children: [
+        /* @__PURE__ */ jsx("h3", { children: "Keyword Analysis" }),
+        /* @__PURE__ */ jsxs("div", { className: "keywords-grid", children: [
+          /* @__PURE__ */ jsxs("div", { className: "keywords-group", children: [
+            /* @__PURE__ */ jsxs("h4", { children: [
+              "✓ Found Keywords (",
+              results.keywords.found.length,
+              ")"
+            ] }),
+            /* @__PURE__ */ jsx("div", { className: "keywords-list", children: results.keywords.found.map((kw, i) => /* @__PURE__ */ jsx("span", { className: "keyword found", children: kw }, i)) })
+          ] }),
+          /* @__PURE__ */ jsxs("div", { className: "keywords-group", children: [
+            /* @__PURE__ */ jsxs("h4", { children: [
+              "✗ Missing Keywords (",
+              results.keywords.missing.length,
+              ")"
+            ] }),
+            /* @__PURE__ */ jsx("div", { className: "keywords-list", children: results.keywords.missing.map((kw, i) => /* @__PURE__ */ jsx("span", { className: "keyword missing", children: kw }, i)) })
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "enhancement-status", children: [
+        analyzing && /* @__PURE__ */ jsxs("div", { className: "optimizing-banner", children: [
+          /* @__PURE__ */ jsx("div", { className: "spinner" }),
+          /* @__PURE__ */ jsx("span", { children: "🤖 AI is analyzing your resume... Optimizing for this job..." })
+        ] }),
+        enhancedResume && /* @__PURE__ */ jsx("div", { className: "enhanced-ready-banner", children: /* @__PURE__ */ jsx("span", { children: '✅ Enhanced resume ready! Check the "Enhanced" tab for improvements' }) })
+      ] })
+    ] }),
+    activeTab === "enhanced" && enhancedResume && /* @__PURE__ */ jsxs("div", { className: "ats-enhanced-section", children: [
+      /* @__PURE__ */ jsxs("div", { className: "enhancement-comparison", children: [
+        /* @__PURE__ */ jsx("h3", { children: "Improvement Summary" }),
+        /* @__PURE__ */ jsxs("div", { className: "comparison-grid", children: [
+          /* @__PURE__ */ jsxs("div", { className: "comparison-item", children: [
+            /* @__PURE__ */ jsx("span", { className: "label", children: "ATS Score" }),
+            /* @__PURE__ */ jsxs("div", { className: "before-after", children: [
+              /* @__PURE__ */ jsx("span", { className: "before", children: enhancedResume.comparison.before.atsScore }),
+              /* @__PURE__ */ jsx("span", { className: "arrow", children: "→" }),
+              /* @__PURE__ */ jsx("span", { className: "after", children: enhancedResume.comparison.after.atsScore })
+            ] }),
+            /* @__PURE__ */ jsxs("span", { className: "gain", children: [
+              "+",
+              enhancedResume.comparison.improvement.atsScoreGain,
+              " points"
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxs("div", { className: "comparison-item", children: [
+            /* @__PURE__ */ jsx("span", { className: "label", children: "Interview Probability" }),
+            /* @__PURE__ */ jsxs("div", { className: "before-after", children: [
+              /* @__PURE__ */ jsxs("span", { className: "before", children: [
+                enhancedResume.comparison.before.interviewProbability,
+                "%"
+              ] }),
+              /* @__PURE__ */ jsx("span", { className: "arrow", children: "→" }),
+              /* @__PURE__ */ jsxs("span", { className: "after", children: [
+                enhancedResume.comparison.after.interviewProbability,
+                "%"
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxs("span", { className: "gain", children: [
+              "+",
+              enhancedResume.comparison.improvement.probabilityGain,
+              "%"
+            ] })
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "enhancement-details", children: [
+        /* @__PURE__ */ jsx("h3", { children: "What Was Enhanced" }),
+        /* @__PURE__ */ jsx("ul", { className: "enhancement-notes", children: enhancedResume.enhancement.notes.map((note, i) => /* @__PURE__ */ jsx("li", { children: note }, i)) })
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "enhanced-resume-box", children: [
+        /* @__PURE__ */ jsx("h3", { children: "Enhanced Resume" }),
+        /* @__PURE__ */ jsx("div", { className: "enhanced-content", children: /* @__PURE__ */ jsx("pre", { children: enhancedResume.enhancement.enhancedResume }) }),
+        /* @__PURE__ */ jsx(
+          "button",
+          {
+            className: "btn-copy",
+            onClick: () => {
+              navigator.clipboard.writeText(enhancedResume.enhancement.enhancedResume);
+              alert("Enhanced resume copied to clipboard!");
+            },
+            children: "📋 Copy Enhanced Resume"
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "next-steps", children: [
+        /* @__PURE__ */ jsx("h3", { children: "Next Steps" }),
+        /* @__PURE__ */ jsxs("ol", { children: [
+          /* @__PURE__ */ jsx("li", { children: "Copy the enhanced resume above" }),
+          /* @__PURE__ */ jsx("li", { children: "Apply to the job with the optimized version" }),
+          /* @__PURE__ */ jsx("li", { children: "Use the original for other jobs to maintain authenticity" })
+        ] })
       ] })
     ] })
-  ] });
+  ] }) });
 }
 function JobAnalyzer() {
   const [jobDescription, setJobDescription] = useState("");
@@ -8315,6 +8995,103 @@ function TuneAndPolishTrack() {
     ] })
   ] });
 }
+function useUserProgress(contextKey, defaultData = {}) {
+  const { isAuthenticated } = useAuthStore();
+  const [data, setData] = useState(defaultData);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState(null);
+  const saveTimer = useRef(null);
+  const pendingRef = useRef(null);
+  const [isReady, setIsReady] = useState(false);
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setIsLoading(false);
+      setIsReady(false);
+      return;
+    }
+    let cancelled = false;
+    setIsLoading(true);
+    setIsReady(false);
+    setError(null);
+    api.get(`/progress/${contextKey}`).then(({ data: res }) => {
+      if (cancelled) return;
+      const stored = (res == null ? void 0 : res.data) && Object.keys(res.data).length > 0 ? res.data : defaultData;
+      setData(stored);
+      setIsReady(true);
+    }).catch((err) => {
+      if (cancelled) return;
+      console.error(`Failed to load progress (${contextKey}):`, err);
+      setData(defaultData);
+      setIsReady(true);
+      setError("Could not load your saved progress.");
+    }).finally(() => {
+      if (!cancelled) setIsLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [contextKey, isAuthenticated]);
+  const flushSave = useCallback(async (payload) => {
+    if (!isAuthenticated || !isReady) return;
+    setIsSaving(true);
+    try {
+      await api.put(`/progress/${contextKey}`, { data: payload });
+      setError(null);
+    } catch (err) {
+      console.error(`Failed to save progress (${contextKey}):`, err);
+      setError("Failed to save progress. Changes will retry on next edit.");
+    } finally {
+      setIsSaving(false);
+    }
+  }, [contextKey, isAuthenticated, isReady]);
+  const scheduleSave = useCallback((payload) => {
+    pendingRef.current = payload;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      if (pendingRef.current) {
+        flushSave(pendingRef.current);
+        pendingRef.current = null;
+      }
+    }, 700);
+  }, [flushSave]);
+  const updateProgress = useCallback((updater) => {
+    setData((prev) => {
+      const next = typeof updater === "function" ? updater(prev) : { ...prev, ...updater };
+      scheduleSave(next);
+      return next;
+    });
+  }, [scheduleSave]);
+  const replaceProgress = useCallback((next) => {
+    setData(next);
+    scheduleSave(next);
+  }, [scheduleSave]);
+  useEffect(() => () => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+  }, []);
+  return {
+    data,
+    setData: replaceProgress,
+    updateProgress,
+    isLoading,
+    isSaving,
+    error,
+    isReady: !isLoading && isReady
+  };
+}
+const DEFAULT_TUTOR_MESSAGE = {
+  role: "assistant",
+  content: "Hi! I'm your AI Tutor. Ask me to explain any concept from your roadmap!"
+};
+const ZERO_TO_HERO_DEFAULTS = {
+  step: "intro",
+  collectedData: {},
+  wizardCurrentQIndex: 0,
+  wizardMessages: [],
+  expandedPhases: {},
+  messages: [DEFAULT_TUTOR_MESSAGE],
+  targetRole: ""
+};
 const WIZARD_QUESTIONS = [
   {
     id: "role",
@@ -8368,21 +9145,23 @@ const WIZARD_QUESTIONS = [
 ];
 function ZeroToHeroTrack() {
   var _a, _b;
-  const [step, setStep] = useState("intro");
+  const { data: progress, updateProgress, isLoading: progressLoading, isSaving } = useUserProgress(
+    "zero-to-hero",
+    ZERO_TO_HERO_DEFAULTS
+  );
+  const step = progress.step;
+  const collectedData = progress.collectedData;
+  const wizardCurrentQIndex = progress.wizardCurrentQIndex;
+  const wizardMessages = progress.wizardMessages;
+  const expandedPhases = progress.expandedPhases;
+  const messages = progress.messages;
+  const targetRole = progress.targetRole;
   const [roadmap, setRoadmap] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [expandedPhases, setExpandedPhases] = useState({});
-  const [targetRole, setTargetRole] = useState("");
-  const [wizardMessages, setWizardMessages] = useState([]);
-  const [wizardCurrentQIndex, setWizardCurrentQIndex] = useState(0);
   const [wizardInput, setWizardInput] = useState("");
   const [isBotTyping, setIsBotTyping] = useState(false);
-  const [collectedData, setCollectedData] = useState({});
   const chatEndRef = useRef(null);
   const [chatInput, setChatInput] = useState("");
-  const [messages, setMessages] = useState([
-    { role: "assistant", content: "Hi! I'm your AI Tutor. Ask me to explain any concept from your roadmap!" }
-  ]);
   const [chatLoading, setChatLoading] = useState(false);
   useEffect(() => {
     loadSavedRoadmap();
@@ -8392,6 +9171,9 @@ function ZeroToHeroTrack() {
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [wizardMessages, isBotTyping, step]);
+  if (progressLoading) {
+    return /* @__PURE__ */ jsx("div", { className: "max-w-7xl mx-auto px-4 py-24 flex justify-center", children: /* @__PURE__ */ jsx(Loader2, { className: "w-8 h-8 animate-spin text-emerald-600" }) });
+  }
   async function loadSavedRoadmap() {
     try {
       const { data } = await api.get("/career/roadmap");
@@ -8402,15 +9184,27 @@ function ZeroToHeroTrack() {
     }
   }
   const startWizard = () => {
-    setStep("chat-wizard");
+    updateProgress({
+      step: "chat-wizard",
+      wizardCurrentQIndex: 0,
+      collectedData: {},
+      wizardMessages: [],
+      targetRole: ""
+    });
     setIsBotTyping(true);
     setTimeout(() => {
       setIsBotTyping(false);
-      setWizardMessages([{ role: "bot", text: "Welcome to your personal career prep journey! Let's build a roadmap tailored just for you." }]);
+      updateProgress((p) => ({
+        ...p,
+        wizardMessages: [{ role: "bot", text: "Welcome to your personal career prep journey! Let's build a roadmap tailored just for you." }]
+      }));
       setIsBotTyping(true);
       setTimeout(() => {
         setIsBotTyping(false);
-        setWizardMessages((prev) => [...prev, { role: "bot", text: WIZARD_QUESTIONS[0].text }]);
+        updateProgress((p) => ({
+          ...p,
+          wizardMessages: [...p.wizardMessages, { role: "bot", text: WIZARD_QUESTIONS[0].text }]
+        }));
       }, 1e3);
     }, 1500);
   };
@@ -8418,27 +9212,43 @@ function ZeroToHeroTrack() {
     if (e) e.preventDefault();
     const answer = val !== null ? val : wizardInput;
     if (!answer.trim()) return;
-    setWizardMessages((prev) => [...prev, { role: "user", text: answer }]);
+    updateProgress((p) => ({
+      ...p,
+      wizardMessages: [...p.wizardMessages, { role: "user", text: answer }]
+    }));
     setWizardInput("");
     const currentQ = WIZARD_QUESTIONS[wizardCurrentQIndex];
     const newData = { ...collectedData, [currentQ.id]: answer };
-    setCollectedData(newData);
-    if (currentQ.id === "role") {
-      setTargetRole(answer);
-    }
+    const roleUpdate = currentQ.id === "role" ? { targetRole: answer } : {};
     const nextIndex = wizardCurrentQIndex + 1;
     if (nextIndex < WIZARD_QUESTIONS.length) {
-      setWizardCurrentQIndex(nextIndex);
+      updateProgress((p) => ({
+        ...p,
+        collectedData: newData,
+        wizardCurrentQIndex: nextIndex,
+        ...roleUpdate
+      }));
       setIsBotTyping(true);
       setTimeout(() => {
         setIsBotTyping(false);
-        setWizardMessages((prev) => [...prev, { role: "bot", text: WIZARD_QUESTIONS[nextIndex].text }]);
+        updateProgress((p) => ({
+          ...p,
+          wizardMessages: [...p.wizardMessages, { role: "bot", text: WIZARD_QUESTIONS[nextIndex].text }]
+        }));
       }, 1e3);
     } else {
+      updateProgress((p) => ({
+        ...p,
+        collectedData: newData,
+        ...roleUpdate
+      }));
       setIsBotTyping(true);
       setTimeout(() => {
         setIsBotTyping(false);
-        setWizardMessages((prev) => [...prev, { role: "bot", text: "Perfect! I have all the details I need. Generating your custom roadmap..." }]);
+        updateProgress((p) => ({
+          ...p,
+          wizardMessages: [...p.wizardMessages, { role: "bot", text: "Perfect! I have all the details I need. Generating your custom roadmap..." }]
+        }));
         setTimeout(() => {
           generateRoadmap(newData);
         }, 1500);
@@ -8447,7 +9257,7 @@ function ZeroToHeroTrack() {
   };
   const generateRoadmap = async (data) => {
     setLoading(true);
-    setStep("generating");
+    updateProgress({ step: "generating" });
     try {
       const res = await api.post("/career/roadmap", {
         currentRole: data.knowledge || "Beginner",
@@ -8456,11 +9266,10 @@ function ZeroToHeroTrack() {
         timeframe: data.monthsToPrepare ? `${data.monthsToPrepare} months` : "6 months"
       });
       setRoadmap(res.data);
-      setStep("display");
-      setExpandedPhases({});
+      updateProgress({ step: "display", expandedPhases: {} });
     } catch (err) {
       console.error(err);
-      setStep("intro");
+      updateProgress({ step: "intro" });
     } finally {
       setLoading(false);
     }
@@ -8469,7 +9278,8 @@ function ZeroToHeroTrack() {
     e.preventDefault();
     if (!chatInput.trim()) return;
     const userMsg = { role: "user", content: chatInput };
-    setMessages((prev) => [...prev, userMsg]);
+    const historyWithUser = [...messages, userMsg];
+    updateProgress({ messages: historyWithUser });
     setChatInput("");
     setChatLoading(true);
     try {
@@ -8477,22 +9287,31 @@ function ZeroToHeroTrack() {
         message: userMsg.content,
         history: messages
       });
-      setMessages((prev) => [...prev, { role: "assistant", content: res.data.data.reply }]);
+      updateProgress({
+        messages: [...historyWithUser, { role: "assistant", content: res.data.data.reply }]
+      });
     } catch (err) {
-      setMessages((prev) => [...prev, { role: "assistant", content: "Sorry, I couldn't process that right now." }]);
+      updateProgress({
+        messages: [...historyWithUser, { role: "assistant", content: "Sorry, I couldn't process that right now." }]
+      });
     } finally {
       setChatLoading(false);
     }
   };
   const togglePhase = (idx) => {
-    setExpandedPhases((prev) => ({ ...prev, [idx]: !prev[idx] }));
+    updateProgress({
+      expandedPhases: { ...expandedPhases, [idx]: !expandedPhases[idx] }
+    });
   };
   return /* @__PURE__ */ jsxs("div", { className: "max-w-7xl mx-auto px-4 py-8", children: [
     /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 mb-8", children: [
       /* @__PURE__ */ jsx("div", { className: "p-4 bg-emerald-100 text-emerald-600 rounded-2xl shadow-inner shadow-emerald-200/50", children: /* @__PURE__ */ jsx(Rocket, { className: "w-8 h-8" }) }),
       /* @__PURE__ */ jsxs("div", { children: [
         /* @__PURE__ */ jsx("h1", { className: "text-3xl font-black text-slate-900 tracking-tight", children: "Zero to Hero Track" }),
-        /* @__PURE__ */ jsx("p", { className: "text-slate-500 mt-1 text-lg", children: "Your complete guided journey from beginner to hired." })
+        /* @__PURE__ */ jsxs("p", { className: "text-slate-500 mt-1 text-lg", children: [
+          "Your complete guided journey from beginner to hired.",
+          isSaving && /* @__PURE__ */ jsx("span", { className: "ml-2 text-emerald-600 text-sm", children: "Saving…" })
+        ] })
       ] })
     ] }),
     step === "intro" && /* @__PURE__ */ jsx("div", { className: "max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700", children: /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-10 border border-white/50 relative overflow-hidden group bg-white shadow-xl shadow-slate-200/50", children: [
@@ -8528,7 +9347,7 @@ function ZeroToHeroTrack() {
             roadmap && /* @__PURE__ */ jsxs(
               "button",
               {
-                onClick: () => setStep("display"),
+                onClick: () => updateProgress({ step: "display" }),
                 className: "flex items-center justify-center gap-2 px-8 py-4 bg-emerald-600 text-white rounded-2xl font-bold text-lg hover:bg-emerald-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-emerald-900/20",
                 children: [
                   /* @__PURE__ */ jsx(Play, { className: "w-5 h-5 fill-current" }),
@@ -8701,25 +9520,38 @@ function ZeroToHeroTrack() {
     ] })
   ] });
 }
-function LearnAndBuildTrack() {
-  var _a, _b, _c, _d, _e, _f;
-  const [targetRole, setTargetRole] = useState("");
-  const [currentSkills, setCurrentSkills] = useState("");
-  const [loadingProjects, setLoadingProjects] = useState(false);
-  const [projectIdeas, setProjectIdeas] = useState([]);
-  const [tasks, setTasks] = useState([
+const LEARN_BUILD_DEFAULTS = {
+  targetRole: "",
+  currentSkills: "",
+  projectIdeas: [],
+  tasks: [
     { id: "t1", title: "Personal Portfolio", status: "done" },
     { id: "t2", title: "React Weather App", status: "in-progress" }
-  ]);
+  ]
+};
+function LearnAndBuildTrack() {
+  var _a, _b, _c, _d, _e, _f;
+  const { data: progress, updateProgress, isLoading: progressLoading, isSaving } = useUserProgress(
+    "learn-and-build",
+    LEARN_BUILD_DEFAULTS
+  );
+  const targetRole = progress.targetRole;
+  const currentSkills = progress.currentSkills;
+  const projectIdeas = progress.projectIdeas;
+  const tasks = progress.tasks;
+  const [loadingProjects, setLoadingProjects] = useState(false);
   const [activeBlueprint, setActiveBlueprint] = useState(null);
   const [loadingBlueprint, setLoadingBlueprint] = useState(false);
+  if (progressLoading) {
+    return /* @__PURE__ */ jsx("div", { className: "max-w-7xl mx-auto px-4 py-24 flex justify-center", children: /* @__PURE__ */ jsx(Loader2, { className: "w-8 h-8 animate-spin text-orange-600" }) });
+  }
   const handleGenerateProjects = async (e) => {
     e.preventDefault();
     if (!targetRole.trim()) return;
     setLoadingProjects(true);
     try {
       const res = await api.post("/job-prep/projects", { role: targetRole, skills: currentSkills });
-      setProjectIdeas(res.data.data.projects);
+      updateProgress({ projectIdeas: res.data.data.projects });
     } catch (err) {
       console.error(err);
     } finally {
@@ -8737,7 +9569,9 @@ function LearnAndBuildTrack() {
         blueprint: res.data.data.blueprint
       });
       if (!tasks.find((t) => t.title === project.title)) {
-        setTasks((prev) => [...prev, { id: Date.now().toString(), title: project.title, status: "todo" }]);
+        updateProgress({
+          tasks: [...tasks, { id: Date.now().toString(), title: project.title, status: "todo" }]
+        });
       }
     } catch (err) {
       setActiveBlueprint(null);
@@ -8750,7 +9584,9 @@ function LearnAndBuildTrack() {
   };
   const handleDrop = (e, status) => {
     const id = e.dataTransfer.getData("taskId");
-    setTasks((prev) => prev.map((t) => t.id === id ? { ...t, status } : t));
+    updateProgress({
+      tasks: tasks.map((t) => t.id === id ? { ...t, status } : t)
+    });
   };
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -8759,7 +9595,10 @@ function LearnAndBuildTrack() {
     /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 mb-8", children: [
       /* @__PURE__ */ jsx("div", { className: "p-4 bg-orange-100 text-orange-600 rounded-2xl", children: /* @__PURE__ */ jsx(Wrench, { className: "w-8 h-8" }) }),
       /* @__PURE__ */ jsxs("div", { children: [
-        /* @__PURE__ */ jsx("h1", { className: "text-3xl font-black text-slate-900", children: "Learn & Build Track" }),
+        /* @__PURE__ */ jsxs("h1", { className: "text-3xl font-black text-slate-900", children: [
+          "Learn & Build Track",
+          isSaving && /* @__PURE__ */ jsx("span", { className: "ml-2 text-orange-600 text-sm font-semibold", children: "Saving…" })
+        ] }),
         /* @__PURE__ */ jsx("p", { className: "text-slate-500 mt-1 text-lg", children: "Build hyper-targeted projects to fill your resume skill gaps." })
       ] })
     ] }),
@@ -8779,7 +9618,7 @@ function LearnAndBuildTrack() {
                 {
                   type: "text",
                   value: targetRole,
-                  onChange: (e) => setTargetRole(e.target.value),
+                  onChange: (e) => updateProgress({ targetRole: e.target.value }),
                   placeholder: "e.g. React Developer",
                   className: "w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-orange-500"
                 }
@@ -8792,7 +9631,7 @@ function LearnAndBuildTrack() {
                 {
                   type: "text",
                   value: currentSkills,
-                  onChange: (e) => setCurrentSkills(e.target.value),
+                  onChange: (e) => updateProgress({ currentSkills: e.target.value }),
                   placeholder: "e.g. HTML, CSS, JS",
                   className: "w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-orange-500"
                 }
@@ -8963,6 +9802,39 @@ function LearnAndBuildTrack() {
     ] }) })
   ] });
 }
+function SessionBlocked() {
+  const { sessionBlockedMessage, clearSessionBlocked, logout } = useAuthStore();
+  const handleSignInAgain = async () => {
+    clearSessionBlocked();
+    await logout();
+    window.location.href = "/login";
+  };
+  return /* @__PURE__ */ jsx("div", { className: "min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950 p-6", children: /* @__PURE__ */ jsxs("div", { className: "max-w-md w-full text-center glass-card rounded-3xl p-10 border border-rose-200/50 dark:border-rose-900/40", children: [
+    /* @__PURE__ */ jsx("div", { className: "inline-flex items-center justify-center w-20 h-20 rounded-full bg-rose-100 dark:bg-rose-900/30 mb-6", children: /* @__PURE__ */ jsx(MonitorOff, { className: "w-10 h-10 text-rose-600 dark:text-rose-400" }) }),
+    /* @__PURE__ */ jsx("h1", { className: "text-2xl font-black text-slate-900 dark:text-white mb-3", children: "Session ended" }),
+    /* @__PURE__ */ jsx("p", { className: "text-slate-600 dark:text-slate-400 mb-8 leading-relaxed", children: sessionBlockedMessage || "This account is only allowed on one device at a time. It was signed in elsewhere, so this session was closed." }),
+    /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500 mb-8", children: "To prevent account sharing, JobTune allows a single active session per user." }),
+    /* @__PURE__ */ jsxs(
+      "button",
+      {
+        onClick: handleSignInAgain,
+        className: "w-full py-3.5 px-6 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 mb-3",
+        children: [
+          /* @__PURE__ */ jsx(LogIn, { className: "w-5 h-5" }),
+          "Sign in on this device"
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsx(
+      Link,
+      {
+        to: "/",
+        className: "block text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors",
+        children: "Back to home"
+      }
+    )
+  ] }) });
+}
 function ProtectedRoute({ children, requireOnboarding = false }) {
   const { isAuthenticated, hasCompletedOnboarding } = useAuthStore();
   const { onboardingComplete } = useSubscriptionStore();
@@ -8993,17 +9865,15 @@ function ProtectedToolRoute({ children, toolPath }) {
   return /* @__PURE__ */ jsx(PlanGate, { toolName, requiredPlan, children });
 }
 function App() {
-  const { checkAuth, isLoading, markOnboardingComplete } = useAuthStore();
-  const { checkOnboarded, onboardingComplete } = useSubscriptionStore();
+  const { checkAuth, isLoading, sessionBlocked } = useAuthStore();
+  const { checkOnboarded } = useSubscriptionStore();
   useEffect(() => {
     if (!isBrowser) return;
-    checkAuth();
-    checkOnboarded();
+    checkAuth().then(() => checkOnboarded());
   }, [checkAuth, checkOnboarded]);
-  useEffect(() => {
-    if (!isBrowser || !onboardingComplete) return;
-    markOnboardingComplete();
-  }, [onboardingComplete, markOnboardingComplete]);
+  if (isBrowser && sessionBlocked) {
+    return /* @__PURE__ */ jsx(SessionBlocked, {});
+  }
   if (isBrowser && isLoading) {
     return /* @__PURE__ */ jsx("div", { className: "min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50", children: /* @__PURE__ */ jsxs("div", { className: "text-center", children: [
       /* @__PURE__ */ jsx("div", { className: "inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 mb-4 animate-spin", children: /* @__PURE__ */ jsx("div", { className: "w-8 h-8 rounded-full border-2 border-white border-t-transparent" }) }),
@@ -9052,6 +9922,7 @@ function App() {
       /* @__PURE__ */ jsx(Route, { path: "career", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/career", children: /* @__PURE__ */ jsx(CareerRoadmap, {}) }) }),
       /* @__PURE__ */ jsx(Route, { path: "job-analyzer", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/job-analyzer", children: /* @__PURE__ */ jsx(JobAnalyzer, {}) }) }),
       /* @__PURE__ */ jsx(Route, { path: "ats-checker", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/ats-checker", children: /* @__PURE__ */ jsx(ATSChecker, {}) }) }),
+      /* @__PURE__ */ jsx(Route, { path: "ats-checker-v2", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/ats-checker", children: /* @__PURE__ */ jsx(ATSCheckerV2, {}) }) }),
       /* @__PURE__ */ jsx(Route, { path: "job-fit", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/job-fit", children: /* @__PURE__ */ jsx(JobFitAnalysis, {}) }) }),
       /* @__PURE__ */ jsx(Route, { path: "cover-letter", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/cover-letter", children: /* @__PURE__ */ jsx(CoverLetterGenerator, {}) }) }),
       /* @__PURE__ */ jsx(
@@ -9109,6 +9980,7 @@ function buildHeadTags(pathname) {
 function resetStoresForSsr() {
   useAuthStore.setState({
     user: null,
+    sessionId: null,
     isAuthenticated: false,
     isLoading: false,
     error: null,

@@ -8,7 +8,7 @@ const router = express.Router();
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
-const auth = require('../middleware/auth');
+const { authenticateToken: auth } = require('../middleware/auth');
 
 // V2 Services
 const ResumeAnalysisEngine = require('../services/v2/resumeAnalysisEngine');
