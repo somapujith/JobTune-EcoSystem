@@ -28,6 +28,7 @@ import ResumeComparison from './pages/ResumeComparison';
 import ResumeSend from './pages/ResumeSend';
 import CareerRoadmap from './pages/CareerRoadmap';
 import ATSChecker from './pages/ATSChecker';
+import ATSCheckerV2 from './pages/ATSCheckerV2';
 import JobAnalyzer from './pages/JobAnalyzer';
 import CoverLetterGenerator from './pages/CoverLetterGenerator';
 import EvidenceDashboard from './pages/EvidenceDashboard';
@@ -163,6 +164,7 @@ function App() {
           <Route path="career" element={<ProtectedToolRoute toolPath="/career"><CareerRoadmap /></ProtectedToolRoute>} />
           <Route path="job-analyzer" element={<ProtectedToolRoute toolPath="/job-analyzer"><JobAnalyzer /></ProtectedToolRoute>} />
           <Route path="ats-checker" element={<ProtectedToolRoute toolPath="/ats-checker"><ATSChecker /></ProtectedToolRoute>} />
+          <Route path="ats-checker-v2" element={<ProtectedToolRoute toolPath="/ats-checker"><ATSCheckerV2 /></ProtectedToolRoute>} />
           <Route path="job-fit" element={<ProtectedToolRoute toolPath="/job-fit"><JobFitAnalysis /></ProtectedToolRoute>} />
           <Route path="cover-letter" element={<ProtectedToolRoute toolPath="/cover-letter"><CoverLetterGenerator /></ProtectedToolRoute>} />
           <Route
