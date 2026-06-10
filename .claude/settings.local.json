@@ -25,7 +25,9 @@
       "Bash(npm start *)",
       "PowerShell(\"Backend killed\")",
       "PowerShell(\"Killed\")",
-      "Bash(node -c src/routes/atsCheckerV2.js)"
+      "Bash(node -c src/routes/atsCheckerV2.js)",
+      "PowerShell(Get-Process npm -ErrorAction SilentlyContinue)",
+      "PowerShell(\"? All processes killed\")"
     ]
   }
 }
