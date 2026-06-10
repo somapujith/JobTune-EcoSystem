@@ -5,7 +5,6 @@ import './ATSCheckerV2.css';
 export default function ATSCheckerV2() {
   const [resumeFile, setResumeFile] = useState(null);
   const [resumeFileName, setResumeFileName] = useState('');
-  const [jobDescriptionText, setJobDescriptionText] = useState('');
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [results, setResults] = useState(null);
@@ -34,15 +33,10 @@ export default function ATSCheckerV2() {
     setError('');
   };
 
-  // Immediate ATS check with file upload
+  // Immediate resume analysis
   const handleCheck = async () => {
     if (!resumeFile) {
       setError('Please upload a resume');
-      return;
-    }
-
-    if (!jobDescriptionText.trim()) {
-      setError('Please paste job description');
       return;
     }
 
@@ -65,14 +59,13 @@ export default function ATSCheckerV2() {
 
       const resumeText = parseResponse.data.resumeText;
 
-      // Step 2: Check ATS score
-      const response = await axios.post('/api/ats/v2/check', {
-        resumeText,
-        jobDescriptionText
+      // Step 2: Analyze resume (general ATS quality)
+      const response = await axios.post('/api/resume/v2/analyze', {
+        resumeText
       });
 
       if (response.data.status === 'success') {
-        setResults(response.data.analysis);
+        setResults(response.data);
         setActiveTab('results');
 
         // Start background enhancement immediately
@@ -80,8 +73,8 @@ export default function ATSCheckerV2() {
         enhanceResumeBackground(resumeText);
       }
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'ATS check failed');
-      console.error('ATS check error:', err);
+      setError(err.response?.data?.message || err.message || 'Analysis failed');
+      console.error('Analysis error:', err);
     } finally {
       setLoading(false);
     }
@@ -90,9 +83,8 @@ export default function ATSCheckerV2() {
   // Background enhancement (non-blocking)
   const enhanceResumeBackground = async (resumeText) => {
     try {
-      const response = await axios.post('/api/ats/v2/enhance', {
-        resumeText,
-        jobDescriptionText
+      const response = await axios.post('/api/resume/v2/optimize', {
+        resumeText
       });
 
       if (response.data.status === 'success') {
@@ -158,10 +150,10 @@ export default function ATSCheckerV2() {
         {/* INPUT TAB */}
         {activeTab === 'input' && (
           <div className="ats-input-section">
-            <div className="input-grid">
+            <div className="input-single">
               {/* Resume File Upload */}
               <div className="input-group">
-                <label htmlFor="resume">Upload Resume</label>
+                <label htmlFor="resume">Upload Your Resume</label>
                 <div className="file-upload-box">
                   <input
                     id="resume"
@@ -175,7 +167,7 @@ export default function ATSCheckerV2() {
                       <>
                         <span className="file-icon">📄</span>
                         <span className="file-name">{resumeFileName}</span>
-                        <span className="file-info">Click to change</span>
+                        <span className="file-info">Click to change file</span>
                       </>
                     ) : (
                       <>
@@ -187,19 +179,6 @@ export default function ATSCheckerV2() {
                   </label>
                 </div>
               </div>
-
-              {/* Job Description Input */}
-              <div className="input-group">
-                <label htmlFor="jd">Job Description</label>
-                <textarea
-                  id="jd"
-                  placeholder="Paste the job description here..."
-                  value={jobDescriptionText}
-                  onChange={(e) => setJobDescriptionText(e.target.value)}
-                  rows={10}
-                />
-                <span className="char-count">{jobDescriptionText.length} characters</span>
-              </div>
             </div>
 
             {error && <div className="error-message">{error}</div>}
@@ -207,15 +186,15 @@ export default function ATSCheckerV2() {
             <button
               className="btn-check"
               onClick={handleCheck}
-              disabled={loading || !resumeFile || !jobDescriptionText.trim()}
+              disabled={loading || !resumeFile}
             >
               {loading ? (
                 <>
                   <span className="spinner"></span>
-                  Analyzing...
+                  Analyzing Resume...
                 </>
               ) : (
-                'Check ATS Score'
+                'Analyze Resume'
               )}
             </button>
           </div>
@@ -319,86 +298,48 @@ export default function ATSCheckerV2() {
               </div>
             </div>
 
-            {/* Job Match & Interview Probability */}
-            <div className="analysis-grid">
-              {/* Job Match Card */}
-              <div className="analysis-card">
-                <h3>Job Match</h3>
-                <div className="match-display">
-                  <div className="match-circle" style={{ color: getScoreColor(results.jobMatch.overall) }}>
-                    {results.jobMatch.overall}%
+            {/* Resume Quality Summary */}
+            {results.analysis?.quality && (
+              <div className="analysis-grid">
+                <div className="analysis-card">
+                  <h3>Resume Quality</h3>
+                  <div className="match-display">
+                    <div className="match-circle" style={{ color: getScoreColor(results.analysis.quality.overallScore * 10) }}>
+                      {Math.round(results.analysis.quality.overallScore * 10)}/10
+                    </div>
                   </div>
-                </div>
-                <p>{results.jobMatch.interpretation}</p>
-
-                <div className="match-breakdown">
-                  <div className="match-item">
-                    <span>Skill Match</span>
-                    <span className="match-percent">{results.jobMatch.skillMatch}%</span>
-                  </div>
-                  <div className="match-item">
-                    <span>Responsibility Match</span>
-                    <span className="match-percent">{results.jobMatch.responsibilityMatch}%</span>
-                  </div>
-                  <div className="match-item">
-                    <span>Experience Match</span>
-                    <span className="match-percent">{results.jobMatch.experienceMatch}%</span>
-                  </div>
+                  <p><strong>{results.analysis.quality.overallQuality}</strong> - This resume demonstrates {results.analysis.quality.overallQuality.toLowerCase()} ATS compatibility</p>
                 </div>
               </div>
+            )}
 
-              {/* Interview Probability Card */}
-              <div className="analysis-card">
-                <h3>Interview Probability</h3>
-                <div className="probability-display">
-                  <div
-                    className="probability-circle"
-                    style={{ color: getScoreColor(results.interviewProbability.probability) }}
-                  >
-                    {results.interviewProbability.probability}%
+            {/* Resume Strengths & Gaps */}
+            {results.analysis && (
+              <div className="keywords-section">
+                <h3>Resume Analysis</h3>
+                {results.analysis.keyStrengths && results.analysis.keyStrengths.length > 0 && (
+                  <div className="keywords-group">
+                    <h4>✓ Strengths</h4>
+                    <ul style={{ marginLeft: '20px', color: '#6b7280' }}>
+                      {results.analysis.keyStrengths.map((strength, i) => (
+                        <li key={i}>{strength}</li>
+                      ))}
+                    </ul>
                   </div>
-                </div>
+                )}
 
-                <div className="recommendation-box" style={{
-                  borderLeft: `4px solid ${getScoreColor(results.interviewProbability.probability)}`
-                }}>
-                  <h4>{results.interviewProbability.recommendation.action}</h4>
-                  <p>{results.interviewProbability.recommendation.reasoning}</p>
-                  <p className="next-step">
-                    <strong>Next:</strong> {results.interviewProbability.recommendation.next}
-                  </p>
-                </div>
-
-                <div className="timeline">
-                  <span>⏱️ {results.interviewProbability.timeline.estimatedDaysToResponse} days expected response</span>
-                  <span>📊 Confidence: {results.interviewProbability.timeline.confidenceLevel}</span>
-                </div>
+                {results.analysis.keyWeaknesses && results.analysis.keyWeaknesses.length > 0 && (
+                  <div className="keywords-group">
+                    <h4>⚠️ Areas to Improve</h4>
+                    <ul style={{ marginLeft: '20px', color: '#6b7280' }}>
+                      {results.analysis.keyWeaknesses.map((weakness, i) => (
+                        <li key={i}>{weakness}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
-            </div>
-
-            {/* Keywords Section */}
-            <div className="keywords-section">
-              <h3>Keyword Analysis</h3>
-              <div className="keywords-grid">
-                <div className="keywords-group">
-                  <h4>✓ Found Keywords ({results.keywords.found.length})</h4>
-                  <div className="keywords-list">
-                    {results.keywords.found.map((kw, i) => (
-                      <span key={i} className="keyword found">{kw}</span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="keywords-group">
-                  <h4>✗ Missing Keywords ({results.keywords.missing.length})</h4>
-                  <div className="keywords-list">
-                    {results.keywords.missing.map((kw, i) => (
-                      <span key={i} className="keyword missing">{kw}</span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
 
             {/* AI Enhancement Status */}
             <div className="enhancement-status">

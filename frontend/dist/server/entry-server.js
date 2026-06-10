@@ -7355,46 +7355,71 @@ function ATSChecker() {
   return null;
 }
 function ATSCheckerV2() {
-  const [resumeText, setResumeText] = useState("");
-  const [jobDescriptionText, setJobDescriptionText] = useState("");
+  var _a;
+  const [resumeFile, setResumeFile] = useState(null);
+  const [resumeFileName, setResumeFileName] = useState("");
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [results, setResults] = useState(null);
   const [enhancedResume, setEnhancedResume] = useState(null);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("input");
+  const handleResumeUpload = (e) => {
+    var _a2;
+    const file = (_a2 = e.target.files) == null ? void 0 : _a2[0];
+    if (!file) return;
+    const allowed = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain"];
+    if (!allowed.includes(file.type)) {
+      setError("Only PDF, DOCX, and TXT files allowed");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("File too large (max 5MB)");
+      return;
+    }
+    setResumeFile(file);
+    setResumeFileName(file.name);
+    setError("");
+  };
   const handleCheck = async () => {
-    var _a, _b;
-    if (!resumeText.trim() || !jobDescriptionText.trim()) {
-      setError("Please provide both resume and job description");
+    var _a2, _b;
+    if (!resumeFile) {
+      setError("Please upload a resume");
       return;
     }
     setError("");
     setLoading(true);
     setResults(null);
     try {
-      const response = await axios.post("/api/ats/v2/check", {
-        resumeText,
-        jobDescriptionText
+      const formData = new FormData();
+      formData.append("resume", resumeFile);
+      const parseResponse = await axios.post("/api/ats/v2/parse", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      if (!parseResponse.data.resumeText) {
+        throw new Error("Failed to parse resume");
+      }
+      const resumeText = parseResponse.data.resumeText;
+      const response = await axios.post("/api/resume/v2/analyze", {
+        resumeText
       });
       if (response.data.status === "success") {
-        setResults(response.data.analysis);
+        setResults(response.data);
         setActiveTab("results");
         setAnalyzing(true);
-        enhanceResumeBackground();
+        enhanceResumeBackground(resumeText);
       }
     } catch (err) {
-      setError(((_b = (_a = err.response) == null ? void 0 : _a.data) == null ? void 0 : _b.message) || "ATS check failed");
-      console.error("ATS check error:", err);
+      setError(((_b = (_a2 = err.response) == null ? void 0 : _a2.data) == null ? void 0 : _b.message) || err.message || "Analysis failed");
+      console.error("Analysis error:", err);
     } finally {
       setLoading(false);
     }
   };
-  const enhanceResumeBackground = async () => {
+  const enhanceResumeBackground = async (resumeText) => {
     try {
-      const response = await axios.post("/api/ats/v2/enhance", {
-        resumeText,
-        jobDescriptionText
+      const response = await axios.post("/api/resume/v2/optimize", {
+        resumeText
       });
       if (response.data.status === "success") {
         setEnhancedResume(response.data);
@@ -7456,53 +7481,41 @@ function ATSCheckerV2() {
       )
     ] }),
     activeTab === "input" && /* @__PURE__ */ jsxs("div", { className: "ats-input-section", children: [
-      /* @__PURE__ */ jsxs("div", { className: "input-grid", children: [
-        /* @__PURE__ */ jsxs("div", { className: "input-group", children: [
-          /* @__PURE__ */ jsx("label", { htmlFor: "resume", children: "Your Resume" }),
+      /* @__PURE__ */ jsx("div", { className: "input-single", children: /* @__PURE__ */ jsxs("div", { className: "input-group", children: [
+        /* @__PURE__ */ jsx("label", { htmlFor: "resume", children: "Upload Your Resume" }),
+        /* @__PURE__ */ jsxs("div", { className: "file-upload-box", children: [
           /* @__PURE__ */ jsx(
-            "textarea",
+            "input",
             {
               id: "resume",
-              placeholder: "Paste your resume text here...",
-              value: resumeText,
-              onChange: (e) => setResumeText(e.target.value),
-              rows: 10
+              type: "file",
+              accept: ".pdf,.docx,.txt",
+              onChange: handleResumeUpload,
+              style: { display: "none" }
             }
           ),
-          /* @__PURE__ */ jsxs("span", { className: "char-count", children: [
-            resumeText.length,
-            " characters"
-          ] })
-        ] }),
-        /* @__PURE__ */ jsxs("div", { className: "input-group", children: [
-          /* @__PURE__ */ jsx("label", { htmlFor: "jd", children: "Job Description" }),
-          /* @__PURE__ */ jsx(
-            "textarea",
-            {
-              id: "jd",
-              placeholder: "Paste the job description here...",
-              value: jobDescriptionText,
-              onChange: (e) => setJobDescriptionText(e.target.value),
-              rows: 10
-            }
-          ),
-          /* @__PURE__ */ jsxs("span", { className: "char-count", children: [
-            jobDescriptionText.length,
-            " characters"
-          ] })
+          /* @__PURE__ */ jsx("label", { htmlFor: "resume", className: "file-upload-label", children: resumeFileName ? /* @__PURE__ */ jsxs(Fragment, { children: [
+            /* @__PURE__ */ jsx("span", { className: "file-icon", children: "📄" }),
+            /* @__PURE__ */ jsx("span", { className: "file-name", children: resumeFileName }),
+            /* @__PURE__ */ jsx("span", { className: "file-info", children: "Click to change file" })
+          ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
+            /* @__PURE__ */ jsx("span", { className: "upload-icon", children: "📤" }),
+            /* @__PURE__ */ jsx("span", { className: "upload-text", children: "Click to upload or drag & drop" }),
+            /* @__PURE__ */ jsx("span", { className: "upload-info", children: "PDF, DOCX, or TXT (max 5MB)" })
+          ] }) })
         ] })
-      ] }),
+      ] }) }),
       error && /* @__PURE__ */ jsx("div", { className: "error-message", children: error }),
       /* @__PURE__ */ jsx(
         "button",
         {
           className: "btn-check",
           onClick: handleCheck,
-          disabled: loading || !resumeText.trim() || !jobDescriptionText.trim(),
+          disabled: loading || !resumeFile,
           children: loading ? /* @__PURE__ */ jsxs(Fragment, { children: [
             /* @__PURE__ */ jsx("span", { className: "spinner" }),
-            "Analyzing..."
-          ] }) : "Check ATS Score"
+            "Analyzing Resume..."
+          ] }) : "Analyze Resume"
         }
       )
     ] }),
@@ -7617,94 +7630,28 @@ function ATSCheckerV2() {
           ] })
         ] })
       ] }),
-      /* @__PURE__ */ jsxs("div", { className: "analysis-grid", children: [
-        /* @__PURE__ */ jsxs("div", { className: "analysis-card", children: [
-          /* @__PURE__ */ jsx("h3", { children: "Job Match" }),
-          /* @__PURE__ */ jsx("div", { className: "match-display", children: /* @__PURE__ */ jsxs("div", { className: "match-circle", style: { color: getScoreColor2(results.jobMatch.overall) }, children: [
-            results.jobMatch.overall,
-            "%"
-          ] }) }),
-          /* @__PURE__ */ jsx("p", { children: results.jobMatch.interpretation }),
-          /* @__PURE__ */ jsxs("div", { className: "match-breakdown", children: [
-            /* @__PURE__ */ jsxs("div", { className: "match-item", children: [
-              /* @__PURE__ */ jsx("span", { children: "Skill Match" }),
-              /* @__PURE__ */ jsxs("span", { className: "match-percent", children: [
-                results.jobMatch.skillMatch,
-                "%"
-              ] })
-            ] }),
-            /* @__PURE__ */ jsxs("div", { className: "match-item", children: [
-              /* @__PURE__ */ jsx("span", { children: "Responsibility Match" }),
-              /* @__PURE__ */ jsxs("span", { className: "match-percent", children: [
-                results.jobMatch.responsibilityMatch,
-                "%"
-              ] })
-            ] }),
-            /* @__PURE__ */ jsxs("div", { className: "match-item", children: [
-              /* @__PURE__ */ jsx("span", { children: "Experience Match" }),
-              /* @__PURE__ */ jsxs("span", { className: "match-percent", children: [
-                results.jobMatch.experienceMatch,
-                "%"
-              ] })
-            ] })
-          ] })
-        ] }),
-        /* @__PURE__ */ jsxs("div", { className: "analysis-card", children: [
-          /* @__PURE__ */ jsx("h3", { children: "Interview Probability" }),
-          /* @__PURE__ */ jsx("div", { className: "probability-display", children: /* @__PURE__ */ jsxs(
-            "div",
-            {
-              className: "probability-circle",
-              style: { color: getScoreColor2(results.interviewProbability.probability) },
-              children: [
-                results.interviewProbability.probability,
-                "%"
-              ]
-            }
-          ) }),
-          /* @__PURE__ */ jsxs("div", { className: "recommendation-box", style: {
-            borderLeft: `4px solid ${getScoreColor2(results.interviewProbability.probability)}`
-          }, children: [
-            /* @__PURE__ */ jsx("h4", { children: results.interviewProbability.recommendation.action }),
-            /* @__PURE__ */ jsx("p", { children: results.interviewProbability.recommendation.reasoning }),
-            /* @__PURE__ */ jsxs("p", { className: "next-step", children: [
-              /* @__PURE__ */ jsx("strong", { children: "Next:" }),
-              " ",
-              results.interviewProbability.recommendation.next
-            ] })
-          ] }),
-          /* @__PURE__ */ jsxs("div", { className: "timeline", children: [
-            /* @__PURE__ */ jsxs("span", { children: [
-              "⏱️ ",
-              results.interviewProbability.timeline.estimatedDaysToResponse,
-              " days expected response"
-            ] }),
-            /* @__PURE__ */ jsxs("span", { children: [
-              "📊 Confidence: ",
-              results.interviewProbability.timeline.confidenceLevel
-            ] })
-          ] })
+      ((_a = results.analysis) == null ? void 0 : _a.quality) && /* @__PURE__ */ jsx("div", { className: "analysis-grid", children: /* @__PURE__ */ jsxs("div", { className: "analysis-card", children: [
+        /* @__PURE__ */ jsx("h3", { children: "Resume Quality" }),
+        /* @__PURE__ */ jsx("div", { className: "match-display", children: /* @__PURE__ */ jsxs("div", { className: "match-circle", style: { color: getScoreColor2(results.analysis.quality.overallScore * 10) }, children: [
+          Math.round(results.analysis.quality.overallScore * 10),
+          "/10"
+        ] }) }),
+        /* @__PURE__ */ jsxs("p", { children: [
+          /* @__PURE__ */ jsx("strong", { children: results.analysis.quality.overallQuality }),
+          " - This resume demonstrates ",
+          results.analysis.quality.overallQuality.toLowerCase(),
+          " ATS compatibility"
         ] })
-      ] }),
-      /* @__PURE__ */ jsxs("div", { className: "keywords-section", children: [
-        /* @__PURE__ */ jsx("h3", { children: "Keyword Analysis" }),
-        /* @__PURE__ */ jsxs("div", { className: "keywords-grid", children: [
-          /* @__PURE__ */ jsxs("div", { className: "keywords-group", children: [
-            /* @__PURE__ */ jsxs("h4", { children: [
-              "✓ Found Keywords (",
-              results.keywords.found.length,
-              ")"
-            ] }),
-            /* @__PURE__ */ jsx("div", { className: "keywords-list", children: results.keywords.found.map((kw, i) => /* @__PURE__ */ jsx("span", { className: "keyword found", children: kw }, i)) })
-          ] }),
-          /* @__PURE__ */ jsxs("div", { className: "keywords-group", children: [
-            /* @__PURE__ */ jsxs("h4", { children: [
-              "✗ Missing Keywords (",
-              results.keywords.missing.length,
-              ")"
-            ] }),
-            /* @__PURE__ */ jsx("div", { className: "keywords-list", children: results.keywords.missing.map((kw, i) => /* @__PURE__ */ jsx("span", { className: "keyword missing", children: kw }, i)) })
-          ] })
+      ] }) }),
+      results.analysis && /* @__PURE__ */ jsxs("div", { className: "keywords-section", children: [
+        /* @__PURE__ */ jsx("h3", { children: "Resume Analysis" }),
+        results.analysis.keyStrengths && results.analysis.keyStrengths.length > 0 && /* @__PURE__ */ jsxs("div", { className: "keywords-group", children: [
+          /* @__PURE__ */ jsx("h4", { children: "✓ Strengths" }),
+          /* @__PURE__ */ jsx("ul", { style: { marginLeft: "20px", color: "#6b7280" }, children: results.analysis.keyStrengths.map((strength, i) => /* @__PURE__ */ jsx("li", { children: strength }, i)) })
+        ] }),
+        results.analysis.keyWeaknesses && results.analysis.keyWeaknesses.length > 0 && /* @__PURE__ */ jsxs("div", { className: "keywords-group", children: [
+          /* @__PURE__ */ jsx("h4", { children: "⚠️ Areas to Improve" }),
+          /* @__PURE__ */ jsx("ul", { style: { marginLeft: "20px", color: "#6b7280" }, children: results.analysis.keyWeaknesses.map((weakness, i) => /* @__PURE__ */ jsx("li", { children: weakness }, i)) })
         ] })
       ] }),
       /* @__PURE__ */ jsxs("div", { className: "enhancement-status", children: [
