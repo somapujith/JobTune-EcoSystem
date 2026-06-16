@@ -7391,10 +7391,19 @@ function ATSCheckerV2() {
     setLoading(true);
     setResults(null);
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Please log in to use this feature");
+        setLoading(false);
+        return;
+      }
       const formData = new FormData();
       formData.append("resume", resumeFile);
       const parseResponse = await axios.post("/api/ats/v2/parse", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "Authorization": `Bearer ${token}`
+        }
       });
       if (!parseResponse.data.resumeText) {
         throw new Error("Failed to parse resume");
@@ -7402,6 +7411,10 @@ function ATSCheckerV2() {
       const resumeText = parseResponse.data.resumeText;
       const response = await axios.post("/api/resume/v2/analyze", {
         resumeText
+      }, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
       });
       if (response.data.status === "success") {
         setResults(response.data);
@@ -7418,8 +7431,13 @@ function ATSCheckerV2() {
   };
   const enhanceResumeBackground = async (resumeText) => {
     try {
+      const token = localStorage.getItem("token");
       const response = await axios.post("/api/resume/v2/optimize", {
         resumeText
+      }, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
       });
       if (response.data.status === "success") {
         setEnhancedResume(response.data);
@@ -9814,14 +9832,18 @@ function ProtectedToolRoute({ children, toolPath }) {
 function App() {
   const { checkAuth, isLoading, sessionBlocked } = useAuthStore();
   const { checkOnboarded } = useSubscriptionStore();
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
   useEffect(() => {
     if (!isBrowser) return;
     checkAuth().then(() => checkOnboarded());
   }, [checkAuth, checkOnboarded]);
-  if (isBrowser && sessionBlocked) {
+  if (hydrated && sessionBlocked) {
     return /* @__PURE__ */ jsx(SessionBlocked, {});
   }
-  if (isBrowser && isLoading) {
+  if (hydrated && isLoading) {
     return /* @__PURE__ */ jsx("div", { className: "min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50", children: /* @__PURE__ */ jsxs("div", { className: "text-center", children: [
       /* @__PURE__ */ jsx("div", { className: "inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 mb-4 animate-spin", children: /* @__PURE__ */ jsx("div", { className: "w-8 h-8 rounded-full border-2 border-white border-t-transparent" }) }),
       /* @__PURE__ */ jsx("p", { className: "text-slate-600 font-semibold", children: "Loading..." })

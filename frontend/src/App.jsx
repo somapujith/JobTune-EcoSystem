@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -94,18 +94,24 @@ function ProtectedToolRoute({ children, toolPath }) {
 function App() {
   const { checkAuth, isLoading, sessionBlocked } = useAuthStore();
   const { checkOnboarded } = useSubscriptionStore();
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   useEffect(() => {
     if (!isBrowser) return;
     checkAuth().then(() => checkOnboarded());
   }, [checkAuth, checkOnboarded]);
 
-  if (isBrowser && sessionBlocked) {
+  if (hydrated && sessionBlocked) {
     return <SessionBlocked />;
   }
 
-  // SSR: render route shell immediately. CSR: wait for auth bootstrap.
-  if (isBrowser && isLoading) {
+  // First client render must match SSR output exactly to avoid hydration
+  // mismatches; only switch to the loading spinner after hydration completes.
+  if (hydrated && isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
         <div className="text-center">
