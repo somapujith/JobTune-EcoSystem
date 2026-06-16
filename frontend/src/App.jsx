@@ -27,8 +27,7 @@ import ResumeHistory from './pages/ResumeHistory';
 import ResumeComparison from './pages/ResumeComparison';
 import ResumeSend from './pages/ResumeSend';
 import CareerRoadmap from './pages/CareerRoadmap';
-import ATSChecker from './pages/ATSChecker';
-import ATSCheckerV2 from './pages/ATSCheckerV2';
+import ATSChecker from './pages/ATSCheckerV2';
 import JobAnalyzer from './pages/JobAnalyzer';
 import CoverLetterGenerator from './pages/CoverLetterGenerator';
 import EvidenceDashboard from './pages/EvidenceDashboard';
@@ -37,6 +36,10 @@ import JobPreparation from './pages/JobPreparation';
 import TuneAndPolishTrack from './pages/TuneAndPolishTrack';
 import ZeroToHeroTrack from './pages/ZeroToHeroTrack';
 import LearnAndBuildTrack from './pages/LearnAndBuildTrack';
+import RecruiterVisibility from './pages/RecruiterVisibility';
+import ResumeConsistency from './pages/ResumeConsistency';
+import AchievementEnhancer from './pages/AchievementEnhancer';
+import ComingSoon from './pages/ComingSoon';
 import useAuthStore from './store/useAuthStore';
 import useSubscriptionStore from './store/useSubscriptionStore';
 import SessionBlocked from './components/SessionBlocked';
@@ -170,7 +173,6 @@ function App() {
           <Route path="career" element={<ProtectedToolRoute toolPath="/career"><CareerRoadmap /></ProtectedToolRoute>} />
           <Route path="job-analyzer" element={<ProtectedToolRoute toolPath="/job-analyzer"><JobAnalyzer /></ProtectedToolRoute>} />
           <Route path="ats-checker" element={<ProtectedToolRoute toolPath="/ats-checker"><ATSChecker /></ProtectedToolRoute>} />
-          <Route path="ats-checker-v2" element={<ProtectedToolRoute toolPath="/ats-checker"><ATSCheckerV2 /></ProtectedToolRoute>} />
           <Route path="job-fit" element={<ProtectedToolRoute toolPath="/job-fit"><JobFitAnalysis /></ProtectedToolRoute>} />
           <Route path="cover-letter" element={<ProtectedToolRoute toolPath="/cover-letter"><CoverLetterGenerator /></ProtectedToolRoute>} />
           <Route
@@ -181,6 +183,10 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="recruiter-visibility" element={<ProtectedToolRoute toolPath="/recruiter-visibility"><RecruiterVisibility /></ProtectedToolRoute>} />
+          <Route path="resume-consistency" element={<ProtectedToolRoute toolPath="/resume-consistency"><ResumeConsistency /></ProtectedToolRoute>} />
+          <Route path="achievement-enhancer" element={<ProtectedToolRoute toolPath="/achievement-enhancer"><AchievementEnhancer /></ProtectedToolRoute>} />
+          <Route path="career-readiness" element={<ProtectedToolRoute toolPath="/career-readiness"><ComingSoon toolName="Career Readiness Dashboard" description="A unified career score with progress tracking and improvement recommendations across your whole journey. Launching soon." /></ProtectedToolRoute>} />
         </Route>
         <Route path="/login" element={<Login />} />
       </Routes>
