@@ -65,19 +65,23 @@ class SessionService {
 
   async createSession(userId, { userAgent, ipAddress, deviceName } = {}, { replaceExisting = false } = {}) {
     const existing = await this.getActiveSession(userId);
-    if (existing && !replaceExisting) {
-      const err = new Error('This account is already active on another device.');
-      err.code = 'ACCOUNT_IN_USE';
-      err.activeSession = {
-        deviceName: existing.device_name,
-        ipAddress: existing.ip_address,
-        lastActiveAt: existing.last_active_at,
-        since: existing.created_at,
-      };
-      throw err;
-    }
 
-    if (existing && replaceExisting) {
+    if (existing) {
+      const sameDevice = ipAddress && existing.ip_address && existing.ip_address === ipAddress;
+
+      if (!replaceExisting && !sameDevice) {
+        const err = new Error('This account is already active on another device.');
+        err.code = 'ACCOUNT_IN_USE';
+        err.activeSession = {
+          deviceName: existing.device_name,
+          ipAddress: existing.ip_address,
+          lastActiveAt: existing.last_active_at,
+          since: existing.created_at,
+        };
+        throw err;
+      }
+
+      // Same device re-login or explicit replace — revoke old sessions before creating new one
       await this.revokeAllSessions(userId);
     }
 

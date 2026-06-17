@@ -129,12 +129,37 @@ router.post('/refresh', async (req, res, next) => {
   }
 });
 
-// Logout current session
-router.post('/logout', authenticateToken, async (req, res, next) => {
+// Logout current session (accepts optional refreshToken as fallback when access token is expired)
+router.post('/logout', async (req, res, next) => {
   try {
-    if (req.user.sessionId) {
-      await sessionService.revokeSession(req.user.sessionId, req.user.id);
+    const { refreshToken } = req.body;
+
+    // Try access token first
+    const authHeader = req.headers.authorization;
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.slice(7);
+      try {
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (decoded.sessionId) {
+          await sessionService.revokeSession(decoded.sessionId, decoded.id);
+          return res.json({ success: true });
+        }
+      } catch {
+        // Token expired or invalid — fall through to refreshToken path
+      }
     }
+
+    // Fallback: revoke via refresh token
+    if (refreshToken) {
+      const crypto = require('crypto');
+      const hash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+      await pool.query(
+        'UPDATE user_sessions SET revoked_at = CURRENT_TIMESTAMP WHERE refresh_token_hash = $1 AND revoked_at IS NULL',
+        [hash]
+      );
+    }
+
     res.json({ success: true });
   } catch (err) {
     next(err);

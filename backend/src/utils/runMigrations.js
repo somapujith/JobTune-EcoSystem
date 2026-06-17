@@ -56,9 +56,9 @@ async function runMigrations() {
     // Insert default plans
     await pool.query(`
       INSERT INTO subscription_plans (name, tier_level, description, price, features) VALUES
-      ('Learn & Build', 1, 'For service role learners', 0, ARRAY['Learning Resources', 'Project Ideas', 'Skill Assessment']),
-      ('Tune & Polish', 2, 'For resume & portfolio refinement', 29, ARRAY['Resume Optimizer', 'LinkedIn Optimizer', 'GitHub Optimizer', 'Portfolio Builder', 'Project Ideas', 'Learning Resources']),
-      ('Zero to Hero', 3, 'All tools & premium features', 79, ARRAY['Resume Optimizer', 'LinkedIn Optimizer', 'GitHub Optimizer', 'Interview Prep', 'Job Tracker', 'Career Roadmap', 'Skill Assessment', 'Project Ideas', 'Cover Letter Generator', 'ATS Checker', 'Learning Resources', 'Mock Interview'])
+      ('Learn & Build', 1, 'Build the skills, projects, and portfolio needed for your dream career.', 199, ARRAY['Skill Assessment', 'Career Roadmap', 'Learning Hub', 'Project Builder', 'Portfolio Builder']),
+      ('Tune & Polish', 2, 'Turn your existing skills into a recruiter-ready professional profile.', 299, ARRAY['Skill Assessment', 'Career Roadmap', 'Learning Hub', 'Project Builder', 'Portfolio Builder', 'Resume Optimizer', 'ATS Checker', 'LinkedIn Optimizer', 'GitHub Optimizer', 'Recruiter Visibility Checker', 'Application Assistant']),
+      ('Zero to Hero', 3, 'The complete career transformation ecosystem.', 499, ARRAY['Skill Assessment', 'Career Roadmap', 'Learning Hub', 'Project Builder', 'Portfolio Builder', 'Resume Optimizer', 'ATS Checker', 'LinkedIn Optimizer', 'GitHub Optimizer', 'Recruiter Visibility Checker', 'Application Assistant', 'Interview Prep', 'Job Analytics', 'Career Readiness Dashboard'])
       ON CONFLICT (name) DO NOTHING
     `);
     }
@@ -129,6 +129,23 @@ async function runMigrations() {
 
       console.log('✅ ATS tables created');
     }
+
+    // Always-run: keep plan pricing/features in sync with the current pricing strategy (idempotent).
+    await pool.query(`
+      UPDATE subscription_plans SET price = 199, description = 'Build the skills, projects, and portfolio needed for your dream career.',
+        features = ARRAY['Skill Assessment', 'Career Roadmap', 'Learning Hub', 'Project Builder', 'Portfolio Builder']
+      WHERE name = 'Learn & Build'
+    `);
+    await pool.query(`
+      UPDATE subscription_plans SET price = 299, description = 'Turn your existing skills into a recruiter-ready professional profile.',
+        features = ARRAY['Skill Assessment', 'Career Roadmap', 'Learning Hub', 'Project Builder', 'Portfolio Builder', 'Resume Optimizer', 'ATS Checker', 'LinkedIn Optimizer', 'GitHub Optimizer', 'Recruiter Visibility Checker', 'Application Assistant']
+      WHERE name = 'Tune & Polish'
+    `);
+    await pool.query(`
+      UPDATE subscription_plans SET price = 499, description = 'The complete career transformation ecosystem.',
+        features = ARRAY['Skill Assessment', 'Career Roadmap', 'Learning Hub', 'Project Builder', 'Portfolio Builder', 'Resume Optimizer', 'ATS Checker', 'LinkedIn Optimizer', 'GitHub Optimizer', 'Recruiter Visibility Checker', 'Application Assistant', 'Interview Prep', 'Job Analytics', 'Career Readiness Dashboard']
+      WHERE name = 'Zero to Hero'
+    `);
 
     console.log('✅ Database migrations completed successfully');
   } catch (err) {

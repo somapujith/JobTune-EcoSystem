@@ -1,20 +1,57 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import './ATSCheckerV2.css';
+import {
+  Zap,
+  UploadCloud,
+  FileText,
+  CheckCircle2,
+  AlertTriangle,
+  Loader2,
+  ArrowRight,
+  ListChecks,
+  ShieldAlert
+} from 'lucide-react';
+
+const SCORE_BANDS = [
+  { min: 90, label: 'Excellent — very likely to pass ATS', color: '#10b981' },
+  { min: 80, label: 'Good — likely to pass ATS', color: '#3b82f6' },
+  { min: 70, label: 'Fair — may pass ATS', color: '#f59e0b' },
+  { min: 60, label: 'Poor — unlikely to pass ATS', color: '#ef4444' },
+  { min: 0, label: 'Critical — will likely be filtered', color: '#991b1b' },
+];
+
+function getScoreBand(score) {
+  return SCORE_BANDS.find((band) => score >= band.min) || SCORE_BANDS[SCORE_BANDS.length - 1];
+}
+
+const SCORE_BREAKDOWN_ITEMS = [
+  { key: 'contact', label: 'Contact Information', max: 10 },
+  { key: 'structure', label: 'Structure', max: 20 },
+  { key: 'formatting', label: 'ATS Formatting', max: 20 },
+  { key: 'skills', label: 'Skills', max: 15 },
+  { key: 'experience', label: 'Experience', max: 15 },
+  { key: 'projects', label: 'Projects', max: 10 },
+  { key: 'education', label: 'Education', max: 5 },
+  { key: 'readability', label: 'Readability', max: 5 },
+];
+
+const SEVERITY_STYLES = {
+  critical: 'bg-red-100 text-red-700',
+  high: 'bg-orange-100 text-orange-700',
+  medium: 'bg-amber-100 text-amber-700',
+  low: 'bg-slate-100 text-slate-600',
+};
 
 export default function ATSCheckerV2() {
   const [resumeFile, setResumeFile] = useState(null);
   const [resumeFileName, setResumeFileName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [analyzing, setAnalyzing] = useState(false);
   const [results, setResults] = useState(null);
-  const [enhancedResume, setEnhancedResume] = useState(null);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('input');
+  const [dragActive, setDragActive] = useState(false);
 
-  // Handle resume file upload
-  const handleResumeUpload = (e) => {
-    const file = e.target.files?.[0];
+  const validateAndSetFile = (file) => {
     if (!file) return;
 
     const allowed = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
@@ -33,7 +70,16 @@ export default function ATSCheckerV2() {
     setError('');
   };
 
-  // Immediate resume analysis
+  const handleResumeUpload = (e) => {
+    validateAndSetFile(e.target.files?.[0]);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragActive(false);
+    validateAndSetFile(e.dataTransfer.files?.[0]);
+  };
+
   const handleCheck = async () => {
     if (!resumeFile) {
       setError('Please upload a resume');
@@ -45,7 +91,6 @@ export default function ATSCheckerV2() {
     setResults(null);
 
     try {
-      // Get auth token
       const token = localStorage.getItem('token');
       if (!token) {
         setError('Please log in to use this feature');
@@ -53,7 +98,6 @@ export default function ATSCheckerV2() {
         return;
       }
 
-      // Step 1: Parse resume file on backend
       const formData = new FormData();
       formData.append('resume', resumeFile);
 
@@ -70,7 +114,6 @@ export default function ATSCheckerV2() {
 
       const resumeText = parseResponse.data.resumeText;
 
-      // Step 2: Analyze resume (general ATS quality)
       const response = await axios.post('/api/resume/v2/analyze', {
         resumeText
       }, {
@@ -82,10 +125,6 @@ export default function ATSCheckerV2() {
       if (response.data.status === 'success') {
         setResults(response.data);
         setActiveTab('results');
-
-        // Start background enhancement immediately
-        setAnalyzing(true);
-        enhanceResumeBackground(resumeText);
       }
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Analysis failed');
@@ -95,353 +134,278 @@ export default function ATSCheckerV2() {
     }
   };
 
-  // Background enhancement (non-blocking)
-  const enhanceResumeBackground = async (resumeText) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post('/api/resume/v2/optimize', {
-        resumeText
-      }, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.data.status === 'success') {
-        setEnhancedResume(response.data);
-      }
-    } catch (err) {
-      console.error('Enhancement error:', err);
-    } finally {
-      setAnalyzing(false);
-    }
-  };
-
-  // Get score color
-  const getScoreColor = (score) => {
-    if (score >= 90) return '#10b981'; // Green
-    if (score >= 80) return '#3b82f6'; // Blue
-    if (score >= 70) return '#f59e0b'; // Amber
-    if (score >= 60) return '#ef4444'; // Red
-    return '#7f1d1d'; // Dark red
-  };
-
-  // Get score interpretation
-  const getScoreInterpretation = (score) => {
-    if (score >= 90) return 'Excellent - Very likely to pass ATS';
-    if (score >= 80) return 'Good - Likely to pass ATS';
-    if (score >= 70) return 'Fair - May pass ATS';
-    if (score >= 60) return 'Poor - Unlikely to pass ATS';
-    return 'Critical - Will likely be filtered';
-  };
+  const overallScore = results?.analysis?.overallScore ?? 0;
+  const scoreBand = getScoreBand(overallScore);
+  const circumference = 2 * Math.PI * 45;
 
   return (
-    <div className="ats-checker-v2">
-      <div className="ats-container">
-        <div className="ats-header">
-          <h1>ATS Checker V2</h1>
-          <p>Analyze your resume against job descriptions for ATS compatibility</p>
+    <div className="max-w-5xl mx-auto py-12 px-4 sm:px-6 lg:px-8 w-full">
+      {/* Header */}
+      <div className="mb-10">
+        <div className="flex items-center gap-2 text-blue-600 font-bold text-sm uppercase tracking-widest mb-2">
+          <Zap className="w-4 h-4 fill-current" /> Resume Tools
         </div>
+        <h1 className="text-4xl font-black text-slate-900 tracking-tight">ATS Score Checker</h1>
+        <p className="text-slate-500 mt-2 font-medium">
+          A fully rule-based, deterministic ATS compliance and resume quality report — no AI involved in scoring.
+        </p>
+      </div>
 
-        {/* Tabs */}
-        <div className="ats-tabs">
+      {/* Tabs */}
+      <div className="flex items-center gap-2 mb-8 glass-card rounded-2xl p-2 w-fit">
+        {[
+          { id: 'input', label: 'Input', disabled: false },
+          { id: 'results', label: 'Report', disabled: !results },
+        ].map((tab) => (
           <button
-            className={`tab ${activeTab === 'input' ? 'active' : ''}`}
-            onClick={() => setActiveTab('input')}
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            disabled={tab.disabled}
+            className={`relative px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
+              activeTab === tab.id
+                ? 'bg-blue-600 text-white shadow-md'
+                : tab.disabled
+                ? 'text-slate-300 cursor-not-allowed'
+                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+            }`}
           >
-            Input
+            {tab.label}
           </button>
-          <button
-            className={`tab ${activeTab === 'results' ? 'active' : ''}`}
-            onClick={() => setActiveTab('results')}
-            disabled={!results}
-          >
-            Results
-          </button>
-          <button
-            className={`tab ${activeTab === 'enhanced' ? 'active' : ''}`}
-            onClick={() => setActiveTab('enhanced')}
-            disabled={!enhancedResume}
-          >
-            Enhanced {enhancedResume && <span className="badge">Ready</span>}
-          </button>
-        </div>
+        ))}
+      </div>
 
-        {/* INPUT TAB */}
-        {activeTab === 'input' && (
-          <div className="ats-input-section">
-            <div className="input-single">
-              {/* Resume File Upload */}
-              <div className="input-group">
-                <label htmlFor="resume">Upload Your Resume</label>
-                <div className="file-upload-box">
-                  <input
-                    id="resume"
-                    type="file"
-                    accept=".pdf,.docx,.txt"
-                    onChange={handleResumeUpload}
-                    style={{ display: 'none' }}
-                  />
-                  <label htmlFor="resume" className="file-upload-label">
-                    {resumeFileName ? (
-                      <>
-                        <span className="file-icon">📄</span>
-                        <span className="file-name">{resumeFileName}</span>
-                        <span className="file-info">Click to change file</span>
-                      </>
-                    ) : (
-                      <>
-                        <span className="upload-icon">📤</span>
-                        <span className="upload-text">Click to upload or drag & drop</span>
-                        <span className="upload-info">PDF, DOCX, or TXT (max 5MB)</span>
-                      </>
-                    )}
-                  </label>
+      {/* INPUT TAB */}
+      {activeTab === 'input' && (
+        <div className="glass-card rounded-3xl p-8 sm:p-10">
+          <label
+            htmlFor="resume"
+            onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+            onDragLeave={() => setDragActive(false)}
+            onDrop={handleDrop}
+            className={`flex flex-col items-center justify-center gap-3 border-2 border-dashed rounded-2xl py-16 px-6 cursor-pointer transition-all duration-200 ${
+              dragActive
+                ? 'border-blue-500 bg-blue-50'
+                : resumeFileName
+                ? 'border-emerald-300 bg-emerald-50/50'
+                : 'border-slate-300 hover:border-blue-400 hover:bg-blue-50/40'
+            }`}
+          >
+            <input
+              id="resume"
+              type="file"
+              accept=".pdf,.docx,.txt"
+              onChange={handleResumeUpload}
+              className="hidden"
+            />
+            {resumeFileName ? (
+              <>
+                <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                  <FileText className="w-7 h-7" />
                 </div>
+                <p className="font-bold text-slate-900 break-all text-center">{resumeFileName}</p>
+                <p className="text-sm text-slate-400 font-medium">Click to choose a different file</p>
+              </>
+            ) : (
+              <>
+                <div className="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center">
+                  <UploadCloud className="w-7 h-7" />
+                </div>
+                <p className="font-bold text-slate-900">Click to upload or drag & drop</p>
+                <p className="text-sm text-slate-400 font-medium">PDF, DOCX, or TXT — max 5MB</p>
+              </>
+            )}
+          </label>
+
+          {error && (
+            <div className="mt-6 flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl font-medium text-sm">
+              <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          <button
+            onClick={handleCheck}
+            disabled={loading || !resumeFile}
+            className="mt-6 w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-white bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed transition-all duration-200 active:scale-[0.98] shadow-lg shadow-blue-600/20 disabled:shadow-none"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Analyzing Resume...
+              </>
+            ) : (
+              <>
+                Check ATS Score
+                <ArrowRight className="w-5 h-5" />
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* REPORT TAB */}
+      {activeTab === 'results' && results && (
+        <div className="space-y-6">
+          {/* Score Card */}
+          <div className="glass-card rounded-3xl p-8 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-8 items-center">
+            <div className="relative w-44 h-44 mx-auto">
+              <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" strokeWidth="8" />
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="45"
+                  fill="none"
+                  stroke={scoreBand.color}
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  strokeDasharray={`${(overallScore / 100) * circumference} ${circumference}`}
+                  style={{ transition: 'stroke-dasharray 0.6s ease' }}
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-4xl font-black text-slate-900">{overallScore}</span>
+                <span className="text-sm font-bold text-slate-400">/100</span>
               </div>
             </div>
 
-            {error && <div className="error-message">{error}</div>}
+            <div>
+              <h3 className="text-xl font-black text-slate-900 mb-1">ATS Score</h3>
+              <p className="font-bold mb-3" style={{ color: scoreBand.color }}>{scoreBand.label}</p>
+              <p className="text-sm text-slate-500 font-medium mb-6">
+                Detected Role: <span className="font-bold text-slate-900">{results.analysis.detectedRole?.displayName}</span>{' '}
+                <span className="text-slate-400">({results.analysis.detectedRole?.confidence}% confidence)</span>
+                {' • '}
+                Completeness: <span className="font-bold text-slate-900">{results.analysis.summary?.completeness}%</span>
+              </p>
 
-            <button
-              className="btn-check"
-              onClick={handleCheck}
-              disabled={loading || !resumeFile}
-            >
-              {loading ? (
-                <>
-                  <span className="spinner"></span>
-                  Analyzing Resume...
-                </>
-              ) : (
-                'Analyze Resume'
-              )}
-            </button>
-          </div>
-        )}
-
-        {/* RESULTS TAB */}
-        {activeTab === 'results' && results && (
-          <div className="ats-results-section">
-            {/* Main Score Display */}
-            <div className="score-card">
-              <div className="score-circle">
-                <svg viewBox="0 0 100 100">
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="45"
-                    fill="none"
-                    stroke="#e5e7eb"
-                    strokeWidth="8"
-                  />
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="45"
-                    fill="none"
-                    stroke={getScoreColor(results.atsScore.score)}
-                    strokeWidth="8"
-                    strokeDasharray={`${(results.atsScore.score / 100) * 282.7} 282.7`}
-                    style={{ transition: 'stroke-dasharray 0.6s ease' }}
-                  />
-                </svg>
-                <div className="score-text">
-                  <span className="score-number">{results.atsScore.score}</span>
-                  <span className="score-max">/100</span>
-                </div>
+              <div className="space-y-3">
+                {SCORE_BREAKDOWN_ITEMS.map((item) => {
+                  const value = results.analysis.scores?.[item.key] ?? 0;
+                  const pct = Math.min(100, (value / item.max) * 100);
+                  return (
+                    <div key={item.key} className="grid grid-cols-[1fr_auto] sm:grid-cols-[140px_1fr_70px] items-center gap-3">
+                      <span className="text-sm font-bold text-slate-600 col-span-2 sm:col-span-1">{item.label}</span>
+                      <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-700"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      <span className="text-sm font-bold text-blue-600 text-right">{value}/{item.max}</span>
+                    </div>
+                  );
+                })}
               </div>
-
-              <div className="score-info">
-                <h3>ATS Compatibility Score</h3>
-                <p className="interpretation">
-                  {getScoreInterpretation(results.atsScore.score)}
-                </p>
-
-                {/* Breakdown */}
-                <div className="score-breakdown">
-                  <div className="breakdown-item">
-                    <span>Keyword Match</span>
-                    <div className="progress-bar">
-                      <div
-                        className="progress-fill"
-                        style={{ width: `${(results.atsScore.breakdown.keywordMatch / 30) * 100}%` }}
-                      ></div>
-                    </div>
-                    <span className="score-value">{results.atsScore.breakdown.keywordMatch}/30</span>
-                  </div>
-
-                  <div className="breakdown-item">
-                    <span>Skills Coverage</span>
-                    <div className="progress-bar">
-                      <div
-                        className="progress-fill"
-                        style={{ width: `${(results.atsScore.breakdown.skillsCoverage / 30) * 100}%` }}
-                      ></div>
-                    </div>
-                    <span className="score-value">{results.atsScore.breakdown.skillsCoverage}/30</span>
-                  </div>
-
-                  <div className="breakdown-item">
-                    <span>Experience Alignment</span>
-                    <div className="progress-bar">
-                      <div
-                        className="progress-fill"
-                        style={{ width: `${(results.atsScore.breakdown.experienceAlignment / 20) * 100}%` }}
-                      ></div>
-                    </div>
-                    <span className="score-value">{results.atsScore.breakdown.experienceAlignment}/20</span>
-                  </div>
-
-                  <div className="breakdown-item">
-                    <span>ATS Formatting</span>
-                    <div className="progress-bar">
-                      <div
-                        className="progress-fill"
-                        style={{ width: `${(results.atsScore.breakdown.atsFormatting / 10) * 100}%` }}
-                      ></div>
-                    </div>
-                    <span className="score-value">{results.atsScore.breakdown.atsFormatting}/10</span>
-                  </div>
-
-                  <div className="breakdown-item">
-                    <span>Resume Quality</span>
-                    <div className="progress-bar">
-                      <div
-                        className="progress-fill"
-                        style={{ width: `${(results.atsScore.breakdown.resumeQuality / 10) * 100}%` }}
-                      ></div>
-                    </div>
-                    <span className="score-value">{results.atsScore.breakdown.resumeQuality}/10</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Resume Quality Summary */}
-            {results.analysis?.quality && (
-              <div className="analysis-grid">
-                <div className="analysis-card">
-                  <h3>Resume Quality</h3>
-                  <div className="match-display">
-                    <div className="match-circle" style={{ color: getScoreColor(results.analysis.quality.overallScore * 10) }}>
-                      {Math.round(results.analysis.quality.overallScore * 10)}/10
-                    </div>
-                  </div>
-                  <p><strong>{results.analysis.quality.overallQuality}</strong> - This resume demonstrates {results.analysis.quality.overallQuality.toLowerCase()} ATS compatibility</p>
-                </div>
-              </div>
-            )}
-
-            {/* Resume Strengths & Gaps */}
-            {results.analysis && (
-              <div className="keywords-section">
-                <h3>Resume Analysis</h3>
-                {results.analysis.keyStrengths && results.analysis.keyStrengths.length > 0 && (
-                  <div className="keywords-group">
-                    <h4>✓ Strengths</h4>
-                    <ul style={{ marginLeft: '20px', color: '#6b7280' }}>
-                      {results.analysis.keyStrengths.map((strength, i) => (
-                        <li key={i}>{strength}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {results.analysis.keyWeaknesses && results.analysis.keyWeaknesses.length > 0 && (
-                  <div className="keywords-group">
-                    <h4>⚠️ Areas to Improve</h4>
-                    <ul style={{ marginLeft: '20px', color: '#6b7280' }}>
-                      {results.analysis.keyWeaknesses.map((weakness, i) => (
-                        <li key={i}>{weakness}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* AI Enhancement Status */}
-            <div className="enhancement-status">
-              {analyzing && (
-                <div className="optimizing-banner">
-                  <div className="spinner"></div>
-                  <span>🤖 AI is analyzing your resume... Optimizing for this job...</span>
-                </div>
-              )}
-              {enhancedResume && (
-                <div className="enhanced-ready-banner">
-                  <span>✅ Enhanced resume ready! Check the "Enhanced" tab for improvements</span>
-                </div>
-              )}
             </div>
           </div>
-        )}
 
-        {/* ENHANCED TAB */}
-        {activeTab === 'enhanced' && enhancedResume && (
-          <div className="ats-enhanced-section">
-            <div className="enhancement-comparison">
-              <h3>Improvement Summary</h3>
-              <div className="comparison-grid">
-                <div className="comparison-item">
-                  <span className="label">ATS Score</span>
-                  <div className="before-after">
-                    <span className="before">{enhancedResume.comparison.before.atsScore}</span>
-                    <span className="arrow">→</span>
-                    <span className="after">{enhancedResume.comparison.after.atsScore}</span>
-                  </div>
-                  <span className="gain">+{enhancedResume.comparison.improvement.atsScoreGain} points</span>
-                </div>
-
-                <div className="comparison-item">
-                  <span className="label">Interview Probability</span>
-                  <div className="before-after">
-                    <span className="before">{enhancedResume.comparison.before.interviewProbability}%</span>
-                    <span className="arrow">→</span>
-                    <span className="after">{enhancedResume.comparison.after.interviewProbability}%</span>
-                  </div>
-                  <span className="gain">+{enhancedResume.comparison.improvement.probabilityGain}%</span>
-                </div>
+          {/* Contact Info Card */}
+          {results.analysis?.contactInfo && (
+            <div className="glass-card rounded-3xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-black text-slate-900 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-blue-600" /> Contact Information
+                </h3>
+                <span className="text-sm font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                  {results.analysis.contactInfo.score}/{results.analysis.contactInfo.maxScore}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(results.analysis.contactInfo.found || {}).map(([field, present]) => (
+                  <span
+                    key={field}
+                    className={`text-xs font-bold px-3 py-1.5 rounded-full capitalize ${
+                      present ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                    }`}
+                  >
+                    {present ? '✓' : '✕'} {field}
+                  </span>
+                ))}
               </div>
             </div>
+          )}
 
-            <div className="enhancement-details">
-              <h3>What Was Enhanced</h3>
-              <ul className="enhancement-notes">
-                {enhancedResume.enhancement.notes.map((note, i) => (
-                  <li key={i}>{note}</li>
+          {/* Strengths/Weaknesses */}
+          {results.analysis?.quality && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="glass-card rounded-3xl p-6">
+                <h3 className="font-black text-slate-900 mb-4 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500" /> Strengths
+                </h3>
+                {results.analysis.quality.keyStrengths?.length > 0 ? (
+                  <ul className="space-y-2.5">
+                    {results.analysis.quality.keyStrengths.map((s, i) => (
+                      <li key={i} className="text-sm text-slate-600 font-medium flex items-start gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-slate-400 font-medium">No standout strengths detected yet.</p>
+                )}
+              </div>
+
+              <div className="glass-card rounded-3xl p-6">
+                <h3 className="font-black text-slate-900 mb-4 flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 text-amber-500" /> Weaknesses
+                </h3>
+                {results.analysis.quality.keyWeaknesses?.length > 0 ? (
+                  <ul className="space-y-2.5">
+                    {results.analysis.quality.keyWeaknesses.map((w, i) => (
+                      <li key={i} className="text-sm text-slate-600 font-medium flex items-start gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                        {w}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-slate-400 font-medium">No major issues found.</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Issues */}
+          {results.analysis?.issues?.length > 0 && (
+            <div className="glass-card rounded-3xl p-6">
+              <h3 className="font-black text-slate-900 mb-4 flex items-center gap-2">
+                <ShieldAlert className="w-5 h-5 text-red-500" /> Issues Found ({results.analysis.issues.length})
+              </h3>
+              <ul className="space-y-2.5">
+                {results.analysis.issues.map((issue, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm">
+                    <span className={`shrink-0 text-xs font-bold px-2 py-1 rounded-full capitalize ${SEVERITY_STYLES[issue.severity] || SEVERITY_STYLES.low}`}>
+                      {issue.severity}
+                    </span>
+                    <span className="text-slate-600 font-medium pt-0.5">{issue.message}</span>
+                  </li>
                 ))}
               </ul>
             </div>
+          )}
 
-            <div className="enhanced-resume-box">
-              <h3>Enhanced Resume</h3>
-              <div className="enhanced-content">
-                <pre>{enhancedResume.enhancement.enhancedResume}</pre>
-              </div>
-              <button
-                className="btn-copy"
-                onClick={() => {
-                  navigator.clipboard.writeText(enhancedResume.enhancement.enhancedResume);
-                  alert('Enhanced resume copied to clipboard!');
-                }}
-              >
-                📋 Copy Enhanced Resume
-              </button>
+          {/* Recommendations */}
+          {results.analysis?.recommendations?.length > 0 && (
+            <div className="glass-card rounded-3xl p-6">
+              <h3 className="font-black text-slate-900 mb-4 flex items-center gap-2">
+                <ListChecks className="w-5 h-5 text-blue-600" /> Recommended Improvements ({results.analysis.recommendations.length})
+              </h3>
+              <ul className="space-y-4">
+                {results.analysis.recommendations.map((rec, i) => (
+                  <li key={i} className="bg-white/60 rounded-2xl p-4">
+                    <p className="font-bold text-slate-900 text-sm mb-1">{rec.message}</p>
+                    {rec.reason && rec.reason !== rec.message && (
+                      <p className="text-xs text-slate-500 font-medium">Reason: {rec.reason}</p>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </div>
-
-            <div className="next-steps">
-              <h3>Next Steps</h3>
-              <ol>
-                <li>Copy the enhanced resume above</li>
-                <li>Apply to the job with the optimized version</li>
-                <li>Use the original for other jobs to maintain authenticity</li>
-              </ol>
-            </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

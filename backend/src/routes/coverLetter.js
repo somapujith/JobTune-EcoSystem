@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
+const { requirePlan } = require('../middleware/requirePlan');
 const { callAI } = require('../utils/aiClient');
 
 function generateFallbackLetter(companyName, position, experience, tone) {
@@ -24,7 +25,7 @@ Sincerely,
 [Your Name]`;
 }
 
-router.post('/generate-cover-letter', authenticateToken, async (req, res) => {
+router.post('/generate-cover-letter', authenticateToken, requirePlan(2), async (req, res) => {
   try {
     const {
       jobDescription,

@@ -8,7 +8,7 @@ import { useState, useEffect, useRef, Component, useMemo, useCallback } from "re
 import { stripBasename, UNSAFE_warning, UNSAFE_invariant, matchPath, joinPaths, Action } from "@remix-run/router";
 import { UNSAFE_NavigationContext, useHref, useNavigate, useLocation, useResolvedPath, createPath, UNSAFE_DataRouterStateContext, UNSAFE_useRouteId, UNSAFE_RouteContext, UNSAFE_DataRouterContext, parsePath, Router, Outlet, Navigate, Routes, Route } from "react-router";
 import "react-dom";
-import { ChevronDown, Sun, Moon, Crown, X, Menu, AlertTriangle, RotateCcw, TrendingUp, Zap, Lock, ArrowRight, Sparkles, Star, Activity, FileText, Linkedin, Github, Layout as Layout$1, BookOpen, Lightbulb, CheckCircle2, Users, ChevronRight, MessageCircle, Check, Rocket, Loader, Plus, Minus, ArrowLeft, Target, ExternalLink, Clock, Briefcase, ShieldCheck, Monitor, Mail, Calendar, User, CheckCircle, Copy, Download, XCircle, Trash2, Edit2, Search, MapPin, Loader2, AlertCircle, ChevronLeft, ChevronUp, Upload, Code2, RefreshCw, BarChart2, TrendingDown, HelpCircle, Award, Code, BrainCircuit, Wrench, FileCode2, Mic, Send, Info, GraduationCap, Play, Bot, Terminal, MonitorOff, LogIn } from "lucide-react";
+import { ChevronDown, Sun, Moon, Crown, X, Menu, AlertTriangle, RotateCcw, TrendingUp, Zap, Lock, ArrowRight, Sparkles, Star, Activity, FileText, Linkedin, Github, Layout as Layout$1, BookOpen, Lightbulb, CheckCircle2, Users, ChevronRight, MessageCircle, Check, Rocket, Loader, Plus, Minus, ArrowLeft, Map as Map$1, Gauge, Search, ListChecks, Target, ExternalLink, Clock, Briefcase, ShieldCheck, Monitor, Mail, Calendar, User, CheckCircle, Copy, Download, XCircle, Trash2, Edit2, MapPin, Loader2, AlertCircle, ChevronLeft, ChevronUp, UploadCloud, ShieldAlert, Code2, RefreshCw, BarChart2, TrendingDown, HelpCircle, Award, Code, BrainCircuit, Wrench, FileCode2, Mic, Send, Info, GraduationCap, Play, Bot, Terminal, Tags, Eye, GitCompare, MonitorOff, LogIn } from "lucide-react";
 import { create } from "zustand";
 import axios from "axios";
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip } from "recharts";
@@ -764,7 +764,8 @@ const useAuthStore = create((set) => ({
   },
   logout: async () => {
     try {
-      await api.post("/auth/logout");
+      const refreshToken = safeLocalStorage("refreshToken");
+      await api.post("/auth/logout", { refreshToken });
     } catch {
     }
     clearSession();
@@ -952,9 +953,9 @@ const Navbar = () => {
   }, []);
   const isGroupActive = (group) => group.items.some((item) => location.pathname.startsWith(item.path));
   return /* @__PURE__ */ jsxs("header", { className: "fixed top-0 w-full z-50 glass-panel border-b border-white/40 dark:border-slate-800/50", children: [
-    /* @__PURE__ */ jsxs("div", { className: "flex justify-between items-center px-6 lg:px-12 h-20 w-full", children: [
-      /* @__PURE__ */ jsx(Link, { to: "/", className: "text-2xl font-black tracking-tight text-blue-800 font-headline flex-shrink-0", children: "JobTune" }),
-      /* @__PURE__ */ jsxs("nav", { className: "hidden lg:flex items-center gap-8 absolute left-1/2 transform -translate-x-1/2", ref: dropdownRef, children: [
+    /* @__PURE__ */ jsxs("div", { className: "flex items-center px-6 lg:px-10 h-16 w-full gap-4", children: [
+      /* @__PURE__ */ jsx(Link, { to: "/", className: "text-2xl font-black tracking-tight text-blue-800 font-headline flex-shrink-0 mr-2", children: "JobTune" }),
+      /* @__PURE__ */ jsxs("nav", { className: "hidden lg:flex items-center gap-5 flex-1 justify-center min-w-0", ref: dropdownRef, children: [
         /* @__PURE__ */ jsx(
           Link,
           {
@@ -1009,7 +1010,7 @@ const Navbar = () => {
           ] }, group.label);
         })
       ] }),
-      /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 flex-shrink-0", children: [
+      /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 flex-shrink-0 ml-2", children: [
         /* @__PURE__ */ jsx(
           "button",
           {
@@ -1019,8 +1020,8 @@ const Navbar = () => {
             children: isDark ? /* @__PURE__ */ jsx(Sun, { className: "w-5 h-5" }) : /* @__PURE__ */ jsx(Moon, { className: "w-5 h-5" })
           }
         ),
-        /* @__PURE__ */ jsx("span", { className: "hidden md:block text-sm text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer transition-colors", children: "Support" }),
-        /* @__PURE__ */ jsx("div", { className: "hidden md:flex items-center gap-3 border-l pl-4 border-slate-200 dark:border-slate-700", children: isAuthenticated ? /* @__PURE__ */ jsxs(Fragment, { children: [
+        /* @__PURE__ */ jsx("span", { className: "hidden xl:block text-sm text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer transition-colors", children: "Support" }),
+        /* @__PURE__ */ jsx("div", { className: "hidden md:flex items-center gap-2 border-l pl-3 border-slate-200 dark:border-slate-700", children: isAuthenticated ? /* @__PURE__ */ jsxs(Fragment, { children: [
           userPlan && /* @__PURE__ */ jsxs(
             Link,
             {
@@ -1205,53 +1206,65 @@ class ErrorBoundary extends Component {
   }
 }
 const TOOL_ACCESS = {
-  // Learn & Build tier (free/entry)
-  "Learning Resources": "Learn & Build",
-  "Project Ideas": "Learn & Build",
+  // Learn & Build tier (₹199/month)
   "Skill Assessment": "Learn & Build",
-  // Tune & Polish tier (mid)
+  "Career Roadmap": "Learn & Build",
+  "Learning Hub": "Learn & Build",
+  "Project Builder": "Learn & Build",
+  "Portfolio Builder": "Learn & Build",
+  // Tune & Polish tier (₹299/month) — includes everything above, plus:
   "Resume Optimizer": "Tune & Polish",
+  "ATS Checker": "Tune & Polish",
   "LinkedIn Optimizer": "Tune & Polish",
   "GitHub Optimizer": "Tune & Polish",
-  "Portfolio Builder": "Tune & Polish",
-  "Job Discovery": "Tune & Polish",
-  // Zero to Hero tier (premium)
+  "Recruiter Visibility Checker": "Tune & Polish",
+  "Resume Consistency Checker": "Tune & Polish",
+  "Achievement Enhancer": "Tune & Polish",
+  "Application Assistant": "Tune & Polish",
+  // Zero To Hero tier (₹499/month) — includes everything above, plus:
   "Interview Prep": "Zero to Hero",
+  "Job Analytics": "Zero to Hero",
+  "Career Readiness Dashboard": "Zero to Hero",
+  // Tools not explicitly named in the pricing PDF — kept at their closest
+  // existing tier so they remain reachable rather than orphaned.
+  "Job Discovery": "Tune & Polish",
   "Job Tracker": "Zero to Hero",
-  "Career Roadmap": "Zero to Hero",
-  "Cover Letter Generator": "Zero to Hero",
-  "ATS Checker": "Zero to Hero",
-  "Mock Interview": "Zero to Hero",
   "Job Fit Analysis": "Zero to Hero",
   "Evidence Dashboard": "Zero to Hero",
   "Job Analyzer": "Zero to Hero"
 };
 const ROUTE_TOOLS = {
   "/skills": "Skill Assessment",
+  "/career": "Career Roadmap",
+  "/learning": "Learning Hub",
+  "/projects": "Project Builder",
+  "/portfolio": "Portfolio Builder",
   "/resume": "Resume Optimizer",
   "/resume/build": "Resume Optimizer",
   "/resume/history": "Resume Optimizer",
   "/resume/compare": "Resume Optimizer",
   "/resume/send": "Resume Optimizer",
+  "/ats-checker": "ATS Checker",
   "/linkedin": "LinkedIn Optimizer",
   "/github": "GitHub Optimizer",
-  "/portfolio": "Portfolio Builder",
-  "/learning": "Learning Resources",
-  "/projects": "Project Ideas",
+  "/recruiter-visibility": "Recruiter Visibility Checker",
+  "/resume-consistency": "Resume Consistency Checker",
+  "/achievement-enhancer": "Achievement Enhancer",
+  "/application-assistant": "Application Assistant",
+  "/cover-letter": "Application Assistant",
   "/interview": "Interview Prep",
+  "/job-analytics": "Job Analytics",
+  "/career-readiness": "Career Readiness Dashboard",
   "/jobmatch": "Job Discovery",
   "/discover": "Job Discovery",
   "/jobs": "Job Tracker",
-  "/career": "Career Roadmap",
-  "/preparation": "Learning Resources",
-  "/preparation/zero-to-hero": "Learning Resources",
-  "/preparation/tune-and-polish": "Learning Resources",
-  "/preparation/learn-and-build": "Learning Resources",
+  "/preparation": "Learning Hub",
+  "/preparation/zero-to-hero": "Learning Hub",
+  "/preparation/tune-and-polish": "Learning Hub",
+  "/preparation/learn-and-build": "Learning Hub",
   "/evidence": "Evidence Dashboard",
   "/job-fit": "Job Fit Analysis",
-  "/job-analyzer": "Job Analyzer",
-  "/ats-checker": "ATS Checker",
-  "/cover-letter": "Cover Letter Generator"
+  "/job-analyzer": "Job Analyzer"
 };
 const PLAN_TIERS$1 = {
   "Learn & Build": 1,
@@ -1269,22 +1282,28 @@ const PLAN_META = {
     tier: 1,
     icon: Zap,
     color: "blue",
-    description: "For service role learners",
-    tagline: "Start learning and building foundations"
+    description: "Build the skills, projects, and portfolio needed for your dream career.",
+    tagline: "Build the skills, projects, and portfolio for your dream career.",
+    bestFor: "Students & beginners starting their career journey",
+    outcome: "Go from no skills to a strong, project-backed portfolio."
   },
   "Tune & Polish": {
     tier: 2,
     icon: TrendingUp,
     color: "purple",
-    description: "For resume & portfolio refinement",
-    tagline: "Polish your professional presence"
+    description: "Turn your existing skills into a recruiter-ready professional profile.",
+    tagline: "Turn your skills into a recruiter-ready professional profile.",
+    bestFor: "Job seekers ready to optimize their applications",
+    outcome: "Go from raw skills to a polished, recruiter-ready profile."
   },
   "Zero to Hero": {
     tier: 3,
     icon: Crown,
     color: "amber",
-    description: "All tools & premium features",
-    tagline: "Full ecosystem for job-ready professionals"
+    description: "The complete career transformation ecosystem.",
+    tagline: "The complete career transformation ecosystem.",
+    bestFor: "Serious candidates who want the full advantage",
+    outcome: "Go from zero to fully job-ready, interview-confident, and hired."
   }
 };
 function getPlanTier(planName) {
@@ -1308,7 +1327,7 @@ function getFeatureDiff(currentFeatures = [], nextFeatures = []) {
 }
 function formatPrice(price) {
   if (price === 0 || price === "0") return "Free";
-  return `$${price}/mo`;
+  return `₹${price}/mo`;
 }
 const PLAN_COLORS = {
   "Learn & Build": { icon: Zap, color: "blue", label: "Entry Plan" },
@@ -2482,13 +2501,21 @@ function PlanSettings() {
               ] })
             ] }),
             /* @__PURE__ */ jsxs("div", { className: "mb-6", children: [
-              /* @__PURE__ */ jsx("p", { className: "text-4xl font-black text-slate-900 dark:text-white", children: plan.price === 0 ? "Free" : `$${plan.price}` }),
+              /* @__PURE__ */ jsx("p", { className: "text-4xl font-black text-slate-900 dark:text-white", children: plan.price === 0 ? "Free" : `₹${plan.price}` }),
               plan.price > 0 && /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500", children: "per month" })
             ] }),
-            /* @__PURE__ */ jsx("div", { className: "flex-1 space-y-2.5 mb-8", children: (plan.features || []).map((feature) => /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-2.5", children: [
+            meta.bestFor && /* @__PURE__ */ jsxs("div", { className: "mb-5 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700", children: [
+              /* @__PURE__ */ jsx("p", { className: "text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-0.5", children: "Best for" }),
+              /* @__PURE__ */ jsx("p", { className: "text-sm font-semibold text-slate-700 dark:text-slate-300", children: meta.bestFor })
+            ] }),
+            /* @__PURE__ */ jsx("div", { className: "flex-1 space-y-2.5 mb-6", children: (plan.features || []).map((feature) => /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-2.5", children: [
               /* @__PURE__ */ jsx(Check, { className: "w-4 h-4 text-emerald-500 shrink-0 mt-0.5" }),
               /* @__PURE__ */ jsx("span", { className: "text-sm text-slate-700 dark:text-slate-300", children: feature })
             ] }, feature)) }),
+            meta.outcome && /* @__PURE__ */ jsxs("div", { className: "mb-6 flex items-start gap-2 px-3 py-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50", children: [
+              /* @__PURE__ */ jsx(Sparkles, { className: "w-4 h-4 text-emerald-600 shrink-0 mt-0.5" }),
+              /* @__PURE__ */ jsx("p", { className: "text-xs font-semibold text-emerald-800 dark:text-emerald-300", children: meta.outcome })
+            ] }),
             isCurrent ? /* @__PURE__ */ jsx("div", { className: "w-full py-3.5 px-4 rounded-xl font-bold text-center bg-blue-600/10 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800", children: "✓ Current plan" }) : /* @__PURE__ */ jsxs(
               LoadingButton,
               {
@@ -2849,7 +2876,7 @@ function SkillAssessment() {
     ] })
   ] });
 }
-function scoreColor(s) {
+function scoreColor$2(s) {
   return s >= 80 ? "green" : s >= 60 ? "amber" : "red";
 }
 function scoreBadge(s) {
@@ -2864,7 +2891,7 @@ const colorMap = {
   red: { bar: "from-red-400   to-red-500", bg: "bg-red-50", text: "text-red-700" }
 };
 function ScoreBar({ label, score, icon }) {
-  const c = colorMap[scoreColor(score)];
+  const c = colorMap[scoreColor$2(score)];
   return /* @__PURE__ */ jsxs("div", { className: `${c.bg} rounded-2xl p-5 flex flex-col gap-3`, children: [
     /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
       /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
@@ -2977,7 +3004,7 @@ function RecentUploads({ resumes, onResumeClick, onDeleteClick }) {
       "No resumes analyzed yet. Upload your first one!"
     ] }) : /* @__PURE__ */ jsx("div", { className: "space-y-4", children: resumes.map((r) => {
       var _a;
-      const c = colorMap[scoreColor(r.overall_score)];
+      const c = colorMap[scoreColor$2(r.overall_score)];
       const isPdf = (_a = r.file_name) == null ? void 0 : _a.toLowerCase().endsWith(".pdf");
       return /* @__PURE__ */ jsxs("div", { className: "relative group w-full", children: [
         /* @__PURE__ */ jsxs(
@@ -3726,18 +3753,27 @@ function ResumeOptimizer() {
   ] });
 }
 const ALL_TOOLS = [
+  // Learn & Build (₹199/month)
   { name: "Skill Assessment", icon: Activity, path: "/skills", color: "bg-blue-500", tier: "Foundation", plan: "Learn & Build" },
+  { name: "Career Roadmap", icon: Map$1, path: "/career", color: "bg-teal-500", tier: "Foundation", plan: "Learn & Build" },
+  { name: "Learning Hub", icon: BookOpen, path: "/learning", color: "bg-amber-500", tier: "Foundation", plan: "Learn & Build" },
+  { name: "Project Builder", icon: Lightbulb, path: "/projects", color: "bg-rose-500", tier: "Foundation", plan: "Learn & Build" },
+  { name: "Portfolio Builder", icon: Layout$1, path: "/portfolio", color: "bg-indigo-500", tier: "Foundation", plan: "Learn & Build" },
+  // Tune & Polish (₹299/month)
   { name: "Resume Optimizer", icon: FileText, path: "/resume", color: "bg-emerald-500", tier: "Profile", plan: "Tune & Polish" },
+  { name: "ATS Checker", icon: CheckCircle2, path: "/ats-checker", color: "bg-green-500", tier: "Profile", plan: "Tune & Polish" },
   { name: "LinkedIn Optimizer", icon: Linkedin, path: "/linkedin", color: "bg-sky-500", tier: "Profile", plan: "Tune & Polish" },
   { name: "GitHub Optimizer", icon: Github, path: "/github", color: "bg-slate-900", tier: "Profile", plan: "Tune & Polish" },
-  { name: "Portfolio Builder", icon: Layout$1, path: "/portfolio", color: "bg-indigo-500", tier: "Profile", plan: "Tune & Polish" },
-  { name: "Content Vault", icon: BookOpen, path: "/learning", color: "bg-amber-500", tier: "Growth", plan: "Learn & Build" },
-  { name: "Project Ideas", icon: Lightbulb, path: "/projects", color: "bg-rose-500", tier: "Growth", plan: "Learn & Build" },
+  { name: "Recruiter Visibility Checker", icon: Gauge, path: "/recruiter-visibility", color: "bg-fuchsia-500", tier: "Profile", plan: "Tune & Polish" },
+  { name: "Application Assistant", icon: FileText, path: "/cover-letter", color: "bg-orange-500", tier: "Profile", plan: "Tune & Polish" },
+  { name: "Job Discovery", icon: Search, path: "/discover", color: "bg-cyan-500", tier: "Profile", plan: "Tune & Polish" },
+  // Zero To Hero (₹499/month)
   { name: "Interview Prep", icon: Zap, path: "/interview", color: "bg-purple-500", tier: "Advanced", plan: "Zero to Hero" },
-  { name: "Job Tracker", icon: TrendingUp, path: "/jobs", color: "bg-cyan-500", tier: "Advanced", plan: "Zero to Hero" },
-  { name: "Career Roadmap", icon: TrendingUp, path: "/career", color: "bg-teal-500", tier: "Advanced", plan: "Zero to Hero" },
-  { name: "ATS Checker", icon: CheckCircle2, path: "/ats-checker", color: "bg-green-500", tier: "Advanced", plan: "Zero to Hero" },
-  { name: "Cover Letter Generator", icon: FileText, path: "/cover-letter", color: "bg-orange-500", tier: "Advanced", plan: "Zero to Hero" }
+  { name: "Job Analytics", icon: TrendingUp, path: "/jobs", color: "bg-cyan-700", tier: "Advanced", plan: "Zero to Hero" },
+  { name: "Career Readiness Dashboard", icon: ListChecks, path: "/career-readiness", color: "bg-violet-600", tier: "Advanced", plan: "Zero to Hero" },
+  { name: "Evidence Dashboard", icon: ListChecks, path: "/evidence", color: "bg-indigo-700", tier: "Advanced", plan: "Zero to Hero" },
+  { name: "Job Fit Analysis", icon: Target, path: "/job-fit", color: "bg-pink-600", tier: "Advanced", plan: "Zero to Hero" },
+  { name: "Job Description Analyzer", icon: ListChecks, path: "/job-analyzer", color: "bg-stone-600", tier: "Advanced", plan: "Zero to Hero" }
 ];
 const PLAN_TIERS = {
   "Learn & Build": 1,
@@ -7018,355 +7054,42 @@ function CareerRoadmap() {
     )
   ] }) });
 }
-function ATSChecker() {
-  const [stage, setStage] = useState("upload");
-  const [resumeFile, setResumeFile] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [analysis, setAnalysis] = useState(null);
-  const [missingFields, setMissingFields] = useState([]);
-  const [additionalInfo, setAdditionalInfo] = useState({});
-  const [optimizedResume, setOptimizedResume] = useState(null);
-  const [improvedScore, setImprovedScore] = useState(0);
-  const fileInputRef = useRef(null);
-  const handleFileUpload = (e) => {
-    var _a;
-    const file = (_a = e.target.files) == null ? void 0 : _a[0];
-    if (!file) return;
-    if (!["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"].includes(file.type)) {
-      setError("Only PDF and DOCX files are supported");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setError("File size must be less than 5MB");
-      return;
-    }
-    setResumeFile(file);
-    setError("");
-  };
-  const handleAnalyze = async () => {
-    var _a, _b;
-    if (!resumeFile) {
-      setError("Please upload your resume");
-      return;
-    }
-    setLoading(true);
-    setError("");
-    try {
-      const formData = new FormData();
-      formData.append("resume", resumeFile);
-      const { data } = await api.post("/jobs/analyze", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
-      setAnalysis(data.data.analysis);
-      setMissingFields(data.data.missingFields || []);
-      if (data.data.missingFields && data.data.missingFields.length > 0) {
-        setStage("missing-fields");
-        setLoading(false);
-      } else {
-        await handleOptimize(data.data);
-      }
-    } catch (err) {
-      setError(((_b = (_a = err.response) == null ? void 0 : _a.data) == null ? void 0 : _b.error) || "Failed to analyze resume");
-      setLoading(false);
-    }
-  };
-  const handleMissingFieldsSubmit = async () => {
-    var _a, _b;
-    setLoading(true);
-    setError("");
-    try {
-      const formData = new FormData();
-      formData.append("resume", resumeFile);
-      formData.append("additionalInfo", JSON.stringify(additionalInfo));
-      const { data } = await api.post("/jobs/optimize", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
-      setOptimizedResume(data.data.optimizedResume);
-      setImprovedScore(data.data.improvedScore);
-      setAnalysis(data.data.analysis);
-      setStage("report");
-    } catch (err) {
-      setError(((_b = (_a = err.response) == null ? void 0 : _a.data) == null ? void 0 : _b.error) || "Failed to optimize resume");
-    } finally {
-      setLoading(false);
-    }
-  };
-  const handleOptimize = async (data) => {
-    var _a, _b;
-    setLoading(true);
-    setError("");
-    try {
-      const formData = new FormData();
-      formData.append("resume", resumeFile);
-      formData.append("additionalInfo", JSON.stringify({}));
-      const response = await api.post("/jobs/optimize", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
-      setOptimizedResume(response.data.data.optimizedResume);
-      setImprovedScore(response.data.data.improvedScore);
-      setAnalysis(response.data.data.analysis);
-      setStage("report");
-    } catch (err) {
-      setError(((_b = (_a = err.response) == null ? void 0 : _a.data) == null ? void 0 : _b.error) || "Failed to optimize resume");
-    } finally {
-      setLoading(false);
-    }
-  };
-  const downloadOptimizedResume = () => {
-    const element = document.createElement("a");
-    const file = new Blob([optimizedResume], { type: "text/plain" });
-    element.href = URL.createObjectURL(file);
-    element.download = "optimized-resume.txt";
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-  };
-  const getScoreColor2 = (score) => {
-    if (score >= 80) return { text: "text-emerald-600", bg: "bg-emerald-50", ring: "ring-emerald-200" };
-    if (score >= 60) return { text: "text-blue-600", bg: "bg-blue-50", ring: "ring-blue-200" };
-    if (score >= 40) return { text: "text-amber-600", bg: "bg-amber-50", ring: "ring-amber-200" };
-    return { text: "text-rose-600", bg: "bg-rose-50", ring: "ring-rose-200" };
-  };
-  if (stage === "upload") {
-    return /* @__PURE__ */ jsx("div", { className: "w-full h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex flex-col", children: /* @__PURE__ */ jsx("div", { className: "flex-1 flex items-center justify-center px-4", children: /* @__PURE__ */ jsxs("div", { className: "w-full max-w-7xl grid lg:grid-cols-2 gap-12 items-center", children: [
-      /* @__PURE__ */ jsxs("div", { children: [
-        /* @__PURE__ */ jsxs("div", { className: "mb-12", children: [
-          /* @__PURE__ */ jsxs("div", { className: "inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-blue-100 dark:bg-blue-900/30 mb-8", children: [
-            /* @__PURE__ */ jsx("span", { className: "text-2xl", children: "✓" }),
-            /* @__PURE__ */ jsx("span", { className: "font-bold text-blue-700 dark:text-blue-300", children: "ATS RESUME CHECKER" })
-          ] }),
-          /* @__PURE__ */ jsx("h1", { className: "text-5xl lg:text-6xl font-black text-slate-900 dark:text-white mb-6 leading-tight", children: "Optimize Your Resume for ATS" }),
-          /* @__PURE__ */ jsx("p", { className: "text-xl text-slate-600 dark:text-slate-400", children: "AI-powered analysis + automatic rewriting for 90+ ATS score" })
-        ] }),
-        /* @__PURE__ */ jsx("div", { className: "glass-card rounded-3xl p-12 border-2 border-dashed border-slate-300 dark:border-slate-700 mb-8", children: /* @__PURE__ */ jsxs("div", { className: "text-center", children: [
-          /* @__PURE__ */ jsx("div", { className: "w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6", children: /* @__PURE__ */ jsx(Upload, { className: "w-8 h-8 text-blue-600" }) }),
-          resumeFile ? /* @__PURE__ */ jsx("div", { className: "space-y-4", children: /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl", children: [
-            /* @__PURE__ */ jsx(CheckCircle2, { className: "w-5 h-5 text-emerald-600" }),
-            /* @__PURE__ */ jsxs("div", { className: "text-left", children: [
-              /* @__PURE__ */ jsx("p", { className: "font-bold text-emerald-900 dark:text-emerald-100", children: resumeFile.name }),
-              /* @__PURE__ */ jsxs("p", { className: "text-xs text-emerald-700 dark:text-emerald-300", children: [
-                (resumeFile.size / 1024 / 1024).toFixed(2),
-                "MB"
-              ] })
-            ] }),
-            /* @__PURE__ */ jsx("button", { onClick: () => setResumeFile(null), className: "ml-auto text-emerald-600 hover:text-emerald-700", children: /* @__PURE__ */ jsx(X, { className: "w-5 h-5" }) })
-          ] }) }) : /* @__PURE__ */ jsxs(Fragment, { children: [
-            /* @__PURE__ */ jsx("p", { className: "text-xl font-bold text-slate-900 dark:text-white mb-2", children: "Upload Your Resume" }),
-            /* @__PURE__ */ jsx("p", { className: "text-slate-600 dark:text-slate-400 mb-6", children: "PDF or DOCX (up to 5MB)" }),
-            /* @__PURE__ */ jsx(
-              "button",
-              {
-                onClick: () => {
-                  var _a;
-                  return (_a = fileInputRef.current) == null ? void 0 : _a.click();
-                },
-                className: "px-8 py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition",
-                children: "Choose File"
-              }
-            ),
-            /* @__PURE__ */ jsx(
-              "input",
-              {
-                ref: fileInputRef,
-                type: "file",
-                accept: ".pdf,.docx",
-                onChange: handleFileUpload,
-                className: "hidden"
-              }
-            )
-          ] })
-        ] }) }),
-        error && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 p-4 bg-rose-50 dark:bg-rose-900/20 rounded-xl border border-rose-200 dark:border-rose-800", children: [
-          /* @__PURE__ */ jsx(AlertCircle, { className: "w-5 h-5 text-rose-600 flex-shrink-0" }),
-          /* @__PURE__ */ jsx("p", { className: "text-rose-700 dark:text-rose-300", children: error })
-        ] }),
-        /* @__PURE__ */ jsx(
-          "button",
-          {
-            onClick: handleAnalyze,
-            disabled: !resumeFile || loading,
-            className: "w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition text-lg flex items-center justify-center gap-2",
-            children: loading ? /* @__PURE__ */ jsxs(Fragment, { children: [
-              /* @__PURE__ */ jsx(Loader, { className: "w-5 h-5 animate-spin" }),
-              "Analyzing Resume..."
-            ] }) : "Analyze & Optimize Resume"
-          }
-        )
-      ] }),
-      /* @__PURE__ */ jsxs("div", { className: "hidden lg:block space-y-8", children: [
-        /* @__PURE__ */ jsx("div", { className: "space-y-6", children: [
-          { icon: "🤖", title: "AI-Powered Analysis", desc: "DeepSeek R1 analyzes your resume for ATS compatibility" },
-          { icon: "✨", title: "Auto Rewriting", desc: "Automatically optimizes for 90+ ATS score" },
-          { icon: "📊", title: "Detailed Report", desc: "See before/after scores and improvements" },
-          { icon: "📥", title: "Download Resume", desc: "Get your optimized resume as a file" }
-        ].map((item, i) => /* @__PURE__ */ jsxs("div", { className: "flex gap-4", children: [
-          /* @__PURE__ */ jsx("div", { className: "text-3xl", children: item.icon }),
-          /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx("h3", { className: "font-bold text-slate-900 dark:text-white", children: item.title }),
-            /* @__PURE__ */ jsx("p", { className: "text-slate-600 dark:text-slate-400 text-sm", children: item.desc })
-          ] })
-        ] }, i)) }),
-        /* @__PURE__ */ jsxs("div", { className: "bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-900/10 rounded-2xl p-6 border border-emerald-200 dark:border-emerald-800", children: [
-          /* @__PURE__ */ jsx("p", { className: "text-sm font-bold text-emerald-700 dark:text-emerald-300 mb-2", children: "✓ 100% Free" }),
-          /* @__PURE__ */ jsx("p", { className: "text-slate-700 dark:text-slate-300 text-sm", children: "No credit card needed. Powered by your local LM Studio." })
-        ] })
-      ] })
-    ] }) }) });
-  }
-  if (stage === "missing-fields") {
-    return /* @__PURE__ */ jsx("div", { className: "w-full min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-12 px-4 flex flex-col", children: /* @__PURE__ */ jsx("div", { className: "flex-1 flex items-center justify-center", children: /* @__PURE__ */ jsxs("div", { className: "w-full max-w-4xl", children: [
-      /* @__PURE__ */ jsxs("div", { className: "text-center mb-12", children: [
-        /* @__PURE__ */ jsx("h1", { className: "text-4xl font-black text-slate-900 dark:text-white mb-4", children: "Complete Your Profile" }),
-        /* @__PURE__ */ jsx("p", { className: "text-xl text-slate-600 dark:text-slate-400", children: "Add missing information for better AI optimization" })
-      ] }),
-      /* @__PURE__ */ jsx("div", { className: "glass-card rounded-3xl p-12 space-y-8", children: missingFields.map((field, idx) => /* @__PURE__ */ jsxs("div", { children: [
-        /* @__PURE__ */ jsxs("label", { className: "block text-sm font-bold text-slate-900 dark:text-white mb-3", children: [
-          field.field,
-          /* @__PURE__ */ jsx("span", { className: "text-slate-500 text-xs font-normal ml-2", children: field.description })
-        ] }),
-        field.type === "textarea" ? /* @__PURE__ */ jsx(
-          "textarea",
-          {
-            value: additionalInfo[field.field] || "",
-            onChange: (e) => setAdditionalInfo({ ...additionalInfo, [field.field]: e.target.value }),
-            placeholder: "Enter your information...",
-            className: "w-full px-6 py-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-600 focus:border-transparent",
-            rows: 4
-          }
-        ) : /* @__PURE__ */ jsx(
-          "input",
-          {
-            type: field.type || "text",
-            value: additionalInfo[field.field] || "",
-            onChange: (e) => setAdditionalInfo({ ...additionalInfo, [field.field]: e.target.value }),
-            placeholder: "Enter your information...",
-            className: "w-full px-6 py-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-          }
-        )
-      ] }, idx)) }),
-      error && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 p-4 bg-rose-50 dark:bg-rose-900/20 rounded-xl border border-rose-200 dark:border-rose-800", children: [
-        /* @__PURE__ */ jsx(AlertCircle, { className: "w-5 h-5 text-rose-600 flex-shrink-0" }),
-        /* @__PURE__ */ jsx("p", { className: "text-rose-700 dark:text-rose-300", children: error })
-      ] }),
-      /* @__PURE__ */ jsxs("div", { className: "flex gap-4 pt-4", children: [
-        /* @__PURE__ */ jsx(
-          "button",
-          {
-            onClick: () => setStage("upload"),
-            className: "flex-1 py-4 px-6 bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white rounded-xl font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition",
-            children: "Back"
-          }
-        ),
-        /* @__PURE__ */ jsx(
-          "button",
-          {
-            onClick: handleMissingFieldsSubmit,
-            disabled: loading,
-            className: "flex-1 py-4 px-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2",
-            children: loading ? /* @__PURE__ */ jsxs(Fragment, { children: [
-              /* @__PURE__ */ jsx(Loader, { className: "w-5 h-5 animate-spin" }),
-              "Optimizing..."
-            ] }) : "Optimize Resume"
-          }
-        )
-      ] })
-    ] }) }) });
-  }
-  if (stage === "report" && optimizedResume) {
-    const beforeScore = (analysis == null ? void 0 : analysis.currentScore) || 42;
-    const improvement = improvedScore - beforeScore;
-    const colors = getScoreColor2(improvedScore);
-    return /* @__PURE__ */ jsx("div", { className: "w-full min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-16 px-4", children: /* @__PURE__ */ jsxs("div", { className: "w-full max-w-7xl mx-auto", children: [
-      /* @__PURE__ */ jsxs("div", { className: "mb-12", children: [
-        /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 mb-6", children: [
-          /* @__PURE__ */ jsx("div", { className: "w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center", children: /* @__PURE__ */ jsx("span", { className: "text-white font-bold text-lg", children: "✓" }) }),
-          /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx("p", { className: "text-sm font-bold uppercase tracking-widest text-blue-600", children: "AI Resume Optimizer" }),
-            /* @__PURE__ */ jsx("h1", { className: "text-3xl font-black text-slate-900 dark:text-white", children: "ATS Resume Analysis Report" })
-          ] })
-        ] }),
-        /* @__PURE__ */ jsx("p", { className: "text-slate-600 dark:text-slate-400", children: "Powered by DeepSeek R1 · Optimized for Applicant Tracking Systems" })
-      ] }),
-      /* @__PURE__ */ jsxs("div", { className: "grid md:grid-cols-3 gap-6 mb-12", children: [
-        /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8 border border-slate-200 dark:border-slate-700", children: [
-          /* @__PURE__ */ jsx("p", { className: "text-xs font-bold uppercase tracking-widest text-slate-400 mb-4", children: "Before Optimization" }),
-          /* @__PURE__ */ jsxs("div", { className: "mb-4", children: [
-            /* @__PURE__ */ jsx("div", { className: `text-5xl font-black ${getScoreColor2(beforeScore).text}`, children: beforeScore }),
-            /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-500 mt-2", children: "/100 Original resume score" })
-          ] }),
-          /* @__PURE__ */ jsx("div", { className: `w-full h-2 ${getScoreColor2(beforeScore).bg} rounded-full overflow-hidden`, children: /* @__PURE__ */ jsx("div", { className: `h-full ${getScoreColor2(beforeScore).text}`, style: { width: `${beforeScore}%` } }) })
-        ] }),
-        /* @__PURE__ */ jsxs("div", { className: `glass-card rounded-3xl p-8 border-2 ${colors.ring} bg-gradient-to-br ${colors.bg}`, children: [
-          /* @__PURE__ */ jsx("p", { className: "text-xs font-bold uppercase tracking-widest text-blue-600 mb-4", children: "After Optimization" }),
-          /* @__PURE__ */ jsxs("div", { className: "mb-4", children: [
-            /* @__PURE__ */ jsx("div", { className: `text-5xl font-black ${colors.text}`, children: improvedScore }),
-            /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-500 mt-2", children: "ATS-ready score" })
-          ] }),
-          /* @__PURE__ */ jsx("div", { className: "w-full h-2 bg-white/40 rounded-full overflow-hidden", children: /* @__PURE__ */ jsx("div", { className: `h-full ${colors.text} bg-current opacity-100`, style: { width: `${improvedScore}%` } }) })
-        ] }),
-        /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8 border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20", children: [
-          /* @__PURE__ */ jsx("p", { className: "text-xs font-bold uppercase tracking-widest text-emerald-600 mb-4", children: "Total Improvement" }),
-          /* @__PURE__ */ jsxs("div", { className: "flex items-baseline gap-2 mb-4", children: [
-            /* @__PURE__ */ jsxs("div", { className: "text-5xl font-black text-emerald-600", children: [
-              "+",
-              improvement
-            ] }),
-            /* @__PURE__ */ jsx("span", { className: "text-sm text-emerald-600 font-bold", children: "Points" })
-          ] }),
-          /* @__PURE__ */ jsxs("p", { className: "text-sm text-emerald-700", children: [
-            Math.round(improvement / beforeScore * 100),
-            "% increase in ATS compatibility"
-          ] })
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8 mb-12 border border-slate-200 dark:border-slate-700", children: [
-        /* @__PURE__ */ jsx("h2", { className: "text-2xl font-black text-slate-900 dark:text-white mb-8", children: "What Changed" }),
-        /* @__PURE__ */ jsx("div", { className: "bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6", children: /* @__PURE__ */ jsx("p", { className: "text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-mono text-sm max-h-96 overflow-y-auto", children: optimizedResume }) })
-      ] }),
-      /* @__PURE__ */ jsx("div", { className: "glass-card rounded-3xl p-8 border border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-600 to-blue-700 text-white mb-12", children: /* @__PURE__ */ jsxs("div", { className: "flex gap-4", children: [
-        /* @__PURE__ */ jsx(Lightbulb, { className: "w-6 h-6 flex-shrink-0 mt-1" }),
-        /* @__PURE__ */ jsxs("div", { children: [
-          /* @__PURE__ */ jsx("p", { className: "font-black text-lg mb-2", children: `"Your resume's first recruiter is often a machine."` }),
-          /* @__PURE__ */ jsx("p", { className: "text-blue-100", children: "This AI-optimized resume is ready to pass ATS filters and reach human recruiters. Download it, customize as needed, and start applying!" })
-        ] })
-      ] }) }),
-      /* @__PURE__ */ jsxs("div", { className: "flex gap-4 justify-center", children: [
-        /* @__PURE__ */ jsx(
-          "button",
-          {
-            onClick: () => setStage("upload"),
-            className: "px-8 py-4 rounded-xl font-bold bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white hover:bg-slate-300 dark:hover:bg-slate-600 transition",
-            children: "Check Another Resume"
-          }
-        ),
-        /* @__PURE__ */ jsx(
-          "button",
-          {
-            onClick: downloadOptimizedResume,
-            className: "px-8 py-4 rounded-xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 text-white hover:from-emerald-700 hover:to-emerald-800 transition",
-            children: "Download Optimized Resume"
-          }
-        )
-      ] }),
-      /* @__PURE__ */ jsx("p", { className: "text-center text-xs text-slate-500 dark:text-slate-400 mt-8", children: "Resume optimization powered by DeepSeek R1 via LM Studio" })
-    ] }) });
-  }
-  return null;
+const SCORE_BANDS = [
+  { min: 90, label: "Excellent — very likely to pass ATS", color: "#10b981" },
+  { min: 80, label: "Good — likely to pass ATS", color: "#3b82f6" },
+  { min: 70, label: "Fair — may pass ATS", color: "#f59e0b" },
+  { min: 60, label: "Poor — unlikely to pass ATS", color: "#ef4444" },
+  { min: 0, label: "Critical — will likely be filtered", color: "#991b1b" }
+];
+function getScoreBand(score) {
+  return SCORE_BANDS.find((band) => score >= band.min) || SCORE_BANDS[SCORE_BANDS.length - 1];
 }
+const SCORE_BREAKDOWN_ITEMS = [
+  { key: "contact", label: "Contact Information", max: 10 },
+  { key: "structure", label: "Structure", max: 20 },
+  { key: "formatting", label: "ATS Formatting", max: 20 },
+  { key: "skills", label: "Skills", max: 15 },
+  { key: "experience", label: "Experience", max: 15 },
+  { key: "projects", label: "Projects", max: 10 },
+  { key: "education", label: "Education", max: 5 },
+  { key: "readability", label: "Readability", max: 5 }
+];
+const SEVERITY_STYLES$1 = {
+  critical: "bg-red-100 text-red-700",
+  high: "bg-orange-100 text-orange-700",
+  medium: "bg-amber-100 text-amber-700",
+  low: "bg-slate-100 text-slate-600"
+};
 function ATSCheckerV2() {
-  var _a;
+  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l;
   const [resumeFile, setResumeFile] = useState(null);
   const [resumeFileName, setResumeFileName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [analyzing, setAnalyzing] = useState(false);
   const [results, setResults] = useState(null);
-  const [enhancedResume, setEnhancedResume] = useState(null);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("input");
-  const handleResumeUpload = (e) => {
-    var _a2;
-    const file = (_a2 = e.target.files) == null ? void 0 : _a2[0];
+  const [dragActive, setDragActive] = useState(false);
+  const validateAndSetFile = (file) => {
     if (!file) return;
     const allowed = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain"];
     if (!allowed.includes(file.type)) {
@@ -7381,8 +7104,18 @@ function ATSCheckerV2() {
     setResumeFileName(file.name);
     setError("");
   };
+  const handleResumeUpload = (e) => {
+    var _a2;
+    validateAndSetFile((_a2 = e.target.files) == null ? void 0 : _a2[0]);
+  };
+  const handleDrop = (e) => {
+    var _a2;
+    e.preventDefault();
+    setDragActive(false);
+    validateAndSetFile((_a2 = e.dataTransfer.files) == null ? void 0 : _a2[0]);
+  };
   const handleCheck = async () => {
-    var _a2, _b;
+    var _a2, _b2;
     if (!resumeFile) {
       setError("Please upload a resume");
       return;
@@ -7419,139 +7152,99 @@ function ATSCheckerV2() {
       if (response.data.status === "success") {
         setResults(response.data);
         setActiveTab("results");
-        setAnalyzing(true);
-        enhanceResumeBackground(resumeText);
       }
     } catch (err) {
-      setError(((_b = (_a2 = err.response) == null ? void 0 : _a2.data) == null ? void 0 : _b.message) || err.message || "Analysis failed");
+      setError(((_b2 = (_a2 = err.response) == null ? void 0 : _a2.data) == null ? void 0 : _b2.message) || err.message || "Analysis failed");
       console.error("Analysis error:", err);
     } finally {
       setLoading(false);
     }
   };
-  const enhanceResumeBackground = async (resumeText) => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.post("/api/resume/v2/optimize", {
-        resumeText
-      }, {
-        headers: {
-          "Authorization": `Bearer ${token}`
-        }
-      });
-      if (response.data.status === "success") {
-        setEnhancedResume(response.data);
-      }
-    } catch (err) {
-      console.error("Enhancement error:", err);
-    } finally {
-      setAnalyzing(false);
-    }
-  };
-  const getScoreColor2 = (score) => {
-    if (score >= 90) return "#10b981";
-    if (score >= 80) return "#3b82f6";
-    if (score >= 70) return "#f59e0b";
-    if (score >= 60) return "#ef4444";
-    return "#7f1d1d";
-  };
-  const getScoreInterpretation = (score) => {
-    if (score >= 90) return "Excellent - Very likely to pass ATS";
-    if (score >= 80) return "Good - Likely to pass ATS";
-    if (score >= 70) return "Fair - May pass ATS";
-    if (score >= 60) return "Poor - Unlikely to pass ATS";
-    return "Critical - Will likely be filtered";
-  };
-  return /* @__PURE__ */ jsx("div", { className: "ats-checker-v2", children: /* @__PURE__ */ jsxs("div", { className: "ats-container", children: [
-    /* @__PURE__ */ jsxs("div", { className: "ats-header", children: [
-      /* @__PURE__ */ jsx("h1", { children: "ATS Checker V2" }),
-      /* @__PURE__ */ jsx("p", { children: "Analyze your resume against job descriptions for ATS compatibility" })
+  const overallScore = ((_a = results == null ? void 0 : results.analysis) == null ? void 0 : _a.overallScore) ?? 0;
+  const scoreBand = getScoreBand(overallScore);
+  const circumference = 2 * Math.PI * 45;
+  return /* @__PURE__ */ jsxs("div", { className: "max-w-5xl mx-auto py-12 px-4 sm:px-6 lg:px-8 w-full", children: [
+    /* @__PURE__ */ jsxs("div", { className: "mb-10", children: [
+      /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 text-blue-600 font-bold text-sm uppercase tracking-widest mb-2", children: [
+        /* @__PURE__ */ jsx(Zap, { className: "w-4 h-4 fill-current" }),
+        " Resume Tools"
+      ] }),
+      /* @__PURE__ */ jsx("h1", { className: "text-4xl font-black text-slate-900 tracking-tight", children: "ATS Score Checker" }),
+      /* @__PURE__ */ jsx("p", { className: "text-slate-500 mt-2 font-medium", children: "A fully rule-based, deterministic ATS compliance and resume quality report — no AI involved in scoring." })
     ] }),
-    /* @__PURE__ */ jsxs("div", { className: "ats-tabs", children: [
-      /* @__PURE__ */ jsx(
-        "button",
-        {
-          className: `tab ${activeTab === "input" ? "active" : ""}`,
-          onClick: () => setActiveTab("input"),
-          children: "Input"
-        }
-      ),
-      /* @__PURE__ */ jsx(
-        "button",
-        {
-          className: `tab ${activeTab === "results" ? "active" : ""}`,
-          onClick: () => setActiveTab("results"),
-          disabled: !results,
-          children: "Results"
-        }
-      ),
+    /* @__PURE__ */ jsx("div", { className: "flex items-center gap-2 mb-8 glass-card rounded-2xl p-2 w-fit", children: [
+      { id: "input", label: "Input", disabled: false },
+      { id: "results", label: "Report", disabled: !results }
+    ].map((tab) => /* @__PURE__ */ jsx(
+      "button",
+      {
+        onClick: () => setActiveTab(tab.id),
+        disabled: tab.disabled,
+        className: `relative px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${activeTab === tab.id ? "bg-blue-600 text-white shadow-md" : tab.disabled ? "text-slate-300 cursor-not-allowed" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"}`,
+        children: tab.label
+      },
+      tab.id
+    )) }),
+    activeTab === "input" && /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8 sm:p-10", children: [
       /* @__PURE__ */ jsxs(
-        "button",
+        "label",
         {
-          className: `tab ${activeTab === "enhanced" ? "active" : ""}`,
-          onClick: () => setActiveTab("enhanced"),
-          disabled: !enhancedResume,
+          htmlFor: "resume",
+          onDragOver: (e) => {
+            e.preventDefault();
+            setDragActive(true);
+          },
+          onDragLeave: () => setDragActive(false),
+          onDrop: handleDrop,
+          className: `flex flex-col items-center justify-center gap-3 border-2 border-dashed rounded-2xl py-16 px-6 cursor-pointer transition-all duration-200 ${dragActive ? "border-blue-500 bg-blue-50" : resumeFileName ? "border-emerald-300 bg-emerald-50/50" : "border-slate-300 hover:border-blue-400 hover:bg-blue-50/40"}`,
           children: [
-            "Enhanced ",
-            enhancedResume && /* @__PURE__ */ jsx("span", { className: "badge", children: "Ready" })
-          ]
-        }
-      )
-    ] }),
-    activeTab === "input" && /* @__PURE__ */ jsxs("div", { className: "ats-input-section", children: [
-      /* @__PURE__ */ jsx("div", { className: "input-single", children: /* @__PURE__ */ jsxs("div", { className: "input-group", children: [
-        /* @__PURE__ */ jsx("label", { htmlFor: "resume", children: "Upload Your Resume" }),
-        /* @__PURE__ */ jsxs("div", { className: "file-upload-box", children: [
-          /* @__PURE__ */ jsx(
-            "input",
-            {
-              id: "resume",
-              type: "file",
-              accept: ".pdf,.docx,.txt",
-              onChange: handleResumeUpload,
-              style: { display: "none" }
-            }
-          ),
-          /* @__PURE__ */ jsx("label", { htmlFor: "resume", className: "file-upload-label", children: resumeFileName ? /* @__PURE__ */ jsxs(Fragment, { children: [
-            /* @__PURE__ */ jsx("span", { className: "file-icon", children: "📄" }),
-            /* @__PURE__ */ jsx("span", { className: "file-name", children: resumeFileName }),
-            /* @__PURE__ */ jsx("span", { className: "file-info", children: "Click to change file" })
-          ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
-            /* @__PURE__ */ jsx("span", { className: "upload-icon", children: "📤" }),
-            /* @__PURE__ */ jsx("span", { className: "upload-text", children: "Click to upload or drag & drop" }),
-            /* @__PURE__ */ jsx("span", { className: "upload-info", children: "PDF, DOCX, or TXT (max 5MB)" })
-          ] }) })
-        ] })
-      ] }) }),
-      error && /* @__PURE__ */ jsx("div", { className: "error-message", children: error }),
-      /* @__PURE__ */ jsx(
-        "button",
-        {
-          className: "btn-check",
-          onClick: handleCheck,
-          disabled: loading || !resumeFile,
-          children: loading ? /* @__PURE__ */ jsxs(Fragment, { children: [
-            /* @__PURE__ */ jsx("span", { className: "spinner" }),
-            "Analyzing Resume..."
-          ] }) : "Analyze Resume"
-        }
-      )
-    ] }),
-    activeTab === "results" && results && /* @__PURE__ */ jsxs("div", { className: "ats-results-section", children: [
-      /* @__PURE__ */ jsxs("div", { className: "score-card", children: [
-        /* @__PURE__ */ jsxs("div", { className: "score-circle", children: [
-          /* @__PURE__ */ jsxs("svg", { viewBox: "0 0 100 100", children: [
             /* @__PURE__ */ jsx(
-              "circle",
+              "input",
               {
-                cx: "50",
-                cy: "50",
-                r: "45",
-                fill: "none",
-                stroke: "#e5e7eb",
-                strokeWidth: "8"
+                id: "resume",
+                type: "file",
+                accept: ".pdf,.docx,.txt",
+                onChange: handleResumeUpload,
+                className: "hidden"
               }
             ),
+            resumeFileName ? /* @__PURE__ */ jsxs(Fragment, { children: [
+              /* @__PURE__ */ jsx("div", { className: "w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center", children: /* @__PURE__ */ jsx(FileText, { className: "w-7 h-7" }) }),
+              /* @__PURE__ */ jsx("p", { className: "font-bold text-slate-900 break-all text-center", children: resumeFileName }),
+              /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-400 font-medium", children: "Click to choose a different file" })
+            ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
+              /* @__PURE__ */ jsx("div", { className: "w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center", children: /* @__PURE__ */ jsx(UploadCloud, { className: "w-7 h-7" }) }),
+              /* @__PURE__ */ jsx("p", { className: "font-bold text-slate-900", children: "Click to upload or drag & drop" }),
+              /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-400 font-medium", children: "PDF, DOCX, or TXT — max 5MB" })
+            ] })
+          ]
+        }
+      ),
+      error && /* @__PURE__ */ jsxs("div", { className: "mt-6 flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl font-medium text-sm", children: [
+        /* @__PURE__ */ jsx(AlertTriangle, { className: "w-5 h-5 shrink-0 mt-0.5" }),
+        /* @__PURE__ */ jsx("span", { children: error })
+      ] }),
+      /* @__PURE__ */ jsx(
+        "button",
+        {
+          onClick: handleCheck,
+          disabled: loading || !resumeFile,
+          className: "mt-6 w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-white bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed transition-all duration-200 active:scale-[0.98] shadow-lg shadow-blue-600/20 disabled:shadow-none",
+          children: loading ? /* @__PURE__ */ jsxs(Fragment, { children: [
+            /* @__PURE__ */ jsx(Loader2, { className: "w-5 h-5 animate-spin" }),
+            "Analyzing Resume..."
+          ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
+            "Check ATS Score",
+            /* @__PURE__ */ jsx(ArrowRight, { className: "w-5 h-5" })
+          ] })
+        }
+      )
+    ] }),
+    activeTab === "results" && results && /* @__PURE__ */ jsxs("div", { className: "space-y-6", children: [
+      /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-8 items-center", children: [
+        /* @__PURE__ */ jsxs("div", { className: "relative w-44 h-44 mx-auto", children: [
+          /* @__PURE__ */ jsxs("svg", { viewBox: "0 0 100 100", className: "w-full h-full -rotate-90", children: [
+            /* @__PURE__ */ jsx("circle", { cx: "50", cy: "50", r: "45", fill: "none", stroke: "#e5e7eb", strokeWidth: "8" }),
             /* @__PURE__ */ jsx(
               "circle",
               {
@@ -7559,194 +7252,136 @@ function ATSCheckerV2() {
                 cy: "50",
                 r: "45",
                 fill: "none",
-                stroke: getScoreColor2(results.atsScore.score),
+                stroke: scoreBand.color,
                 strokeWidth: "8",
-                strokeDasharray: `${results.atsScore.score / 100 * 282.7} 282.7`,
+                strokeLinecap: "round",
+                strokeDasharray: `${overallScore / 100 * circumference} ${circumference}`,
                 style: { transition: "stroke-dasharray 0.6s ease" }
               }
             )
           ] }),
-          /* @__PURE__ */ jsxs("div", { className: "score-text", children: [
-            /* @__PURE__ */ jsx("span", { className: "score-number", children: results.atsScore.score }),
-            /* @__PURE__ */ jsx("span", { className: "score-max", children: "/100" })
+          /* @__PURE__ */ jsxs("div", { className: "absolute inset-0 flex flex-col items-center justify-center", children: [
+            /* @__PURE__ */ jsx("span", { className: "text-4xl font-black text-slate-900", children: overallScore }),
+            /* @__PURE__ */ jsx("span", { className: "text-sm font-bold text-slate-400", children: "/100" })
           ] })
         ] }),
-        /* @__PURE__ */ jsxs("div", { className: "score-info", children: [
-          /* @__PURE__ */ jsx("h3", { children: "ATS Compatibility Score" }),
-          /* @__PURE__ */ jsx("p", { className: "interpretation", children: getScoreInterpretation(results.atsScore.score) }),
-          /* @__PURE__ */ jsxs("div", { className: "score-breakdown", children: [
-            /* @__PURE__ */ jsxs("div", { className: "breakdown-item", children: [
-              /* @__PURE__ */ jsx("span", { children: "Keyword Match" }),
-              /* @__PURE__ */ jsx("div", { className: "progress-bar", children: /* @__PURE__ */ jsx(
-                "div",
-                {
-                  className: "progress-fill",
-                  style: { width: `${results.atsScore.breakdown.keywordMatch / 30 * 100}%` }
-                }
-              ) }),
-              /* @__PURE__ */ jsxs("span", { className: "score-value", children: [
-                results.atsScore.breakdown.keywordMatch,
-                "/30"
-              ] })
+        /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsx("h3", { className: "text-xl font-black text-slate-900 mb-1", children: "ATS Score" }),
+          /* @__PURE__ */ jsx("p", { className: "font-bold mb-3", style: { color: scoreBand.color }, children: scoreBand.label }),
+          /* @__PURE__ */ jsxs("p", { className: "text-sm text-slate-500 font-medium mb-6", children: [
+            "Detected Role: ",
+            /* @__PURE__ */ jsx("span", { className: "font-bold text-slate-900", children: (_b = results.analysis.detectedRole) == null ? void 0 : _b.displayName }),
+            " ",
+            /* @__PURE__ */ jsxs("span", { className: "text-slate-400", children: [
+              "(",
+              (_c = results.analysis.detectedRole) == null ? void 0 : _c.confidence,
+              "% confidence)"
             ] }),
-            /* @__PURE__ */ jsxs("div", { className: "breakdown-item", children: [
-              /* @__PURE__ */ jsx("span", { children: "Skills Coverage" }),
-              /* @__PURE__ */ jsx("div", { className: "progress-bar", children: /* @__PURE__ */ jsx(
-                "div",
-                {
-                  className: "progress-fill",
-                  style: { width: `${results.atsScore.breakdown.skillsCoverage / 30 * 100}%` }
-                }
-              ) }),
-              /* @__PURE__ */ jsxs("span", { className: "score-value", children: [
-                results.atsScore.breakdown.skillsCoverage,
-                "/30"
-              ] })
-            ] }),
-            /* @__PURE__ */ jsxs("div", { className: "breakdown-item", children: [
-              /* @__PURE__ */ jsx("span", { children: "Experience Alignment" }),
-              /* @__PURE__ */ jsx("div", { className: "progress-bar", children: /* @__PURE__ */ jsx(
-                "div",
-                {
-                  className: "progress-fill",
-                  style: { width: `${results.atsScore.breakdown.experienceAlignment / 20 * 100}%` }
-                }
-              ) }),
-              /* @__PURE__ */ jsxs("span", { className: "score-value", children: [
-                results.atsScore.breakdown.experienceAlignment,
-                "/20"
-              ] })
-            ] }),
-            /* @__PURE__ */ jsxs("div", { className: "breakdown-item", children: [
-              /* @__PURE__ */ jsx("span", { children: "ATS Formatting" }),
-              /* @__PURE__ */ jsx("div", { className: "progress-bar", children: /* @__PURE__ */ jsx(
-                "div",
-                {
-                  className: "progress-fill",
-                  style: { width: `${results.atsScore.breakdown.atsFormatting / 10 * 100}%` }
-                }
-              ) }),
-              /* @__PURE__ */ jsxs("span", { className: "score-value", children: [
-                results.atsScore.breakdown.atsFormatting,
-                "/10"
-              ] })
-            ] }),
-            /* @__PURE__ */ jsxs("div", { className: "breakdown-item", children: [
-              /* @__PURE__ */ jsx("span", { children: "Resume Quality" }),
-              /* @__PURE__ */ jsx("div", { className: "progress-bar", children: /* @__PURE__ */ jsx(
-                "div",
-                {
-                  className: "progress-fill",
-                  style: { width: `${results.atsScore.breakdown.resumeQuality / 10 * 100}%` }
-                }
-              ) }),
-              /* @__PURE__ */ jsxs("span", { className: "score-value", children: [
-                results.atsScore.breakdown.resumeQuality,
-                "/10"
-              ] })
-            ] })
-          ] })
-        ] })
-      ] }),
-      ((_a = results.analysis) == null ? void 0 : _a.quality) && /* @__PURE__ */ jsx("div", { className: "analysis-grid", children: /* @__PURE__ */ jsxs("div", { className: "analysis-card", children: [
-        /* @__PURE__ */ jsx("h3", { children: "Resume Quality" }),
-        /* @__PURE__ */ jsx("div", { className: "match-display", children: /* @__PURE__ */ jsxs("div", { className: "match-circle", style: { color: getScoreColor2(results.analysis.quality.overallScore * 10) }, children: [
-          Math.round(results.analysis.quality.overallScore * 10),
-          "/10"
-        ] }) }),
-        /* @__PURE__ */ jsxs("p", { children: [
-          /* @__PURE__ */ jsx("strong", { children: results.analysis.quality.overallQuality }),
-          " - This resume demonstrates ",
-          results.analysis.quality.overallQuality.toLowerCase(),
-          " ATS compatibility"
-        ] })
-      ] }) }),
-      results.analysis && /* @__PURE__ */ jsxs("div", { className: "keywords-section", children: [
-        /* @__PURE__ */ jsx("h3", { children: "Resume Analysis" }),
-        results.analysis.keyStrengths && results.analysis.keyStrengths.length > 0 && /* @__PURE__ */ jsxs("div", { className: "keywords-group", children: [
-          /* @__PURE__ */ jsx("h4", { children: "✓ Strengths" }),
-          /* @__PURE__ */ jsx("ul", { style: { marginLeft: "20px", color: "#6b7280" }, children: results.analysis.keyStrengths.map((strength, i) => /* @__PURE__ */ jsx("li", { children: strength }, i)) })
-        ] }),
-        results.analysis.keyWeaknesses && results.analysis.keyWeaknesses.length > 0 && /* @__PURE__ */ jsxs("div", { className: "keywords-group", children: [
-          /* @__PURE__ */ jsx("h4", { children: "⚠️ Areas to Improve" }),
-          /* @__PURE__ */ jsx("ul", { style: { marginLeft: "20px", color: "#6b7280" }, children: results.analysis.keyWeaknesses.map((weakness, i) => /* @__PURE__ */ jsx("li", { children: weakness }, i)) })
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxs("div", { className: "enhancement-status", children: [
-        analyzing && /* @__PURE__ */ jsxs("div", { className: "optimizing-banner", children: [
-          /* @__PURE__ */ jsx("div", { className: "spinner" }),
-          /* @__PURE__ */ jsx("span", { children: "🤖 AI is analyzing your resume... Optimizing for this job..." })
-        ] }),
-        enhancedResume && /* @__PURE__ */ jsx("div", { className: "enhanced-ready-banner", children: /* @__PURE__ */ jsx("span", { children: '✅ Enhanced resume ready! Check the "Enhanced" tab for improvements' }) })
-      ] })
-    ] }),
-    activeTab === "enhanced" && enhancedResume && /* @__PURE__ */ jsxs("div", { className: "ats-enhanced-section", children: [
-      /* @__PURE__ */ jsxs("div", { className: "enhancement-comparison", children: [
-        /* @__PURE__ */ jsx("h3", { children: "Improvement Summary" }),
-        /* @__PURE__ */ jsxs("div", { className: "comparison-grid", children: [
-          /* @__PURE__ */ jsxs("div", { className: "comparison-item", children: [
-            /* @__PURE__ */ jsx("span", { className: "label", children: "ATS Score" }),
-            /* @__PURE__ */ jsxs("div", { className: "before-after", children: [
-              /* @__PURE__ */ jsx("span", { className: "before", children: enhancedResume.comparison.before.atsScore }),
-              /* @__PURE__ */ jsx("span", { className: "arrow", children: "→" }),
-              /* @__PURE__ */ jsx("span", { className: "after", children: enhancedResume.comparison.after.atsScore })
-            ] }),
-            /* @__PURE__ */ jsxs("span", { className: "gain", children: [
-              "+",
-              enhancedResume.comparison.improvement.atsScoreGain,
-              " points"
-            ] })
-          ] }),
-          /* @__PURE__ */ jsxs("div", { className: "comparison-item", children: [
-            /* @__PURE__ */ jsx("span", { className: "label", children: "Interview Probability" }),
-            /* @__PURE__ */ jsxs("div", { className: "before-after", children: [
-              /* @__PURE__ */ jsxs("span", { className: "before", children: [
-                enhancedResume.comparison.before.interviewProbability,
-                "%"
-              ] }),
-              /* @__PURE__ */ jsx("span", { className: "arrow", children: "→" }),
-              /* @__PURE__ */ jsxs("span", { className: "after", children: [
-                enhancedResume.comparison.after.interviewProbability,
-                "%"
-              ] })
-            ] }),
-            /* @__PURE__ */ jsxs("span", { className: "gain", children: [
-              "+",
-              enhancedResume.comparison.improvement.probabilityGain,
+            " • ",
+            "Completeness: ",
+            /* @__PURE__ */ jsxs("span", { className: "font-bold text-slate-900", children: [
+              (_d = results.analysis.summary) == null ? void 0 : _d.completeness,
               "%"
             ] })
+          ] }),
+          /* @__PURE__ */ jsx("div", { className: "space-y-3", children: SCORE_BREAKDOWN_ITEMS.map((item) => {
+            var _a2;
+            const value = ((_a2 = results.analysis.scores) == null ? void 0 : _a2[item.key]) ?? 0;
+            const pct = Math.min(100, value / item.max * 100);
+            return /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-[1fr_auto] sm:grid-cols-[140px_1fr_70px] items-center gap-3", children: [
+              /* @__PURE__ */ jsx("span", { className: "text-sm font-bold text-slate-600 col-span-2 sm:col-span-1", children: item.label }),
+              /* @__PURE__ */ jsx("div", { className: "h-2.5 bg-slate-100 rounded-full overflow-hidden", children: /* @__PURE__ */ jsx(
+                "div",
+                {
+                  className: "h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-700",
+                  style: { width: `${pct}%` }
+                }
+              ) }),
+              /* @__PURE__ */ jsxs("span", { className: "text-sm font-bold text-blue-600 text-right", children: [
+                value,
+                "/",
+                item.max
+              ] })
+            ] }, item.key);
+          }) })
+        ] })
+      ] }),
+      ((_e = results.analysis) == null ? void 0 : _e.contactInfo) && /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-6", children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between mb-4", children: [
+          /* @__PURE__ */ jsxs("h3", { className: "font-black text-slate-900 flex items-center gap-2", children: [
+            /* @__PURE__ */ jsx(CheckCircle2, { className: "w-5 h-5 text-blue-600" }),
+            " Contact Information"
+          ] }),
+          /* @__PURE__ */ jsxs("span", { className: "text-sm font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full", children: [
+            results.analysis.contactInfo.score,
+            "/",
+            results.analysis.contactInfo.maxScore
           ] })
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxs("div", { className: "enhancement-details", children: [
-        /* @__PURE__ */ jsx("h3", { children: "What Was Enhanced" }),
-        /* @__PURE__ */ jsx("ul", { className: "enhancement-notes", children: enhancedResume.enhancement.notes.map((note, i) => /* @__PURE__ */ jsx("li", { children: note }, i)) })
-      ] }),
-      /* @__PURE__ */ jsxs("div", { className: "enhanced-resume-box", children: [
-        /* @__PURE__ */ jsx("h3", { children: "Enhanced Resume" }),
-        /* @__PURE__ */ jsx("div", { className: "enhanced-content", children: /* @__PURE__ */ jsx("pre", { children: enhancedResume.enhancement.enhancedResume }) }),
-        /* @__PURE__ */ jsx(
-          "button",
+        ] }),
+        /* @__PURE__ */ jsx("div", { className: "flex flex-wrap gap-2", children: Object.entries(results.analysis.contactInfo.found || {}).map(([field, present]) => /* @__PURE__ */ jsxs(
+          "span",
           {
-            className: "btn-copy",
-            onClick: () => {
-              navigator.clipboard.writeText(enhancedResume.enhancement.enhancedResume);
-              alert("Enhanced resume copied to clipboard!");
-            },
-            children: "📋 Copy Enhanced Resume"
-          }
-        )
+            className: `text-xs font-bold px-3 py-1.5 rounded-full capitalize ${present ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`,
+            children: [
+              present ? "✓" : "✕",
+              " ",
+              field
+            ]
+          },
+          field
+        )) })
       ] }),
-      /* @__PURE__ */ jsxs("div", { className: "next-steps", children: [
-        /* @__PURE__ */ jsx("h3", { children: "Next Steps" }),
-        /* @__PURE__ */ jsxs("ol", { children: [
-          /* @__PURE__ */ jsx("li", { children: "Copy the enhanced resume above" }),
-          /* @__PURE__ */ jsx("li", { children: "Apply to the job with the optimized version" }),
-          /* @__PURE__ */ jsx("li", { children: "Use the original for other jobs to maintain authenticity" })
+      ((_f = results.analysis) == null ? void 0 : _f.quality) && /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6", children: [
+        /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-6", children: [
+          /* @__PURE__ */ jsxs("h3", { className: "font-black text-slate-900 mb-4 flex items-center gap-2", children: [
+            /* @__PURE__ */ jsx(CheckCircle2, { className: "w-5 h-5 text-emerald-500" }),
+            " Strengths"
+          ] }),
+          ((_g = results.analysis.quality.keyStrengths) == null ? void 0 : _g.length) > 0 ? /* @__PURE__ */ jsx("ul", { className: "space-y-2.5", children: results.analysis.quality.keyStrengths.map((s, i) => /* @__PURE__ */ jsxs("li", { className: "text-sm text-slate-600 font-medium flex items-start gap-2", children: [
+            /* @__PURE__ */ jsx("span", { className: "w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" }),
+            s
+          ] }, i)) }) : /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-400 font-medium", children: "No standout strengths detected yet." })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-6", children: [
+          /* @__PURE__ */ jsxs("h3", { className: "font-black text-slate-900 mb-4 flex items-center gap-2", children: [
+            /* @__PURE__ */ jsx(AlertTriangle, { className: "w-5 h-5 text-amber-500" }),
+            " Weaknesses"
+          ] }),
+          ((_h = results.analysis.quality.keyWeaknesses) == null ? void 0 : _h.length) > 0 ? /* @__PURE__ */ jsx("ul", { className: "space-y-2.5", children: results.analysis.quality.keyWeaknesses.map((w, i) => /* @__PURE__ */ jsxs("li", { className: "text-sm text-slate-600 font-medium flex items-start gap-2", children: [
+            /* @__PURE__ */ jsx("span", { className: "w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" }),
+            w
+          ] }, i)) }) : /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-400 font-medium", children: "No major issues found." })
         ] })
+      ] }),
+      ((_j = (_i = results.analysis) == null ? void 0 : _i.issues) == null ? void 0 : _j.length) > 0 && /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-6", children: [
+        /* @__PURE__ */ jsxs("h3", { className: "font-black text-slate-900 mb-4 flex items-center gap-2", children: [
+          /* @__PURE__ */ jsx(ShieldAlert, { className: "w-5 h-5 text-red-500" }),
+          " Issues Found (",
+          results.analysis.issues.length,
+          ")"
+        ] }),
+        /* @__PURE__ */ jsx("ul", { className: "space-y-2.5", children: results.analysis.issues.map((issue, i) => /* @__PURE__ */ jsxs("li", { className: "flex items-start gap-3 text-sm", children: [
+          /* @__PURE__ */ jsx("span", { className: `shrink-0 text-xs font-bold px-2 py-1 rounded-full capitalize ${SEVERITY_STYLES$1[issue.severity] || SEVERITY_STYLES$1.low}`, children: issue.severity }),
+          /* @__PURE__ */ jsx("span", { className: "text-slate-600 font-medium pt-0.5", children: issue.message })
+        ] }, i)) })
+      ] }),
+      ((_l = (_k = results.analysis) == null ? void 0 : _k.recommendations) == null ? void 0 : _l.length) > 0 && /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-6", children: [
+        /* @__PURE__ */ jsxs("h3", { className: "font-black text-slate-900 mb-4 flex items-center gap-2", children: [
+          /* @__PURE__ */ jsx(ListChecks, { className: "w-5 h-5 text-blue-600" }),
+          " Recommended Improvements (",
+          results.analysis.recommendations.length,
+          ")"
+        ] }),
+        /* @__PURE__ */ jsx("ul", { className: "space-y-4", children: results.analysis.recommendations.map((rec, i) => /* @__PURE__ */ jsxs("li", { className: "bg-white/60 rounded-2xl p-4", children: [
+          /* @__PURE__ */ jsx("p", { className: "font-bold text-slate-900 text-sm mb-1", children: rec.message }),
+          rec.reason && rec.reason !== rec.message && /* @__PURE__ */ jsxs("p", { className: "text-xs text-slate-500 font-medium", children: [
+            "Reason: ",
+            rec.reason
+          ] })
+        ] }, i)) })
       ] })
     ] })
-  ] }) });
+  ] });
 }
 function JobAnalyzer() {
   const [jobDescription, setJobDescription] = useState("");
@@ -9767,6 +9402,762 @@ function LearnAndBuildTrack() {
     ] }) })
   ] });
 }
+const SUB_META = {
+  resume: { label: "Resume", icon: FileText, color: "emerald" },
+  linkedin: { label: "LinkedIn", icon: Linkedin, color: "blue" },
+  github: { label: "GitHub", icon: Github, color: "purple" },
+  keywords: { label: "Keywords", icon: Tags, color: "amber" }
+};
+function scoreColor$1(score) {
+  if (score >= 80) return "text-emerald-600 dark:text-emerald-400";
+  if (score >= 60) return "text-blue-600 dark:text-blue-400";
+  if (score >= 40) return "text-amber-600 dark:text-amber-400";
+  return "text-rose-600 dark:text-rose-400";
+}
+function barColor(score) {
+  if (score >= 80) return "bg-emerald-500";
+  if (score >= 60) return "bg-blue-500";
+  if (score >= 40) return "bg-amber-500";
+  return "bg-rose-500";
+}
+function RecruiterVisibility() {
+  var _a, _b;
+  const [resumeText, setResumeText] = useState("");
+  const [linkedinHeadline, setLinkedinHeadline] = useState("");
+  const [linkedinAbout, setLinkedinAbout] = useState("");
+  const [linkedinSkills, setLinkedinSkills] = useState("");
+  const [githubUsername, setGithubUsername] = useState("");
+  const [targetKeywords, setTargetKeywords] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
+  const handleAnalyze = async (e) => {
+    var _a2, _b2;
+    e.preventDefault();
+    const hasResume = resumeText.trim().length > 0;
+    const hasLinkedin = linkedinHeadline.trim() || linkedinAbout.trim() || linkedinSkills.trim();
+    const hasGithub = githubUsername.trim().length > 0;
+    if (!hasResume && !hasLinkedin && !hasGithub) {
+      setError("Provide at least one of: resume text, LinkedIn details, or GitHub username.");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    try {
+      let github;
+      if (hasGithub) {
+        try {
+          const { data: gh } = await api.post("/profiles/github/analyze", { username: githubUsername.trim() });
+          github = gh;
+        } catch {
+          github = void 0;
+        }
+      }
+      const linkedin = hasLinkedin ? { headline: linkedinHeadline, about: linkedinAbout, skills: linkedinSkills } : void 0;
+      const { data } = await api.post("/recruiter-visibility/analyze", {
+        resumeText: hasResume ? resumeText : void 0,
+        linkedin,
+        github,
+        targetKeywords: targetKeywords.trim() || void 0
+      });
+      setResult(data.data);
+    } catch (err) {
+      setError(((_b2 = (_a2 = err.response) == null ? void 0 : _a2.data) == null ? void 0 : _b2.error) || "Failed to analyze recruiter visibility");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const loadTestData = () => {
+    setResumeText(
+      "Senior Software Engineer. Led development of React and Node.js microservices serving 2M users. Improved API performance by 40% and reduced infrastructure costs by 25%. Built CI/CD pipelines with Docker, Kubernetes and AWS. Mentored 4 junior engineers. Stack: TypeScript, PostgreSQL, GraphQL, Redis. linkedin.com/in/janedoe · github.com/janedoe · jane.doe@email.com"
+    );
+    setLinkedinHeadline("Senior Software Engineer | React, Node.js, AWS | Building scalable platforms");
+    setLinkedinAbout(
+      "I build reliable, high-scale web platforms. Over the past 6 years I have led teams, shipped production features used by millions, and improved performance and developer experience across the stack."
+    );
+    setLinkedinSkills("React, Node.js, TypeScript, AWS, Docker, Kubernetes, PostgreSQL, GraphQL, Redis, CI/CD, System Design, Leadership");
+    setGithubUsername("");
+    setTargetKeywords("react, node, aws, graphql, kubernetes, typescript");
+    setResult(null);
+    setError("");
+  };
+  return /* @__PURE__ */ jsxs("div", { className: "w-full max-w-5xl mx-auto py-16 px-4 sm:px-6", children: [
+    /* @__PURE__ */ jsxs("div", { className: "text-center mb-16", children: [
+      /* @__PURE__ */ jsx("div", { className: "inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-slate-900/5 mb-6", children: /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-slate-900 text-3xl", style: { fontVariationSettings: "'FILL' 0" }, children: "visibility" }) }),
+      /* @__PURE__ */ jsx("h1", { className: "text-4xl font-black text-on-surface font-headline mb-4", children: "Recruiter Visibility Checker" }),
+      /* @__PURE__ */ jsx("p", { className: "text-lg text-on-surface-variant font-medium max-w-2xl mx-auto", children: "Measure how attractive your profile looks to recruiters across your resume, LinkedIn, and GitHub." })
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "max-w-5xl mx-auto mb-12 glass-card border-blue-200/50 rounded-3xl p-8", children: [
+      /* @__PURE__ */ jsxs("h3", { className: "text-xl font-bold text-on-surface mb-4 flex items-center gap-2", children: [
+        /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-blue-600", children: "info" }),
+        "How It Works"
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "space-y-3 text-slate-700 dark:text-slate-300", children: [
+        /* @__PURE__ */ jsxs("p", { children: [
+          /* @__PURE__ */ jsx("strong", { children: "1. Add Your Profile Sources:" }),
+          " Paste your resume, LinkedIn details, and/or GitHub username. You can fill in just one — we score what you provide and flag what's missing."
+        ] }),
+        /* @__PURE__ */ jsxs("p", { children: [
+          /* @__PURE__ */ jsx("strong", { children: "2. Visibility Scoring:" }),
+          " We combine resume, LinkedIn, GitHub, and keyword-coverage signals into a single Recruiter Visibility Score (0-100) with per-source sub-scores."
+        ] }),
+        /* @__PURE__ */ jsxs("p", { children: [
+          /* @__PURE__ */ jsx("strong", { children: "3. Improve:" }),
+          " Follow the ranked suggestions to raise the signals recruiters search and screen for."
+        ] })
+      ] })
+    ] }),
+    error && /* @__PURE__ */ jsxs("div", { className: "max-w-3xl mx-auto mb-6 glass-card border-rose-200/50 p-4 rounded-2xl text-rose-600 text-sm font-medium flex items-center gap-3", children: [
+      /* @__PURE__ */ jsx(AlertCircle, { className: "w-5 h-5 flex-shrink-0" }),
+      error
+    ] }),
+    /* @__PURE__ */ jsxs("form", { onSubmit: handleAnalyze, className: "max-w-3xl mx-auto mb-12 space-y-6", children: [
+      /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8", children: [
+        /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-2 text-sm font-bold text-on-surface mb-3", children: [
+          /* @__PURE__ */ jsx(FileText, { className: "w-4 h-4 text-emerald-600" }),
+          " Resume Text"
+        ] }),
+        /* @__PURE__ */ jsx(
+          "textarea",
+          {
+            value: resumeText,
+            onChange: (e) => setResumeText(e.target.value),
+            placeholder: "Paste your resume text here...",
+            rows: 8,
+            className: "w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-3 text-on-surface placeholder:text-outline/50 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8 space-y-4", children: [
+        /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-2 text-sm font-bold text-on-surface", children: [
+          /* @__PURE__ */ jsx(Linkedin, { className: "w-4 h-4 text-blue-600" }),
+          " LinkedIn (optional)"
+        ] }),
+        /* @__PURE__ */ jsx(
+          "input",
+          {
+            type: "text",
+            value: linkedinHeadline,
+            onChange: (e) => setLinkedinHeadline(e.target.value),
+            placeholder: "Headline (e.g. Senior Software Engineer | React, Node.js, AWS)",
+            className: "w-full px-4 py-2 bg-surface-container/50 border border-outline/20 rounded-xl text-on-surface placeholder:text-outline/50 focus:ring-1 focus:ring-blue-500 outline-none"
+          }
+        ),
+        /* @__PURE__ */ jsx(
+          "textarea",
+          {
+            value: linkedinAbout,
+            onChange: (e) => setLinkedinAbout(e.target.value),
+            placeholder: "About section...",
+            rows: 3,
+            className: "w-full px-4 py-2 bg-surface-container/50 border border-outline/20 rounded-xl text-on-surface placeholder:text-outline/50 focus:ring-1 focus:ring-blue-500 outline-none resize-none"
+          }
+        ),
+        /* @__PURE__ */ jsx(
+          "input",
+          {
+            type: "text",
+            value: linkedinSkills,
+            onChange: (e) => setLinkedinSkills(e.target.value),
+            placeholder: "Skills, comma-separated (e.g. React, Node.js, AWS)",
+            className: "w-full px-4 py-2 bg-surface-container/50 border border-outline/20 rounded-xl text-on-surface placeholder:text-outline/50 focus:ring-1 focus:ring-blue-500 outline-none"
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8 space-y-4", children: [
+        /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-2 text-sm font-bold text-on-surface", children: [
+          /* @__PURE__ */ jsx(Github, { className: "w-4 h-4 text-purple-600" }),
+          " GitHub Username (optional)"
+        ] }),
+        /* @__PURE__ */ jsx(
+          "input",
+          {
+            type: "text",
+            value: githubUsername,
+            onChange: (e) => setGithubUsername(e.target.value),
+            placeholder: "e.g. janedoe",
+            className: "w-full px-4 py-2 bg-surface-container/50 border border-outline/20 rounded-xl text-on-surface placeholder:text-outline/50 focus:ring-1 focus:ring-blue-500 outline-none"
+          }
+        ),
+        /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-2 text-sm font-bold text-on-surface pt-2", children: [
+          /* @__PURE__ */ jsx(Tags, { className: "w-4 h-4 text-amber-600" }),
+          " Target Role Keywords (optional)"
+        ] }),
+        /* @__PURE__ */ jsx(
+          "input",
+          {
+            type: "text",
+            value: targetKeywords,
+            onChange: (e) => setTargetKeywords(e.target.value),
+            placeholder: "Keywords from your target job, comma-separated",
+            className: "w-full px-4 py-2 bg-surface-container/50 border border-outline/20 rounded-xl text-on-surface placeholder:text-outline/50 focus:ring-1 focus:ring-blue-500 outline-none"
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "flex flex-col sm:flex-row gap-3 justify-center", children: [
+        /* @__PURE__ */ jsx(
+          "button",
+          {
+            type: "submit",
+            disabled: loading,
+            className: "px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white rounded-2xl font-bold transition-all shadow-lg flex items-center justify-center gap-3",
+            children: loading ? /* @__PURE__ */ jsxs(Fragment, { children: [
+              /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined animate-spin text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "sync" }),
+              "Analyzing..."
+            ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
+              /* @__PURE__ */ jsx(Eye, { className: "w-5 h-5" }),
+              "Check Visibility"
+            ] })
+          }
+        ),
+        /* @__PURE__ */ jsxs(
+          "button",
+          {
+            type: "button",
+            onClick: loadTestData,
+            className: "px-8 py-3 glass-card hover:bg-white/40 text-on-surface rounded-2xl font-bold transition-all flex items-center justify-center gap-3",
+            children: [
+              /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "dataset" }),
+              "Load Test Data"
+            ]
+          }
+        )
+      ] })
+    ] }),
+    result && !loading && /* @__PURE__ */ jsxs("div", { className: "max-w-3xl mx-auto space-y-8", children: [
+      /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8 text-center", children: [
+        /* @__PURE__ */ jsx("p", { className: "text-xs font-bold text-blue-600 dark:text-blue-400 uppercase mb-2", children: "Recruiter Visibility Score" }),
+        /* @__PURE__ */ jsx("p", { className: `text-6xl font-black ${scoreColor$1(result.visibilityScore)}`, children: result.visibilityScore }),
+        /* @__PURE__ */ jsx("p", { className: "text-lg font-bold text-on-surface mt-2", children: result.scoreLabel }),
+        /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500 dark:text-slate-400 mt-2", children: result.scoreDescription })
+      ] }),
+      /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4", children: Object.entries(result.subScores).map(([key, sub]) => {
+        const meta = SUB_META[key] || { label: key, icon: Eye };
+        const Icon = meta.icon;
+        return /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-2xl p-6", children: [
+          /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between mb-3", children: [
+            /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
+              /* @__PURE__ */ jsx(Icon, { className: "w-5 h-5 text-slate-500" }),
+              /* @__PURE__ */ jsx("span", { className: "font-bold text-on-surface", children: meta.label })
+            ] }),
+            sub.available ? /* @__PURE__ */ jsx("span", { className: `text-2xl font-black ${scoreColor$1(sub.score)}`, children: sub.score }) : /* @__PURE__ */ jsx("span", { className: "text-xs font-semibold text-slate-400 uppercase", children: "Not provided" })
+          ] }),
+          /* @__PURE__ */ jsx("div", { className: "w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden", children: /* @__PURE__ */ jsx(
+            "div",
+            {
+              className: `h-full ${sub.available ? barColor(sub.score) : "bg-slate-300"} transition-all`,
+              style: { width: `${sub.available ? sub.score : 0}%` }
+            }
+          ) }),
+          key === "keywords" && sub.available && Array.isArray(sub.matched) && sub.matched.length > 0 && /* @__PURE__ */ jsx("div", { className: "flex flex-wrap gap-1.5 mt-3", children: sub.matched.slice(0, 10).map((kw) => /* @__PURE__ */ jsx("span", { className: "px-2 py-0.5 bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 rounded text-xs font-medium", children: kw }, kw)) })
+        ] }, key);
+      }) }),
+      ((_b = (_a = result.subScores.keywords) == null ? void 0 : _a.missing) == null ? void 0 : _b.length) > 0 && /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8", children: [
+        /* @__PURE__ */ jsx("h3", { className: "text-lg font-bold text-on-surface mb-3", children: "Keywords Recruiters Search For That You're Missing" }),
+        /* @__PURE__ */ jsx("div", { className: "flex flex-wrap gap-2", children: result.subScores.keywords.missing.map((kw) => /* @__PURE__ */ jsx("span", { className: "px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-sm font-medium", children: kw }, kw)) })
+      ] }),
+      result.suggestions.length > 0 && /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8", children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 mb-4", children: [
+          /* @__PURE__ */ jsx(Lightbulb, { className: "w-6 h-6 text-amber-500" }),
+          /* @__PURE__ */ jsx("h3", { className: "text-xl font-bold text-on-surface", children: "Ranked Improvement Suggestions" })
+        ] }),
+        /* @__PURE__ */ jsx("ol", { className: "space-y-3", children: result.suggestions.map((s, i) => /* @__PURE__ */ jsxs("li", { className: "flex gap-3 text-slate-700 dark:text-slate-300", children: [
+          /* @__PURE__ */ jsx("span", { className: "flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-bold text-sm flex items-center justify-center", children: i + 1 }),
+          /* @__PURE__ */ jsx("span", { children: s })
+        ] }, i)) })
+      ] })
+    ] })
+  ] });
+}
+const SEVERITY_STYLES = {
+  high: "border-rose-300/60 bg-rose-50/60 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300",
+  medium: "border-amber-300/60 bg-amber-50/60 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300",
+  low: "border-blue-300/60 bg-blue-50/60 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300"
+};
+function scoreColor(score) {
+  if (score == null) return "text-slate-500";
+  if (score >= 80) return "text-emerald-600 dark:text-emerald-400";
+  if (score >= 55) return "text-amber-600 dark:text-amber-400";
+  return "text-rose-600 dark:text-rose-400";
+}
+function ResumeConsistency() {
+  var _a, _b, _c, _d;
+  const [resumeText, setResumeText] = useState("");
+  const [linkedinText, setLinkedinText] = useState("");
+  const [githubText, setGithubText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [report, setReport] = useState(null);
+  const [error, setError] = useState("");
+  const parseField = (label, text) => {
+    const trimmed = text.trim();
+    if (!trimmed) return null;
+    try {
+      return JSON.parse(trimmed);
+    } catch (e) {
+      throw new Error(`${label} is not valid JSON. ${e.message}`);
+    }
+  };
+  const handleCheck = async (e) => {
+    var _a2, _b2;
+    e.preventDefault();
+    setError("");
+    let resume, linkedin, github;
+    try {
+      resume = parseField("Resume", resumeText);
+      linkedin = parseField("LinkedIn", linkedinText);
+      github = parseField("GitHub", githubText);
+    } catch (parseErr) {
+      setError(parseErr.message);
+      return;
+    }
+    if (!resume && !linkedin && !github) {
+      setError("Provide at least two profiles (resume, LinkedIn, GitHub) to compare.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data } = await api.post("/resume-consistency/check", { resume, linkedin, github });
+      setReport(data.data);
+    } catch (err) {
+      setError(((_b2 = (_a2 = err.response) == null ? void 0 : _a2.data) == null ? void 0 : _b2.error) || "Failed to run consistency check");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const loadTestData = () => {
+    setResumeText(
+      JSON.stringify(
+        {
+          name: "Jane Doe",
+          headline: "Senior Software Engineer",
+          skills: ["JavaScript", "React", "Node.js", "PostgreSQL", "AWS"],
+          projects: ["JobTune Platform", "Analytics Dashboard"],
+          experience: [
+            { title: "Senior Software Engineer", company: "TechCorp", startDate: "2021", endDate: "2024" },
+            { title: "Software Engineer", company: "StartupXYZ", startDate: "2018", endDate: "2021" }
+          ]
+        },
+        null,
+        2
+      )
+    );
+    setLinkedinText(
+      JSON.stringify(
+        {
+          name: "Jane Doe",
+          headline: "Full Stack Engineer",
+          skills: ["JavaScript", "React", "TypeScript", "Docker"],
+          experience: [
+            { title: "Lead Software Engineer", company: "TechCorp", startDate: "2021", endDate: "2023" },
+            { title: "Software Engineer", company: "StartupXYZ", startDate: "2018", endDate: "2021" }
+          ]
+        },
+        null,
+        2
+      )
+    );
+    setGithubText(
+      JSON.stringify(
+        {
+          username: "janedoe",
+          repos: [
+            { name: "JobTune Platform", language: "JavaScript" },
+            { name: "ml-experiments", language: "Python" },
+            { name: "go-cli-tool", language: "Go" }
+          ]
+        },
+        null,
+        2
+      )
+    );
+    setReport(null);
+    setError("");
+  };
+  return /* @__PURE__ */ jsxs("div", { className: "w-full max-w-5xl mx-auto py-16 px-4 sm:px-6", children: [
+    /* @__PURE__ */ jsxs("div", { className: "text-center mb-16", children: [
+      /* @__PURE__ */ jsx("div", { className: "inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-slate-900/5 mb-6", children: /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-slate-900 text-3xl", style: { fontVariationSettings: "'FILL' 0" }, children: "fact_check" }) }),
+      /* @__PURE__ */ jsx("h1", { className: "text-4xl font-black text-on-surface font-headline mb-4", children: "Resume Consistency Checker" }),
+      /* @__PURE__ */ jsx("p", { className: "text-lg text-on-surface-variant font-medium max-w-2xl mx-auto", children: "Cross-check your resume against your LinkedIn and GitHub to catch missing projects, skill gaps, and conflicting titles or dates." })
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "max-w-5xl mx-auto mb-12 glass-card border-emerald-200/50 rounded-3xl p-8", children: [
+      /* @__PURE__ */ jsxs("h3", { className: "text-xl font-bold text-on-surface mb-4 flex items-center gap-2", children: [
+        /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-emerald-600", children: "info" }),
+        "How It Works"
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "space-y-3 text-slate-700 dark:text-slate-300", children: [
+        /* @__PURE__ */ jsxs("p", { children: [
+          /* @__PURE__ */ jsx("strong", { children: "1. Provide your profile data" }),
+          " as JSON for any two or more of: Resume, LinkedIn, GitHub."
+        ] }),
+        /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsxs("p", { className: "mb-2", children: [
+            /* @__PURE__ */ jsx("strong", { children: "2. We cross-compare them" }),
+            " and flag:"
+          ] }),
+          /* @__PURE__ */ jsxs("ul", { className: "list-disc list-inside ml-4 space-y-1", children: [
+            /* @__PURE__ */ jsxs("li", { children: [
+              /* @__PURE__ */ jsx("strong", { children: "Projects Missing in Resume:" }),
+              " GitHub repos not on your resume"
+            ] }),
+            /* @__PURE__ */ jsxs("li", { children: [
+              /* @__PURE__ */ jsx("strong", { children: "Skill gaps:" }),
+              " skills on one profile but absent from another"
+            ] }),
+            /* @__PURE__ */ jsxs("li", { children: [
+              /* @__PURE__ */ jsx("strong", { children: "Title & Date Mismatches:" }),
+              " conflicting roles or dates for the same employer"
+            ] })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxs("p", { children: [
+          /* @__PURE__ */ jsx("strong", { children: "3. Get a consistency score (0-100)" }),
+          " and a categorized list of mismatches to fix."
+        ] })
+      ] })
+    ] }),
+    error && /* @__PURE__ */ jsxs("div", { className: "max-w-3xl mx-auto mb-6 glass-card border-rose-200/50 p-4 rounded-2xl text-rose-600 text-sm font-medium flex items-center gap-3", children: [
+      /* @__PURE__ */ jsx(AlertCircle, { className: "w-5 h-5 flex-shrink-0" }),
+      error
+    ] }),
+    /* @__PURE__ */ jsxs("form", { onSubmit: handleCheck, className: "max-w-5xl mx-auto mb-12", children: [
+      /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 lg:grid-cols-3 gap-6", children: [
+        /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-2 text-sm font-bold text-on-surface mb-2", children: [
+            /* @__PURE__ */ jsx(FileText, { className: "w-4 h-4 text-emerald-600" }),
+            " Resume (JSON)"
+          ] }),
+          /* @__PURE__ */ jsx(
+            "textarea",
+            {
+              value: resumeText,
+              onChange: (e) => setResumeText(e.target.value),
+              placeholder: '{ "skills": [...], "projects": [...], "experience": [...] }',
+              rows: 12,
+              className: "w-full font-mono text-xs bg-surface-container/50 border border-outline/20 rounded-xl px-4 py-3 text-on-surface placeholder:text-outline/50 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-2 text-sm font-bold text-on-surface mb-2", children: [
+            /* @__PURE__ */ jsx(Linkedin, { className: "w-4 h-4 text-blue-600" }),
+            " LinkedIn (JSON)"
+          ] }),
+          /* @__PURE__ */ jsx(
+            "textarea",
+            {
+              value: linkedinText,
+              onChange: (e) => setLinkedinText(e.target.value),
+              placeholder: '{ "headline": "...", "skills": [...], "experience": [...] }',
+              rows: 12,
+              className: "w-full font-mono text-xs bg-surface-container/50 border border-outline/20 rounded-xl px-4 py-3 text-on-surface placeholder:text-outline/50 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-2 text-sm font-bold text-on-surface mb-2", children: [
+            /* @__PURE__ */ jsx(Github, { className: "w-4 h-4 text-slate-700 dark:text-slate-300" }),
+            " GitHub (JSON)"
+          ] }),
+          /* @__PURE__ */ jsx(
+            "textarea",
+            {
+              value: githubText,
+              onChange: (e) => setGithubText(e.target.value),
+              placeholder: '{ "username": "...", "repos": [{ "name": "...", "language": "..." }] }',
+              rows: 12,
+              className: "w-full font-mono text-xs bg-surface-container/50 border border-outline/20 rounded-xl px-4 py-3 text-on-surface placeholder:text-outline/50 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+            }
+          )
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "mt-6 flex flex-col sm:flex-row gap-3 justify-center", children: [
+        /* @__PURE__ */ jsx(
+          "button",
+          {
+            type: "submit",
+            disabled: loading,
+            className: "px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white rounded-2xl font-bold transition-all shadow-lg flex items-center justify-center gap-3",
+            children: loading ? /* @__PURE__ */ jsxs(Fragment, { children: [
+              /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined animate-spin text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "sync" }),
+              "Checking..."
+            ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
+              /* @__PURE__ */ jsx(GitCompare, { className: "w-5 h-5" }),
+              "Check Consistency"
+            ] })
+          }
+        ),
+        /* @__PURE__ */ jsxs(
+          "button",
+          {
+            type: "button",
+            onClick: loadTestData,
+            className: "px-8 py-3 glass-card hover:bg-white/40 text-on-surface rounded-2xl font-bold transition-all flex items-center justify-center gap-3",
+            children: [
+              /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "dataset" }),
+              "Load Test Data"
+            ]
+          }
+        )
+      ] })
+    ] }),
+    report && !loading && /* @__PURE__ */ jsxs("div", { className: "max-w-3xl mx-auto space-y-8", children: [
+      /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6", children: [
+        /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsx("p", { className: "text-xs font-bold text-slate-500 uppercase mb-1", children: "Consistency Score" }),
+          /* @__PURE__ */ jsxs("p", { className: `text-6xl font-black ${scoreColor(report.consistencyScore)}`, children: [
+            report.consistencyScore == null ? "N/A" : report.consistencyScore,
+            report.consistencyScore != null && /* @__PURE__ */ jsx("span", { className: "text-2xl text-slate-400", children: "/100" })
+          ] }),
+          !((_a = report.summary) == null ? void 0 : _a.comparable) && /* @__PURE__ */ jsx("p", { className: "text-xs text-amber-600 mt-2", children: "Provide at least two profiles for a score." })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "text-right", children: [
+          /* @__PURE__ */ jsxs("p", { className: "text-sm text-slate-600 dark:text-slate-400", children: [
+            /* @__PURE__ */ jsx("strong", { children: ((_b = report.summary) == null ? void 0 : _b.totalMismatches) ?? 0 }),
+            " mismatches found"
+          ] }),
+          /* @__PURE__ */ jsxs("p", { className: "text-xs text-slate-400 mt-1", children: [
+            "Sources: ",
+            (((_c = report.summary) == null ? void 0 : _c.sourcesProvided) || []).join(", ") || "none"
+          ] })
+        ] })
+      ] }),
+      (!report.mismatches || report.mismatches.length === 0) && /* @__PURE__ */ jsxs("div", { className: "glass-card border-emerald-200/50 rounded-3xl p-8 flex items-center gap-3 text-emerald-700 dark:text-emerald-300", children: [
+        /* @__PURE__ */ jsx(CheckCircle, { className: "w-6 h-6 flex-shrink-0" }),
+        /* @__PURE__ */ jsx("p", { className: "font-semibold", children: "No mismatches detected across the provided profiles." })
+      ] }),
+      (_d = report.mismatches) == null ? void 0 : _d.map((m, i) => /* @__PURE__ */ jsxs("div", { className: `glass-card rounded-3xl p-6 border ${SEVERITY_STYLES[m.severity] || ""}`, children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between mb-3", children: [
+          /* @__PURE__ */ jsx("h3", { className: "text-lg font-bold text-on-surface", children: m.category }),
+          /* @__PURE__ */ jsx("span", { className: "text-xs font-bold uppercase px-3 py-1 rounded-full bg-white/50 dark:bg-black/20", children: m.severity })
+        ] }),
+        m.details && /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-600 dark:text-slate-400 mb-3", children: m.details }),
+        /* @__PURE__ */ jsx("ul", { className: "space-y-2", children: m.items.map((item, j) => /* @__PURE__ */ jsxs("li", { className: "flex gap-3 text-sm text-slate-700 dark:text-slate-300", children: [
+          /* @__PURE__ */ jsx("span", { className: "font-bold flex-shrink-0", children: "•" }),
+          /* @__PURE__ */ jsx("span", { children: item })
+        ] }, j)) }),
+        /* @__PURE__ */ jsxs("p", { className: "text-xs text-slate-400 mt-3", children: [
+          m.source,
+          " → ",
+          m.target
+        ] })
+      ] }, i)),
+      /* @__PURE__ */ jsxs("p", { className: "text-center text-xs text-slate-400", children: [
+        "Generated at ",
+        new Date(report.generatedAt).toLocaleString()
+      ] })
+    ] })
+  ] });
+}
+function AchievementEnhancer() {
+  const [achievements, setAchievements] = useState("");
+  const [role, setRole] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
+  const [copiedIdx, setCopiedIdx] = useState(null);
+  const [copiedAll, setCopiedAll] = useState(false);
+  const handleEnhance = async (e) => {
+    var _a, _b;
+    e.preventDefault();
+    if (!achievements.trim()) {
+      setError("Please enter at least one achievement.");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    try {
+      const { data } = await api.post("/jobs/achievement-enhancer/enhance", {
+        achievements,
+        role
+      });
+      setResult(data.data);
+    } catch (err) {
+      setError(((_b = (_a = err.response) == null ? void 0 : _a.data) == null ? void 0 : _b.error) || "Failed to enhance achievements");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleCopy = (text, idx) => {
+    navigator.clipboard.writeText(text);
+    setCopiedIdx(idx);
+    setTimeout(() => setCopiedIdx(null), 2e3);
+  };
+  const handleCopyAll = () => {
+    var _a;
+    if (!((_a = result == null ? void 0 : result.bullets) == null ? void 0 : _a.length)) return;
+    navigator.clipboard.writeText(result.bullets.map((b) => `• ${b}`).join("\n"));
+    setCopiedAll(true);
+    setTimeout(() => setCopiedAll(false), 2e3);
+  };
+  const loadTestData = () => {
+    setAchievements("Created Attendance System\nHelped onboard new team members\nMade a dashboard for sales");
+    setRole("Software Engineer");
+    setResult(null);
+    setError("");
+  };
+  return /* @__PURE__ */ jsxs("div", { className: "w-full max-w-5xl mx-auto py-16 px-4 sm:px-6", children: [
+    /* @__PURE__ */ jsxs("div", { className: "text-center mb-16", children: [
+      /* @__PURE__ */ jsx("div", { className: "inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-slate-900/5 mb-6", children: /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-slate-900 text-3xl", style: { fontVariationSettings: "'FILL' 0" }, children: "auto_awesome" }) }),
+      /* @__PURE__ */ jsx("h1", { className: "text-4xl font-black text-on-surface font-headline mb-4", children: "Achievement Enhancer" }),
+      /* @__PURE__ */ jsx("p", { className: "text-lg text-on-surface-variant font-medium max-w-2xl mx-auto", children: "Turn plain achievements into polished, impact-driven resume bullets." })
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "max-w-5xl mx-auto mb-12 glass-card border-emerald-200/50 rounded-3xl p-8", children: [
+      /* @__PURE__ */ jsxs("h3", { className: "text-xl font-bold text-on-surface mb-4 flex items-center gap-2", children: [
+        /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-emerald-600", children: "info" }),
+        "How It Works"
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "space-y-3 text-slate-700 dark:text-slate-300", children: [
+        /* @__PURE__ */ jsxs("p", { children: [
+          /* @__PURE__ */ jsx("strong", { children: "1. List your achievements" }),
+          ' — one per line. They can be rough, e.g. "Created Attendance System".'
+        ] }),
+        /* @__PURE__ */ jsxs("p", { children: [
+          /* @__PURE__ */ jsx("strong", { children: "2. (Optional) Add your target role" }),
+          " to tailor the phrasing."
+        ] }),
+        /* @__PURE__ */ jsxs("p", { children: [
+          /* @__PURE__ */ jsx("strong", { children: "3. Enhance" }),
+          " — each line becomes a professional resume bullet starting with a strong action verb and conveying impact."
+        ] })
+      ] })
+    ] }),
+    error && /* @__PURE__ */ jsxs("div", { className: "max-w-3xl mx-auto mb-6 glass-card border-rose-200/50 p-4 rounded-2xl text-rose-600 text-sm font-medium flex items-center gap-3", children: [
+      /* @__PURE__ */ jsx(AlertCircle, { className: "w-5 h-5 flex-shrink-0" }),
+      error
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-8", children: [
+      /* @__PURE__ */ jsxs("form", { onSubmit: handleEnhance, className: "space-y-6", children: [
+        /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsx("label", { className: "block text-sm font-bold text-on-surface mb-2", children: "Target Role / Context" }),
+          /* @__PURE__ */ jsx(
+            "input",
+            {
+              type: "text",
+              value: role,
+              onChange: (e) => setRole(e.target.value),
+              placeholder: "e.g., Software Engineer (optional)",
+              className: "w-full px-4 py-2 bg-surface-container/50 border border-outline/20 rounded-xl text-on-surface placeholder:text-outline/50 focus:ring-1 focus:ring-blue-500 outline-none"
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsx("label", { className: "block text-sm font-bold text-on-surface mb-2", children: "Your Achievements * (one per line)" }),
+          /* @__PURE__ */ jsx(
+            "textarea",
+            {
+              value: achievements,
+              onChange: (e) => setAchievements(e.target.value),
+              placeholder: "Created Attendance System\nHelped onboard new team members",
+              rows: 8,
+              className: "w-full px-4 py-2 bg-surface-container/50 border border-outline/20 rounded-xl text-on-surface placeholder:text-outline/50 focus:ring-1 focus:ring-blue-500 outline-none resize-none"
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-3", children: [
+          /* @__PURE__ */ jsx(
+            "button",
+            {
+              type: "submit",
+              disabled: loading,
+              className: "px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white rounded-xl font-bold transition-all shadow-lg flex items-center justify-center gap-3",
+              children: loading ? /* @__PURE__ */ jsxs(Fragment, { children: [
+                /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined animate-spin text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "sync" }),
+                "Enhancing..."
+              ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
+                /* @__PURE__ */ jsx(Sparkles, { className: "w-5 h-5" }),
+                "Enhance Achievements"
+              ] })
+            }
+          ),
+          /* @__PURE__ */ jsxs(
+            "button",
+            {
+              type: "button",
+              onClick: loadTestData,
+              className: "px-8 py-3 glass-card hover:bg-white/40 text-on-surface rounded-xl font-bold transition-all flex items-center justify-center gap-3",
+              children: [
+                /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "dataset" }),
+                "Load Test Data"
+              ]
+            }
+          )
+        ] })
+      ] }),
+      /* @__PURE__ */ jsx("div", { className: "h-full", children: result ? /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-8 h-full flex flex-col", children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between mb-6 pb-4 border-b border-slate-200 dark:border-slate-700", children: [
+          /* @__PURE__ */ jsxs("h3", { className: "text-lg font-bold text-on-surface", children: [
+            "Enhanced Bullets ",
+            /* @__PURE__ */ jsxs("span", { className: "text-sm font-normal text-slate-400", children: [
+              "(",
+              result.count,
+              ")"
+            ] })
+          ] }),
+          /* @__PURE__ */ jsx(
+            "button",
+            {
+              onClick: handleCopyAll,
+              className: "px-3 py-1.5 text-sm font-medium hover:bg-surface-container/50 rounded-lg transition-colors flex items-center gap-1.5",
+              title: "Copy all",
+              children: copiedAll ? /* @__PURE__ */ jsxs(Fragment, { children: [
+                /* @__PURE__ */ jsx(CheckCircle, { className: "w-4 h-4 text-emerald-600" }),
+                " Copied"
+              ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
+                /* @__PURE__ */ jsx(Copy, { className: "w-4 h-4 text-slate-600" }),
+                " Copy all"
+              ] })
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsx("div", { className: "flex-1 overflow-y-auto space-y-3", children: result.results.map((item, idx) => /* @__PURE__ */ jsxs("div", { className: "group bg-surface-container/40 rounded-2xl p-4 border border-outline/10", children: [
+          /* @__PURE__ */ jsxs("div", { className: "flex items-start justify-between gap-3", children: [
+            /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-800 dark:text-slate-200 leading-relaxed", children: item.enhanced }),
+            /* @__PURE__ */ jsx(
+              "button",
+              {
+                onClick: () => handleCopy(item.enhanced, idx),
+                className: "p-1.5 hover:bg-surface-container/70 rounded-lg transition-colors flex-shrink-0",
+                title: "Copy",
+                children: copiedIdx === idx ? /* @__PURE__ */ jsx(CheckCircle, { className: "w-4 h-4 text-emerald-600" }) : /* @__PURE__ */ jsx(Copy, { className: "w-4 h-4 text-slate-500" })
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsxs("p", { className: "mt-2 text-xs text-slate-400 italic", children: [
+            "From: ",
+            item.original
+          ] })
+        ] }, idx)) }),
+        /* @__PURE__ */ jsx("div", { className: "mt-6 pt-6 border-t border-slate-200 dark:border-slate-700", children: /* @__PURE__ */ jsxs("p", { className: "text-xs text-slate-400", children: [
+          result.source === "ai" ? "AI-enhanced" : "Rule-based",
+          " · Generated at ",
+          new Date(result.generatedAt).toLocaleString()
+        ] }) })
+      ] }) : /* @__PURE__ */ jsx("div", { className: "glass-card bg-surface-container/30 rounded-3xl p-8 h-full flex items-center justify-center border-2 border-dashed border-outline/20", children: /* @__PURE__ */ jsx("p", { className: "text-center text-slate-500 dark:text-slate-400", children: 'Enter your achievements and click "Enhance Achievements" to see polished resume bullets here.' }) }) })
+    ] })
+  ] });
+}
+function ComingSoon({
+  toolName = "This tool",
+  description = "We're building this feature right now. Check back soon!"
+}) {
+  return /* @__PURE__ */ jsx("div", { className: "max-w-3xl mx-auto py-20 px-4 sm:px-6 w-full text-center", children: /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl p-12", children: [
+    /* @__PURE__ */ jsx("div", { className: "w-16 h-16 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto mb-6", children: /* @__PURE__ */ jsx(Sparkles, { className: "w-8 h-8" }) }),
+    /* @__PURE__ */ jsx("div", { className: "text-blue-600 font-bold text-sm uppercase tracking-widest mb-2", children: "Coming Soon" }),
+    /* @__PURE__ */ jsx("h1", { className: "text-3xl font-black text-slate-900 tracking-tight mb-3", children: toolName }),
+    /* @__PURE__ */ jsx("p", { className: "text-slate-500 font-medium max-w-md mx-auto mb-8", children: description }),
+    /* @__PURE__ */ jsxs(
+      Link,
+      {
+        to: "/dashboard",
+        className: "inline-flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-white bg-blue-600 hover:bg-blue-700 transition-all active:scale-95",
+        children: [
+          /* @__PURE__ */ jsx(ArrowLeft, { className: "w-4 h-4" }),
+          " Back to Dashboard"
+        ]
+      }
+    )
+  ] }) });
+}
 function SessionBlocked() {
   const { sessionBlockedMessage, clearSessionBlocked, logout } = useAuthStore();
   const handleSignInAgain = async () => {
@@ -9890,8 +10281,7 @@ function App() {
       /* @__PURE__ */ jsx(Route, { path: "jobs", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/jobs", children: /* @__PURE__ */ jsx(JobTracker, {}) }) }),
       /* @__PURE__ */ jsx(Route, { path: "career", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/career", children: /* @__PURE__ */ jsx(CareerRoadmap, {}) }) }),
       /* @__PURE__ */ jsx(Route, { path: "job-analyzer", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/job-analyzer", children: /* @__PURE__ */ jsx(JobAnalyzer, {}) }) }),
-      /* @__PURE__ */ jsx(Route, { path: "ats-checker", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/ats-checker", children: /* @__PURE__ */ jsx(ATSChecker, {}) }) }),
-      /* @__PURE__ */ jsx(Route, { path: "ats-checker-v2", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/ats-checker", children: /* @__PURE__ */ jsx(ATSCheckerV2, {}) }) }),
+      /* @__PURE__ */ jsx(Route, { path: "ats-checker", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/ats-checker", children: /* @__PURE__ */ jsx(ATSCheckerV2, {}) }) }),
       /* @__PURE__ */ jsx(Route, { path: "job-fit", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/job-fit", children: /* @__PURE__ */ jsx(JobFitAnalysis, {}) }) }),
       /* @__PURE__ */ jsx(Route, { path: "cover-letter", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/cover-letter", children: /* @__PURE__ */ jsx(CoverLetterGenerator, {}) }) }),
       /* @__PURE__ */ jsx(
@@ -9900,7 +10290,11 @@ function App() {
           path: "evidence",
           element: /* @__PURE__ */ jsx(ProtectedRoute, { children: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/evidence", children: /* @__PURE__ */ jsx(EvidenceDashboard, {}) }) })
         }
-      )
+      ),
+      /* @__PURE__ */ jsx(Route, { path: "recruiter-visibility", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/recruiter-visibility", children: /* @__PURE__ */ jsx(RecruiterVisibility, {}) }) }),
+      /* @__PURE__ */ jsx(Route, { path: "resume-consistency", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/resume-consistency", children: /* @__PURE__ */ jsx(ResumeConsistency, {}) }) }),
+      /* @__PURE__ */ jsx(Route, { path: "achievement-enhancer", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/achievement-enhancer", children: /* @__PURE__ */ jsx(AchievementEnhancer, {}) }) }),
+      /* @__PURE__ */ jsx(Route, { path: "career-readiness", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/career-readiness", children: /* @__PURE__ */ jsx(ComingSoon, { toolName: "Career Readiness Dashboard", description: "A unified career score with progress tracking and improvement recommendations across your whole journey. Launching soon." }) }) })
     ] }),
     /* @__PURE__ */ jsx(Route, { path: "/login", element: /* @__PURE__ */ jsx(Login, {}) })
   ] }) });

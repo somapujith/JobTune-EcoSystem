@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
+const { requirePlan } = require('../middleware/requirePlan');
 const { callAI } = require('../utils/aiClient');
 
 function generateFallbackAnalysis(jobDescription) {
@@ -45,7 +46,7 @@ function generateFallbackAnalysis(jobDescription) {
   };
 }
 
-router.post('/analyze-description', authenticateToken, async (req, res) => {
+router.post('/analyze-description', authenticateToken, requirePlan(3), async (req, res) => {
   try {
     const { jobDescription } = req.body;
 

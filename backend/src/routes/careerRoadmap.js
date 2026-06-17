@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
+const { requirePlan } = require('../middleware/requirePlan');
 const { pool } = require('../config/database');
 const { callAI, extractJSON } = require('../utils/aiClient');
 
 const activeGenerations = new Map();
 
 // ── POST /api/career/roadmap - Generate personalized career roadmap ────────
-router.post('/roadmap', authenticateToken, async (req, res) => {
+router.post('/roadmap', authenticateToken, requirePlan(1), async (req, res) => {
   const userId = req.user.id;
 
   if (activeGenerations.has(userId)) {
@@ -94,7 +95,7 @@ JSON schema:
 });
 
 // ── GET /api/career/roadmap/:id - Fetch saved roadmap ────────────────────
-router.get('/roadmap/:id', authenticateToken, async (req, res) => {
+router.get('/roadmap/:id', authenticateToken, requirePlan(1), async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
@@ -121,7 +122,7 @@ router.get('/roadmap/:id', authenticateToken, async (req, res) => {
 });
 
 // ── GET /api/career/roadmap - Fetch user's latest roadmap ────────────────
-router.get('/roadmap', authenticateToken, async (req, res) => {
+router.get('/roadmap', authenticateToken, requirePlan(1), async (req, res) => {
   try {
     const userId = req.user.id;
 

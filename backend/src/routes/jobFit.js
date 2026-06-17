@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
+const { requirePlan } = require('../middleware/requirePlan');
 const { score } = require('../services/scoring/strategies/jobFit');
 
 /**
@@ -13,7 +14,7 @@ const { score } = require('../services/scoring/strategies/jobFit');
  * Body: { resumeText: string, jobDescription: string }
  * Returns: { score, breakdown, method }
  */
-router.post('/fit', authenticateToken, async (req, res, next) => {
+router.post('/fit', authenticateToken, requirePlan(3), async (req, res, next) => {
   try {
     const { resumeText, jobDescription } = req.body;
 

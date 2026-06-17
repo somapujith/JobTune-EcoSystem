@@ -20,22 +20,38 @@ import {
   Lightbulb,
   Lock,
   Crown,
-  TrendingUp as TrendingUpIcon
+  TrendingUp as TrendingUpIcon,
+  Search,
+  Gauge,
+  ListChecks,
+  Map as MapIcon
 } from 'lucide-react';
 
+// Mirrors the JobTube Subscription Plans PDF tiers exactly.
 const ALL_TOOLS = [
+  // Learn & Build (₹199/month)
   { name: 'Skill Assessment', icon: Activity, path: '/skills', color: 'bg-blue-500', tier: 'Foundation', plan: 'Learn & Build' },
+  { name: 'Career Roadmap', icon: MapIcon, path: '/career', color: 'bg-teal-500', tier: 'Foundation', plan: 'Learn & Build' },
+  { name: 'Learning Hub', icon: BookOpen, path: '/learning', color: 'bg-amber-500', tier: 'Foundation', plan: 'Learn & Build' },
+  { name: 'Project Builder', icon: Lightbulb, path: '/projects', color: 'bg-rose-500', tier: 'Foundation', plan: 'Learn & Build' },
+  { name: 'Portfolio Builder', icon: LayoutIcon, path: '/portfolio', color: 'bg-indigo-500', tier: 'Foundation', plan: 'Learn & Build' },
+
+  // Tune & Polish (₹299/month)
   { name: 'Resume Optimizer', icon: FileText, path: '/resume', color: 'bg-emerald-500', tier: 'Profile', plan: 'Tune & Polish' },
+  { name: 'ATS Checker', icon: CheckCircle2, path: '/ats-checker', color: 'bg-green-500', tier: 'Profile', plan: 'Tune & Polish' },
   { name: 'LinkedIn Optimizer', icon: Linkedin, path: '/linkedin', color: 'bg-sky-500', tier: 'Profile', plan: 'Tune & Polish' },
   { name: 'GitHub Optimizer', icon: Github, path: '/github', color: 'bg-slate-900', tier: 'Profile', plan: 'Tune & Polish' },
-  { name: 'Portfolio Builder', icon: LayoutIcon, path: '/portfolio', color: 'bg-indigo-500', tier: 'Profile', plan: 'Tune & Polish' },
-  { name: 'Content Vault', icon: BookOpen, path: '/learning', color: 'bg-amber-500', tier: 'Growth', plan: 'Learn & Build' },
-  { name: 'Project Ideas', icon: Lightbulb, path: '/projects', color: 'bg-rose-500', tier: 'Growth', plan: 'Learn & Build' },
+  { name: 'Recruiter Visibility Checker', icon: Gauge, path: '/recruiter-visibility', color: 'bg-fuchsia-500', tier: 'Profile', plan: 'Tune & Polish' },
+  { name: 'Application Assistant', icon: FileText, path: '/cover-letter', color: 'bg-orange-500', tier: 'Profile', plan: 'Tune & Polish' },
+  { name: 'Job Discovery', icon: Search, path: '/discover', color: 'bg-cyan-500', tier: 'Profile', plan: 'Tune & Polish' },
+
+  // Zero To Hero (₹499/month)
   { name: 'Interview Prep', icon: Zap, path: '/interview', color: 'bg-purple-500', tier: 'Advanced', plan: 'Zero to Hero' },
-  { name: 'Job Tracker', icon: TrendingUpIcon, path: '/jobs', color: 'bg-cyan-500', tier: 'Advanced', plan: 'Zero to Hero' },
-  { name: 'Career Roadmap', icon: TrendingUpIcon, path: '/career', color: 'bg-teal-500', tier: 'Advanced', plan: 'Zero to Hero' },
-  { name: 'ATS Checker', icon: CheckCircle2, path: '/ats-checker', color: 'bg-green-500', tier: 'Advanced', plan: 'Zero to Hero' },
-  { name: 'Cover Letter Generator', icon: FileText, path: '/cover-letter', color: 'bg-orange-500', tier: 'Advanced', plan: 'Zero to Hero' },
+  { name: 'Job Analytics', icon: TrendingUpIcon, path: '/jobs', color: 'bg-cyan-700', tier: 'Advanced', plan: 'Zero to Hero' },
+  { name: 'Career Readiness Dashboard', icon: ListChecks, path: '/career-readiness', color: 'bg-violet-600', tier: 'Advanced', plan: 'Zero to Hero' },
+  { name: 'Evidence Dashboard', icon: ListChecks, path: '/evidence', color: 'bg-indigo-700', tier: 'Advanced', plan: 'Zero to Hero' },
+  { name: 'Job Fit Analysis', icon: Target, path: '/job-fit', color: 'bg-pink-600', tier: 'Advanced', plan: 'Zero to Hero' },
+  { name: 'Job Description Analyzer', icon: ListChecks, path: '/job-analyzer', color: 'bg-stone-600', tier: 'Advanced', plan: 'Zero to Hero' },
 ];
 
 const PLAN_TIERS = {

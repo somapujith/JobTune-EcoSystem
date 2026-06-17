@@ -251,12 +251,19 @@ export default function PlanSettings() {
 
                   <div className="mb-6">
                     <p className="text-4xl font-black text-slate-900 dark:text-white">
-                      {plan.price === 0 ? 'Free' : `$${plan.price}`}
+                      {plan.price === 0 ? 'Free' : `₹${plan.price}`}
                     </p>
                     {plan.price > 0 && <p className="text-sm text-slate-500">per month</p>}
                   </div>
 
-                  <div className="flex-1 space-y-2.5 mb-8">
+                  {meta.bestFor && (
+                    <div className="mb-5 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Best for</p>
+                      <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{meta.bestFor}</p>
+                    </div>
+                  )}
+
+                  <div className="flex-1 space-y-2.5 mb-6">
                     {(plan.features || []).map((feature) => (
                       <div key={feature} className="flex items-start gap-2.5">
                         <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
@@ -264,6 +271,13 @@ export default function PlanSettings() {
                       </div>
                     ))}
                   </div>
+
+                  {meta.outcome && (
+                    <div className="mb-6 flex items-start gap-2 px-3 py-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50">
+                      <Sparkles className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">{meta.outcome}</p>
+                    </div>
+                  )}
 
                   {isCurrent ? (
                     <div className="w-full py-3.5 px-4 rounded-xl font-bold text-center bg-blue-600/10 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
