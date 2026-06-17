@@ -1213,7 +1213,9 @@ export default function GitHubOptimizer() {
   })();
 
   const pipelineActive = Object.values(stageStatuses).some(s => s !== 'idle');
-  const showTracker = (loading || pipelineActive) && !results;
+  // Show tracker only while loading AND no results yet
+  // Once results arrive, show them immediately (don't wait for tracker to finish)
+  const showTracker = loading && !results;
   const showResults = !!results;
 
   return (
