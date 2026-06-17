@@ -1,26 +1,34 @@
 // Maps tool names to required plan tier
 // Tool -> Required Plan (all plans >= tier have access)
+// Mapping mirrors the official JobTube Subscription Plans PDF exactly.
 
 export const TOOL_ACCESS = {
-  // Learn & Build tier (free/entry)
-  'Learning Resources': 'Learn & Build',
-  'Project Ideas': 'Learn & Build',
+  // Learn & Build tier (₹199/month)
   'Skill Assessment': 'Learn & Build',
+  'Career Roadmap': 'Learn & Build',
+  'Learning Hub': 'Learn & Build',
+  'Project Builder': 'Learn & Build',
+  'Portfolio Builder': 'Learn & Build',
 
-  // Tune & Polish tier (mid)
+  // Tune & Polish tier (₹299/month) — includes everything above, plus:
   'Resume Optimizer': 'Tune & Polish',
+  'ATS Checker': 'Tune & Polish',
   'LinkedIn Optimizer': 'Tune & Polish',
   'GitHub Optimizer': 'Tune & Polish',
-  'Portfolio Builder': 'Tune & Polish',
-  'Job Discovery': 'Tune & Polish',
+  'Recruiter Visibility Checker': 'Tune & Polish',
+  'Resume Consistency Checker': 'Tune & Polish',
+  'Achievement Enhancer': 'Tune & Polish',
+  'Application Assistant': 'Tune & Polish',
 
-  // Zero to Hero tier (premium)
+  // Zero To Hero tier (₹499/month) — includes everything above, plus:
   'Interview Prep': 'Zero to Hero',
+  'Job Analytics': 'Zero to Hero',
+  'Career Readiness Dashboard': 'Zero to Hero',
+
+  // Tools not explicitly named in the pricing PDF — kept at their closest
+  // existing tier so they remain reachable rather than orphaned.
+  'Job Discovery': 'Tune & Polish',
   'Job Tracker': 'Zero to Hero',
-  'Career Roadmap': 'Zero to Hero',
-  'Cover Letter Generator': 'Zero to Hero',
-  'ATS Checker': 'Zero to Hero',
-  'Mock Interview': 'Zero to Hero',
   'Job Fit Analysis': 'Zero to Hero',
   'Evidence Dashboard': 'Zero to Hero',
   'Job Analyzer': 'Zero to Hero',
@@ -29,30 +37,36 @@ export const TOOL_ACCESS = {
 // Route -> Tool name mapping
 export const ROUTE_TOOLS = {
   '/skills': 'Skill Assessment',
+  '/career': 'Career Roadmap',
+  '/learning': 'Learning Hub',
+  '/projects': 'Project Builder',
+  '/portfolio': 'Portfolio Builder',
   '/resume': 'Resume Optimizer',
   '/resume/build': 'Resume Optimizer',
   '/resume/history': 'Resume Optimizer',
   '/resume/compare': 'Resume Optimizer',
   '/resume/send': 'Resume Optimizer',
+  '/ats-checker': 'ATS Checker',
   '/linkedin': 'LinkedIn Optimizer',
   '/github': 'GitHub Optimizer',
-  '/portfolio': 'Portfolio Builder',
-  '/learning': 'Learning Resources',
-  '/projects': 'Project Ideas',
+  '/recruiter-visibility': 'Recruiter Visibility Checker',
+  '/resume-consistency': 'Resume Consistency Checker',
+  '/achievement-enhancer': 'Achievement Enhancer',
+  '/application-assistant': 'Application Assistant',
+  '/cover-letter': 'Application Assistant',
   '/interview': 'Interview Prep',
+  '/job-analytics': 'Job Analytics',
+  '/career-readiness': 'Career Readiness Dashboard',
   '/jobmatch': 'Job Discovery',
   '/discover': 'Job Discovery',
   '/jobs': 'Job Tracker',
-  '/career': 'Career Roadmap',
-  '/preparation': 'Learning Resources',
-  '/preparation/zero-to-hero': 'Learning Resources',
-  '/preparation/tune-and-polish': 'Learning Resources',
-  '/preparation/learn-and-build': 'Learning Resources',
+  '/preparation': 'Learning Hub',
+  '/preparation/zero-to-hero': 'Learning Hub',
+  '/preparation/tune-and-polish': 'Learning Hub',
+  '/preparation/learn-and-build': 'Learning Hub',
   '/evidence': 'Evidence Dashboard',
   '/job-fit': 'Job Fit Analysis',
   '/job-analyzer': 'Job Analyzer',
-  '/ats-checker': 'ATS Checker',
-  '/cover-letter': 'Cover Letter Generator',
 };
 
 export const PLAN_TIERS = {

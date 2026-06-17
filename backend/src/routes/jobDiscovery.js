@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { pool } = require('../config/database');
 const { authenticateToken } = require('../middleware/auth');
+const { requirePlan } = require('../middleware/requirePlan');
 const apiResponse = require('../utils/apiResponse');
 const { getSource, VALID_SOURCES } = require('../services/discovery/index');
 const MockJobSource = require('../services/discovery/MockJobSource');
@@ -47,7 +48,7 @@ async function cacheJobs(userId, jobs) {
  *   - location {string}  location filter (default: '')
  *   - source   {string}  'mock' | 'remotive' (default: 'mock')
  */
-router.get('/discover', authenticateToken, async (req, res) => {
+router.get('/discover', authenticateToken, requirePlan(2), async (req, res) => {
   const userId = req.user.id;
   const query = (req.query.query || '').trim();
   const location = (req.query.location || '').trim();

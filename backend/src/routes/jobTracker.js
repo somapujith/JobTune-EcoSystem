@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { pool } = require('../config/database');
 const { authenticateToken } = require('../middleware/auth');
+const { requirePlan } = require('../middleware/requirePlan');
 const apiResponse = require('../utils/apiResponse');
 
 const VALID_STATUSES = ['applied', 'interview', 'offer', 'rejected'];
@@ -43,7 +44,7 @@ router.get('/', authenticateToken, async (req, res) => {
 });
 
 // POST /api/jobs — create a new job application
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/', authenticateToken, requirePlan(3), async (req, res) => {
   const userId = req.user.id;
   const {
     company,

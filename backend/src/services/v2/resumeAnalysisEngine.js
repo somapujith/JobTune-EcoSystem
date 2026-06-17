@@ -1,6 +1,14 @@
 /**
  * Resume Analysis Engine V2 - Main orchestrator
- * Combines all rule-based analyzers for instant scoring
+ * Fully deterministic, rule-based ATS Score Checker — no AI/LLM anywhere.
+ *
+ * ATS Score formula (100 pts total):
+ *   Contact 10 | Structure 20 | Formatting 20 | Skills 15
+ *   Experience 15 | Projects 10 | Education 5 | Readability 5
+ *
+ * Every deduction has a visible reason (issues[]) and every recommendation
+ * is generated from a predefined rule (recommendations[]).
+ *
  * Latency Target: <100ms
  */
 
@@ -8,17 +16,29 @@ const SectionAnalyzer = require('./sectionAnalyzer');
 const MetricsAnalyzer = require('./metricsAnalyzer');
 const ActionVerbAnalyzer = require('./actionVerbAnalyzer');
 const FormattingAnalyzer = require('./formattingAnalyzer');
-const KeywordAnalyzer = require('./keywordAnalyzer');
 const RoleDetectionEngine = require('./roleDetectionEngine');
 const MissingInfoEngine = require('./missingInfoEngine');
+const ContactValidator = require('./contactValidator');
+const ProjectAnalyzer = require('./projectAnalyzer');
+const ExperienceAnalyzer = require('./experienceAnalyzer');
+const ReadabilityAnalyzer = require('./readabilityAnalyzer');
+const SkillsAnalyzer = require('./skillsAnalyzer');
+const EducationAnalyzer = require('./educationAnalyzer');
+const CertificationAnalyzer = require('./certificationAnalyzer');
 
 class ResumeAnalysisEngine {
-  /**
-   * Perform complete resume analysis (Stage 1-6)
-   * @param {string} resumeText - Parsed resume text
-   * @param {string} fileContent - Original file content (for format checking)
-   * @returns {object} Complete analysis report
-   */
+  // Weighted contribution of each category toward the 100-point ATS Score
+  static WEIGHTS = {
+    contact: 10,
+    structure: 20,
+    formatting: 20,
+    skills: 15,
+    experience: 15,
+    projects: 10,
+    education: 5,
+    readability: 5
+  };
+
   static analyze(resumeText, fileContent = null) {
     if (!resumeText || typeof resumeText !== 'string' || resumeText.trim().length === 0) {
       return this._emptyAnalysis();
@@ -26,155 +46,265 @@ class ResumeAnalysisEngine {
 
     const startTime = Date.now();
 
-    // Stage 4: Role Detection
     const roleDetection = RoleDetectionEngine.detect(resumeText);
 
-    // Stage 1: Section Analysis
+    // Run every deterministic analyzer
+    const contactAnalysis = ContactValidator.analyze(resumeText);
     const sectionAnalysis = SectionAnalyzer.analyze(resumeText);
-
-    // Stage 2: Metrics Analysis
-    const metricsAnalysis = MetricsAnalyzer.analyze(resumeText);
-
-    // Stage 3: Action Verb Analysis
-    const actionVerbAnalysis = ActionVerbAnalyzer.analyze(resumeText);
-
-    // Stage 4: Formatting Analysis
     const formattingAnalysis = FormattingAnalyzer.analyze(resumeText, fileContent);
-
-    // Stage 5: Keyword Analysis
-    const keywordAnalysis = KeywordAnalyzer.analyze(resumeText, roleDetection.role);
-
-    // Stage 5: Missing Information
+    const skillsAnalysis = SkillsAnalyzer.analyze(resumeText);
+    const experienceAnalysis = ExperienceAnalyzer.analyze(resumeText);
+    const projectAnalysis = ProjectAnalyzer.analyze(resumeText);
+    const educationAnalysis = EducationAnalyzer.analyze(resumeText);
+    const certificationAnalysis = CertificationAnalyzer.analyze(resumeText);
+    const readabilityAnalysis = ReadabilityAnalyzer.analyze(resumeText);
+    const metricsAnalysis = MetricsAnalyzer.analyze(resumeText);
+    const actionVerbAnalysis = ActionVerbAnalyzer.analyze(resumeText);
     const missingInfoAnalysis = MissingInfoEngine.analyze(resumeText);
 
-    // Calculate overall score
-    const overallScore = this._calculateOverallScore({
-      section: sectionAnalysis.score,
-      metrics: metricsAnalysis.score,
-      actionVerbs: actionVerbAnalysis.score,
-      formatting: formattingAnalysis.score,
-      keywords: keywordAnalysis.score
+    // Rescale each category's raw score onto its weight in the 100-point formula
+    const categoryScores = {
+      contact: this._rescale(contactAnalysis.score, ContactValidator.MAX_SCORE, this.WEIGHTS.contact),
+      structure: this._rescale(sectionAnalysis.score, SectionAnalyzer.MAX_SCORE, this.WEIGHTS.structure),
+      formatting: this._rescale(formattingAnalysis.score, FormattingAnalyzer.MAX_SCORE, this.WEIGHTS.formatting),
+      skills: this._rescale(skillsAnalysis.score, SkillsAnalyzer.MAX_SCORE, this.WEIGHTS.skills),
+      experience: this._rescale(experienceAnalysis.score, ExperienceAnalyzer.MAX_SCORE, this.WEIGHTS.experience),
+      projects: this._rescale(projectAnalysis.score, ProjectAnalyzer.MAX_SCORE, this.WEIGHTS.projects),
+      education: this._rescale(educationAnalysis.score, EducationAnalyzer.MAX_SCORE, this.WEIGHTS.education),
+      readability: this._rescale(readabilityAnalysis.score, ReadabilityAnalyzer.MAX_SCORE, this.WEIGHTS.readability)
+    };
+
+    const overallScore = Math.round(Object.values(categoryScores).reduce((sum, v) => sum + v, 0));
+    const completeness = this._calculateCompleteness({
+      contactAnalysis, sectionAnalysis, skillsAnalysis, experienceAnalysis,
+      projectAnalysis, educationAnalysis
     });
+
+    const issues = this._buildIssueList({
+      contactAnalysis, sectionAnalysis, formattingAnalysis, skillsAnalysis,
+      experienceAnalysis, projectAnalysis, educationAnalysis, metricsAnalysis
+    });
+
+    const recommendations = this._buildRecommendationEngine(issues);
 
     const processingTime = Date.now() - startTime;
 
     return {
-      // Overall Results
       status: 'success',
-      overallScore: Math.round(overallScore),
+      overallScore: Math.min(overallScore, 100),
       maxScore: 100,
       processingTimeMs: processingTime,
       atsCompatible: formattingAnalysis.atsCompatible && overallScore >= 60,
 
-      // Detected Role
       detectedRole: {
         role: roleDetection.role,
         displayName: RoleDetectionEngine.getRoleDisplayName(roleDetection.role),
-        confidence: Math.round(roleDetection.confidence * 100),
-        candidates: roleDetection.candidates.map(c => ({
-          role: RoleDetectionEngine.getRoleDisplayName(c.role),
-          confidence: Math.round(c.confidence * 100)
-        }))
+        confidence: Math.round(roleDetection.confidence * 100)
       },
 
-      // Individual Scores
+      // ATS Score breakdown — weight-scaled, sums to 100
       scores: {
-        section: sectionAnalysis.score,
-        metrics: metricsAnalysis.score,
-        actionVerbs: actionVerbAnalysis.score,
-        formatting: formattingAnalysis.score,
-        keywords: keywordAnalysis.score
+        contact: Math.round(categoryScores.contact * 10) / 10,
+        structure: Math.round(categoryScores.structure * 10) / 10,
+        formatting: Math.round(categoryScores.formatting * 10) / 10,
+        skills: Math.round(categoryScores.skills * 10) / 10,
+        experience: Math.round(categoryScores.experience * 10) / 10,
+        projects: Math.round(categoryScores.projects * 10) / 10,
+        education: Math.round(categoryScores.education * 10) / 10,
+        readability: Math.round(categoryScores.readability * 10) / 10
+      },
+      maxScores: { ...this.WEIGHTS },
+
+      contactInfo: {
+        score: contactAnalysis.score,
+        maxScore: contactAnalysis.maxScore,
+        found: contactAnalysis.found,
+        missing: contactAnalysis.missingLabels
       },
 
-      // Detailed Analysis
+      // Detailed per-category analysis (raw, unscaled)
       analysis: {
         section: sectionAnalysis,
         metrics: metricsAnalysis,
         actionVerbs: actionVerbAnalysis,
         formatting: formattingAnalysis,
-        keywords: keywordAnalysis,
-        missingInfo: missingInfoAnalysis
+        skills: skillsAnalysis,
+        missingInfo: missingInfoAnalysis,
+        experience: experienceAnalysis,
+        projects: projectAnalysis,
+        education: educationAnalysis,
+        certifications: certificationAnalysis,
+        readability: readabilityAnalysis,
+        contact: contactAnalysis
       },
 
-      // Key Metrics Summary
       summary: {
         foundSections: sectionAnalysis.foundSections,
         missingSections: sectionAnalysis.missingSections,
         metricsCount: metricsAnalysis.count,
         strongVerbsCount: actionVerbAnalysis.strongVerbCount,
         weakVerbsCount: actionVerbAnalysis.weakVerbCount,
-        keywordsCovered: keywordAnalysis.keywords.found.length,
-        keywordsTotal: keywordAnalysis.keywords.total,
-        completeness: missingInfoAnalysis.completeness,
-        criticalIssues: formattingAnalysis.issues.length
+        skillsCount: skillsAnalysis.count,
+        completeness,
+        criticalIssues: issues.filter(i => i.severity === 'critical').length,
+        jobsFound: experienceAnalysis.jobsFound,
+        projectsFound: projectAnalysis.projectsFound
       },
 
-      // Aggregated Recommendations
-      recommendations: this._aggregateRecommendations({
-        section: sectionAnalysis.missingSections.length > 0 ? SectionAnalyzer.getRecommendations(sectionAnalysis) : [],
-        metrics: metricsAnalysis.recommendations,
-        actionVerbs: actionVerbAnalysis.recommendations,
-        formatting: formattingAnalysis.recommendations,
-        keywords: keywordAnalysis.recommendations,
-        missingInfo: missingInfoAnalysis.recommendations
-      }),
+      // Step 17: Issue Detection Engine output
+      issues,
 
-      // Quality Assessment
+      // Step 18: Recommendation Engine output
+      recommendations,
+
       quality: {
         overallQuality: this._assessOverallQuality(overallScore),
         readyForSubmission: overallScore >= 75,
-        readyForOptimization: overallScore < 85,
-        keyStrengths: this._getKeyStrengths({
-          section: sectionAnalysis,
-          metrics: metricsAnalysis,
-          actionVerbs: actionVerbAnalysis,
-          formatting: formattingAnalysis,
-          keywords: keywordAnalysis
-        }),
-        keyWeaknesses: this._getKeyWeaknesses({
-          section: sectionAnalysis,
-          metrics: metricsAnalysis,
-          actionVerbs: actionVerbAnalysis,
-          formatting: formattingAnalysis,
-          keywords: keywordAnalysis,
-          missingInfo: missingInfoAnalysis
-        })
+        keyStrengths: this._getKeyStrengths({ categoryScores, contactAnalysis, metricsAnalysis, actionVerbAnalysis, formattingAnalysis, skillsAnalysis, projectAnalysis }),
+        keyWeaknesses: this._getKeyWeaknesses({ categoryScores, issues })
       }
     };
   }
 
   /**
-   * Calculate overall score (weighted average)
+   * Rescale a raw score from its native max onto a target weight
    * @private
    */
-  static _calculateOverallScore(scores) {
-    const weights = {
-      section: 0.25,    // 25%
-      metrics: 0.20,    // 20%
-      actionVerbs: 0.20, // 20%
-      formatting: 0.15,  // 15%
-      keywords: 0.20    // 20%
-    };
+  static _rescale(rawScore, rawMax, targetWeight) {
+    if (!rawMax || rawMax <= 0) return 0;
+    return Math.max(0, Math.min(targetWeight, (rawScore / rawMax) * targetWeight));
+  }
 
-    let total = 0;
-    let weightSum = 0;
+  /**
+   * Step 15: Resume Completeness Score = completed fields / expected fields x 100
+   * @private
+   */
+  static _calculateCompleteness({ contactAnalysis, sectionAnalysis, skillsAnalysis, experienceAnalysis, projectAnalysis, educationAnalysis }) {
+    const expectedFields = [
+      contactAnalysis.found.name,
+      contactAnalysis.found.email,
+      contactAnalysis.found.phone,
+      contactAnalysis.found.linkedin,
+      contactAnalysis.found.github,
+      sectionAnalysis.foundSections.length > 0,
+      skillsAnalysis.count > 0,
+      experienceAnalysis.jobsFound > 0,
+      projectAnalysis.projectsFound > 0,
+      educationAnalysis.entries.length > 0
+    ];
 
-    for (const [key, weight] of Object.entries(weights)) {
-      if (scores[key] !== undefined) {
-        // Normalize to 0-100 scale
-        const normalizedScore = (scores[key] / 30) * 100; // Assuming max is 30 or less per category
-        total += normalizedScore * weight;
-        weightSum += weight;
+    const completed = expectedFields.filter(Boolean).length;
+    return Math.round((completed / expectedFields.length) * 100);
+  }
+
+  /**
+   * Step 17: Issue Detection Engine — every issue has a visible, specific reason.
+   * @private
+   */
+  static _buildIssueList({ contactAnalysis, sectionAnalysis, formattingAnalysis, skillsAnalysis, experienceAnalysis, projectAnalysis, educationAnalysis, metricsAnalysis }) {
+    const issues = [];
+
+    for (const missing of contactAnalysis.missing) {
+      issues.push({ severity: missing === 'email' || missing === 'name' ? 'critical' : 'medium', message: `Missing ${ContactValidator.FIELDS[missing]?.label || missing}` });
+    }
+
+    for (const missingSection of sectionAnalysis.missingSections) {
+      issues.push({ severity: 'high', message: `No ${missingSection} section found` });
+    }
+
+    for (const formattingIssue of formattingAnalysis.issues) {
+      issues.push({ severity: formattingIssue.penalty >= 5 ? 'high' : 'medium', message: formattingIssue.message });
+    }
+
+    if (skillsAnalysis.count === 0) {
+      issues.push({ severity: 'critical', message: 'No recognized technical skills found' });
+    }
+    if (skillsAnalysis.duplicates.length > 0) {
+      issues.push({ severity: 'low', message: `Duplicate skills listed: ${skillsAnalysis.duplicates.join(', ')}` });
+    }
+
+    for (const job of experienceAnalysis.jobs) {
+      for (const field of job.missing) {
+        issues.push({ severity: 'high', message: `Experience entry "${job.title}" is missing ${field}` });
       }
     }
 
-    return weightSum > 0 ? total / weightSum : 0;
+    for (const project of projectAnalysis.projects) {
+      for (const field of project.missing) {
+        issues.push({ severity: 'medium', message: `Project "${project.title}" is missing ${field}` });
+      }
+    }
+
+    if (educationAnalysis.issues) {
+      for (const issue of educationAnalysis.issues) {
+        issues.push({ severity: 'medium', message: issue.message });
+      }
+    }
+
+    if (metricsAnalysis.count === 0) {
+      issues.push({ severity: 'high', message: 'No quantified achievements detected (numbers, percentages, metrics)' });
+    }
+
+    return issues;
   }
 
   /**
-   * Assess overall quality
+   * Step 18: Recommendation Engine — one rule-based recommendation per issue category.
    * @private
    */
+  static _buildRecommendationEngine(issues) {
+    const recommendations = [];
+    const seen = new Set();
+
+    const ruleFor = (issue) => {
+      const msg = issue.message.toLowerCase();
+      if (msg.includes('missing email') || msg.includes('missing full name')) {
+        return { recommendation: 'Add complete contact information', reason: issue.message };
+      }
+      if (msg.includes('linkedin')) {
+        return { recommendation: 'Add your LinkedIn profile URL', reason: issue.message };
+      }
+      if (msg.includes('github')) {
+        return { recommendation: 'Add your GitHub profile URL', reason: issue.message };
+      }
+      if (msg.includes('no professional summary') || msg.includes('no summary')) {
+        return { recommendation: 'Add a Professional Summary section', reason: 'Professional Summary section not found' };
+      }
+      if (msg.includes('section found')) {
+        return { recommendation: `Add the missing section: ${issue.message.replace('No ', '').replace(' section found', '')}`, reason: issue.message };
+      }
+      if (msg.includes('table') || msg.includes('column') || msg.includes('image') || msg.includes('icon') || msg.includes('header/footer') || msg.includes('text box')) {
+        return { recommendation: 'Simplify resume formatting for ATS compatibility', reason: issue.message };
+      }
+      if (msg.includes('no recognized technical skills')) {
+        return { recommendation: 'Add a Technical Skills section with relevant technologies', reason: issue.message };
+      }
+      if (msg.includes('duplicate skills')) {
+        return { recommendation: 'Remove duplicate skill entries', reason: issue.message };
+      }
+      if (msg.includes('missing company') || msg.includes('missing role') || msg.includes('missing duration') || msg.includes('missing description')) {
+        return { recommendation: 'Complete all experience entry fields (company, role, duration, description)', reason: issue.message };
+      }
+      if (msg.includes('project') && (msg.includes('missing project name') || msg.includes('missing description') || msg.includes('missing technologies'))) {
+        return { recommendation: 'Add measurable project outcomes and technologies used', reason: issue.message };
+      }
+      if (msg.includes('no quantified achievements')) {
+        return { recommendation: 'Add measurable project outcomes', reason: 'No quantified achievements detected' };
+      }
+      return { recommendation: issue.message, reason: issue.message };
+    };
+
+    for (const issue of issues) {
+      const { recommendation, reason } = ruleFor(issue);
+      const key = recommendation;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      recommendations.push({ severity: issue.severity, message: recommendation, reason });
+    }
+
+    return recommendations;
+  }
+
   static _assessOverallQuality(score) {
     if (score >= 90) return 'excellent';
     if (score >= 75) return 'good';
@@ -183,104 +313,42 @@ class ResumeAnalysisEngine {
     return 'critical';
   }
 
-  /**
-   * Get key strengths
-   * @private
-   */
-  static _getKeyStrengths(analyses) {
+  static _getKeyStrengths({ categoryScores, contactAnalysis, metricsAnalysis, actionVerbAnalysis, formattingAnalysis, skillsAnalysis, projectAnalysis }) {
     const strengths = [];
 
-    if (analyses.section.score >= 25) {
-      strengths.push('Complete section structure with all essential components');
+    if (contactAnalysis.score === contactAnalysis.maxScore) {
+      strengths.push('Complete contact information (name, email, phone, LinkedIn, GitHub)');
     }
-
-    if (analyses.metrics.count >= 8) {
-      strengths.push(`Strong use of metrics (${analyses.metrics.count} quantified achievements)`);
+    if (categoryScores.skills >= this.WEIGHTS.skills * 0.85) {
+      strengths.push(`Good Skills Section (${skillsAnalysis.count} recognized skills)`);
     }
-
-    if (analyses.actionVerbs.strongVerbCount >= 10) {
-      strengths.push(`Excellent action verb usage (${analyses.actionVerbs.strongVerbCount} strong verbs)`);
+    if (categoryScores.projects >= this.WEIGHTS.projects * 0.8) {
+      strengths.push('Strong Projects');
     }
-
-    if (analyses.formatting.atsCompatible) {
-      strengths.push('Good ATS formatting - no compatibility issues detected');
+    if (metricsAnalysis.count >= 5) {
+      strengths.push(`Strong use of metrics (${metricsAnalysis.count} quantified achievements)`);
     }
-
-    if (analyses.keywords.coverage >= 60) {
-      strengths.push(`Good keyword coverage (${Math.round(analyses.keywords.coverage)}% of expected skills)`);
+    if (actionVerbAnalysis.strongVerbCount >= 10) {
+      strengths.push(`Excellent action verb usage (${actionVerbAnalysis.strongVerbCount} strong verbs)`);
+    }
+    if (formattingAnalysis.atsCompatible) {
+      strengths.push('Good ATS formatting — no compatibility issues detected');
     }
 
     return strengths.slice(0, 3);
   }
 
-  /**
-   * Get key weaknesses
-   * @private
-   */
-  static _getKeyWeaknesses(analyses) {
+  static _getKeyWeaknesses({ categoryScores, issues }) {
     const weaknesses = [];
+    const critical = issues.filter(i => i.severity === 'critical' || i.severity === 'high');
 
-    if (analyses.section.missingSections.length > 0) {
-      weaknesses.push(`Missing sections: ${analyses.section.missingSections.join(', ')}`);
+    for (const issue of critical.slice(0, 3)) {
+      weaknesses.push(issue.message);
     }
 
-    if (analyses.metrics.count < 3) {
-      weaknesses.push('Few quantified metrics - add percentages, dollar amounts, or numbers');
-    }
-
-    if (analyses.actionVerbs.weakVerbCount > 3) {
-      weaknesses.push(`${analyses.actionVerbs.weakVerbCount} weak verbs detected - replace with action words`);
-    }
-
-    if (!analyses.formatting.atsCompatible) {
-      weaknesses.push(`${analyses.formatting.issues.length} ATS compatibility issues found`);
-    }
-
-    if (analyses.keywords.coverage < 40) {
-      weaknesses.push(`Low keyword coverage (${Math.round(analyses.keywords.coverage)}%) - missing key skills`);
-    }
-
-    if (analyses.missingInfo.critical.length > 0) {
-      weaknesses.push(`Missing critical information: ${analyses.missingInfo.critical.map(f => f.name).join(', ')}`);
-    }
-
-    return weaknesses.slice(0, 3);
+    return weaknesses;
   }
 
-  /**
-   * Aggregate all recommendations
-   * @private
-   */
-  static _aggregateRecommendations(allRecommendations) {
-    const recommendations = [];
-
-    // Add high-priority recommendations from all analyzers
-    for (const source of Object.values(allRecommendations)) {
-      for (const rec of source) {
-        if (rec.severity === 'critical' || rec.priority === 'high') {
-          recommendations.push(rec);
-        }
-      }
-    }
-
-    // Add medium-priority recommendations
-    if (recommendations.length < 5) {
-      for (const source of Object.values(allRecommendations)) {
-        for (const rec of source) {
-          if (rec.severity === 'medium' || rec.priority === 'medium') {
-            recommendations.push(rec);
-          }
-        }
-      }
-    }
-
-    return recommendations.slice(0, 5); // Return top 5
-  }
-
-  /**
-   * Empty analysis response
-   * @private
-   */
   static _emptyAnalysis() {
     return {
       status: 'error',
@@ -289,10 +357,8 @@ class ResumeAnalysisEngine {
       maxScore: 100,
       atsCompatible: false,
       analysis: {},
-      recommendations: [{
-        severity: 'critical',
-        message: 'No resume content detected'
-      }]
+      issues: [{ severity: 'critical', message: 'No resume content detected' }],
+      recommendations: [{ severity: 'critical', message: 'Upload a valid resume file', reason: 'No resume content detected' }]
     };
   }
 }

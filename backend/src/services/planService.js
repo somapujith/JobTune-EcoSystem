@@ -45,11 +45,6 @@ class PlanService {
     const result = await pool.query('SELECT * FROM onboarding_responses WHERE user_id = $1', [userId]);
     return result.rows[0] || null;
   }
-
-  hasAccess(userPlan, toolName) {
-    if (!userPlan) return false;
-    return userPlan.features && userPlan.features.includes(toolName);
-  }
 }
 
 module.exports = new PlanService();

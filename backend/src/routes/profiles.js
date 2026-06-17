@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
+const { requirePlan } = require('../middleware/requirePlan');
 
 // Fetch real GitHub user data from public API
 async function fetchGitHubData(username) {
@@ -193,7 +194,7 @@ ${connect}`;
 }
 
 // POST /profiles/github/analyze
-router.post('/github/analyze', authenticateToken, async (req, res) => {
+router.post('/github/analyze', authenticateToken, requirePlan(2), async (req, res) => {
   const { username } = req.body;
   if (!username) return res.status(400).json({ error: 'GitHub username is required' });
 
@@ -222,7 +223,7 @@ router.post('/github/analyze', authenticateToken, async (req, res) => {
 });
 
 // POST /profiles/linkedin/analyze
-router.post('/linkedin/analyze', authenticateToken, async (req, res) => {
+router.post('/linkedin/analyze', authenticateToken, requirePlan(2), async (req, res) => {
   const { headline, about, skills, experienceCount, yearsOfExperience, connections, hasPhoto, hasFeatured } = req.body;
   
   const headlineStr = (headline || '').trim();

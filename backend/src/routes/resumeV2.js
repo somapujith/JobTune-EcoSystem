@@ -1,6 +1,6 @@
 /**
  * Resume Analyzer V2 Routes
- * Implements 10-stage resume analysis pipeline
+ * Fully deterministic ATS Score Checker — no AI/LLM involved anywhere in this pipeline.
  */
 
 const express = require('express');
@@ -9,10 +9,10 @@ const multer = require('multer');
 const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
 const { authenticateToken: auth } = require('../middleware/auth');
+const { requirePlan } = require('../middleware/requirePlan');
 
 // V2 Services
 const ResumeAnalysisEngine = require('../services/v2/resumeAnalysisEngine');
-const ResumeOptimizationEngine = require('../services/v2/resumeOptimizationEngine');
 const ResumeCriticEngine = require('../services/v2/resumeCriticEngine');
 const ResumeExportEngine = require('../services/v2/resumeExportEngine');
 const ResumeDatabase = require('../services/resumeDatabase');
@@ -33,49 +33,48 @@ const upload = multer({
 
 /**
  * POST /api/resume/v2/analyze
- * Stage 1-6: Upload, parse, and analyze resume
- * Latency: <100ms for analysis
+ * Deterministic ATS Score Checker — parse + score, no AI.
+ * Accepts either a multipart file upload ("resume") or a JSON/body { resumeText }
+ * (the frontend parses the file via /api/ats/v2/parse first and sends the text here).
+ * Latency: <100ms
  */
-router.post('/v2/analyze', auth, upload.single('resume'), async (req, res) => {
+router.post('/v2/analyze', auth, requirePlan(2), upload.single('resume'), async (req, res) => {
   try {
-    // Stage 1: File validation (already done by multer)
-    if (!req.file) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'No file uploaded'
-      });
-    }
-
-    // Stage 2: Resume parsing
     let resumeText;
-    try {
-      if (req.file.mimetype === 'application/pdf') {
-        const data = await pdfParse(req.file.buffer);
-        resumeText = data.text;
-      } else if (req.file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-        const result = await mammoth.extractRawText({ buffer: req.file.buffer });
-        resumeText = result.value;
-      } else {
-        resumeText = req.file.buffer.toString('utf-8');
+    let fileBuffer = null;
+
+    if (req.file) {
+      fileBuffer = req.file.buffer;
+      try {
+        if (req.file.mimetype === 'application/pdf') {
+          const data = await pdfParse(req.file.buffer);
+          resumeText = data.text;
+        } else if (req.file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+          const result = await mammoth.extractRawText({ buffer: req.file.buffer });
+          resumeText = result.value;
+        } else {
+          resumeText = req.file.buffer.toString('utf-8');
+        }
+      } catch (parseError) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Failed to parse resume file',
+          details: parseError.message
+        });
       }
-    } catch (parseError) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Failed to parse resume file',
-        details: parseError.message
-      });
+    } else {
+      resumeText = req.body.resumeText;
     }
 
-    if (!resumeText || resumeText.trim().length === 0) {
+    if (!resumeText || typeof resumeText !== 'string' || resumeText.trim().length === 0) {
       return res.status(400).json({
         status: 'error',
         message: 'Resume file is empty or unreadable'
       });
     }
 
-    // Stage 3-6: Rule-based analysis (instant)
     const startTime = Date.now();
-    const analysis = ResumeAnalysisEngine.analyze(resumeText, req.file.buffer);
+    const analysis = ResumeAnalysisEngine.analyze(resumeText, fileBuffer);
     const processingTime = Date.now() - startTime;
 
     // Save to database (async, don't block response)
@@ -86,14 +85,13 @@ router.post('/v2/analyze', auth, upload.single('resume'), async (req, res) => {
         total: analysis.overallScore,
         role: analysis.detectedRole.role,
         keywordCoverage: {
-          found: analysis.analysis.keywords.keywords.found.length,
-          total: analysis.analysis.keywords.keywords.total
+          found: analysis.analysis.skills.count,
+          total: analysis.analysis.skills.count
         },
         missingInfo: analysis.analysis.missingInfo.missing
       }
     );
 
-    // Return analysis results
     return res.json({
       status: 'success',
       message: 'Resume analyzed successfully',
@@ -102,14 +100,15 @@ router.post('/v2/analyze', auth, upload.single('resume'), async (req, res) => {
         overallScore: analysis.overallScore,
         detectedRole: analysis.detectedRole,
         scores: analysis.scores,
+        maxScores: analysis.maxScores,
+        contactInfo: analysis.contactInfo,
         summary: analysis.summary,
         quality: analysis.quality,
+        issues: analysis.issues,
         recommendations: analysis.recommendations,
         processingTimeMs: processingTime
       },
-      atsCompatible: analysis.atsCompatible,
-      readyForOptimization: analysis.quality.readyForOptimization,
-      next: 'Use /v2/optimize to generate improved version'
+      atsCompatible: analysis.atsCompatible
     });
   } catch (error) {
     console.error('Resume analysis error:', error);
@@ -122,89 +121,10 @@ router.post('/v2/analyze', auth, upload.single('resume'), async (req, res) => {
 });
 
 /**
- * POST /api/resume/v2/optimize
- * Stage 7-9: AI optimization and re-scoring
- * Latency: 8-15 seconds
- */
-router.post('/v2/optimize', auth, async (req, res) => {
-  try {
-    const { resumeId, resumeText } = req.body;
-
-    if (!resumeText || typeof resumeText !== 'string') {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Resume text required'
-      });
-    }
-
-    // Get initial analysis
-    const initialAnalysis = ResumeAnalysisEngine.analyze(resumeText);
-
-    // Stage 7: AI Optimization
-    const optimizationStart = Date.now();
-    const optimization = await ResumeOptimizationEngine.optimize(
-      resumeText,
-      initialAnalysis.detectedRole.role,
-      initialAnalysis
-    );
-    const optimizationTime = Date.now() - optimizationStart;
-
-    if (optimization.status !== 'success') {
-      return res.status(500).json({
-        status: 'error',
-        message: 'Optimization failed',
-        details: optimization.message
-      });
-    }
-
-    // Stage 8: Re-score optimized resume
-    const optimizedAnalysis = ResumeAnalysisEngine.analyze(optimization.optimizedResume);
-
-    // Stage 9: Save optimized resume
-    if (resumeId) {
-      await ResumeDatabase.updateOptimizedResume(
-        resumeId,
-        optimization.optimizedResume,
-        optimizedAnalysis.overallScore,
-        optimizedAnalysis
-      );
-    }
-
-    // Return optimization results
-    return res.json({
-      status: 'success',
-      message: 'Resume optimized successfully',
-      optimization: {
-        originalScore: initialAnalysis.overallScore,
-        optimizedScore: optimizedAnalysis.overallScore,
-        improvement: optimizedAnalysis.overallScore - initialAnalysis.overallScore,
-        processingTimeMs: optimizationTime,
-        optimizationNotes: optimization.optimizationNotes
-      },
-      optimizedResume: optimization.optimizedResume,
-      optimizedAnalysis: {
-        scores: optimizedAnalysis.scores,
-        summary: optimizedAnalysis.summary,
-        quality: optimizedAnalysis.quality
-      },
-      next: 'Use /v2/feedback to get detailed analysis, or /v2/export to download'
-    });
-  } catch (error) {
-    console.error('Resume optimization error:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Optimization failed',
-      details: error.message
-    });
-  }
-});
-
-/**
  * POST /api/resume/v2/feedback
- * Stage 9: Generate detailed feedback using AI
- * Latency: 8-15 seconds
+ * Rule-based detailed feedback (no AI).
  */
-router.post('/v2/feedback', auth, async (req, res) => {
+router.post('/v2/feedback', auth, requirePlan(2), async (req, res) => {
   try {
     const { resumeText } = req.body;
 
@@ -215,32 +135,11 @@ router.post('/v2/feedback', auth, async (req, res) => {
       });
     }
 
-    // Get analysis
     const analysis = ResumeAnalysisEngine.analyze(resumeText);
-
-    // Try to get AI feedback, fall back to rule-based if LLM unavailable
-    let feedback;
-    try {
-      const aiStart = Date.now();
-      const aiFeedback = await ResumeCriticEngine.generateFeedback(
-        resumeText,
-        analysis.detectedRole.role,
-        analysis
-      );
-      const aiTime = Date.now() - aiStart;
-
-      feedback = {
-        source: 'ai',
-        processingTimeMs: aiTime,
-        ...aiFeedback.feedback
-      };
-    } catch (error) {
-      console.warn('AI feedback unavailable, using rule-based feedback');
-      feedback = {
-        source: 'rule-based',
-        ...ResumeCriticEngine.generateQuickFeedback(analysis)
-      };
-    }
+    const feedback = {
+      source: 'rule-based',
+      ...ResumeCriticEngine.generateQuickFeedback(analysis)
+    };
 
     return res.json({
       status: 'success',
@@ -261,10 +160,10 @@ router.post('/v2/feedback', auth, async (req, res) => {
 
 /**
  * POST /api/resume/v2/export
- * Stage 10: Export resume in different formats
+ * Export resume in different formats
  * Latency: <2 seconds
  */
-router.post('/v2/export', auth, async (req, res) => {
+router.post('/v2/export', auth, requirePlan(2), async (req, res) => {
   try {
     const { resumeText, format = 'txt' } = req.body;
 
@@ -275,7 +174,6 @@ router.post('/v2/export', auth, async (req, res) => {
       });
     }
 
-    // Validate format
     const validFormats = ['pdf', 'docx', 'txt'];
     if (!validFormats.includes(format.toLowerCase())) {
       return res.status(400).json({
@@ -284,12 +182,10 @@ router.post('/v2/export', auth, async (req, res) => {
       });
     }
 
-    // Export
     const exportStart = Date.now();
     const result = await ResumeExportEngine.export(resumeText, format);
     const exportTime = Date.now() - exportStart;
 
-    // Validate
     const validation = ResumeExportEngine.validateExport(result.content, format);
     if (!validation.valid) {
       return res.status(500).json({
@@ -299,14 +195,12 @@ router.post('/v2/export', auth, async (req, res) => {
       });
     }
 
-    // Set response headers
     res.set({
       'Content-Type': result.mimeType,
       'Content-Disposition': `attachment; filename="${result.filename}"`,
       'Content-Length': Buffer.byteLength(result.content)
     });
 
-    // Send file
     if (format.toLowerCase() === 'pdf') {
       res.end(result.content);
     } else {

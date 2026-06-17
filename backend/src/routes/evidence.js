@@ -7,6 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
+const { requirePlan } = require('../middleware/requirePlan');
 const { getReuseReport } = require('../services/evidence/evidenceTracker');
 const { pool } = require('../config/database');
 
@@ -14,7 +15,7 @@ const { pool } = require('../config/database');
  * GET /api/evidence/report
  * Returns bullet reuse report for authenticated user.
  */
-router.get('/report', authenticateToken, async (req, res) => {
+router.get('/report', authenticateToken, requirePlan(3), async (req, res) => {
   try {
     const userId = req.user.id;
     const report = await getReuseReport(userId);

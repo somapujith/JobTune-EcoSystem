@@ -71,14 +71,14 @@ const Navbar = () => {
 
   return (
     <header className="fixed top-0 w-full z-50 glass-panel border-b border-white/40 dark:border-slate-800/50">
-      <div className="flex justify-between items-center px-6 lg:px-12 h-20 w-full">
+      <div className="flex items-center px-6 lg:px-10 h-16 w-full gap-4">
         {/* Logo - Left */}
-        <Link to="/" className="text-2xl font-black tracking-tight text-blue-800 font-headline flex-shrink-0">
+        <Link to="/" className="text-2xl font-black tracking-tight text-blue-800 font-headline flex-shrink-0 mr-2">
           JobTune
         </Link>
 
-        {/* Nav - Center */}
-        <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 transform -translate-x-1/2" ref={dropdownRef}>
+        {/* Nav - Center (flex-1 so it never overlaps logo or right controls) */}
+        <nav className="hidden lg:flex items-center gap-5 flex-1 justify-center min-w-0" ref={dropdownRef}>
             <Link
               to="/dashboard"
               className={`text-sm font-semibold transition-all duration-200 ${
@@ -143,7 +143,7 @@ const Navbar = () => {
           </nav>
 
         {/* Right - Buttons & User Menu */}
-        <div className="flex items-center gap-4 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
           <button
             onClick={() => setIsDark(!isDark)}
             title={isDark ? 'Light mode' : 'Dark mode'}
@@ -151,8 +151,8 @@ const Navbar = () => {
           >
             {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
-          <span className="hidden md:block text-sm text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer transition-colors">Support</span>
-          <div className="hidden md:flex items-center gap-3 border-l pl-4 border-slate-200 dark:border-slate-700">
+          <span className="hidden xl:block text-sm text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer transition-colors">Support</span>
+          <div className="hidden md:flex items-center gap-2 border-l pl-3 border-slate-200 dark:border-slate-700">
             {isAuthenticated ? (
               <>
                 {userPlan && (

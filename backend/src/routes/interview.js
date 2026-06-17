@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
+const { requirePlan } = require('../middleware/requirePlan');
 const { pool } = require('../config/database');
 const { callAI, extractJSON } = require('../utils/aiClient');
 
@@ -111,7 +112,7 @@ function getFallbackResponse(role, messageCount, lastAnswer) {
 }
 
 // POST /api/interview/start - Start a new mock interview
-router.post('/start', authenticateToken, async (req, res, next) => {
+router.post('/start', authenticateToken, requirePlan(3), async (req, res, next) => {
   try {
     const { role } = req.body;
     const targetRole = role || 'Full Stack Developer';

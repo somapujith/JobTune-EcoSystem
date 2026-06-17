@@ -1,27 +1,22 @@
 /**
- * Section Analyzer - Rule-based section completeness scoring
- * Max Score: 30 Points
- * Latency Target: <10ms
+ * Section Analyzer - Resume structure/section completeness scoring
+ * Raw scale: 80 points (Summary 10, Skills 10, Experience 20, Projects 20,
+ * Education 10, Certifications 10) — rescaled by the orchestrator onto the
+ * 20-point "Structure" weight in the final ATS formula.
  */
 
 class SectionAnalyzer {
-  // Define required sections and their weights
   static SECTIONS = {
-    summary: { name: 'Summary/Objective', required: true, weight: 5 },
-    experience: { name: 'Experience', required: true, weight: 5 },
-    education: { name: 'Education', required: true, weight: 5 },
-    skills: { name: 'Skills', required: true, weight: 5 },
-    projects: { name: 'Projects', required: false, weight: 5 },
-    certifications: { name: 'Certifications', required: false, weight: 5 }
+    summary: { name: 'Professional Summary', required: true, points: 10 },
+    skills: { name: 'Skills', required: true, points: 10 },
+    experience: { name: 'Experience', required: true, points: 20 },
+    projects: { name: 'Projects', required: true, points: 20 },
+    education: { name: 'Education', required: true, points: 10 },
+    certifications: { name: 'Certifications', required: false, points: 10 }
   };
 
-  static MAX_SCORE = 30;
+  static MAX_SCORE = 80;
 
-  /**
-   * Analyze resume sections
-   * @param {string} resumeText - Raw resume text
-   * @returns {object} Section analysis with score
-   */
   static analyze(resumeText) {
     if (!resumeText || typeof resumeText !== 'string') {
       return {
@@ -40,13 +35,12 @@ class SectionAnalyzer {
 
     let totalScore = 0;
 
-    // Check each section
     for (const [key, section] of Object.entries(this.SECTIONS)) {
       const found = this._sectionExists(text, key);
 
       if (found) {
-        results[key] = section.weight;
-        totalScore += section.weight;
+        results[key] = section.points;
+        totalScore += section.points;
         foundSections.push(section.name);
       } else {
         results[key] = 0;
@@ -63,58 +57,30 @@ class SectionAnalyzer {
       details: results,
       foundSections,
       missingSections,
-      quality: this._assessQuality(text, foundSections)
+      quality: this._assessQuality(foundSections)
     };
   }
 
-  /**
-   * Check if section exists in resume
-   * @private
-   */
   static _sectionExists(text, sectionKey) {
     const patterns = {
-      summary: [
-        'summary', 'objective', 'professional summary',
-        'about', 'profile', 'introduction'
-      ],
-      experience: [
-        'experience', 'employment', 'work experience',
-        'professional experience', 'career history'
-      ],
-      education: [
-        'education', 'academic', 'degree', 'university',
-        'college', 'qualification', 'school'
-      ],
-      skills: [
-        'skills', 'technical skills', 'core competencies',
-        'competencies', 'abilities', 'expertise', 'proficiencies'
-      ],
-      projects: [
-        'projects', 'portfolio', 'notable projects',
-        'key projects', 'accomplishments'
-      ],
-      certifications: [
-        'certifications', 'certificates', 'licenses',
-        'certification', 'certified', 'award', 'awards'
-      ]
+      summary: ['summary', 'objective', 'professional summary', 'about', 'profile', 'introduction'],
+      experience: ['experience', 'employment', 'work experience', 'professional experience', 'career history'],
+      education: ['education', 'academic', 'degree', 'university', 'college', 'qualification', 'school'],
+      skills: ['skills', 'technical skills', 'core competencies', 'competencies', 'abilities', 'expertise', 'proficiencies'],
+      projects: ['projects', 'portfolio', 'notable projects', 'key projects', 'accomplishments'],
+      certifications: ['certifications', 'certificates', 'licenses', 'certification', 'certified', 'award', 'awards']
     };
 
     const keywordPatterns = patterns[sectionKey] || [];
     return keywordPatterns.some(keyword => {
-      // Look for section headers
       const regex = new RegExp(`\\b${keyword}\\b|^${keyword}|\\n${keyword}`, 'i');
       return regex.test(text);
     });
   }
 
-  /**
-   * Assess overall section quality
-   * @private
-   */
-  static _assessQuality(text, foundSections) {
+  static _assessQuality(foundSections) {
     let quality = 'good';
 
-    // Check if critical sections are present
     const criticalSections = ['experience', 'education', 'skills'];
     const hasAllCritical = criticalSections.every(s =>
       foundSections.some(fs => fs.toLowerCase().includes(s))
@@ -131,9 +97,6 @@ class SectionAnalyzer {
     return quality;
   }
 
-  /**
-   * Get recommendations for missing sections
-   */
   static getRecommendations(analysis) {
     const recommendations = [];
 
@@ -144,7 +107,7 @@ class SectionAnalyzer {
       });
     }
 
-    if (analysis.score < 20) {
+    if (analysis.score < this.MAX_SCORE * 0.5) {
       recommendations.push({
         severity: 'critical',
         message: 'Resume lacks essential sections. Add Summary, Experience, Education, and Skills.'

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
+const { requirePlan } = require('../middleware/requirePlan');
 const { pool } = require('../config/database');
 const { callAI, extractJSON } = require('../utils/aiClient');
 
@@ -114,7 +115,7 @@ function generateFallbackRoadmap(gaps, targetRole) {
 }
 
 // POST /api/learning/generate-roadmap
-router.post('/generate-roadmap', authenticateToken, async (req, res, next) => {
+router.post('/generate-roadmap', authenticateToken, requirePlan(1), async (req, res, next) => {
   try {
     const { gaps, targetRole } = req.body;
 
@@ -160,7 +161,7 @@ router.post('/generate-roadmap', authenticateToken, async (req, res, next) => {
 });
 
 // GET /api/learning/roadmaps - get user's roadmaps
-router.get('/roadmaps', authenticateToken, async (req, res, next) => {
+router.get('/roadmaps', authenticateToken, requirePlan(1), async (req, res, next) => {
   try {
     const rows = await pool.query(
       'SELECT * FROM learning_roadmaps WHERE user_id = $1 ORDER BY created_at DESC LIMIT 10',

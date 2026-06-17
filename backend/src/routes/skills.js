@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
+const { requirePlan } = require('../middleware/requirePlan');
 const { pool } = require('../config/database');
 const { callAI, extractJSON } = require('../utils/aiClient');
 
@@ -85,7 +86,7 @@ function generateFallbackAnalysis(answers) {
 }
 
 // Submit Assessment - AI-Powered
-router.post('/assessment', authenticateToken, async (req, res, next) => {
+router.post('/assessment', authenticateToken, requirePlan(1), async (req, res, next) => {
   try {
     const { answers } = req.body;
 
@@ -156,7 +157,7 @@ router.post('/assessment', authenticateToken, async (req, res, next) => {
 });
 
 // Get User History
-router.get('/history', authenticateToken, async (req, res, next) => {
+router.get('/history', authenticateToken, requirePlan(1), async (req, res, next) => {
   try {
     const rows = await pool.query('SELECT * FROM skill_assessments WHERE user_id = $1 ORDER BY created_at DESC', [req.user.id]);
     res.json(rows.rows);

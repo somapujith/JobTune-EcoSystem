@@ -1,283 +1,139 @@
 /**
- * Formatting Analyzer - Detects ATS compatibility issues
- * Max Score: 15 Points
- * Latency Target: <10ms
+ * Formatting Analyzer - Detects ATS-unfriendly formatting elements
+ * Max Score: 20 Points, starts full and is penalized per detected issue.
+ *
+ * Note: input is plain extracted text, not the original PDF layout, so
+ * "Images"/"Icons"/"Headers-Footers"/"Text Boxes" are detected via textual
+ * signatures (e.g. leftover OCR/alt-text artifacts, repeated boilerplate
+ * lines) rather than true visual inspection of the PDF.
  */
 
 class FormattingAnalyzer {
-  static MAX_SCORE = 15;
+  static MAX_SCORE = 20;
 
-  /**
-   * Analyze resume formatting
-   * @param {string} resumeText - Raw resume text
-   * @param {string} fileContent - Original file content
-   * @returns {object} Formatting analysis
-   */
+  static PENALTIES = {
+    table: 5,
+    multiColumn: 5,
+    image: 5,
+    icon: 2,
+    headerFooter: 2,
+    textBox: 5
+  };
+
   static analyze(resumeText, fileContent = null) {
     if (!resumeText || typeof resumeText !== 'string') {
-      return {
-        score: 0,
-        maxScore: this.MAX_SCORE,
-        issues: [],
-        warnings: [],
-        recommendations: []
-      };
+      return { score: 0, maxScore: this.MAX_SCORE, issues: [], recommendations: [] };
     }
 
     const issues = [];
-    const warnings = [];
     let score = this.MAX_SCORE;
 
-    // Check for problematic characters
-    const charIssues = this._checkCharacters(resumeText);
-    if (charIssues.length > 0) {
-      issues.push(...charIssues);
-      score -= charIssues.length * 1.5;
+    if (this._hasTable(resumeText)) {
+      issues.push({ type: 'table', message: 'Table layout detected', penalty: this.PENALTIES.table });
+      score -= this.PENALTIES.table;
     }
 
-    // Check date consistency
-    const dateIssues = this._checkDates(resumeText);
-    if (dateIssues.length > 0) {
-      issues.push(...dateIssues);
-      score -= dateIssues.length;
+    if (this._hasMultiColumn(resumeText)) {
+      issues.push({ type: 'multiColumn', message: 'Two-column layout found', penalty: this.PENALTIES.multiColumn });
+      score -= this.PENALTIES.multiColumn;
     }
 
-    // Check for tables and columns
-    const tableIssues = this._checkForTables(resumeText);
-    if (tableIssues.length > 0) {
-      warnings.push(...tableIssues);
-      score -= tableIssues.length * 2;
+    if (this._hasImage(resumeText)) {
+      issues.push({ type: 'image', message: 'Profile photo or embedded image detected', penalty: this.PENALTIES.image });
+      score -= this.PENALTIES.image;
     }
 
-    // Check for complex formatting
-    const formatIssues = this._checkComplexFormatting(resumeText);
-    if (formatIssues.length > 0) {
-      warnings.push(...formatIssues);
-      score -= formatIssues.length;
+    if (this._hasIcon(resumeText)) {
+      issues.push({ type: 'icon', message: 'Decorative icons detected', penalty: this.PENALTIES.icon });
+      score -= this.PENALTIES.icon;
     }
 
-    // Check line length
-    const lineIssues = this._checkLineLengths(resumeText);
-    if (lineIssues.length > 0) {
-      warnings.push(...lineIssues);
+    if (this._hasHeaderFooter(resumeText)) {
+      issues.push({ type: 'headerFooter', message: 'Repeating header/footer content detected', penalty: this.PENALTIES.headerFooter });
+      score -= this.PENALTIES.headerFooter;
     }
 
-    // Check for proper spacing
-    const spacingIssues = this._checkSpacing(resumeText);
-    if (spacingIssues.length > 0) {
-      warnings.push(...spacingIssues);
+    if (this._hasTextBox(resumeText)) {
+      issues.push({ type: 'textBox', message: 'Text box / sidebar layout detected', penalty: this.PENALTIES.textBox });
+      score -= this.PENALTIES.textBox;
     }
 
-    const recommendations = this._getRecommendations(issues, warnings);
+    score = Math.max(0, Math.min(score, this.MAX_SCORE));
 
     return {
-      score: Math.max(0, Math.min(score, this.MAX_SCORE)),
+      score,
       maxScore: this.MAX_SCORE,
-      percentage: Math.max(0, (score / this.MAX_SCORE) * 100),
+      percentage: (score / this.MAX_SCORE) * 100,
       issues,
-      warnings,
-      recommendations,
       atsCompatible: issues.length === 0,
-      quality: this._assessQuality(issues.length, warnings.length)
+      recommendations: this._getRecommendations(issues)
     };
   }
 
   /**
-   * Check for problematic characters for ATS
-   * @private
+   * A real table/grid layout shows up as a markdown-style separator row
+   * (|---|---|) or as 3+ consecutive lines with pipes at matching column
+   * positions. A single "Title | Company" label line is not a table.
    */
-  static _checkCharacters(text) {
-    const issues = [];
+  static _hasTable(text) {
+    if (/\+[-]{3,}\+/.test(text)) return true;
+    if (/^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)+\|?\s*$/m.test(text)) return true;
 
-    // Check for special characters that ATS systems struggle with
-    const problematicChars = [
-      { char: '•', name: 'Bullet points', replacement: '-' },
-      { char: '○', name: 'Circle bullets', replacement: '-' },
-      { char: '★', name: 'Stars', replacement: '*' },
-      { char: '→', name: 'Arrows', replacement: '->' },
-      { char: '|', name: 'Pipes', replacement: '-' },
-      { char: '–', name: 'En dashes', replacement: '-' },
-      { char: '—', name: 'Em dashes', replacement: '-' }
-    ];
-
-    for (const { char, name, replacement } of problematicChars) {
-      if (text.includes(char)) {
-        issues.push({
-          type: 'character',
-          severity: 'high',
-          character: name,
-          message: `Replace ${name} (${char}) with ${replacement} for ATS compatibility`,
-          count: (text.match(new RegExp(char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length
-        });
-      }
-    }
-
-    return issues;
-  }
-
-  /**
-   * Check date consistency
-   * @private
-   */
-  static _checkDates(text) {
-    const issues = [];
-    const datePatterns = {
-      mmddyyyy: /\d{1,2}\/\d{1,2}\/\d{4}/g,
-      mmyyyy: /\d{1,2}\/\d{4}/g,
-      mmmyyyy: /[A-Za-z]{3,9}\s+\d{4}/g,
-      yyyymmdd: /\d{4}-\d{1,2}-\d{1,2}/g
-    };
-
-    const usedFormats = [];
-    for (const [format, pattern] of Object.entries(datePatterns)) {
-      if (pattern.test(text)) {
-        usedFormats.push(format);
-      }
-    }
-
-    // Check for inconsistent date formats
-    if (usedFormats.length > 1) {
-      issues.push({
-        type: 'date',
-        severity: 'medium',
-        message: `Use consistent date format. Found: ${usedFormats.join(', ')}`,
-        recommendation: 'Use MM/YYYY or Month YYYY consistently'
-      });
-    }
-
-    // Check for "Present" vs "Current"
-    const presentCount = (text.match(/\bpresent\b/gi) || []).length;
-    const currentCount = (text.match(/\bcurrent\b/gi) || []).length;
-
-    if (presentCount > 0 && currentCount > 0) {
-      issues.push({
-        type: 'date',
-        severity: 'low',
-        message: 'Use either "Present" or "Current" consistently for ongoing positions'
-      });
-    }
-
-    return issues;
-  }
-
-  /**
-   * Check for tables (ATS unfriendly)
-   * @private
-   */
-  static _checkForTables(text) {
-    const issues = [];
-
-    // Check for table indicators
-    const hasComplexFormatting = /\||\+\-+\+|\s{2,}(?=\S)/.test(text);
-
-    if (hasComplexFormatting) {
-      issues.push({
-        type: 'formatting',
-        severity: 'high',
-        message: 'Avoid tables and complex column layouts - use simple text lists instead',
-        recommendation: 'Convert tables to bullet-point format'
-      });
-    }
-
-    return issues;
-  }
-
-  /**
-   * Check for complex formatting
-   * @private
-   */
-  static _checkComplexFormatting(text) {
-    const issues = [];
-
-    // Check for multiple spaces (often indicates columns)
-    if (/\s{3,}/.test(text)) {
-      issues.push({
-        type: 'spacing',
-        severity: 'medium',
-        message: 'Multiple spaces detected - may indicate column alignment. Use simple spacing instead.'
-      });
-    }
-
-    return issues;
-  }
-
-  /**
-   * Check line lengths
-   * @private
-   */
-  static _checkLineLengths(text) {
-    const issues = [];
     const lines = text.split('\n');
-    const veryLongLines = lines.filter(l => l.length > 120);
+    const pipePositions = lines
+      .map(line => [...line].reduce((positions, ch, idx) => (ch === '|' ? [...positions, idx] : positions), []))
+      .filter(positions => positions.length >= 2);
 
-    if (veryLongLines.length > 0) {
-      issues.push({
-        type: 'line-length',
-        severity: 'low',
-        message: `${veryLongLines.length} lines exceed 120 characters - consider wrapping`,
-        count: veryLongLines.length
-      });
+    if (pipePositions.length < 3) return false;
+
+    for (let i = 0; i <= pipePositions.length - 3; i++) {
+      const [a, b, c] = pipePositions.slice(i, i + 3);
+      const matches = (x, y) => x.length === y.length && x.every((pos, idx) => Math.abs(pos - y[idx]) <= 1);
+      if (matches(a, b) && matches(b, c)) return true;
     }
 
-    return issues;
+    return false;
   }
 
-  /**
-   * Check spacing and structure
-   * @private
-   */
-  static _checkSpacing(text) {
-    const issues = [];
-
-    // Check for inconsistent spacing between sections
-    const singleLineBreaks = (text.match(/[^\n]\n[^\n]/g) || []).length;
-    const doubleLineBreaks = (text.match(/\n\n/g) || []).length;
-
-    if (singleLineBreaks > doubleLineBreaks * 2) {
-      issues.push({
-        type: 'spacing',
-        severity: 'low',
-        message: 'Use consistent spacing - double line breaks between sections for readability'
-      });
-    }
-
-    return issues;
+  /** Large runs of inline whitespace between words on the same line suggest column alignment. */
+  static _hasMultiColumn(text) {
+    const lines = text.split('\n');
+    const columnLikeLines = lines.filter(l => /\S\s{4,}\S/.test(l));
+    return columnLikeLines.length >= 3;
   }
 
-  /**
-   * Assess overall quality
-   * @private
-   */
-  static _assessQuality(issueCount, warningCount) {
-    if (issueCount > 2) return 'poor';
-    if (issueCount > 0) return 'fair';
-    if (warningCount > 2) return 'fair';
-    if (warningCount > 0) return 'good';
-    return 'excellent';
+  /** PDF/DOCX text extractors leave behind alt-text or [image] placeholders for embedded images. */
+  static _hasImage(text) {
+    return /\[image\]|\[photo\]|\[picture\]|alt\s*=\s*["']?(photo|headshot|profile)/i.test(text);
   }
 
-  /**
-   * Get recommendations
-   * @private
-   */
-  static _getRecommendations(issues, warnings) {
-    const recommendations = [];
+  /** Common icon-font ligature names or emoji used as bullet/section markers. */
+  static _hasIcon(text) {
+    return /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(text) || /\b(fa-|material-icons|glyphicon)\b/i.test(text);
+  }
 
-    if (issues.length > 0) {
-      recommendations.push({
-        priority: 'high',
-        message: 'Fix formatting issues for ATS compatibility'
-      });
-    }
+  /** A short line repeated verbatim near the top and bottom of the document indicates a running header/footer. */
+  static _hasHeaderFooter(text) {
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    if (lines.length < 10) return false;
 
-    if (warnings.length > 0) {
-      recommendations.push({
-        priority: 'medium',
-        message: 'Address formatting warnings for better readability'
-      });
-    }
+    const topSlice = lines.slice(0, 3);
+    const bottomSlice = lines.slice(-3);
+    return topSlice.some(top => top.length > 0 && top.length < 60 && bottomSlice.includes(top));
+  }
 
-    return recommendations;
+  /** Sidebar/text-box content often appears as short isolated lines surrounded by large whitespace gaps mid-document. */
+  static _hasTextBox(text) {
+    return /\t{2,}/.test(text);
+  }
+
+  static _getRecommendations(issues) {
+    if (issues.length === 0) return [];
+
+    return issues.map(issue => ({
+      priority: issue.penalty >= 5 ? 'high' : 'medium',
+      message: `Remove ${issue.message.toLowerCase()} — ATS parsers often misread or skip this content (-${issue.penalty} pts)`
+    }));
   }
 }
 

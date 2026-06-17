@@ -203,7 +203,8 @@ const useAuthStore = create((set) => ({
 
   logout: async () => {
     try {
-      await api.post('/auth/logout');
+      const refreshToken = safeLocalStorage('refreshToken');
+      await api.post('/auth/logout', { refreshToken });
     } catch {
       // still clear local session
     }
