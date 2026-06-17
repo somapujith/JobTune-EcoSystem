@@ -4,8 +4,9 @@ import { Menu, X, ChevronDown, Moon, Sun, Crown } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
 import useSubscriptionStore from '../store/useSubscriptionStore';
 import { useDarkMode } from '../hooks/useDarkMode';
+import { api } from '../store/useAuthStore';
 
-const NAV_GROUPS = [
+const BASE_NAV_GROUPS = [
   { label: 'Job Search', items: [
     { label: 'Job Discovery',    path: '/discover',  desc: 'Find new opportunities' },
     { label: 'Job Tracker',      path: '/jobs',      desc: 'Track applications' },
@@ -21,12 +22,17 @@ const NAV_GROUPS = [
     { label: 'GitHub Profile',   path: '/github',    desc: 'Audit & generate README' },
     { label: 'LinkedIn Profile', path: '/linkedin',  desc: 'Score your LinkedIn presence' },
   ]},
-  { label: 'Preparation', items: [
-    { label: 'Job Preparation Hub', path: '/preparation', desc: 'Your central prep center' },
-    { label: 'Tune & Polish', path: '/preparation/tune-and-polish', desc: 'Interview Copilot & Resumes' },
-    { label: 'Zero to Hero', path: '/preparation/zero-to-hero', desc: 'Path Finder & AI Tutor' },
-    { label: 'Learn & Build', path: '/preparation/learn-and-build', desc: 'Targeted Portfolio Projects' },
-  ]},
+];
+
+const PREP_ITEM_LOCKED = [
+  { label: 'Preparation Dashboard', path: '/preparation', desc: 'Your central prep center' },
+];
+
+const PREP_ITEMS_UNLOCKED = [
+  { label: 'Preparation Dashboard', path: '/preparation', desc: 'Your central prep center' },
+  { label: 'Tune & Polish', path: '/preparation/tune-and-polish', desc: 'Interview Copilot & Resumes' },
+  { label: 'Zero to Hero', path: '/preparation/zero-to-hero', desc: 'Path Finder & AI Tutor' },
+  { label: 'Learn & Build', path: '/preparation/learn-and-build', desc: 'Targeted Portfolio Projects' },
 ];
 
 const Navbar = () => {
@@ -37,11 +43,48 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState(null);
   const [openMobileGroup, setOpenMobileGroup] = useState(null);
+  const [prepUnlocked, setPrepUnlocked] = useState(false);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
     checkAuth();
   }, []);
+
+  // Check prep onboarding status so the nav shows sub-tracks only after completion
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    api.get('/progress/preferences')
+      .then(({ data }) => {
+        if (data?.data?.prepOnboardingDone) setPrepUnlocked(true);
+      })
+      .catch(() => {});
+  }, [isAuthenticated]);
+
+  // Re-check on navigate or custom event; re-lock on retake event
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const recheck = () => {
+      api.get('/progress/preferences')
+        .then(({ data }) => { if (data?.data?.prepOnboardingDone) setPrepUnlocked(true); })
+        .catch(() => {});
+    };
+    if (!prepUnlocked) recheck();
+    window.addEventListener('prep-onboarding-complete', recheck);
+    const relock = () => setPrepUnlocked(false);
+    window.addEventListener('prep-onboarding-reset', relock);
+    return () => {
+      window.removeEventListener('prep-onboarding-complete', recheck);
+      window.removeEventListener('prep-onboarding-reset', relock);
+    };
+  }, [location.pathname, isAuthenticated, prepUnlocked]);
+
+  const NAV_GROUPS = [
+    ...BASE_NAV_GROUPS,
+    {
+      label: 'Preparation',
+      items: prepUnlocked ? PREP_ITEMS_UNLOCKED : PREP_ITEM_LOCKED,
+    },
+  ];
 
   useEffect(() => {
     setMobileOpen(false);

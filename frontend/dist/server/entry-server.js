@@ -8,7 +8,7 @@ import { useState, useEffect, useRef, Component, useMemo, useCallback } from "re
 import { stripBasename, UNSAFE_warning, UNSAFE_invariant, matchPath, joinPaths, Action } from "@remix-run/router";
 import { UNSAFE_NavigationContext, useHref, useNavigate, useLocation, useResolvedPath, createPath, UNSAFE_DataRouterStateContext, UNSAFE_useRouteId, UNSAFE_RouteContext, UNSAFE_DataRouterContext, parsePath, Router, Outlet, Navigate, Routes, Route } from "react-router";
 import "react-dom";
-import { ChevronDown, Sun, Moon, Crown, X, Menu, AlertTriangle, RotateCcw, TrendingUp, Zap, Lock, ArrowRight, Sparkles, Star, Activity, FileText, Linkedin, Github, Layout as Layout$1, BookOpen, Lightbulb, CheckCircle2, Users, ChevronRight, MessageCircle, Check, Rocket, Loader, Plus, Minus, ArrowLeft, Map as Map$1, Gauge, Search, ListChecks, Target, ExternalLink, Clock, Briefcase, ShieldCheck, Monitor, Mail, Calendar, User, CheckCircle, Copy, Download, XCircle, Trash2, Edit2, MapPin, Loader2, AlertCircle, ChevronLeft, ChevronUp, UploadCloud, ShieldAlert, Code2, RefreshCw, BarChart2, TrendingDown, HelpCircle, Award, Code, BrainCircuit, Wrench, FileCode2, Mic, Send, Info, GraduationCap, Play, Bot, Terminal, Tags, Eye, GitCompare, MonitorOff, LogIn } from "lucide-react";
+import { ChevronDown, Sun, Moon, Crown, X, Menu, AlertTriangle, RotateCcw, TrendingUp, Zap, Lock, ArrowRight, Sparkles, Star, Activity, FileText, Linkedin, Github, Layout as Layout$1, BookOpen, Lightbulb, CheckCircle2, Users, ChevronRight, MessageCircle, Check, Rocket, Loader, Plus, Minus, ArrowLeft, Map as Map$1, Gauge, Search, ListChecks, Target, ExternalLink, Clock, Briefcase, ShieldCheck, Monitor, Mail, Calendar, User, CheckCircle, Copy, Download, XCircle, Trash2, Edit2, MapPin, Loader2, AlertCircle, ChevronLeft, ChevronUp, UploadCloud, ShieldAlert, Code2, RefreshCw, BarChart2, TrendingDown, HelpCircle, Award, Code, BrainCircuit, Wrench, Play, FileCode2, Mic, Send, Info, GraduationCap, Bot, Terminal, Tags, Eye, GitCompare, MonitorOff, LogIn } from "lucide-react";
 import { create } from "zustand";
 import axios from "axios";
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip } from "recharts";
@@ -896,7 +896,7 @@ function useDarkMode() {
   }, [isDark]);
   return [isDark, setIsDark];
 }
-const NAV_GROUPS = [
+const BASE_NAV_GROUPS = [
   { label: "Job Search", items: [
     { label: "Job Discovery", path: "/discover", desc: "Find new opportunities" },
     { label: "Job Tracker", path: "/jobs", desc: "Track applications" },
@@ -911,13 +911,16 @@ const NAV_GROUPS = [
   { label: "Portfolios", items: [
     { label: "GitHub Profile", path: "/github", desc: "Audit & generate README" },
     { label: "LinkedIn Profile", path: "/linkedin", desc: "Score your LinkedIn presence" }
-  ] },
-  { label: "Preparation", items: [
-    { label: "Job Preparation Hub", path: "/preparation", desc: "Your central prep center" },
-    { label: "Tune & Polish", path: "/preparation/tune-and-polish", desc: "Interview Copilot & Resumes" },
-    { label: "Zero to Hero", path: "/preparation/zero-to-hero", desc: "Path Finder & AI Tutor" },
-    { label: "Learn & Build", path: "/preparation/learn-and-build", desc: "Targeted Portfolio Projects" }
   ] }
+];
+const PREP_ITEM_LOCKED = [
+  { label: "Preparation Dashboard", path: "/preparation", desc: "Your central prep center" }
+];
+const PREP_ITEMS_UNLOCKED = [
+  { label: "Preparation Dashboard", path: "/preparation", desc: "Your central prep center" },
+  { label: "Tune & Polish", path: "/preparation/tune-and-polish", desc: "Interview Copilot & Resumes" },
+  { label: "Zero to Hero", path: "/preparation/zero-to-hero", desc: "Path Finder & AI Tutor" },
+  { label: "Learn & Build", path: "/preparation/learn-and-build", desc: "Targeted Portfolio Projects" }
 ];
 const Navbar = () => {
   const { user, logout, isAuthenticated, checkAuth } = useAuthStore();
@@ -927,10 +930,44 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState(null);
   const [openMobileGroup, setOpenMobileGroup] = useState(null);
+  const [prepUnlocked, setPrepUnlocked] = useState(false);
   const dropdownRef = useRef(null);
   useEffect(() => {
     checkAuth();
   }, []);
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    api.get("/progress/preferences").then(({ data }) => {
+      var _a;
+      if ((_a = data == null ? void 0 : data.data) == null ? void 0 : _a.prepOnboardingDone) setPrepUnlocked(true);
+    }).catch(() => {
+    });
+  }, [isAuthenticated]);
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const recheck = () => {
+      api.get("/progress/preferences").then(({ data }) => {
+        var _a;
+        if ((_a = data == null ? void 0 : data.data) == null ? void 0 : _a.prepOnboardingDone) setPrepUnlocked(true);
+      }).catch(() => {
+      });
+    };
+    if (!prepUnlocked) recheck();
+    window.addEventListener("prep-onboarding-complete", recheck);
+    const relock = () => setPrepUnlocked(false);
+    window.addEventListener("prep-onboarding-reset", relock);
+    return () => {
+      window.removeEventListener("prep-onboarding-complete", recheck);
+      window.removeEventListener("prep-onboarding-reset", relock);
+    };
+  }, [location.pathname, isAuthenticated, prepUnlocked]);
+  const NAV_GROUPS = [
+    ...BASE_NAV_GROUPS,
+    {
+      label: "Preparation",
+      items: prepUnlocked ? PREP_ITEMS_UNLOCKED : PREP_ITEM_LOCKED
+    }
+  ];
   useEffect(() => {
     setMobileOpen(false);
     setOpenGroup(null);
@@ -1405,7 +1442,7 @@ const TOOLS = [
   { name: "Content Vault", icon: BookOpen, path: "/learning", accent: "#f59e0b", light: "#fffbeb", tag: "Growth" },
   { name: "Project Ideas", icon: Lightbulb, path: "/projects", accent: "#ef4444", light: "#fef2f2", tag: "Growth" }
 ];
-const STEPS$1 = [
+const STEPS$2 = [
   { num: "01", title: "Assess", desc: "A 45-min diagnostic maps your exact technical standing across 25+ domains." },
   { num: "02", title: "Optimize", desc: "AI rewrites your resume, LinkedIn headline, and GitHub profile for recruiters." },
   { num: "03", title: "Learn", desc: "A personalized path fills every gap the assessment found — nothing extra." },
@@ -1799,10 +1836,10 @@ function Home() {
       ] }),
       /* @__PURE__ */ jsxs("div", { className: "relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8", children: [
         /* @__PURE__ */ jsx("div", { className: "hidden lg:block absolute top-10 left-[12.5%] right-[12.5%] h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" }),
-        STEPS$1.map((step, i) => /* @__PURE__ */ jsxs("div", { className: "relative flex flex-col items-center text-center group", children: [
+        STEPS$2.map((step, i) => /* @__PURE__ */ jsxs("div", { className: "relative flex flex-col items-center text-center group", children: [
           /* @__PURE__ */ jsxs("div", { className: "relative mb-6", children: [
             /* @__PURE__ */ jsx("div", { className: "w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center group-hover:border-blue-200 dark:group-hover:border-blue-500 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 transition-all duration-300", children: /* @__PURE__ */ jsx("span", { className: "text-2xl font-black text-slate-300 dark:text-slate-600 group-hover:text-blue-500 transition-colors", children: step.num }) }),
-            i < STEPS$1.length - 1 && /* @__PURE__ */ jsx("div", { className: "lg:hidden absolute top-1/2 left-full w-8 h-px bg-slate-200 -translate-y-1/2" })
+            i < STEPS$2.length - 1 && /* @__PURE__ */ jsx("div", { className: "lg:hidden absolute top-1/2 left-full w-8 h-px bg-slate-200 -translate-y-1/2" })
           ] }),
           /* @__PURE__ */ jsx("h3", { className: "text-xl font-black text-slate-900 dark:text-white mb-2", children: step.title }),
           /* @__PURE__ */ jsx("p", { className: "text-slate-500 text-sm leading-relaxed max-w-[200px]", children: step.desc })
@@ -1865,7 +1902,7 @@ function Home() {
     ) }) })
   ] });
 }
-const QUESTIONS = [
+const QUESTIONS$1 = [
   {
     id: "career-goal",
     question: "What's your primary career goal?",
@@ -1909,8 +1946,8 @@ function OnboardingQuestionnaire({ onComplete }) {
     "pain-points": []
   });
   const { getRecommendation, isLoading } = useSubscriptionStore();
-  const currentQuestion = QUESTIONS == null ? void 0 : QUESTIONS[currentQuestionIndex];
-  const isLastQuestion = currentQuestionIndex === ((QUESTIONS == null ? void 0 : QUESTIONS.length) || 0) - 1;
+  const currentQuestion = QUESTIONS$1 == null ? void 0 : QUESTIONS$1[currentQuestionIndex];
+  const isLastQuestion = currentQuestionIndex === ((QUESTIONS$1 == null ? void 0 : QUESTIONS$1.length) || 0) - 1;
   const answeredAll = answers["career-goal"] && answers["experience"] && ((_a = answers["pain-points"]) == null ? void 0 : _a.length) > 0;
   if (!currentQuestion) {
     return /* @__PURE__ */ jsx("div", { className: "text-center py-12", children: "Loading questions..." });
@@ -1958,7 +1995,7 @@ function OnboardingQuestionnaire({ onComplete }) {
       /* @__PURE__ */ jsx("p", { className: "text-lg text-slate-600 dark:text-slate-400", children: "Answer a few questions to find your perfect plan" })
     ] }),
     /* @__PURE__ */ jsxs("div", { className: "mb-8", children: [
-      /* @__PURE__ */ jsx("div", { className: "flex gap-2", children: QUESTIONS.map((_, idx) => /* @__PURE__ */ jsx(
+      /* @__PURE__ */ jsx("div", { className: "flex gap-2", children: QUESTIONS$1.map((_, idx) => /* @__PURE__ */ jsx(
         "div",
         {
           className: `h-2 flex-1 rounded-full transition-all ${idx < currentQuestionIndex ? "bg-green-500" : idx === currentQuestionIndex ? "bg-blue-600" : "bg-slate-300 dark:bg-slate-600"}`
@@ -1969,7 +2006,7 @@ function OnboardingQuestionnaire({ onComplete }) {
         "Question ",
         currentQuestionIndex + 1,
         " of ",
-        QUESTIONS.length
+        QUESTIONS$1.length
       ] })
     ] }),
     /* @__PURE__ */ jsxs("div", { className: "bg-white dark:bg-slate-800 rounded-2xl p-8 mb-8 shadow-lg", children: [
@@ -2112,7 +2149,7 @@ function PlanSelection({ recommendation, onPlanSelected }) {
     /* @__PURE__ */ jsx("p", { className: "text-center text-sm text-slate-600 dark:text-slate-400", children: "You can change your plan anytime. All plans include customer support and regular updates." })
   ] }) });
 }
-const STEPS = {
+const STEPS$1 = {
   QUESTIONNAIRE: "questionnaire",
   PLAN_SELECTION: "plan-selection",
   COMPLETE: "complete"
@@ -2120,7 +2157,7 @@ const STEPS = {
 function Onboarding() {
   const { isAuthenticated } = useAuthStore();
   const { recommendation, onboardingComplete, fetchPlans } = useSubscriptionStore();
-  const [currentStep, setCurrentStep] = useState(STEPS.QUESTIONNAIRE);
+  const [currentStep, setCurrentStep] = useState(STEPS$1.QUESTIONNAIRE);
   useEffect(() => {
     if (isAuthenticated) {
       fetchPlans();
@@ -2133,18 +2170,18 @@ function Onboarding() {
     return /* @__PURE__ */ jsx(Navigate, { to: "/dashboard", replace: true });
   }
   const handleQuestionnaireComplete = () => {
-    setCurrentStep(STEPS.PLAN_SELECTION);
+    setCurrentStep(STEPS$1.PLAN_SELECTION);
   };
   const handlePlanSelected = () => {
-    setCurrentStep(STEPS.COMPLETE);
+    setCurrentStep(STEPS$1.COMPLETE);
     setTimeout(() => {
       window.location.href = "/payment-confirm";
     }, 500);
   };
   return /* @__PURE__ */ jsxs("div", { className: "w-full h-screen overflow-hidden", children: [
-    currentStep === STEPS.QUESTIONNAIRE && /* @__PURE__ */ jsx(OnboardingQuestionnaire, { onComplete: handleQuestionnaireComplete }),
-    currentStep === STEPS.PLAN_SELECTION && recommendation && /* @__PURE__ */ jsx(PlanSelection, { recommendation, onPlanSelected: handlePlanSelected }),
-    currentStep === STEPS.COMPLETE && /* @__PURE__ */ jsx("div", { className: "w-full h-screen bg-gradient-to-br from-green-50 to-emerald-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-6", children: /* @__PURE__ */ jsxs("div", { className: "text-center", children: [
+    currentStep === STEPS$1.QUESTIONNAIRE && /* @__PURE__ */ jsx(OnboardingQuestionnaire, { onComplete: handleQuestionnaireComplete }),
+    currentStep === STEPS$1.PLAN_SELECTION && recommendation && /* @__PURE__ */ jsx(PlanSelection, { recommendation, onPlanSelected: handlePlanSelected }),
+    currentStep === STEPS$1.COMPLETE && /* @__PURE__ */ jsx("div", { className: "w-full h-screen bg-gradient-to-br from-green-50 to-emerald-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-6", children: /* @__PURE__ */ jsxs("div", { className: "text-center", children: [
       /* @__PURE__ */ jsx("div", { className: "text-6xl mb-4", children: "🎉" }),
       /* @__PURE__ */ jsx("h1", { className: "text-4xl font-black text-slate-900 dark:text-white mb-3", children: "All Set!" }),
       /* @__PURE__ */ jsx("p", { className: "text-lg text-slate-600 dark:text-slate-400 mb-6", children: "Redirecting to your dashboard..." }),
@@ -8405,66 +8442,398 @@ function JobFitAnalysis() {
     ] })
   ] });
 }
-const TRACKS = [
+const QUESTIONS = [
   {
+    id: "goal",
+    question: "What is your primary goal right now?",
+    type: "single",
+    options: [
+      { value: "land-faang", label: "🚀 Land at a top company", desc: "FAANG, unicorn, or high-growth startup" },
+      { value: "first-job", label: "🌱 Get my first tech job", desc: "Breaking into the industry from scratch" },
+      { value: "level-up", label: "📈 Level up my career", desc: "Grow from where I am right now" },
+      { value: "switch", label: "🔄 Switch into tech", desc: "Transitioning from a different field" }
+    ]
+  },
+  {
+    id: "experience",
+    question: "How much professional experience do you have?",
+    type: "single",
+    options: [
+      { value: "beginner", label: "🌱 Beginner", desc: "0–1 year or no professional experience" },
+      { value: "intermediate", label: "📈 Intermediate", desc: "1–3 years in the industry" },
+      { value: "advanced", label: "⭐ Advanced", desc: "3+ years, looking to make a big leap" }
+    ]
+  },
+  {
+    id: "challenges",
+    question: "What are your biggest challenges? (Pick all that apply)",
+    type: "multiple",
+    options: [
+      { value: "resume", label: "📄 Resume & Portfolio", desc: "Getting past ATS and standing out" },
+      { value: "interviews", label: "🎤 Interview Skills", desc: "Technical & behavioral interviews" },
+      { value: "skills", label: "🛠️ Skill Gaps", desc: "Missing key technical knowledge" },
+      { value: "projects", label: "⚙️ Project Building", desc: "Need portfolio-worthy project ideas" },
+      { value: "search", label: "🔍 Job Search Strategy", desc: "Finding the right opportunities" }
+    ]
+  }
+];
+const TRACK_RECOMMENDATIONS = {
+  beginner: "zero-to-hero",
+  intermediate: "learn-and-build",
+  advanced: "tune-and-polish"
+};
+const TRACKS$1 = {
+  "zero-to-hero": {
+    id: "zero-to-hero",
+    title: "Zero to Hero",
+    subtitle: "Your complete beginner-to-hired roadmap",
+    description: "Start from scratch with an AI-generated roadmap tailored to your target role. Your personal AI Tutor explains every concept along the way.",
+    icon: Rocket,
+    color: "from-emerald-400 to-teal-600",
+    features: ["AI-generated learning roadmap", "Personal AI Tutor", "Step-by-step skill tracking"],
+    path: "/preparation/zero-to-hero"
+  },
+  "learn-and-build": {
+    id: "learn-and-build",
+    title: "Learn & Build",
+    subtitle: "Fill gaps. Build projects. Get hired.",
+    description: "Generate hyper-targeted portfolio projects based on your current skills and target role. Track every project on a visual Kanban board.",
+    icon: Wrench,
+    color: "from-orange-400 to-rose-500",
+    features: ["AI project suggestions", "Blueprint generator", "Portfolio Kanban tracker"],
+    path: "/preparation/learn-and-build"
+  },
+  "tune-and-polish": {
     id: "tune-and-polish",
     title: "Tune & Polish",
-    subtitle: "For Experienced Professionals",
-    description: "Optimize your resume, generate perfect STAR stories, and practice targeted mock interviews.",
+    subtitle: "Sharpen everything before the big leap",
+    description: "Generate perfect STAR interview stories, run your resume through ATS, and practice targeted mock interviews.",
     icon: Target,
     color: "from-blue-500 to-indigo-600",
+    features: ["STAR story generator", "ATS resume analysis", "Mock interview prep"],
     path: "/preparation/tune-and-polish"
-  },
+  }
+};
+const STEPS = { QUESTIONS: "questions", REVEAL: "reveal" };
+function PreparationOnboarding({ onComplete }) {
+  const navigate = useNavigate();
+  const [step, setStep] = useState(STEPS.QUESTIONS);
+  const [qIndex, setQIndex] = useState(0);
+  const [answers, setAnswers] = useState({ goal: null, experience: null, challenges: [] });
+  const [isSaving, setIsSaving] = useState(false);
+  const [recommended, setRecommended] = useState(null);
+  const currentQ = QUESTIONS[qIndex];
+  const isLast = qIndex === QUESTIONS.length - 1;
+  const handleAnswer = (value) => {
+    if (currentQ.type === "single") {
+      setAnswers((prev) => ({ ...prev, [currentQ.id]: value }));
+      if (!isLast) setTimeout(() => setQIndex((i) => i + 1), 280);
+    } else {
+      setAnswers((prev) => ({
+        ...prev,
+        challenges: prev.challenges.includes(value) ? prev.challenges.filter((v) => v !== value) : [...prev.challenges, value]
+      }));
+    }
+  };
+  const handleSubmit = async () => {
+    const track = TRACK_RECOMMENDATIONS[answers.experience] || "zero-to-hero";
+    setRecommended(track);
+    setIsSaving(true);
+    try {
+      await api.patch("/progress/preferences", {
+        data: {
+          prepOnboardingDone: true,
+          recommendedTrack: track,
+          prepAnswers: answers
+        }
+      });
+    } catch {
+    } finally {
+      setIsSaving(false);
+    }
+    setStep(STEPS.REVEAL);
+  };
+  const handleStartTrack = async (trackId) => {
+    window.dispatchEvent(new Event("prep-onboarding-complete"));
+    onComplete({ recommendedTrack: trackId });
+    navigate(TRACKS$1[trackId].path);
+  };
+  const handleGoToDashboard = () => {
+    window.dispatchEvent(new Event("prep-onboarding-complete"));
+    onComplete({ recommendedTrack: recommended });
+    navigate("/preparation");
+  };
+  if (step === STEPS.QUESTIONS) {
+    const isAnswered = currentQ.type === "single" ? !!answers[currentQ.id] : answers.challenges.length > 0;
+    return /* @__PURE__ */ jsx("div", { className: "w-full min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 flex items-center justify-center p-6", children: /* @__PURE__ */ jsxs("div", { className: "w-full max-w-2xl", children: [
+      /* @__PURE__ */ jsxs("div", { className: "text-center mb-10", children: [
+        /* @__PURE__ */ jsx("div", { className: "inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white mb-5 shadow-lg shadow-blue-200", children: /* @__PURE__ */ jsx(BrainCircuit, { className: "w-7 h-7" }) }),
+        /* @__PURE__ */ jsx("h1", { className: "text-3xl font-black text-slate-900 dark:text-white", children: "Let's find your path" }),
+        /* @__PURE__ */ jsx("p", { className: "text-slate-500 dark:text-slate-400 mt-2", children: "3 quick questions to recommend the best preparation track for you" })
+      ] }),
+      /* @__PURE__ */ jsx("div", { className: "flex gap-2 mb-8 justify-center", children: QUESTIONS.map((_, i) => /* @__PURE__ */ jsx(
+        "div",
+        {
+          className: `h-1.5 rounded-full transition-all duration-300 ${i < qIndex ? "w-8 bg-blue-500" : i === qIndex ? "w-12 bg-blue-600" : "w-8 bg-slate-200 dark:bg-slate-700"}`
+        },
+        i
+      )) }),
+      /* @__PURE__ */ jsxs("div", { className: "bg-white dark:bg-slate-800 rounded-3xl shadow-xl shadow-slate-200/60 dark:shadow-slate-900/60 p-8 mb-5", children: [
+        /* @__PURE__ */ jsxs("p", { className: "text-xs font-bold uppercase tracking-widest text-blue-500 mb-3", children: [
+          "Question ",
+          qIndex + 1,
+          " of ",
+          QUESTIONS.length
+        ] }),
+        /* @__PURE__ */ jsx("h2", { className: "text-xl font-bold text-slate-900 dark:text-white mb-6", children: currentQ.question }),
+        /* @__PURE__ */ jsx("div", { className: "space-y-3", children: currentQ.options.map((opt) => {
+          const selected = currentQ.type === "single" ? answers[currentQ.id] === opt.value : answers.challenges.includes(opt.value);
+          return /* @__PURE__ */ jsxs(
+            "button",
+            {
+              onClick: () => handleAnswer(opt.value),
+              className: `w-full text-left p-4 rounded-2xl border-2 transition-all duration-150 flex items-start gap-3 group ${selected ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30" : "border-slate-100 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50/50 dark:hover:bg-blue-900/10"}`,
+              children: [
+                /* @__PURE__ */ jsx("div", { className: `mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${selected ? "bg-blue-600 border-blue-600" : "border-slate-300 dark:border-slate-500"}`, children: selected && /* @__PURE__ */ jsx("div", { className: "w-2 h-2 rounded-full bg-white" }) }),
+                /* @__PURE__ */ jsxs("div", { children: [
+                  /* @__PURE__ */ jsx("p", { className: `font-semibold text-sm ${selected ? "text-blue-700 dark:text-blue-300" : "text-slate-800 dark:text-slate-200"}`, children: opt.label }),
+                  /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 mt-0.5", children: opt.desc })
+                ] })
+              ]
+            },
+            opt.value
+          );
+        }) })
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "flex gap-3", children: [
+        qIndex > 0 && /* @__PURE__ */ jsx(
+          "button",
+          {
+            onClick: () => setQIndex((i) => i - 1),
+            className: "px-5 py-3 rounded-xl font-semibold text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 transition-colors",
+            children: "Back"
+          }
+        ),
+        isLast ? /* @__PURE__ */ jsx(
+          "button",
+          {
+            onClick: handleSubmit,
+            disabled: !isAnswered || isSaving,
+            className: "flex-1 py-3 px-6 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2",
+            children: isSaving ? "Saving…" : /* @__PURE__ */ jsxs(Fragment, { children: [
+              "Find My Track ",
+              /* @__PURE__ */ jsx(ArrowRight, { className: "w-5 h-5" })
+            ] })
+          }
+        ) : /* @__PURE__ */ jsxs(
+          "button",
+          {
+            onClick: () => setQIndex((i) => i + 1),
+            disabled: !isAnswered,
+            className: "flex-1 py-3 px-6 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2",
+            children: [
+              "Next ",
+              /* @__PURE__ */ jsx(ArrowRight, { className: "w-5 h-5" })
+            ]
+          }
+        )
+      ] })
+    ] }) });
+  }
+  if (step === STEPS.REVEAL) {
+    const rec = TRACKS$1[recommended];
+    const RecIcon = rec.icon;
+    const others = Object.values(TRACKS$1).filter((t) => t.id !== recommended);
+    return /* @__PURE__ */ jsx("div", { className: "w-full min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 py-12 px-6 flex items-start justify-center", children: /* @__PURE__ */ jsxs("div", { className: "w-full max-w-3xl", children: [
+      /* @__PURE__ */ jsxs("div", { className: "text-center mb-10", children: [
+        /* @__PURE__ */ jsxs("div", { className: "inline-flex items-center gap-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-sm font-bold px-4 py-1.5 rounded-full mb-5", children: [
+          /* @__PURE__ */ jsx(Sparkles, { className: "w-4 h-4" }),
+          " Your personalized track is ready"
+        ] }),
+        /* @__PURE__ */ jsxs("h1", { className: "text-4xl font-black text-slate-900 dark:text-white mb-3", children: [
+          "We recommend ",
+          /* @__PURE__ */ jsx("span", { className: "text-blue-600", children: rec.title })
+        ] }),
+        /* @__PURE__ */ jsx("p", { className: "text-slate-500 dark:text-slate-400 max-w-xl mx-auto", children: "Based on your answers, this track is the perfect fit for where you are right now." })
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: `relative rounded-3xl p-8 bg-gradient-to-br ${rec.color} text-white shadow-2xl mb-5 overflow-hidden`, children: [
+        /* @__PURE__ */ jsx("div", { className: "absolute top-0 right-0 w-64 h-64 rounded-full bg-white/10 -mr-16 -mt-16 blur-2xl" }),
+        /* @__PURE__ */ jsxs("div", { className: "relative z-10", children: [
+          /* @__PURE__ */ jsxs("div", { className: "flex items-start justify-between mb-5", children: [
+            /* @__PURE__ */ jsx("div", { className: "p-3 bg-white/20 rounded-2xl", children: /* @__PURE__ */ jsx(RecIcon, { className: "w-8 h-8" }) }),
+            /* @__PURE__ */ jsx("span", { className: "bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full", children: "⭐ Recommended" })
+          ] }),
+          /* @__PURE__ */ jsx("h2", { className: "text-3xl font-black mb-1", children: rec.title }),
+          /* @__PURE__ */ jsx("p", { className: "text-white/80 text-sm font-medium mb-4", children: rec.subtitle }),
+          /* @__PURE__ */ jsx("p", { className: "text-white/90 mb-6 leading-relaxed", children: rec.description }),
+          /* @__PURE__ */ jsx("div", { className: "space-y-2 mb-8", children: rec.features.map((f) => /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 text-sm text-white/90", children: [
+            /* @__PURE__ */ jsx(CheckCircle2, { className: "w-4 h-4 text-white flex-shrink-0" }),
+            f
+          ] }, f)) }),
+          /* @__PURE__ */ jsxs(
+            "button",
+            {
+              onClick: () => handleStartTrack(rec.id),
+              className: "flex items-center gap-2 bg-white text-slate-900 px-6 py-3 rounded-xl font-bold hover:bg-white/90 transition-all shadow-lg",
+              children: [
+                /* @__PURE__ */ jsx(Play, { className: "w-5 h-5" }),
+                " Start ",
+                rec.title
+              ]
+            }
+          )
+        ] })
+      ] }),
+      /* @__PURE__ */ jsx("p", { className: "text-xs font-bold uppercase tracking-widest text-slate-400 mb-3", children: "Or choose a different track" }),
+      /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6", children: others.map((track) => {
+        const Icon = track.icon;
+        return /* @__PURE__ */ jsxs(
+          "button",
+          {
+            onClick: () => handleStartTrack(track.id),
+            className: "text-left bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all group",
+            children: [
+              /* @__PURE__ */ jsx("div", { className: `inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br ${track.color} text-white mb-3`, children: /* @__PURE__ */ jsx(Icon, { className: "w-5 h-5" }) }),
+              /* @__PURE__ */ jsx("p", { className: "font-bold text-slate-900 dark:text-white text-sm group-hover:text-blue-600 transition-colors", children: track.title }),
+              /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 mt-1", children: track.subtitle }),
+              /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-1 text-xs text-blue-600 mt-3 font-semibold", children: [
+                "Choose this track ",
+                /* @__PURE__ */ jsx(ChevronRight, { className: "w-3 h-3" })
+              ] })
+            ]
+          },
+          track.id
+        );
+      }) }),
+      /* @__PURE__ */ jsx("div", { className: "text-center", children: /* @__PURE__ */ jsx(
+        "button",
+        {
+          onClick: handleGoToDashboard,
+          className: "text-sm text-slate-400 hover:text-blue-600 transition-colors font-medium",
+          children: "Go to Preparation Dashboard instead →"
+        }
+      ) })
+    ] }) });
+  }
+  return null;
+}
+const TRACKS = [
   {
     id: "zero-to-hero",
     title: "Zero to Hero",
     subtitle: "For Complete Beginners",
-    description: "Find your path, follow a detailed interactive roadmap, and learn with an AI tutor from scratch.",
+    description: "Start from scratch with an AI-generated roadmap tailored to your role. Your personal AI Tutor explains every concept along the way.",
     icon: Rocket,
     color: "from-emerald-400 to-teal-600",
+    bgAccent: "bg-emerald-50 dark:bg-emerald-900/10",
     path: "/preparation/zero-to-hero"
+  },
+  {
+    id: "tune-and-polish",
+    title: "Tune & Polish",
+    subtitle: "For Experienced Professionals",
+    description: "Generate STAR interview stories, run your resume through ATS, and sharpen everything before the big leap.",
+    icon: Target,
+    color: "from-blue-500 to-indigo-600",
+    bgAccent: "bg-blue-50 dark:bg-blue-900/10",
+    path: "/preparation/tune-and-polish"
   },
   {
     id: "learn-and-build",
     title: "Learn & Build",
     subtitle: "For Intermediate Builders",
-    description: "Generate hyper-targeted projects to fill skill gaps on your resume and track your portfolio.",
+    description: "Generate hyper-targeted portfolio projects to fill skill gaps and track everything on a visual Kanban board.",
     icon: Wrench,
     color: "from-orange-400 to-rose-500",
+    bgAccent: "bg-orange-50 dark:bg-orange-900/10",
     path: "/preparation/learn-and-build"
   }
 ];
 function JobPreparation() {
-  return /* @__PURE__ */ jsxs("div", { className: "max-w-6xl mx-auto px-4 py-8 space-y-12", children: [
+  const [status, setStatus] = useState("loading");
+  const [recommendedTrack, setRecommendedTrack] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    api.get("/progress/preferences").then(({ data }) => {
+      if (cancelled) return;
+      const prefs = (data == null ? void 0 : data.data) || {};
+      if (prefs.prepOnboardingDone) {
+        setRecommendedTrack(prefs.recommendedTrack || null);
+        setStatus("hub");
+      } else {
+        setStatus("onboarding");
+      }
+    }).catch(() => {
+      if (!cancelled) setStatus("onboarding");
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const handleOnboardingComplete = ({ recommendedTrack: track }) => {
+    setRecommendedTrack(track);
+    setStatus("hub");
+  };
+  if (status === "loading") {
+    return /* @__PURE__ */ jsx("div", { className: "w-full min-h-[60vh] flex items-center justify-center", children: /* @__PURE__ */ jsxs("div", { className: "text-center", children: [
+      /* @__PURE__ */ jsx(Loader2, { className: "w-8 h-8 text-blue-500 animate-spin mx-auto mb-3" }),
+      /* @__PURE__ */ jsx("p", { className: "text-slate-500 font-medium", children: "Loading your workspace…" })
+    ] }) });
+  }
+  if (status === "onboarding") {
+    return /* @__PURE__ */ jsx(PreparationOnboarding, { onComplete: handleOnboardingComplete });
+  }
+  return /* @__PURE__ */ jsxs("div", { className: "max-w-6xl mx-auto px-4 py-10 space-y-12 w-full", children: [
     /* @__PURE__ */ jsxs("div", { className: "text-center space-y-4", children: [
-      /* @__PURE__ */ jsx("div", { className: "inline-flex items-center justify-center p-3 bg-indigo-50 rounded-2xl mb-2", children: /* @__PURE__ */ jsx(BrainCircuit, { className: "w-8 h-8 text-indigo-600" }) }),
-      /* @__PURE__ */ jsx("h1", { className: "text-4xl font-black text-slate-900 tracking-tight", children: "Job Preparation Center" }),
-      /* @__PURE__ */ jsx("p", { className: "text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed", children: "Select your track based on your current experience level. Whether you are starting from scratch or just need to polish your interview skills, we have a guided path for you." })
+      /* @__PURE__ */ jsx("div", { className: "inline-flex items-center justify-center p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl mb-2", children: /* @__PURE__ */ jsx(BrainCircuit, { className: "w-8 h-8 text-indigo-600 dark:text-indigo-400" }) }),
+      /* @__PURE__ */ jsx("h1", { className: "text-4xl font-black text-slate-900 dark:text-white tracking-tight", children: "Preparation Dashboard" }),
+      /* @__PURE__ */ jsx("p", { className: "text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed", children: "Your three AI-powered tracks are ready. Pick up where you left off or explore a new path." })
     ] }),
     /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-6", children: TRACKS.map((track) => {
       const Icon = track.icon;
+      const isRecommended = track.id === recommendedTrack;
       return /* @__PURE__ */ jsxs(
         Link,
         {
           to: track.path,
-          className: "group relative flex flex-col glass-card rounded-3xl p-8 hover:-translate-y-2 transition-all duration-300 hover:shadow-xl overflow-hidden border border-white/50",
+          className: `group relative flex flex-col rounded-3xl p-8 hover:-translate-y-2 transition-all duration-300 hover:shadow-xl overflow-hidden border ${isRecommended ? "border-blue-300 dark:border-blue-700 shadow-lg shadow-blue-100 dark:shadow-blue-900/20" : "border-white/50 dark:border-slate-700/50 glass-card"} ${isRecommended ? track.bgAccent : ""}`,
           children: [
-            /* @__PURE__ */ jsx("div", { className: `absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-gradient-to-br ${track.color} opacity-10 blur-2xl group-hover:opacity-20 transition-opacity` }),
-            /* @__PURE__ */ jsx("div", { className: `inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${track.color} text-white mb-6 shadow-lg shadow-indigo-200/50`, children: /* @__PURE__ */ jsx(Icon, { className: "w-7 h-7" }) }),
-            /* @__PURE__ */ jsxs("div", { className: "flex-1", children: [
-              /* @__PURE__ */ jsx("p", { className: "text-sm font-bold text-indigo-600 mb-1 uppercase tracking-wider", children: track.subtitle }),
-              /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-slate-900 mb-3", children: track.title }),
-              /* @__PURE__ */ jsx("p", { className: "text-slate-600 leading-relaxed mb-8", children: track.description })
+            isRecommended && /* @__PURE__ */ jsxs("div", { className: "absolute top-4 right-4 flex items-center gap-1 bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full", children: [
+              /* @__PURE__ */ jsx(Star, { className: "w-3 h-3" }),
+              " Your Track"
             ] }),
-            /* @__PURE__ */ jsxs("div", { className: "flex items-center text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors mt-auto", children: [
-              "Start Track",
+            /* @__PURE__ */ jsx("div", { className: `absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-gradient-to-br ${track.color} opacity-10 blur-2xl group-hover:opacity-20 transition-opacity` }),
+            /* @__PURE__ */ jsx("div", { className: `inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${track.color} text-white mb-6 shadow-lg`, children: /* @__PURE__ */ jsx(Icon, { className: "w-7 h-7" }) }),
+            /* @__PURE__ */ jsxs("div", { className: "flex-1", children: [
+              /* @__PURE__ */ jsx("p", { className: "text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-1 uppercase tracking-wider", children: track.subtitle }),
+              /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-slate-900 dark:text-white mb-3", children: track.title }),
+              /* @__PURE__ */ jsx("p", { className: "text-slate-600 dark:text-slate-400 leading-relaxed mb-8", children: track.description })
+            ] }),
+            /* @__PURE__ */ jsxs("div", { className: "flex items-center text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors mt-auto", children: [
+              isRecommended ? "Continue Track" : "Start Track",
               /* @__PURE__ */ jsx(ChevronRight, { className: "w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" })
             ] })
           ]
         },
         track.id
       );
-    }) })
+    }) }),
+    /* @__PURE__ */ jsx("div", { className: "text-center", children: /* @__PURE__ */ jsx(
+      "button",
+      {
+        onClick: async () => {
+          try {
+            await api.patch("/progress/preferences", { data: { prepOnboardingDone: false } });
+          } catch {
+          }
+          window.dispatchEvent(new Event("prep-onboarding-reset"));
+          setStatus("onboarding");
+          setRecommendedTrack(null);
+        },
+        className: "text-sm text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium",
+        children: "Not sure which track? Retake the questionnaire →"
+      }
+    ) })
   ] });
 }
 function STARGenerator() {
