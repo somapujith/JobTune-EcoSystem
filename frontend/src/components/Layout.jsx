@@ -17,10 +17,13 @@ const BASE_NAV_GROUPS = [
     { label: 'ATS Checker',      path: '/ats-checker',  desc: 'Resume-job match score' },
     { label: 'Job Fit Scorer',   path: '/job-fit',      desc: 'Detailed job fit analysis' },
     { label: 'Cover Letter',     path: '/cover-letter', desc: 'AI-generated letters' },
+    { label: 'Achievement Enhancer', path: '/achievement-enhancer', desc: 'Turn tasks into impact bullets' },
+    { label: 'Resume Consistency',   path: '/resume-consistency',   desc: 'Cross-check resume vs profiles' },
   ]},
   { label: 'Portfolios', items: [
     { label: 'GitHub Profile',   path: '/github',    desc: 'Audit & generate README' },
     { label: 'LinkedIn Profile', path: '/linkedin',  desc: 'Score your LinkedIn presence' },
+    { label: 'Recruiter Visibility', path: '/recruiter-visibility', desc: 'How recruiters see you' },
   ]},
 ];
 
@@ -36,7 +39,8 @@ const PREP_ITEMS_UNLOCKED = [
 ];
 
 const Navbar = () => {
-  const { user, logout, isAuthenticated, checkAuth } = useAuthStore();
+  // App.jsx owns checkAuth — Navbar just reads state, no duplicate call
+  const { user, logout, isAuthenticated } = useAuthStore();
   const { userPlan } = useSubscriptionStore();
   const [isDark, setIsDark] = useDarkMode();
   const location = useLocation();
@@ -46,37 +50,25 @@ const Navbar = () => {
   const [prepUnlocked, setPrepUnlocked] = useState(false);
   const dropdownRef = useRef(null);
 
+  // Fetch prep-onboarding status once on login; listen for custom events only
   useEffect(() => {
-    checkAuth();
-  }, []);
-
-  // Check prep onboarding status so the nav shows sub-tracks only after completion
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    api.get('/progress/preferences')
-      .then(({ data }) => {
-        if (data?.data?.prepOnboardingDone) setPrepUnlocked(true);
-      })
-      .catch(() => {});
-  }, [isAuthenticated]);
-
-  // Re-check on navigate or custom event; re-lock on retake event
-  useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) {
+      setPrepUnlocked(false);
+      return;
+    }
     const recheck = () => {
       api.get('/progress/preferences')
         .then(({ data }) => { if (data?.data?.prepOnboardingDone) setPrepUnlocked(true); })
         .catch(() => {});
     };
-    if (!prepUnlocked) recheck();
+    recheck();
     window.addEventListener('prep-onboarding-complete', recheck);
-    const relock = () => setPrepUnlocked(false);
-    window.addEventListener('prep-onboarding-reset', relock);
+    window.addEventListener('prep-onboarding-reset', () => setPrepUnlocked(false));
     return () => {
       window.removeEventListener('prep-onboarding-complete', recheck);
-      window.removeEventListener('prep-onboarding-reset', relock);
+      window.removeEventListener('prep-onboarding-reset', () => setPrepUnlocked(false));
     };
-  }, [location.pathname, isAuthenticated, prepUnlocked]);
+  }, [isAuthenticated]);
 
   const NAV_GROUPS = [
     ...BASE_NAV_GROUPS,
@@ -91,7 +83,6 @@ const Navbar = () => {
     setOpenGroup(null);
   }, [location.pathname]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -115,77 +106,74 @@ const Navbar = () => {
   return (
     <header className="fixed top-0 w-full z-50 glass-panel border-b border-white/40 dark:border-slate-800/50">
       <div className="flex items-center px-6 lg:px-10 h-16 w-full gap-4">
-        {/* Logo - Left */}
         <Link to="/" className="text-2xl font-black tracking-tight text-blue-800 font-headline flex-shrink-0 mr-2">
           JobTune
         </Link>
 
-        {/* Nav - Center (flex-1 so it never overlaps logo or right controls) */}
         <nav className="hidden lg:flex items-center gap-5 flex-1 justify-center min-w-0" ref={dropdownRef}>
-            <Link
-              to="/dashboard"
-              className={`text-sm font-semibold transition-all duration-200 ${
-                location.pathname === '/dashboard'
-                  ? 'text-blue-700 border-b-2 border-blue-600 pb-0.5'
-                  : 'text-slate-500 hover:text-blue-600'
-              }`}
-            >
-              Dashboard
-            </Link>
-            <Link
-              to="/resume"
-              className={`text-sm font-semibold transition-all duration-200 ${
-                location.pathname.startsWith('/resume')
-                  ? 'text-blue-700 border-b-2 border-blue-600 pb-0.5'
-                  : 'text-slate-500 hover:text-blue-600'
-              }`}
-            >
-              Resume Forge
-            </Link>
-            <Link
-              to="/blog"
-              className={`text-sm font-semibold transition-all duration-200 ${
-                location.pathname === '/blog'
-                  ? 'text-blue-700 border-b-2 border-blue-600 pb-0.5'
-                  : 'text-slate-500 hover:text-blue-600'
-              }`}
-            >
-              Blog
-            </Link>
-            {NAV_GROUPS.map((group) => {
-              const active = isGroupActive(group);
-              const isOpen = openGroup === group.label;
-              return (
-                <div key={group.label} className="relative">
-                  <button
-                    onClick={() => setOpenGroup(isOpen ? null : group.label)}
-                    className={`flex items-center gap-1 text-sm font-semibold transition-colors duration-200 ${
-                      active || isOpen ? 'text-blue-700' : 'text-slate-500 hover:text-blue-600'
-                    }`}
-                  >
-                    {group.label}
-                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                  </button>
-                  {isOpen && (
-                    <div className="absolute top-full left-0 mt-6 w-64 bg-white rounded-2xl shadow-[0px_16px_40px_rgba(0,78,159,0.12)] border border-slate-100 py-2 z-50">
-                      {group.items.map(item => (
-                        <Link
-                          key={item.path}
-                          to={item.path}
-                          className="flex flex-col px-4 py-3 hover:bg-blue-50 transition-colors group rounded-xl mx-2"
-                        >
-                          <span className="text-sm font-semibold text-slate-800 group-hover:text-blue-700">{item.label}</span>
-                          <span className="text-xs text-slate-400 mt-0.5">{item.desc}</span>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </nav>
+          <Link
+            to="/dashboard"
+            className={`text-sm font-semibold transition-all duration-200 ${
+              location.pathname === '/dashboard'
+                ? 'text-blue-700 border-b-2 border-blue-600 pb-0.5'
+                : 'text-slate-500 hover:text-blue-600'
+            }`}
+          >
+            Dashboard
+          </Link>
+          <Link
+            to="/resume"
+            className={`text-sm font-semibold transition-all duration-200 ${
+              location.pathname.startsWith('/resume')
+                ? 'text-blue-700 border-b-2 border-blue-600 pb-0.5'
+                : 'text-slate-500 hover:text-blue-600'
+            }`}
+          >
+            Resume Forge
+          </Link>
+          <Link
+            to="/blog"
+            className={`text-sm font-semibold transition-all duration-200 ${
+              location.pathname === '/blog'
+                ? 'text-blue-700 border-b-2 border-blue-600 pb-0.5'
+                : 'text-slate-500 hover:text-blue-600'
+            }`}
+          >
+            Blog
+          </Link>
+          {NAV_GROUPS.map((group) => {
+            const active = isGroupActive(group);
+            const isOpen = openGroup === group.label;
+            return (
+              <div key={group.label} className="relative">
+                <button
+                  onClick={() => setOpenGroup(isOpen ? null : group.label)}
+                  className={`flex items-center gap-1 text-sm font-semibold transition-colors duration-200 ${
+                    active || isOpen ? 'text-blue-700' : 'text-slate-500 hover:text-blue-600'
+                  }`}
+                >
+                  {group.label}
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {isOpen && (
+                  <div className="absolute top-full left-0 mt-6 w-64 bg-white rounded-2xl shadow-[0px_16px_40px_rgba(0,78,159,0.12)] border border-slate-100 py-2 z-50">
+                    {group.items.map(item => (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        className="flex flex-col px-4 py-3 hover:bg-blue-50 transition-colors group rounded-xl mx-2"
+                      >
+                        <span className="text-sm font-semibold text-slate-800 group-hover:text-blue-700">{item.label}</span>
+                        <span className="text-xs text-slate-400 mt-0.5">{item.desc}</span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </nav>
 
-        {/* Right - Buttons & User Menu */}
         <div className="flex items-center gap-2 flex-shrink-0 ml-2">
           <button
             onClick={() => setIsDark(!isDark)}
@@ -230,7 +218,6 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile hamburger */}
           <button
             onClick={() => setMobileOpen(prev => !prev)}
             className="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
@@ -241,7 +228,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile dropdown menu */}
       {mobileOpen && (
         <div className="lg:hidden bg-white border-t border-slate-100 shadow-lg max-h-[80vh] overflow-y-auto">
           <nav className="flex flex-col px-6 py-4 gap-2 w-full">
@@ -287,7 +273,7 @@ const Navbar = () => {
                     {group.label}
                     <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                   </button>
-                  
+
                   {isOpen && (
                     <div className="flex flex-col pl-4 border-l-2 border-slate-100 ml-6 mt-1 gap-1">
                       {group.items.map(item => (
@@ -333,9 +319,7 @@ const Navbar = () => {
 
 const Layout = () => {
   const location = useLocation();
-  const isInternalPage = location.pathname !== '/';
 
-  // Full screen pages without navbar/footer
   const isFullScreenPage = location.pathname === '/onboarding' || location.pathname === '/payment-confirm';
 
   if (isFullScreenPage) {
@@ -343,11 +327,11 @@ const Layout = () => {
   }
 
   return (
-    <div className={`min-h-screen flex flex-col font-body bg-slate-50 dark:bg-[#030712] text-slate-900 dark:text-slate-100 antialiased overflow-x-hidden relative transition-colors duration-500`}>
+    <div className="min-h-screen flex flex-col font-body bg-slate-50 dark:bg-[#030712] text-slate-900 dark:text-slate-100 antialiased overflow-x-hidden relative transition-colors duration-500">
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-blue-400/30 mix-blend-multiply filter blur-[120px] opacity-70 animate-blob dark:bg-blue-900/40 dark:mix-blend-screen"></div>
-        <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-indigo-400/30 mix-blend-multiply filter blur-[120px] opacity-70 animate-blob dark:bg-indigo-900/40 dark:mix-blend-screen" style={{ animationDelay: '3s' }}></div>
-        <div className="absolute bottom-[-20%] left-[20%] w-[60%] h-[60%] rounded-full bg-cyan-400/30 mix-blend-multiply filter blur-[120px] opacity-70 animate-blob dark:bg-cyan-900/40 dark:mix-blend-screen" style={{ animationDelay: '6s' }}></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-blue-400/30 mix-blend-multiply filter blur-[120px] opacity-70 animate-blob dark:bg-blue-900/40 dark:mix-blend-screen" />
+        <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-indigo-400/30 mix-blend-multiply filter blur-[120px] opacity-70 animate-blob dark:bg-indigo-900/40 dark:mix-blend-screen" style={{ animationDelay: '3s' }} />
+        <div className="absolute bottom-[-20%] left-[20%] w-[60%] h-[60%] rounded-full bg-cyan-400/30 mix-blend-multiply filter blur-[120px] opacity-70 animate-blob dark:bg-cyan-900/40 dark:mix-blend-screen" style={{ animationDelay: '6s' }} />
       </div>
 
       <div className="relative z-10 w-full flex flex-col flex-grow">
@@ -356,18 +340,17 @@ const Layout = () => {
           <Outlet />
         </div>
 
-
-      <footer className="w-full border-t-0 bg-transparent flex justify-between items-center px-8 py-12 font-body text-sm relative z-10">
-        <div className="text-slate-500 dark:text-slate-400">
+        <footer className="w-full border-t-0 bg-transparent flex justify-between items-center px-8 py-12 font-body text-sm relative z-10">
+          <div className="text-slate-500 dark:text-slate-400">
             &copy; 2024 JobTune AI. Professional Vanguard System.
-        </div>
-        <div className="flex gap-8">
-          <a className="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors duration-300" href="#">Privacy Policy</a>
-          <a className="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors duration-300" href="#">Terms of Service</a>
-          <a className="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors duration-300" href="#">Help Center</a>
-          <a className="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors duration-300" href="#">API</a>
-        </div>
-      </footer>
+          </div>
+          <div className="flex gap-8">
+            <a className="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors duration-300" href="#">Privacy Policy</a>
+            <a className="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors duration-300" href="#">Terms of Service</a>
+            <a className="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors duration-300" href="#">Help Center</a>
+            <a className="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors duration-300" href="#">API</a>
+          </div>
+        </footer>
       </div>
     </div>
   );

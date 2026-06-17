@@ -42,6 +42,8 @@ const ALL_TOOLS = [
   { name: 'LinkedIn Optimizer', icon: Linkedin, path: '/linkedin', color: 'bg-sky-500', tier: 'Profile', plan: 'Tune & Polish' },
   { name: 'GitHub Optimizer', icon: Github, path: '/github', color: 'bg-slate-900', tier: 'Profile', plan: 'Tune & Polish' },
   { name: 'Recruiter Visibility Checker', icon: Gauge, path: '/recruiter-visibility', color: 'bg-fuchsia-500', tier: 'Profile', plan: 'Tune & Polish' },
+  { name: 'Resume Consistency Checker', icon: CheckCircle2, path: '/resume-consistency', color: 'bg-lime-600', tier: 'Profile', plan: 'Tune & Polish' },
+  { name: 'Achievement Enhancer', icon: FileText, path: '/achievement-enhancer', color: 'bg-amber-600', tier: 'Profile', plan: 'Tune & Polish' },
   { name: 'Application Assistant', icon: FileText, path: '/cover-letter', color: 'bg-orange-500', tier: 'Profile', plan: 'Tune & Polish' },
   { name: 'Job Discovery', icon: Search, path: '/discover', color: 'bg-cyan-500', tier: 'Profile', plan: 'Tune & Polish' },
 
