@@ -29,21 +29,24 @@ async function loadServerRenderer() {
 function injectHead(template, headHtml) {
   if (!headHtml) return template;
 
-  let doc = template;
-  if (doc.includes('<!--ssr-head-->')) {
-    doc = doc.replace('<!--ssr-head-->', headHtml);
-    const anchor = doc.indexOf(headHtml);
-    if (anchor !== -1) {
-      const tail = doc.slice(anchor + headHtml.length);
-      const cleanedTail = tail
-        .replace(/^\s*<title>[^<]*<\/title>/, '')
-        .replace(/^\s*<meta name="description"[^>]*>/, '');
-      doc = doc.slice(0, anchor + headHtml.length) + cleanedTail;
-    }
-    return doc;
-  }
+  // Replace the SSR placeholder comment if present; otherwise prepend before </head>.
+  // The index.html template ships with a static fallback <title> and
+  // <meta name="description"> below the placeholder — strip them so the
+  // SSR-injected tags are the only ones in the document.
+  let doc = template.includes('<!--ssr-head-->')
+    ? template.replace('<!--ssr-head-->', headHtml)
+    : template.replace('</head>', `${headHtml}\n  </head>`);
 
-  return doc.replace('</head>', `${headHtml}\n  </head>`);
+  // Strip any static <title> / <meta name="description"> that appear AFTER the
+  // injected block (index.html has these as fallbacks below the placeholder).
+  const injectedEnd = doc.indexOf(headHtml) + headHtml.length;
+  const before = doc.slice(0, injectedEnd);
+  const after = doc
+    .slice(injectedEnd)
+    .replace(/[ \t]*<title>[^<]*<\/title>\n?/g, '')
+    .replace(/[ \t]*<meta name="description"[^>]*>\n?/g, '');
+
+  return before + after;
 }
 
 function injectRoot(template, html, ssr) {
@@ -89,7 +92,7 @@ function setupFrontend(app) {
         const { html, head } = renderer.render(req.originalUrl);
         res
           .status(200)
-          .set({ 'Content-Type': 'text/html; charset=utf-8' })
+          .set({ 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' })
           .send(renderDocument({ html, head, ssr: true }));
         return;
       }
@@ -98,7 +101,7 @@ function setupFrontend(app) {
       const head = renderer?.buildHeadTags ? renderer.buildHeadTags(req.path) : '';
       res
         .status(200)
-        .set({ 'Content-Type': 'text/html; charset=utf-8' })
+        .set({ 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' })
         .send(renderDocument({ html: '', head, ssr: false }));
     } catch (err) {
       console.error('[SSR] Render failed:', err);
