@@ -4,7 +4,7 @@ import { isBrowser, safeLocalStorage, setSafeLocalStorage, removeSafeLocalStorag
 
 const apiBase =
   import.meta.env.VITE_API_URL ||
-  (isBrowser ? `${window.location.origin}/api` : 'http://localhost:5000/api');
+  (isBrowser ? `${window.location.origin}/api` : 'http://localhost:3000/api');
 
 const api = axios.create({
   baseURL: apiBase,

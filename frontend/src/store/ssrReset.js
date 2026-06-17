@@ -7,9 +7,12 @@ export function resetStoresForSsr() {
     user: null,
     sessionId: null,
     isAuthenticated: false,
-    isLoading: false,
+    isLoading: false, // SSR never has a token; no auth check needed
     error: null,
     hasCompletedOnboarding: false,
+    sessionBlocked: false,
+    sessionBlockedMessage: null,
+    accountInUse: null,
   });
 
   useSubscriptionStore.setState({

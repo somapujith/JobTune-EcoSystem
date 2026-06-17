@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -58,24 +58,17 @@ function ProtectedRoute({ children, requireOnboarding = false }) {
 
 function ProtectedToolRoute({ children, toolPath }) {
   const { isAuthenticated } = useAuthStore();
-  const { onboardingComplete, onboardingChecked, getUserPlan } = useSubscriptionStore();
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      getUserPlan();
-    }
-  }, [isAuthenticated, getUserPlan]);
+  const { onboardingComplete, onboardingChecked } = useSubscriptionStore();
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
+  // Show a minimal inline loader only while the very first onboarding check is in flight
   if (!onboardingChecked) {
     return (
       <div className="w-full min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 mb-4 animate-spin">
-            <div className="w-8 h-8 rounded-full border-2 border-white border-t-transparent" />
-          </div>
-          <p className="text-slate-600 font-semibold">Loading your tools...</p>
+          <div className="inline-block w-8 h-8 rounded-full border-2 border-blue-600 border-t-transparent animate-spin mb-3" />
+          <p className="text-slate-500 text-sm font-medium">Loading your tools...</p>
         </div>
       </div>
     );
@@ -94,38 +87,39 @@ function ProtectedToolRoute({ children, toolPath }) {
   );
 }
 
+// Inline loading spinner shown only during the initial auth check on page load
+function AppLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+      <div className="text-center">
+        <div className="inline-block w-10 h-10 rounded-full border-2 border-blue-600 border-t-transparent animate-spin mb-4" />
+        <p className="text-slate-600 font-semibold">Loading...</p>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const { checkAuth, isLoading, sessionBlocked } = useAuthStore();
-  const { checkOnboarded } = useSubscriptionStore();
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    setHydrated(true);
-  }, []);
+  const { checkOnboarded, getUserPlan } = useSubscriptionStore();
 
   useEffect(() => {
     if (!isBrowser) return;
-    checkAuth().then(() => checkOnboarded());
-  }, [checkAuth, checkOnboarded]);
+    // Sequential: verify session → check onboarding status → fetch plan once
+    checkAuth().then(async () => {
+      const isAuthed = useAuthStore.getState().isAuthenticated;
+      if (!isAuthed) return;
+      const onboarded = await checkOnboarded();
+      if (onboarded) getUserPlan();
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (hydrated && sessionBlocked) {
-    return <SessionBlocked />;
-  }
+  if (sessionBlocked) return <SessionBlocked />;
 
-  // First client render must match SSR output exactly to avoid hydration
-  // mismatches; only switch to the loading spinner after hydration completes.
-  if (hydrated && isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 mb-4 animate-spin">
-            <div className="w-8 h-8 rounded-full border-2 border-white border-t-transparent" />
-          </div>
-          <p className="text-slate-600 font-semibold">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  // During SSR isLoading is false (no browser, no token check needed).
+  // On the client, isLoading starts true, so we show the spinner only after
+  // hydration (isBrowser guard) to avoid a hydration mismatch.
+  if (isBrowser && isLoading) return <AppLoader />;
 
   return (
     <ErrorBoundary>
@@ -150,22 +144,8 @@ function App() {
           <Route path="learning" element={<ProtectedToolRoute toolPath="/learning"><ContentVault /></ProtectedToolRoute>} />
           <Route path="projects" element={<ProtectedToolRoute toolPath="/projects"><ProjectIdeas /></ProtectedToolRoute>} />
           <Route path="blog" element={<Blog />} />
-          <Route
-            path="dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="dashboard/settings/plans"
-            element={
-              <ProtectedRoute>
-                <PlanSettings />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="dashboard/settings/plans" element={<ProtectedRoute><PlanSettings /></ProtectedRoute>} />
           <Route path="interview" element={<ProtectedToolRoute toolPath="/interview"><MockInterview /></ProtectedToolRoute>} />
           <Route path="jobmatch" element={<ProtectedToolRoute toolPath="/jobmatch"><JobMatcher /></ProtectedToolRoute>} />
           <Route path="discover" element={<ProtectedToolRoute toolPath="/discover"><JobDiscovery /></ProtectedToolRoute>} />

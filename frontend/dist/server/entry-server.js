@@ -8,7 +8,7 @@ import { useState, useEffect, useRef, Component, useMemo, useCallback } from "re
 import { stripBasename, UNSAFE_warning, UNSAFE_invariant, matchPath, joinPaths, Action } from "@remix-run/router";
 import { UNSAFE_NavigationContext, useHref, useNavigate, useLocation, useResolvedPath, createPath, UNSAFE_DataRouterStateContext, UNSAFE_useRouteId, UNSAFE_RouteContext, UNSAFE_DataRouterContext, parsePath, Router, Outlet, Navigate, Routes, Route } from "react-router";
 import "react-dom";
-import { ChevronDown, Sun, Moon, Crown, X, Menu, AlertTriangle, RotateCcw, TrendingUp, Zap, Lock, ArrowRight, Sparkles, Star, Activity, FileText, Linkedin, Github, Layout as Layout$1, BookOpen, Lightbulb, CheckCircle2, Users, ChevronRight, MessageCircle, Check, Rocket, Loader, Plus, Minus, ArrowLeft, Map as Map$1, Gauge, Search, ListChecks, Target, ExternalLink, Clock, Briefcase, ShieldCheck, Monitor, Mail, Calendar, User, CheckCircle, Copy, Download, XCircle, Trash2, Edit2, MapPin, Loader2, AlertCircle, ChevronLeft, ChevronUp, UploadCloud, ShieldAlert, Code2, RefreshCw, BarChart2, TrendingDown, HelpCircle, Award, Code, BrainCircuit, Wrench, Play, FileCode2, Mic, Send, Info, GraduationCap, Bot, Terminal, Tags, Eye, GitCompare, MonitorOff, LogIn } from "lucide-react";
+import { ChevronDown, Sun, Moon, Crown, X, Menu, AlertTriangle, RotateCcw, TrendingUp, Zap, Lock, ArrowRight, Sparkles, Star, Activity, FileText, Linkedin, Github, Layout as Layout$1, BookOpen, Lightbulb, CheckCircle2, Users, ChevronRight, MessageCircle, Check, Rocket, Loader, Plus, Minus, ArrowLeft, Map as Map$1, Gauge, Search, ListChecks, Target, ExternalLink, Clock, Briefcase, ShieldCheck, Monitor, Mail, Calendar, User, XCircle, Trash2, Edit2, MapPin, Loader2, AlertCircle, CheckCircle, ChevronLeft, Copy, Download, ChevronUp, UploadCloud, ShieldAlert, Code2, RefreshCw, BarChart2, TrendingDown, HelpCircle, Award, Code, BrainCircuit, Wrench, Play, FileCode2, Mic, Send, Info, GraduationCap, Bot, Terminal, Tags, Eye, GitCompare, MonitorOff, LogIn } from "lucide-react";
 import { create } from "zustand";
 import axios from "axios";
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip } from "recharts";
@@ -906,11 +906,14 @@ const BASE_NAV_GROUPS = [
     { label: "Job Analyzer", path: "/job-analyzer", desc: "Extract skills from postings" },
     { label: "ATS Checker", path: "/ats-checker", desc: "Resume-job match score" },
     { label: "Job Fit Scorer", path: "/job-fit", desc: "Detailed job fit analysis" },
-    { label: "Cover Letter", path: "/cover-letter", desc: "AI-generated letters" }
+    { label: "Cover Letter", path: "/cover-letter", desc: "AI-generated letters" },
+    { label: "Achievement Enhancer", path: "/achievement-enhancer", desc: "Turn tasks into impact bullets" },
+    { label: "Resume Consistency", path: "/resume-consistency", desc: "Cross-check resume vs profiles" }
   ] },
   { label: "Portfolios", items: [
     { label: "GitHub Profile", path: "/github", desc: "Audit & generate README" },
-    { label: "LinkedIn Profile", path: "/linkedin", desc: "Score your LinkedIn presence" }
+    { label: "LinkedIn Profile", path: "/linkedin", desc: "Score your LinkedIn presence" },
+    { label: "Recruiter Visibility", path: "/recruiter-visibility", desc: "How recruiters see you" }
   ] }
 ];
 const PREP_ITEM_LOCKED = [
@@ -923,7 +926,7 @@ const PREP_ITEMS_UNLOCKED = [
   { label: "Learn & Build", path: "/preparation/learn-and-build", desc: "Targeted Portfolio Projects" }
 ];
 const Navbar = () => {
-  const { user, logout, isAuthenticated, checkAuth } = useAuthStore();
+  const { user, logout, isAuthenticated } = useAuthStore();
   const { userPlan } = useSubscriptionStore();
   const [isDark, setIsDark] = useDarkMode();
   const location = useLocation();
@@ -933,18 +936,10 @@ const Navbar = () => {
   const [prepUnlocked, setPrepUnlocked] = useState(false);
   const dropdownRef = useRef(null);
   useEffect(() => {
-    checkAuth();
-  }, []);
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    api.get("/progress/preferences").then(({ data }) => {
-      var _a;
-      if ((_a = data == null ? void 0 : data.data) == null ? void 0 : _a.prepOnboardingDone) setPrepUnlocked(true);
-    }).catch(() => {
-    });
-  }, [isAuthenticated]);
-  useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) {
+      setPrepUnlocked(false);
+      return;
+    }
     const recheck = () => {
       api.get("/progress/preferences").then(({ data }) => {
         var _a;
@@ -952,15 +947,14 @@ const Navbar = () => {
       }).catch(() => {
       });
     };
-    if (!prepUnlocked) recheck();
+    recheck();
     window.addEventListener("prep-onboarding-complete", recheck);
-    const relock = () => setPrepUnlocked(false);
-    window.addEventListener("prep-onboarding-reset", relock);
+    window.addEventListener("prep-onboarding-reset", () => setPrepUnlocked(false));
     return () => {
       window.removeEventListener("prep-onboarding-complete", recheck);
-      window.removeEventListener("prep-onboarding-reset", relock);
+      window.removeEventListener("prep-onboarding-reset", () => setPrepUnlocked(false));
     };
-  }, [location.pathname, isAuthenticated, prepUnlocked]);
+  }, [isAuthenticated]);
   const NAV_GROUPS = [
     ...BASE_NAV_GROUPS,
     {
@@ -1169,12 +1163,11 @@ const Navbar = () => {
 };
 const Layout = () => {
   const location = useLocation();
-  location.pathname !== "/";
   const isFullScreenPage = location.pathname === "/onboarding" || location.pathname === "/payment-confirm";
   if (isFullScreenPage) {
     return /* @__PURE__ */ jsx(Outlet, {});
   }
-  return /* @__PURE__ */ jsxs("div", { className: `min-h-screen flex flex-col font-body bg-slate-50 dark:bg-[#030712] text-slate-900 dark:text-slate-100 antialiased overflow-x-hidden relative transition-colors duration-500`, children: [
+  return /* @__PURE__ */ jsxs("div", { className: "min-h-screen flex flex-col font-body bg-slate-50 dark:bg-[#030712] text-slate-900 dark:text-slate-100 antialiased overflow-x-hidden relative transition-colors duration-500", children: [
     /* @__PURE__ */ jsxs("div", { className: "fixed inset-0 z-0 overflow-hidden pointer-events-none", children: [
       /* @__PURE__ */ jsx("div", { className: "absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-blue-400/30 mix-blend-multiply filter blur-[120px] opacity-70 animate-blob dark:bg-blue-900/40 dark:mix-blend-screen" }),
       /* @__PURE__ */ jsx("div", { className: "absolute top-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-indigo-400/30 mix-blend-multiply filter blur-[120px] opacity-70 animate-blob dark:bg-indigo-900/40 dark:mix-blend-screen", style: { animationDelay: "3s" } }),
@@ -1373,19 +1366,17 @@ const PLAN_COLORS = {
 };
 function PlanGate({ toolName, requiredPlan = "Tune & Polish", children, fallback = null }) {
   var _a;
-  const { userPlan, onboardingComplete } = useSubscriptionStore();
-  if (!onboardingComplete) {
-    return fallback || /* @__PURE__ */ jsx("div", { className: "w-full h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800", children: /* @__PURE__ */ jsxs("div", { className: "text-center", children: [
-      /* @__PURE__ */ jsx("div", { className: "animate-spin mb-4", children: /* @__PURE__ */ jsx(Zap, { className: "w-8 h-8 text-blue-600 dark:text-blue-400" }) }),
-      /* @__PURE__ */ jsx("p", { className: "text-slate-600 dark:text-slate-400 font-medium", children: "Setting up your plan..." })
+  const { userPlan } = useSubscriptionStore();
+  if (!userPlan) {
+    return fallback || /* @__PURE__ */ jsx("div", { className: "w-full min-h-[40vh] flex items-center justify-center", children: /* @__PURE__ */ jsxs("div", { className: "text-center", children: [
+      /* @__PURE__ */ jsx("div", { className: "inline-block w-8 h-8 rounded-full border-2 border-blue-600 border-t-transparent animate-spin mb-3" }),
+      /* @__PURE__ */ jsx("p", { className: "text-slate-500 text-sm font-medium", children: "Checking access..." })
     ] }) });
   }
-  const userTier = userPlan ? PLAN_TIERS$1[userPlan.name] || 0 : 0;
+  const userTier = PLAN_TIERS$1[userPlan.name] || 0;
   const requiredTier = PLAN_TIERS$1[requiredPlan] || PLAN_TIERS$1[TOOL_ACCESS[toolName]] || 1;
   const hasAccess = userTier >= requiredTier;
-  if (hasAccess) {
-    return children;
-  }
+  if (hasAccess) return children;
   const planConfig = PLAN_COLORS[requiredPlan] || PLAN_COLORS["Tune & Polish"];
   const IconComponent = planConfig.icon;
   return /* @__PURE__ */ jsx("div", { className: "w-full min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-6", children: /* @__PURE__ */ jsxs("div", { className: "max-w-md w-full text-center", children: [
@@ -3030,7 +3021,7 @@ function KeywordPill({ text, variant }) {
   ] });
 }
 function RecentUploads({ resumes, onResumeClick, onDeleteClick }) {
-  const formatDate = (ts) => new Date(ts).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  const formatDate2 = (ts) => new Date(ts).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
   return /* @__PURE__ */ jsxs("section", { className: "space-y-6", children: [
     /* @__PURE__ */ jsxs("h2", { className: "text-xl font-bold flex items-center gap-3", children: [
       /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-primary", style: { fontVariationSettings: "'FILL' 0" }, children: "history" }),
@@ -3055,7 +3046,7 @@ function RecentUploads({ resumes, onResumeClick, onDeleteClick }) {
                   /* @__PURE__ */ jsx("div", { className: `w-10 h-12 ${isPdf ? "bg-red-50" : "bg-blue-50"} rounded-md flex items-center justify-center shrink-0`, children: /* @__PURE__ */ jsx("span", { className: `material-symbols-outlined ${isPdf ? "text-red-500" : "text-blue-500"}`, style: { fontVariationSettings: "'FILL' 0" }, children: isPdf ? "picture_as_pdf" : "description" }) }),
                   /* @__PURE__ */ jsxs("div", { children: [
                     /* @__PURE__ */ jsx("h5", { className: "font-bold text-sm truncate w-32", children: r.file_name }),
-                    /* @__PURE__ */ jsx("p", { className: "text-[10px] uppercase font-bold text-outline tracking-wider", children: formatDate(r.created_at) })
+                    /* @__PURE__ */ jsx("p", { className: "text-[10px] uppercase font-bold text-outline tracking-wider", children: formatDate2(r.created_at) })
                   ] })
                 ] }),
                 /* @__PURE__ */ jsxs("span", { className: `text-xs font-bold px-2 py-1 rounded ${c.bg} ${c.text}`, children: [
@@ -3802,6 +3793,8 @@ const ALL_TOOLS = [
   { name: "LinkedIn Optimizer", icon: Linkedin, path: "/linkedin", color: "bg-sky-500", tier: "Profile", plan: "Tune & Polish" },
   { name: "GitHub Optimizer", icon: Github, path: "/github", color: "bg-slate-900", tier: "Profile", plan: "Tune & Polish" },
   { name: "Recruiter Visibility Checker", icon: Gauge, path: "/recruiter-visibility", color: "bg-fuchsia-500", tier: "Profile", plan: "Tune & Polish" },
+  { name: "Resume Consistency Checker", icon: CheckCircle2, path: "/resume-consistency", color: "bg-lime-600", tier: "Profile", plan: "Tune & Polish" },
+  { name: "Achievement Enhancer", icon: FileText, path: "/achievement-enhancer", color: "bg-amber-600", tier: "Profile", plan: "Tune & Polish" },
   { name: "Application Assistant", icon: FileText, path: "/cover-letter", color: "bg-orange-500", tier: "Profile", plan: "Tune & Polish" },
   { name: "Job Discovery", icon: Search, path: "/discover", color: "bg-cyan-500", tier: "Profile", plan: "Tune & Polish" },
   // Zero To Hero (₹499/month)
@@ -4843,741 +4836,1050 @@ function LinkedInOptimizer() {
     ] })
   ] });
 }
-function generateReadme(formData) {
-  let markdown = "";
-  if (formData.name) {
-    markdown += `# Hi 👋, I'm ${formData.name}
-`;
-  }
-  if (formData.tagline) {
-    markdown += `### ${formData.tagline}
-`;
-  }
-  markdown += "\n";
-  const aboutItems = [];
-  if (formData.currentWork) {
-    aboutItems.push(`🔭 I'm currently working on **${formData.currentWork}**`);
-  }
-  if (formData.learning) {
-    aboutItems.push(`🌱 I'm currently learning **${formData.learning}**`);
-  }
-  if (formData.askAbout) {
-    aboutItems.push(`💬 Ask me about **${formData.askAbout}**`);
-  }
-  if (formData.email) {
-    aboutItems.push(`📫 How to reach me: **${formData.email}**`);
-  }
-  if (formData.bio) {
-    aboutItems.push(`✨ ${formData.bio}`);
-  }
-  if (aboutItems.length > 0) {
-    markdown += "## About Me\n";
-    aboutItems.forEach((item) => {
-      markdown += `- ${item}
-`;
-    });
-    markdown += "\n";
-  }
-  if (formData.skills && formData.skills.length > 0) {
-    markdown += "## Skills & Languages\n";
-    markdown += `\`\`\`
-`;
-    markdown += formData.skills.join(", ");
-    markdown += `
-\`\`\`
-
-`;
-  }
-  if (formData.techStack) {
-    markdown += "## Tech Stack\n";
-    const stacks = formData.techStack.split(",").map((s) => s.trim()).filter(Boolean);
-    const badges = stacks.map((tech) => {
-      const slug = tech.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-      return `![${tech}](https://img.shields.io/badge/${slug}-000?style=flat&logo=${slug})`;
-    }).join(" ");
-    markdown += badges + "\n\n";
-  }
-  const socialLinks = [];
-  if (formData.linkedin) {
-    socialLinks.push(`[LinkedIn](${formData.linkedin})`);
-  }
-  if (formData.twitter) {
-    socialLinks.push(`[Twitter](https://twitter.com/${formData.twitter})`);
-  }
-  if (formData.github) {
-    socialLinks.push(`[GitHub](https://github.com/${formData.github})`);
-  }
-  if (formData.instagram) {
-    socialLinks.push(`[Instagram](https://instagram.com/${formData.instagram})`);
-  }
-  if (formData.portfolio) {
-    socialLinks.push(`[Portfolio](${formData.portfolio})`);
-  }
-  if (formData.blog) {
-    socialLinks.push(`[Blog](${formData.blog})`);
-  }
-  if (socialLinks.length > 0) {
-    markdown += "## Connect With Me\n";
-    markdown += socialLinks.join(" | ") + "\n\n";
-  }
-  if (formData.showGithubStats && formData.github) {
-    markdown += "## GitHub Stats\n";
-    markdown += `![${formData.github}'s GitHub Stats](https://github-readme-stats.vercel.app/api?username=${formData.github}&show_icons=true&theme=radical)
-
-`;
-  }
-  if (formData.showStreakStats && formData.github) {
-    markdown += "## GitHub Streak\n";
-    markdown += `![GitHub Streak](https://github-readme-streak-stats.herokuapp.com/?user=${formData.github}&theme=radical)
-
-`;
-  }
-  if (formData.showTopLanguages && formData.github) {
-    markdown += "## Top Languages\n";
-    markdown += `![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=${formData.github}&layout=compact&theme=radical)
-
-`;
-  }
-  if (formData.showVisitors) {
-    markdown += "## Profile Views\n";
-    markdown += `![Visitors](https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2F${formData.github}&label=Visitors&countColor=%23263759&style=flat)
-
-`;
-  }
-  if (formData.buyMeCoffee) {
-    markdown += `## Support
-`;
-    markdown += `[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](${formData.buyMeCoffee})
-
-`;
-  }
-  if (formData.customSection) {
-    markdown += `## ${formData.customSectionTitle || "More"}
-`;
-    markdown += formData.customSection + "\n\n";
-  }
-  markdown += "---\n";
-  markdown += `*Generated with ❤️ by JobTube Eco System*`;
-  return markdown;
-}
-const SKILLS_BY_CATEGORY = {
-  "Languages": [
-    "JavaScript",
-    "TypeScript",
-    "Python",
-    "Go",
-    "Rust",
-    "Java",
-    "C++",
-    "C#",
-    "PHP",
-    "Ruby",
-    "Swift",
-    "Kotlin"
-  ],
-  "Frontend": [
-    "React",
-    "Vue.js",
-    "Angular",
-    "Svelte",
-    "Next.js",
-    "Nuxt.js",
-    "HTML5",
-    "CSS3",
-    "Tailwind CSS",
-    "Material UI"
-  ],
-  "Backend": [
-    "Node.js",
-    "Express",
-    "Django",
-    "Flask",
-    "Spring Boot",
-    "FastAPI",
-    "NestJS",
-    "Gin",
-    "Laravel",
-    "ASP.NET"
-  ],
-  "Databases": [
-    "MongoDB",
-    "PostgreSQL",
-    "MySQL",
-    "Redis",
-    "DynamoDB",
-    "Firebase",
-    "SQLite",
-    "Elasticsearch"
-  ],
-  "DevOps & Tools": [
-    "Docker",
-    "Kubernetes",
-    "AWS",
-    "Google Cloud",
-    "Azure",
-    "Git",
-    "CI/CD",
-    "Linux",
-    "Nginx",
-    "Apache"
-  ]
-};
-function GitHubReadmePreview({ markdown, onCopy, onDownload, copied }) {
-  const renderMarkdown = (md) => {
-    if (!md) return "<p>Preview will appear here...</p>";
-    let html = md.replace(/^### (.*?)$/gm, '<h3 class="text-xl font-bold mt-4 mb-2">$1</h3>').replace(/^## (.*?)$/gm, '<h2 class="text-2xl font-bold mt-6 mb-3">$1</h2>').replace(/^# (.*?)$/gm, '<h1 class="text-4xl font-black mb-3">$1</h1>').replace(/^\*\*\*$/gm, '<hr class="my-6 border-slate-300">').replace(/^---$/gm, '<hr class="my-6 border-slate-300">').replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold">$1</strong>').replace(/\*([^*]+)\*/g, '<em class="italic">$1</em>').replace(/`([^`]+)`/g, '<code class="bg-slate-200 dark:bg-slate-700 px-2 py-1 rounded">$1</code>').replace(/^\- (.*?)$/gm, '<li class="ml-4">$1</li>').replace(/(<li.*?<\/li>)/s, '<ul class="list-disc my-3">$1</ul>').replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:underline" target="_blank">$1</a>').replace(/^(```[\s\S]*?```)/gm, (match) => {
-      const code = match.replace(/```/g, "");
-      return `<pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto my-3"><code>${code}</code></pre>`;
-    }).replace(/\n\n/g, '</p><p class="my-3">').replace(/^(?!<[hpli]|<ul|<pre|<hr)(.+)$/gm, '<p class="my-2">$1</p>');
-    html = '<p class="my-2">' + html + "</p>";
-    return html;
-  };
-  return /* @__PURE__ */ jsxs("div", { className: "flex flex-col h-full", children: [
-    /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between mb-4 pb-4 border-b border-slate-200 dark:border-slate-700", children: [
-      /* @__PURE__ */ jsx("h3", { className: "text-lg font-bold text-slate-900 dark:text-white", children: "Preview" }),
-      /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
-        /* @__PURE__ */ jsx(
-          "button",
-          {
-            onClick: onCopy,
-            className: "flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors",
-            title: "Copy to clipboard",
-            children: copied ? /* @__PURE__ */ jsxs(Fragment, { children: [
-              /* @__PURE__ */ jsx(CheckCircle, { className: "w-4 h-4" }),
-              "Copied!"
-            ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
-              /* @__PURE__ */ jsx(Copy, { className: "w-4 h-4" }),
-              "Copy"
-            ] })
-          }
-        ),
-        /* @__PURE__ */ jsxs(
-          "button",
-          {
-            onClick: onDownload,
-            className: "flex items-center gap-2 px-3 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg text-sm font-semibold transition-colors",
-            title: "Download as README.md",
-            children: [
-              /* @__PURE__ */ jsx(Download, { className: "w-4 h-4" }),
-              "Download"
-            ]
-          }
-        )
-      ] })
-    ] }),
-    /* @__PURE__ */ jsx("div", { className: "flex-1 overflow-y-auto bg-white dark:bg-slate-900 rounded-lg p-6 border border-slate-200 dark:border-slate-700", children: /* @__PURE__ */ jsx(
-      "div",
-      {
-        className: "prose dark:prose-invert prose-sm max-w-none text-slate-900 dark:text-slate-100",
-        dangerouslySetInnerHTML: { __html: renderMarkdown(markdown) }
-      }
-    ) })
-  ] });
-}
-function GitHubReadmeGenerator() {
-  const [formData, setFormData] = useState({
-    name: "",
-    tagline: "",
-    bio: "",
-    github: "",
-    currentWork: "",
-    learning: "",
-    askAbout: "",
-    email: "",
-    linkedin: "",
-    twitter: "",
-    instagram: "",
-    portfolio: "",
-    blog: "",
-    skills: [],
-    techStack: "",
-    showGithubStats: true,
-    showStreakStats: true,
-    showTopLanguages: true,
-    showVisitors: true,
-    buyMeCoffee: "",
-    customSection: "",
-    customSectionTitle: "Additional Info"
-  });
-  const [markdown, setMarkdown] = useState("");
-  const [copied, setCopied] = useState(false);
-  const [expandedCategory, setExpandedCategory] = useState(null);
-  useEffect(() => {
-    setMarkdown(generateReadme(formData));
-  }, [formData]);
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value
-    }));
-  };
-  const addSkill = (skill) => {
-    setFormData((prev) => ({
-      ...prev,
-      skills: prev.skills.includes(skill) ? prev.skills.filter((s) => s !== skill) : [...prev.skills, skill]
-    }));
-  };
-  const removeSkill = (skill) => {
-    setFormData((prev) => ({
-      ...prev,
-      skills: prev.skills.filter((s) => s !== skill)
-    }));
-  };
-  const handleCopy = () => {
-    navigator.clipboard.writeText(markdown);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2e3);
-  };
-  const handleDownload = () => {
-    const element = document.createElement("a");
-    const file = new Blob([markdown], { type: "text/plain" });
-    element.href = URL.createObjectURL(file);
-    element.download = "README.md";
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-  };
-  return /* @__PURE__ */ jsx("div", { className: "w-full space-y-8", children: /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-8", children: [
-    /* @__PURE__ */ jsxs("div", { className: "space-y-6 overflow-y-auto max-h-[80vh] pr-4", children: [
-      /* @__PURE__ */ jsxs("section", { className: "bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-200 dark:border-slate-700", children: [
-        /* @__PURE__ */ jsx("h3", { className: "text-lg font-bold text-slate-900 dark:text-white mb-4", children: "Personal Info" }),
-        /* @__PURE__ */ jsxs("div", { className: "space-y-4", children: [
-          /* @__PURE__ */ jsx(
-            "input",
-            {
-              type: "text",
-              name: "name",
-              placeholder: "Your Name",
-              value: formData.name,
-              onChange: handleInputChange,
-              className: "w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-            }
-          ),
-          /* @__PURE__ */ jsx(
-            "input",
-            {
-              type: "text",
-              name: "tagline",
-              placeholder: "Your Tagline (e.g., Full Stack Developer | React Enthusiast)",
-              value: formData.tagline,
-              onChange: handleInputChange,
-              className: "w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-            }
-          ),
-          /* @__PURE__ */ jsx(
-            "textarea",
-            {
-              name: "bio",
-              placeholder: "Short bio about yourself...",
-              value: formData.bio,
-              onChange: handleInputChange,
-              rows: 3,
-              className: "w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-            }
-          ),
-          /* @__PURE__ */ jsx(
-            "input",
-            {
-              type: "email",
-              name: "email",
-              placeholder: "Your Email",
-              value: formData.email,
-              onChange: handleInputChange,
-              className: "w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-            }
-          )
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxs("section", { className: "bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-200 dark:border-slate-700", children: [
-        /* @__PURE__ */ jsx("h3", { className: "text-lg font-bold text-slate-900 dark:text-white mb-4", children: "Current Work" }),
-        /* @__PURE__ */ jsxs("div", { className: "space-y-4", children: [
-          /* @__PURE__ */ jsx(
-            "input",
-            {
-              type: "text",
-              name: "currentWork",
-              placeholder: "What are you working on?",
-              value: formData.currentWork,
-              onChange: handleInputChange,
-              className: "w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-            }
-          ),
-          /* @__PURE__ */ jsx(
-            "input",
-            {
-              type: "text",
-              name: "learning",
-              placeholder: "What are you learning?",
-              value: formData.learning,
-              onChange: handleInputChange,
-              className: "w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-            }
-          ),
-          /* @__PURE__ */ jsx(
-            "input",
-            {
-              type: "text",
-              name: "askAbout",
-              placeholder: "What to ask you about? (e.g., Web Development, React)",
-              value: formData.askAbout,
-              onChange: handleInputChange,
-              className: "w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-            }
-          )
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxs("section", { className: "bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-200 dark:border-slate-700", children: [
-        /* @__PURE__ */ jsx("h3", { className: "text-lg font-bold text-slate-900 dark:text-white mb-4", children: "Dev Profiles" }),
-        /* @__PURE__ */ jsx("div", { className: "space-y-3", children: [
-          { name: "github", label: "GitHub Username" },
-          { name: "linkedin", label: "LinkedIn Profile URL" },
-          { name: "portfolio", label: "Portfolio URL" },
-          { name: "blog", label: "Blog URL" },
-          { name: "twitter", label: "Twitter Handle" },
-          { name: "instagram", label: "Instagram Handle" }
-        ].map((field) => /* @__PURE__ */ jsx(
-          "input",
-          {
-            type: "text",
-            name: field.name,
-            placeholder: field.label,
-            value: formData[field.name],
-            onChange: handleInputChange,
-            className: "w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-          },
-          field.name
-        )) })
-      ] }),
-      /* @__PURE__ */ jsxs("section", { className: "bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-200 dark:border-slate-700", children: [
-        /* @__PURE__ */ jsx("h3", { className: "text-lg font-bold text-slate-900 dark:text-white mb-4", children: "Skills" }),
-        formData.skills.length > 0 && /* @__PURE__ */ jsx("div", { className: "mb-4 flex flex-wrap gap-2", children: formData.skills.map((skill) => /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full text-sm", children: [
-          skill,
-          /* @__PURE__ */ jsx(
-            "button",
-            {
-              onClick: () => removeSkill(skill),
-              className: "text-blue-700 dark:text-blue-300 hover:text-blue-900",
-              children: /* @__PURE__ */ jsx(X, { className: "w-4 h-4" })
-            }
-          )
-        ] }, skill)) }),
-        /* @__PURE__ */ jsx("div", { className: "space-y-2", children: Object.entries(SKILLS_BY_CATEGORY).map(([category, skills]) => /* @__PURE__ */ jsxs("div", { children: [
-          /* @__PURE__ */ jsx(
-            "button",
-            {
-              onClick: () => setExpandedCategory(expandedCategory === category ? null : category),
-              className: "w-full text-left px-3 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg font-semibold text-slate-900 dark:text-white transition-colors",
-              children: category
-            }
-          ),
-          expandedCategory === category && /* @__PURE__ */ jsx("div", { className: "mt-2 grid grid-cols-2 gap-2", children: skills.map((skill) => /* @__PURE__ */ jsx(
-            "button",
-            {
-              onClick: () => addSkill(skill),
-              className: `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${formData.skills.includes(skill) ? "bg-blue-600 text-white" : "bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-600"}`,
-              children: skill
-            },
-            skill
-          )) })
-        ] }, category)) })
-      ] }),
-      /* @__PURE__ */ jsxs("section", { className: "bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-200 dark:border-slate-700", children: [
-        /* @__PURE__ */ jsx("h3", { className: "text-lg font-bold text-slate-900 dark:text-white mb-4", children: "GitHub Stats" }),
-        /* @__PURE__ */ jsx("div", { className: "space-y-3", children: [
-          { name: "showGithubStats", label: "Show GitHub Stats Card" },
-          { name: "showStreakStats", label: "Show GitHub Streak Stats" },
-          { name: "showTopLanguages", label: "Show Top Languages" },
-          { name: "showVisitors", label: "Show Visitors Counter" }
-        ].map((field) => /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-3 cursor-pointer", children: [
-          /* @__PURE__ */ jsx(
-            "input",
-            {
-              type: "checkbox",
-              name: field.name,
-              checked: formData[field.name],
-              onChange: handleInputChange,
-              className: "w-4 h-4 rounded border-slate-300 text-blue-600"
-            }
-          ),
-          /* @__PURE__ */ jsx("span", { className: "text-slate-900 dark:text-white", children: field.label })
-        ] }, field.name)) })
-      ] }),
-      /* @__PURE__ */ jsxs("section", { className: "bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-200 dark:border-slate-700", children: [
-        /* @__PURE__ */ jsx("h3", { className: "text-lg font-bold text-slate-900 dark:text-white mb-4", children: "Extras" }),
-        /* @__PURE__ */ jsxs("div", { className: "space-y-4", children: [
-          /* @__PURE__ */ jsx(
-            "input",
-            {
-              type: "text",
-              name: "buyMeCoffee",
-              placeholder: "Buy Me A Coffee Link (optional)",
-              value: formData.buyMeCoffee,
-              onChange: handleInputChange,
-              className: "w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-            }
-          ),
-          /* @__PURE__ */ jsx(
-            "input",
-            {
-              type: "text",
-              name: "techStack",
-              placeholder: "Tech Stack (comma-separated, e.g., React, Node.js, MongoDB)",
-              value: formData.techStack,
-              onChange: handleInputChange,
-              className: "w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-            }
-          )
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxs("section", { className: "bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-200 dark:border-slate-700", children: [
-        /* @__PURE__ */ jsx("h3", { className: "text-lg font-bold text-slate-900 dark:text-white mb-4", children: "Custom Section" }),
-        /* @__PURE__ */ jsxs("div", { className: "space-y-3", children: [
-          /* @__PURE__ */ jsx(
-            "input",
-            {
-              type: "text",
-              name: "customSectionTitle",
-              placeholder: "Section Title",
-              value: formData.customSectionTitle,
-              onChange: handleInputChange,
-              className: "w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-            }
-          ),
-          /* @__PURE__ */ jsx(
-            "textarea",
-            {
-              name: "customSection",
-              placeholder: "Custom markdown content...",
-              value: formData.customSection,
-              onChange: handleInputChange,
-              rows: 4,
-              className: "w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-            }
-          )
-        ] })
-      ] })
-    ] }),
-    /* @__PURE__ */ jsx("div", { className: "h-[80vh]", children: /* @__PURE__ */ jsx(
-      GitHubReadmePreview,
-      {
-        markdown,
-        onCopy: handleCopy,
-        onDownload: handleDownload,
-        copied
-      }
-    ) })
-  ] }) });
-}
 function getScoreColor$2(score) {
   if (score >= 80) return "#10b981";
   if (score >= 60) return "#0ea5e9";
   if (score >= 40) return "#f59e0b";
   return "#ef4444";
 }
-function GitHubOptimizer() {
-  const [activeTab, setActiveTab] = useState("analyzer");
-  const [username, setUsername] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [report, setReport] = useState(null);
-  const [error, setError] = useState("");
-  const [validationError, setValidationError] = useState("");
+function getGradeLabel(score) {
+  if (score >= 80) return "Excellent";
+  if (score >= 60) return "Good";
+  if (score >= 40) return "Average";
+  return "Needs Work";
+}
+function parseUsername(raw) {
+  const trimmed = raw.trim();
+  const match = trimmed.match(/(?:https?:\/\/)?github\.com\/([a-zA-Z0-9_-]+)/);
+  if (match) return match[1];
+  return trimmed;
+}
+function delay(ms) {
+  return new Promise((res) => setTimeout(res, ms));
+}
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  try {
+    return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  } catch {
+    return dateStr;
+  }
+}
+const PIPELINE_STAGES = [
+  { id: 1, name: "Data Collection", description: "Fetching GitHub profile & repositories" },
+  { id: 2, name: "Portfolio Scoring", description: "Scoring profile completeness & quality" },
+  { id: 3, name: "Project Analysis", description: "Identifying showcase projects" },
+  { id: 4, name: "AI Enhancement", description: "Generating recommendations & README" },
+  { id: 5, name: "Final Report", description: "Assembling your recruiter report" }
+];
+function StageIcon({ status }) {
+  if (status === "running") {
+    return /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-sky-500 text-2xl animate-spin", style: { fontVariationSettings: "'FILL' 0" }, children: "sync" });
+  }
+  if (status === "done") {
+    return /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-emerald-500 text-2xl", style: { fontVariationSettings: "'FILL' 1" }, children: "check_circle" });
+  }
+  if (status === "error") {
+    return /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-rose-500 text-2xl", style: { fontVariationSettings: "'FILL' 0" }, children: "error" });
+  }
+  return /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-outline text-2xl", style: { fontVariationSettings: "'FILL' 0" }, children: "radio_button_unchecked" });
+}
+function ScoreGauge({ score, size = 120 }) {
+  const color = getScoreColor$2(score);
+  const r = 15.9;
+  const dashArray = `${score / 100 * 100} 100`;
+  return /* @__PURE__ */ jsxs("div", { className: "relative", style: { width: size, height: size }, children: [
+    /* @__PURE__ */ jsxs("svg", { viewBox: "0 0 36 36", className: "-rotate-90", style: { width: size, height: size }, children: [
+      /* @__PURE__ */ jsx("circle", { cx: "18", cy: "18", r, fill: "none", stroke: "#e5eeff", strokeWidth: "3.2" }),
+      /* @__PURE__ */ jsx(
+        "circle",
+        {
+          cx: "18",
+          cy: "18",
+          r,
+          fill: "none",
+          stroke: color,
+          strokeWidth: "3.2",
+          strokeDasharray: dashArray,
+          strokeLinecap: "round"
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "absolute inset-0 flex flex-col items-center justify-center", children: [
+      /* @__PURE__ */ jsx("span", { className: "font-black text-on-surface", style: { fontSize: size * 0.25 }, children: score }),
+      /* @__PURE__ */ jsx("span", { className: "font-bold text-on-surface-variant", style: { fontSize: size * 0.1 }, children: "/ 100" })
+    ] })
+  ] });
+}
+function ReadmePanel({ content, filename = "README.md", badge = null }) {
   const [copied, setCopied] = useState(false);
-  const validateUsername = (value) => {
-    if (!value.trim()) {
-      return "GitHub username is required";
+  const handleCopy = () => {
+    if (!content) return;
+    navigator.clipboard.writeText(content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2e3);
+  };
+  const handleDownload = () => {
+    if (!content) return;
+    const blob = new Blob([content], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+  return /* @__PURE__ */ jsxs("div", { className: "glass-card border-slate-700/50 rounded-3xl bg-slate-800/50 overflow-hidden flex flex-col", children: [
+    /* @__PURE__ */ jsxs("div", { className: "glass-panel border-b border-white/10 bg-slate-900/50 px-6 py-4 flex justify-between items-center", children: [
+      /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
+        /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-slate-400 text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "description" }),
+        /* @__PURE__ */ jsx("span", { className: "text-white font-bold text-sm", children: filename }),
+        badge && /* @__PURE__ */ jsx(
+          "span",
+          {
+            className: `px-2 py-0.5 rounded-lg text-xs font-bold ${badge === "AI-generated" ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-600/60 text-slate-300"}`,
+            children: badge
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
+        /* @__PURE__ */ jsxs(
+          "button",
+          {
+            onClick: handleCopy,
+            className: "flex items-center gap-1.5 px-3 py-1.5 glass-card hover:bg-white/10 text-slate-300 rounded-xl text-xs font-bold border border-slate-600/50 transition-colors",
+            children: [
+              /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-sm", style: { fontVariationSettings: "'FILL' 0" }, children: copied ? "check" : "content_copy" }),
+              copied ? "Copied!" : "Copy"
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsxs(
+          "button",
+          {
+            onClick: handleDownload,
+            className: "flex items-center gap-1.5 px-3 py-1.5 glass-card hover:bg-white/10 text-slate-300 rounded-xl text-xs font-bold border border-slate-600/50 transition-colors",
+            children: [
+              /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-sm", style: { fontVariationSettings: "'FILL' 0" }, children: "download" }),
+              ".md"
+            ]
+          }
+        )
+      ] })
+    ] }),
+    /* @__PURE__ */ jsx("div", { className: "p-6 overflow-y-auto max-h-96", children: /* @__PURE__ */ jsx("pre", { className: "text-slate-300 font-mono text-sm whitespace-pre-wrap leading-relaxed", children: content || "— No content —" }) })
+  ] });
+}
+function Collapsible({ title, icon, iconColor = "text-on-surface-variant", defaultOpen = false, children }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return /* @__PURE__ */ jsxs("div", { className: "glass-card rounded-3xl overflow-hidden", children: [
+    /* @__PURE__ */ jsxs(
+      "button",
+      {
+        onClick: () => setOpen((o) => !o),
+        className: "w-full px-8 py-6 flex items-center justify-between hover:bg-white/5 transition-colors",
+        children: [
+          /* @__PURE__ */ jsxs("h3", { className: "text-xl font-bold text-on-surface font-headline flex items-center gap-3", children: [
+            /* @__PURE__ */ jsx("span", { className: `material-symbols-outlined text-xl ${iconColor}`, style: { fontVariationSettings: "'FILL' 0" }, children: icon }),
+            title
+          ] }),
+          /* @__PURE__ */ jsx(
+            "span",
+            {
+              className: "material-symbols-outlined text-outline text-xl transition-transform duration-200",
+              style: { fontVariationSettings: "'FILL' 0", transform: open ? "rotate(180deg)" : "rotate(0deg)" },
+              children: "expand_more"
+            }
+          )
+        ]
+      }
+    ),
+    open && /* @__PURE__ */ jsx("div", { className: "px-8 pb-8 border-t border-white/10", children: /* @__PURE__ */ jsx("div", { className: "pt-6", children }) })
+  ] });
+}
+function RepoReadmeModal({ modal, onClose }) {
+  if (!modal.open) return null;
+  return /* @__PURE__ */ jsxs("div", { className: "fixed inset-0 z-50 flex items-center justify-center p-4", children: [
+    /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-black/60 backdrop-blur-sm", onClick: onClose }),
+    /* @__PURE__ */ jsxs("div", { className: "relative glass-card rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl", children: [
+      /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between px-8 py-6 border-b border-white/10", children: [
+        /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsx("h3", { className: "text-xl font-bold text-on-surface font-headline", children: "Repository README" }),
+          modal.repo && /* @__PURE__ */ jsx("p", { className: "text-sm text-on-surface-variant font-medium mt-0.5", children: modal.repo })
+        ] }),
+        /* @__PURE__ */ jsx(
+          "button",
+          {
+            onClick: onClose,
+            className: "w-10 h-10 flex items-center justify-center glass-card rounded-2xl hover:bg-white/10 transition-colors",
+            children: /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-on-surface-variant text-xl", style: { fontVariationSettings: "'FILL' 0" }, children: "close" })
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsx("div", { className: "flex-1 overflow-y-auto p-6", children: modal.loading ? /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center justify-center py-16 gap-4", children: [
+        /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined animate-spin text-slate-500 text-5xl", style: { fontVariationSettings: "'FILL' 0" }, children: "sync" }),
+        /* @__PURE__ */ jsxs("p", { className: "text-on-surface-variant font-medium", children: [
+          "Generating README for ",
+          modal.repo,
+          "..."
+        ] })
+      ] }) : modal.readme ? /* @__PURE__ */ jsx(
+        ReadmePanel,
+        {
+          content: modal.readme,
+          filename: `${modal.repo}-README.md`,
+          badge: "AI-generated"
+        }
+      ) : /* @__PURE__ */ jsx("p", { className: "text-on-surface-variant font-medium text-center py-8", children: "No README generated." }) })
+    ] })
+  ] });
+}
+function PipelineTracker({ statuses }) {
+  return /* @__PURE__ */ jsxs("div", { className: "glass-card p-8 rounded-3xl max-w-2xl mx-auto", children: [
+    /* @__PURE__ */ jsx("h3", { className: "text-base font-bold text-on-surface font-headline text-center mb-8", children: "Analysis in Progress" }),
+    /* @__PURE__ */ jsx("div", { className: "space-y-4", children: PIPELINE_STAGES.map((stage) => {
+      const status = statuses[stage.id] ?? "idle";
+      const isRunning = status === "running";
+      const isDone = status === "done";
+      return /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4", children: [
+        /* @__PURE__ */ jsx("div", { className: "w-10 flex items-center justify-center flex-shrink-0", children: /* @__PURE__ */ jsx(StageIcon, { status }) }),
+        /* @__PURE__ */ jsxs("div", { className: "flex-1 min-w-0", children: [
+          /* @__PURE__ */ jsx(
+            "div",
+            {
+              className: `font-bold text-sm ${isDone ? "text-emerald-600 dark:text-emerald-400" : isRunning ? "text-on-surface" : "text-on-surface-variant"}`,
+              children: stage.name
+            }
+          ),
+          /* @__PURE__ */ jsx("div", { className: "text-xs text-on-surface-variant font-medium mt-0.5", children: stage.description })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "flex-shrink-0", children: [
+          isDone && /* @__PURE__ */ jsx("span", { className: "px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg text-xs font-bold", children: "Done" }),
+          isRunning && /* @__PURE__ */ jsx("span", { className: "px-2 py-0.5 bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-lg text-xs font-bold", children: "Running" }),
+          status === "idle" && /* @__PURE__ */ jsx("span", { className: "px-2 py-0.5 bg-surface-container text-outline rounded-lg text-xs font-bold", children: "Waiting" }),
+          status === "error" && /* @__PURE__ */ jsx("span", { className: "px-2 py-0.5 bg-rose-500/10 text-rose-600 rounded-lg text-xs font-bold", children: "Failed" })
+        ] })
+      ] }, stage.id);
+    }) })
+  ] });
+}
+function Stage1ProfileHealth({ data }) {
+  var _a;
+  if (!data) return null;
+  const score = data.score ?? 0;
+  const color = getScoreColor$2(score);
+  const grade = getGradeLabel(score);
+  return /* @__PURE__ */ jsxs("div", { className: "glass-card p-8 rounded-3xl", children: [
+    /* @__PURE__ */ jsxs("h2", { className: "text-xl font-bold text-on-surface font-headline flex items-center gap-3 mb-8", children: [
+      /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-sky-500 text-xl", style: { fontVariationSettings: "'FILL' 1" }, children: "analytics" }),
+      "Profile Health Score"
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "flex flex-col sm:flex-row items-center gap-8", children: [
+      /* @__PURE__ */ jsx("div", { className: "flex-shrink-0", children: /* @__PURE__ */ jsx(ScoreGauge, { score, size: 140 }) }),
+      /* @__PURE__ */ jsxs("div", { className: "flex-1 space-y-4 w-full", children: [
+        /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx(
+          "span",
+          {
+            className: "inline-block px-4 py-1.5 rounded-2xl text-sm font-bold",
+            style: { backgroundColor: `${color}20`, color },
+            children: grade
+          }
+        ) }),
+        data.scoreDescription && /* @__PURE__ */ jsx("p", { className: "text-on-surface-variant font-medium text-sm leading-relaxed", children: data.scoreDescription }),
+        /* @__PURE__ */ jsx("div", { className: "grid grid-cols-2 sm:grid-cols-4 gap-3", children: [
+          { icon: "account_tree", label: "Repos", value: data.repoCount ?? data.totalRepos ?? "—", fill: 0, cls: "text-outline" },
+          { icon: "star", label: "Stars", value: data.stars ?? data.totalStars ?? "—", fill: 1, cls: "text-amber-500" },
+          { icon: "group", label: "Followers", value: data.followers ?? "—", fill: 0, cls: "text-outline" },
+          { icon: "code", label: "Languages", value: ((_a = data.languages) == null ? void 0 : _a.length) ?? "—", fill: 0, cls: "text-outline" }
+        ].map((stat, i) => /* @__PURE__ */ jsxs("div", { className: "glass-card bg-surface-container/30 p-3 rounded-2xl text-center", children: [
+          /* @__PURE__ */ jsx(
+            "span",
+            {
+              className: `material-symbols-outlined text-lg mb-1 block ${stat.cls}`,
+              style: { fontVariationSettings: `"FILL" ${stat.fill}` },
+              children: stat.icon
+            }
+          ),
+          /* @__PURE__ */ jsx("div", { className: "font-black text-lg text-on-surface", children: stat.value }),
+          /* @__PURE__ */ jsx("div", { className: "text-xs font-bold text-outline uppercase tracking-wider", children: stat.label })
+        ] }, i)) })
+      ] })
+    ] }),
+    data.languages && data.languages.length > 0 && /* @__PURE__ */ jsx("div", { className: "mt-6 flex flex-wrap gap-2", children: data.languages.slice(0, 10).map((lang, i) => /* @__PURE__ */ jsx("span", { className: "px-3 py-1 glass-card bg-surface-container/30 rounded-xl text-xs font-bold text-on-surface-variant", children: lang }, i)) })
+  ] });
+}
+function Stage2RepoAudit({ data, onGenerateReadme }) {
+  if (!data) return null;
+  const repos = data.repos ?? data.repositories ?? [];
+  const auditScore = data.auditScore ?? data.score ?? null;
+  const scoreBreakdown = data.scoreBreakdown ?? data.breakdown ?? [];
+  const statusIcon = (status) => {
+    if (status === "good") return { icon: "check_circle", cls: "text-emerald-500", fill: 1 };
+    if (status === "warning" || status === "warn") return { icon: "warning", cls: "text-amber-500", fill: 0 };
+    return { icon: "cancel", cls: "text-rose-500", fill: 1 };
+  };
+  return /* @__PURE__ */ jsxs("div", { className: "glass-card p-8 rounded-3xl", children: [
+    /* @__PURE__ */ jsxs("h2", { className: "text-xl font-bold text-on-surface font-headline flex items-center gap-3 mb-6", children: [
+      /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-amber-500 text-xl", style: { fontVariationSettings: "'FILL' 0" }, children: "folder_open" }),
+      "Repository Audit"
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 mb-6 flex-wrap", children: [
+      /* @__PURE__ */ jsxs("div", { className: "px-4 py-2 glass-card bg-surface-container/30 rounded-2xl text-sm font-bold text-on-surface", children: [
+        repos.length,
+        " repos found"
+      ] }),
+      auditScore !== null && /* @__PURE__ */ jsxs(
+        "div",
+        {
+          className: "px-4 py-2 rounded-2xl text-sm font-bold",
+          style: { backgroundColor: `${getScoreColor$2(auditScore)}20`, color: getScoreColor$2(auditScore) },
+          children: [
+            "Audit Score: ",
+            auditScore,
+            "/100"
+          ]
+        }
+      )
+    ] }),
+    scoreBreakdown.length > 0 && /* @__PURE__ */ jsxs("div", { className: "mb-8", children: [
+      /* @__PURE__ */ jsx("h3", { className: "text-sm font-bold text-outline uppercase tracking-wider mb-4", children: "Score Breakdown" }),
+      /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-3", children: scoreBreakdown.map((cat, i) => {
+        const pct = cat.max > 0 ? Math.round(cat.score / cat.max * 100) : 0;
+        return /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
+          /* @__PURE__ */ jsx("span", { className: "text-xs font-bold text-on-surface-variant w-32 flex-shrink-0 truncate", children: cat.label ?? cat.name }),
+          /* @__PURE__ */ jsx("div", { className: "flex-1 h-2 bg-surface-container rounded-full overflow-hidden", children: /* @__PURE__ */ jsx(
+            "div",
+            {
+              className: "h-full rounded-full transition-all duration-700",
+              style: { width: `${pct}%`, backgroundColor: getScoreColor$2(pct) }
+            }
+          ) }),
+          /* @__PURE__ */ jsxs("span", { className: "text-xs font-bold text-on-surface-variant w-12 text-right flex-shrink-0", children: [
+            cat.score,
+            "/",
+            cat.max
+          ] })
+        ] }, i);
+      }) })
+    ] }),
+    repos.length > 0 && /* @__PURE__ */ jsx("div", { className: "overflow-x-auto", children: /* @__PURE__ */ jsxs("table", { className: "w-full text-sm", children: [
+      /* @__PURE__ */ jsx("thead", { children: /* @__PURE__ */ jsxs("tr", { className: "border-b border-white/10", children: [
+        /* @__PURE__ */ jsx("th", { className: "text-left text-xs font-bold text-outline uppercase tracking-wider pb-3 pr-4", children: "Repo" }),
+        /* @__PURE__ */ jsx("th", { className: "text-left text-xs font-bold text-outline uppercase tracking-wider pb-3 pr-4", children: "Lang" }),
+        /* @__PURE__ */ jsx("th", { className: "text-left text-xs font-bold text-outline uppercase tracking-wider pb-3 pr-4", children: "Stars" }),
+        /* @__PURE__ */ jsx("th", { className: "text-left text-xs font-bold text-outline uppercase tracking-wider pb-3 pr-4", children: "Status" }),
+        /* @__PURE__ */ jsx("th", { className: "text-left text-xs font-bold text-outline uppercase tracking-wider pb-3" })
+      ] }) }),
+      /* @__PURE__ */ jsx("tbody", { className: "divide-y divide-white/5", children: repos.map((repo, i) => {
+        const st = statusIcon(repo.status);
+        return /* @__PURE__ */ jsxs("tr", { className: "hover:bg-white/3 transition-colors", children: [
+          /* @__PURE__ */ jsxs("td", { className: "py-3 pr-4", children: [
+            /* @__PURE__ */ jsx("div", { className: "font-bold text-on-surface text-sm", children: repo.name }),
+            repo.description && /* @__PURE__ */ jsx("div", { className: "text-xs text-on-surface-variant mt-0.5 max-w-xs truncate", children: repo.description })
+          ] }),
+          /* @__PURE__ */ jsx("td", { className: "py-3 pr-4", children: repo.language && /* @__PURE__ */ jsx("span", { className: "px-2 py-0.5 glass-card bg-surface-container/40 rounded-lg text-xs font-bold text-on-surface-variant", children: repo.language }) }),
+          /* @__PURE__ */ jsx("td", { className: "py-3 pr-4", children: /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-1 text-xs font-bold text-on-surface-variant", children: [
+            /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-amber-400 text-sm", style: { fontVariationSettings: "'FILL' 1" }, children: "star" }),
+            repo.stars ?? repo.stargazersCount ?? 0
+          ] }) }),
+          /* @__PURE__ */ jsx("td", { className: "py-3 pr-4", children: /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-1.5", children: [
+            /* @__PURE__ */ jsx(
+              "span",
+              {
+                className: `material-symbols-outlined text-base ${st.cls}`,
+                style: { fontVariationSettings: `"FILL" ${st.fill}` },
+                children: st.icon
+              }
+            ),
+            repo.homepage && /* @__PURE__ */ jsx("span", { className: "px-2 py-0.5 bg-sky-500/10 text-sky-600 rounded-lg text-xs font-bold", children: "Hosted" })
+          ] }) }),
+          /* @__PURE__ */ jsx("td", { className: "py-3", children: /* @__PURE__ */ jsxs(
+            "button",
+            {
+              onClick: () => onGenerateReadme(repo),
+              className: "px-3 py-1.5 glass-card hover:bg-white/10 rounded-xl text-xs font-bold text-on-surface-variant border border-white/10 transition-colors flex items-center gap-1",
+              children: [
+                /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-xs", style: { fontVariationSettings: "'FILL' 0" }, children: "auto_awesome" }),
+                "README"
+              ]
+            }
+          ) })
+        ] }, i);
+      }) })
+    ] }) })
+  ] });
+}
+function Stage3ShowcaseProjects({ data }) {
+  if (!data) return null;
+  const projects = data.topProjects ?? data.showcaseProjects ?? data.projects ?? [];
+  const hasPortfolio = data.hasPortfolio ?? false;
+  return /* @__PURE__ */ jsxs("div", { className: "glass-card p-8 rounded-3xl", children: [
+    /* @__PURE__ */ jsxs("h2", { className: "text-xl font-bold text-on-surface font-headline flex items-center gap-3 mb-6", children: [
+      /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-emerald-500 text-xl", style: { fontVariationSettings: "'FILL' 0" }, children: "workspace_premium" }),
+      "Showcase Projects"
+    ] }),
+    hasPortfolio ? /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 mb-6 px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl", children: [
+      /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-emerald-500 text-lg", style: { fontVariationSettings: "'FILL' 1" }, children: "check_circle" }),
+      /* @__PURE__ */ jsx("span", { className: "text-emerald-700 dark:text-emerald-400 font-bold text-sm", children: "Portfolio website detected" })
+    ] }) : /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 mb-6 px-4 py-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl", children: [
+      /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-amber-500 text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "warning" }),
+      /* @__PURE__ */ jsx("span", { className: "text-amber-700 dark:text-amber-400 font-bold text-sm", children: "No portfolio website found — hosting a project would significantly boost your profile" })
+    ] }),
+    /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4", children: projects.slice(0, 5).map((proj, i) => /* @__PURE__ */ jsxs("div", { className: "glass-card bg-surface-container/20 rounded-2xl p-5 flex flex-col gap-3", children: [
+      /* @__PURE__ */ jsxs("div", { className: "flex items-start justify-between gap-2", children: [
+        /* @__PURE__ */ jsx("div", { className: "font-bold text-on-surface text-sm leading-tight", children: proj.name }),
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-1 text-xs font-bold text-amber-500 flex-shrink-0", children: [
+          /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-sm", style: { fontVariationSettings: "'FILL' 1" }, children: "star" }),
+          proj.stars ?? proj.stargazersCount ?? 0
+        ] })
+      ] }),
+      proj.description && /* @__PURE__ */ jsx("p", { className: "text-xs text-on-surface-variant font-medium leading-relaxed line-clamp-2", children: proj.description }),
+      /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 mt-auto flex-wrap", children: [
+        proj.language && /* @__PURE__ */ jsx("span", { className: "px-2 py-0.5 glass-card bg-surface-container/40 rounded-lg text-xs font-bold text-on-surface-variant", children: proj.language }),
+        proj.homepage && /* @__PURE__ */ jsx("span", { className: "px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg text-xs font-bold", children: "Hosted" })
+      ] })
+    ] }, i)) })
+  ] });
+}
+function BioSuggestion({ current, suggested }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    if (!suggested) return;
+    navigator.clipboard.writeText(suggested);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2e3);
+  };
+  return /* @__PURE__ */ jsxs("div", { className: "space-y-4", children: [
+    /* @__PURE__ */ jsxs("div", { children: [
+      /* @__PURE__ */ jsx("div", { className: "text-xs font-bold text-outline uppercase tracking-wider mb-2", children: "Current" }),
+      /* @__PURE__ */ jsx("div", { className: "px-4 py-3 bg-surface-container/40 rounded-2xl text-on-surface-variant font-medium text-sm", children: current || /* @__PURE__ */ jsx("span", { className: "italic text-outline", children: "No bio set" }) })
+    ] }),
+    suggested && /* @__PURE__ */ jsxs("div", { children: [
+      /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between mb-2", children: [
+        /* @__PURE__ */ jsx("div", { className: "text-xs font-bold text-outline uppercase tracking-wider", children: "Suggested" }),
+        /* @__PURE__ */ jsxs("span", { className: "text-xs text-outline", children: [
+          suggested.length,
+          " chars"
+        ] })
+      ] }),
+      /* @__PURE__ */ jsx("div", { className: "px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-on-surface font-medium text-sm", children: suggested }),
+      /* @__PURE__ */ jsxs(
+        "button",
+        {
+          onClick: handleCopy,
+          className: "mt-2 flex items-center gap-1.5 px-3 py-1.5 glass-card hover:bg-white/10 rounded-xl text-xs font-bold text-on-surface-variant border border-white/10 transition-colors",
+          children: [
+            /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-sm", style: { fontVariationSettings: "'FILL' 0" }, children: copied ? "check" : "content_copy" }),
+            copied ? "Copied!" : "Copy suggestion"
+          ]
+        }
+      )
+    ] })
+  ] });
+}
+function RepoSuggestionRow({ suggestion }) {
+  const [copiedName, setCopiedName] = useState(false);
+  const [copiedDesc, setCopiedDesc] = useState(false);
+  return /* @__PURE__ */ jsxs("tr", { className: "hover:bg-white/3 transition-colors", children: [
+    /* @__PURE__ */ jsx("td", { className: "py-3 pr-4 font-mono text-xs text-on-surface-variant", children: suggestion.current ?? suggestion.currentName }),
+    /* @__PURE__ */ jsx("td", { className: "py-3 pr-4", children: /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
+      /* @__PURE__ */ jsx("span", { className: "font-mono text-xs text-emerald-600 dark:text-emerald-400", children: suggestion.suggested ?? suggestion.suggestedName }),
+      /* @__PURE__ */ jsx(
+        "button",
+        {
+          onClick: () => {
+            navigator.clipboard.writeText(suggestion.suggested ?? suggestion.suggestedName ?? "");
+            setCopiedName(true);
+            setTimeout(() => setCopiedName(false), 1500);
+          },
+          className: "w-6 h-6 flex items-center justify-center glass-card hover:bg-white/10 rounded-lg text-outline border border-white/10 transition-colors",
+          children: /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-xs", style: { fontVariationSettings: "'FILL' 0" }, children: copiedName ? "check" : "content_copy" })
+        }
+      )
+    ] }) }),
+    /* @__PURE__ */ jsx("td", { className: "py-3 pr-4 text-xs text-on-surface-variant max-w-xs", children: /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
+      /* @__PURE__ */ jsx("span", { className: "truncate", children: suggestion.description ?? suggestion.suggestedDescription ?? "—" }),
+      (suggestion.description || suggestion.suggestedDescription) && /* @__PURE__ */ jsx(
+        "button",
+        {
+          onClick: () => {
+            navigator.clipboard.writeText(suggestion.description ?? suggestion.suggestedDescription ?? "");
+            setCopiedDesc(true);
+            setTimeout(() => setCopiedDesc(false), 1500);
+          },
+          className: "w-6 h-6 flex-shrink-0 flex items-center justify-center glass-card hover:bg-white/10 rounded-lg text-outline border border-white/10 transition-colors",
+          children: /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-xs", style: { fontVariationSettings: "'FILL' 0" }, children: copiedDesc ? "check" : "content_copy" })
+        }
+      )
+    ] }) })
+  ] });
+}
+function Stage4AIRecommendations({ data }) {
+  if (!data) return null;
+  const readme = data.profileReadme ?? data.generatedReadme ?? data.readme ?? "";
+  const aiPowered = data.aiPowered ?? true;
+  const bioSuggestion = data.bioSuggestion ?? data.suggestedBio ?? null;
+  const currentBio = data.currentBio ?? "";
+  const repoSuggestions = data.repoSuggestions ?? data.repoNameSuggestions ?? [];
+  const hostingRecs = data.hostingRecommendations ?? data.hostingRecs ?? [];
+  const platformStyles = {
+    vercel: "bg-black text-white",
+    railway: "bg-purple-600 text-white",
+    "github pages": "bg-sky-600 text-white",
+    render: "bg-green-600 text-white"
+  };
+  const getPlatformStyle = (platform) => {
+    const key = (platform || "").toLowerCase();
+    for (const k of Object.keys(platformStyles)) {
+      if (key.includes(k)) return platformStyles[k];
     }
-    if (!/^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i.test(value)) {
-      return "Invalid GitHub username format";
+    return "bg-slate-700 text-white";
+  };
+  const priorityBadge = {
+    high: "bg-rose-500/10 text-rose-600",
+    medium: "bg-amber-500/10 text-amber-600",
+    low: "bg-sky-500/10 text-sky-600"
+  };
+  return /* @__PURE__ */ jsxs("div", { className: "space-y-4", children: [
+    /* @__PURE__ */ jsxs("h2", { className: "text-xl font-bold text-on-surface font-headline flex items-center gap-3 mb-2", children: [
+      /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-purple-500 text-xl", style: { fontVariationSettings: "'FILL' 1" }, children: "auto_awesome" }),
+      "AI Recommendations"
+    ] }),
+    readme && /* @__PURE__ */ jsx(Collapsible, { title: "Profile README", icon: "description", iconColor: "text-slate-400", defaultOpen: true, children: /* @__PURE__ */ jsx(ReadmePanel, { content: readme, filename: "README.md", badge: aiPowered ? "AI-generated" : "Template" }) }),
+    (bioSuggestion || currentBio) && /* @__PURE__ */ jsx(Collapsible, { title: "Bio Suggestion", icon: "edit", iconColor: "text-sky-500", defaultOpen: false, children: /* @__PURE__ */ jsx(BioSuggestion, { current: currentBio, suggested: bioSuggestion }) }),
+    repoSuggestions.length > 0 && /* @__PURE__ */ jsx(
+      Collapsible,
+      {
+        title: `Repo Improvements (${repoSuggestions.length})`,
+        icon: "drive_file_rename_outline",
+        iconColor: "text-amber-500",
+        defaultOpen: false,
+        children: /* @__PURE__ */ jsx("div", { className: "overflow-x-auto", children: /* @__PURE__ */ jsxs("table", { className: "w-full text-sm", children: [
+          /* @__PURE__ */ jsx("thead", { children: /* @__PURE__ */ jsxs("tr", { className: "border-b border-white/10", children: [
+            /* @__PURE__ */ jsx("th", { className: "text-left text-xs font-bold text-outline uppercase tracking-wider pb-3 pr-4", children: "Current Name" }),
+            /* @__PURE__ */ jsx("th", { className: "text-left text-xs font-bold text-outline uppercase tracking-wider pb-3 pr-4", children: "Suggested Name" }),
+            /* @__PURE__ */ jsx("th", { className: "text-left text-xs font-bold text-outline uppercase tracking-wider pb-3 pr-4", children: "Suggested Description" })
+          ] }) }),
+          /* @__PURE__ */ jsx("tbody", { className: "divide-y divide-white/5", children: repoSuggestions.map((s, i) => /* @__PURE__ */ jsx(RepoSuggestionRow, { suggestion: s }, i)) })
+        ] }) })
+      }
+    ),
+    hostingRecs.length > 0 && /* @__PURE__ */ jsx(
+      Collapsible,
+      {
+        title: `Hosting Recommendations (${hostingRecs.length})`,
+        icon: "cloud_upload",
+        iconColor: "text-emerald-500",
+        defaultOpen: false,
+        children: /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4", children: hostingRecs.map((rec, i) => {
+          var _a;
+          return /* @__PURE__ */ jsxs("div", { className: "glass-card bg-surface-container/20 rounded-2xl p-5", children: [
+            /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 mb-3 flex-wrap", children: [
+              /* @__PURE__ */ jsx("span", { className: "font-bold text-on-surface text-sm", children: rec.repo ?? rec.repoName }),
+              rec.platform && /* @__PURE__ */ jsx("span", { className: `px-2 py-0.5 rounded-lg text-xs font-bold ${getPlatformStyle(rec.platform)}`, children: rec.platform }),
+              rec.priority && /* @__PURE__ */ jsx(
+                "span",
+                {
+                  className: `px-2 py-0.5 rounded-lg text-xs font-bold ${priorityBadge[(_a = rec.priority) == null ? void 0 : _a.toLowerCase()] || "bg-slate-500/10 text-slate-600"}`,
+                  children: rec.priority
+                }
+              )
+            ] }),
+            rec.reason && /* @__PURE__ */ jsx("p", { className: "text-xs text-on-surface-variant font-medium leading-relaxed", children: rec.reason })
+          ] }, i);
+        }) })
+      }
+    )
+  ] });
+}
+function Stage5RecruiterReport({ data, onSave, savingAnalysis, analysisSaved, onStartOver }) {
+  if (!data) return null;
+  const summary = data.recruiterSummary ?? data.summary ?? "";
+  const priorities = data.topPriorities ?? data.priorities ?? [];
+  const quickWins = data.quickWins ?? [];
+  const strengths = data.strengths ?? [];
+  const impactBadge = {
+    high: "bg-rose-500/10 text-rose-600",
+    medium: "bg-amber-500/10 text-amber-600",
+    low: "bg-sky-500/10 text-sky-600"
+  };
+  return /* @__PURE__ */ jsxs("div", { className: "glass-card p-8 rounded-3xl", children: [
+    /* @__PURE__ */ jsxs("h2", { className: "text-xl font-bold text-on-surface font-headline flex items-center gap-3 mb-6", children: [
+      /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-rose-500 text-xl", style: { fontVariationSettings: "'FILL' 0" }, children: "contact_page" }),
+      "Final Recruiter Report"
+    ] }),
+    summary && /* @__PURE__ */ jsxs("div", { className: "mb-8 px-6 py-5 bg-primary/5 rounded-2xl border border-primary/10", children: [
+      /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 mb-3", children: [
+        /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-primary text-base", style: { fontVariationSettings: "'FILL' 0" }, children: "summarize" }),
+        /* @__PURE__ */ jsx("span", { className: "text-xs font-bold text-primary uppercase tracking-wider", children: "Recruiter Summary" })
+      ] }),
+      /* @__PURE__ */ jsx("p", { className: "text-on-surface font-medium leading-relaxed", children: summary })
+    ] }),
+    priorities.length > 0 && /* @__PURE__ */ jsxs("div", { className: "mb-8", children: [
+      /* @__PURE__ */ jsxs("h3", { className: "text-lg font-bold text-on-surface mb-4 flex items-center gap-2", children: [
+        /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-rose-500 text-base", style: { fontVariationSettings: "'FILL' 0" }, children: "priority_high" }),
+        "Top Priorities"
+      ] }),
+      /* @__PURE__ */ jsx("div", { className: "space-y-3", children: priorities.map((p, i) => {
+        var _a;
+        return /* @__PURE__ */ jsxs("div", { className: "glass-card bg-surface-container/20 rounded-2xl p-5", children: [
+          /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 mb-2 flex-wrap", children: [
+            /* @__PURE__ */ jsx("span", { className: "font-black text-on-surface-variant text-xs w-5 h-5 flex items-center justify-center bg-surface-container rounded-full flex-shrink-0", children: i + 1 }),
+            /* @__PURE__ */ jsx("span", { className: "font-bold text-on-surface text-sm flex-1", children: p.action ?? p.title ?? p.item }),
+            p.impact && /* @__PURE__ */ jsx(
+              "span",
+              {
+                className: `px-2 py-0.5 rounded-lg text-xs font-bold ${impactBadge[(_a = p.impact) == null ? void 0 : _a.toLowerCase()] || "bg-slate-500/10 text-slate-600"}`,
+                children: p.impact
+              }
+            ),
+            p.effort && /* @__PURE__ */ jsx("span", { className: "px-2 py-0.5 glass-card bg-surface-container/40 rounded-lg text-xs font-bold text-on-surface-variant", children: p.effort })
+          ] }),
+          p.why && /* @__PURE__ */ jsx("p", { className: "text-xs text-on-surface-variant font-medium leading-relaxed ml-8", children: p.why })
+        ] }, i);
+      }) })
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6 mb-8", children: [
+      quickWins.length > 0 && /* @__PURE__ */ jsxs("div", { children: [
+        /* @__PURE__ */ jsxs("h3", { className: "text-lg font-bold text-on-surface mb-4 flex items-center gap-2", children: [
+          /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-amber-500 text-base", style: { fontVariationSettings: "'FILL' 1" }, children: "bolt" }),
+          "Quick Wins"
+        ] }),
+        /* @__PURE__ */ jsx("ul", { className: "space-y-2", children: quickWins.map((w, i) => /* @__PURE__ */ jsxs("li", { className: "flex items-start gap-2 text-on-surface-variant font-medium text-sm", children: [
+          /* @__PURE__ */ jsx("span", { className: "w-1.5 h-1.5 mt-2 rounded-full bg-amber-500 flex-shrink-0" }),
+          typeof w === "string" ? w : w.action ?? w.item ?? JSON.stringify(w)
+        ] }, i)) })
+      ] }),
+      strengths.length > 0 && /* @__PURE__ */ jsxs("div", { children: [
+        /* @__PURE__ */ jsxs("h3", { className: "text-lg font-bold text-on-surface mb-4 flex items-center gap-2", children: [
+          /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-emerald-500 text-base", style: { fontVariationSettings: "'FILL' 1" }, children: "check_circle" }),
+          "Strengths"
+        ] }),
+        /* @__PURE__ */ jsx("ul", { className: "space-y-2", children: strengths.map((s, i) => /* @__PURE__ */ jsxs("li", { className: "flex items-start gap-2 text-on-surface-variant font-medium text-sm", children: [
+          /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-emerald-500 text-base flex-shrink-0 mt-0.5", style: { fontVariationSettings: "'FILL' 1" }, children: "check" }),
+          typeof s === "string" ? s : s.item ?? JSON.stringify(s)
+        ] }, i)) })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 flex-wrap pt-4 border-t border-white/10", children: [
+      /* @__PURE__ */ jsx(
+        "button",
+        {
+          onClick: onSave,
+          disabled: savingAnalysis || analysisSaved,
+          className: "bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700/50 text-white px-6 py-3 rounded-2xl font-bold hover:from-slate-700 hover:to-slate-800 active:scale-95 transition-all duration-200 disabled:opacity-60 shadow-[0px_10px_30px_rgba(15,23,42,0.3)] flex items-center gap-2",
+          children: savingAnalysis ? /* @__PURE__ */ jsxs(Fragment, { children: [
+            /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined animate-spin text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "sync" }),
+            "Saving..."
+          ] }) : analysisSaved ? /* @__PURE__ */ jsxs(Fragment, { children: [
+            /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-lg text-emerald-400", style: { fontVariationSettings: "'FILL' 1" }, children: "check_circle" }),
+            "Saved!"
+          ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
+            /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "save" }),
+            "Save Analysis"
+          ] })
+        }
+      ),
+      /* @__PURE__ */ jsxs(
+        "button",
+        {
+          onClick: onStartOver,
+          className: "px-6 py-3 glass-card hover:bg-white/10 text-on-surface-variant font-bold rounded-2xl transition-all border border-white/10 flex items-center gap-2",
+          children: [
+            /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "restart_alt" }),
+            "Start Over"
+          ]
+        }
+      )
+    ] })
+  ] });
+}
+function HistoryPanel({ history }) {
+  if (!history || history.length === 0) return null;
+  return /* @__PURE__ */ jsxs("div", { className: "glass-card p-6 rounded-3xl mt-8", children: [
+    /* @__PURE__ */ jsxs("h3", { className: "text-base font-bold text-on-surface font-headline flex items-center gap-2 mb-4", children: [
+      /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-outline text-base", style: { fontVariationSettings: "'FILL' 0" }, children: "history" }),
+      "Past Analyses"
+    ] }),
+    /* @__PURE__ */ jsx("div", { className: "divide-y divide-white/10", children: history.slice(0, 5).map((item, i) => {
+      const color = getScoreColor$2(item.score ?? 0);
+      const grade = getGradeLabel(item.score ?? 0);
+      return /* @__PURE__ */ jsxs("div", { className: "py-3 flex items-center gap-4", children: [
+        /* @__PURE__ */ jsxs("div", { className: "font-bold text-on-surface text-sm flex-1", children: [
+          "@",
+          item.username
+        ] }),
+        /* @__PURE__ */ jsxs(
+          "span",
+          {
+            className: "px-2 py-0.5 rounded-lg text-xs font-bold",
+            style: { backgroundColor: `${color}20`, color },
+            children: [
+              item.score,
+              "/100 · ",
+              grade
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsx("span", { className: "text-xs text-outline", children: formatDate(item.analyzedAt ?? item.createdAt ?? item.date) })
+      ] }, i);
+    }) })
+  ] });
+}
+function GitHubOptimizer() {
+  var _a, _b, _c, _d;
+  const [url, setUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [results, setResults] = useState(null);
+  const [history, setHistory] = useState([]);
+  const [stageStatuses, setStageStatuses] = useState({ 1: "idle", 2: "idle", 3: "idle", 4: "idle", 5: "idle" });
+  const [repoReadmeModal, setRepoReadmeModal] = useState({ open: false, repo: null, readme: null, loading: false });
+  const [savingAnalysis, setSavingAnalysis] = useState(false);
+  const [analysisSaved, setAnalysisSaved] = useState(false);
+  const resultsRef = useRef(null);
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await api.get("/profiles/github/history");
+        setHistory(Array.isArray(data) ? data : data.history ?? []);
+      } catch {
+      }
+    })();
+  }, []);
+  const setStageStatus = (stageId, status) => {
+    setStageStatuses((prev) => ({ ...prev, [stageId]: status }));
+  };
+  const resetPipeline = () => {
+    setStageStatuses({ 1: "idle", 2: "idle", 3: "idle", 4: "idle", 5: "idle" });
+  };
+  const validateUrl = (raw) => {
+    const trimmed = raw.trim();
+    if (!trimmed) return "Please enter a GitHub URL or username.";
+    const username = parseUsername(trimmed);
+    if (!/^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i.test(username)) {
+      return "Invalid GitHub username format.";
     }
     return "";
   };
-  const handleUsernameChange = (e) => {
-    const value = e.target.value;
-    setUsername(value);
-    setValidationError(validateUsername(value));
-  };
   const handleAnalyze = async (e) => {
-    var _a, _b;
+    var _a2, _b2;
     e.preventDefault();
-    const validation = validateUsername(username);
-    if (validation) {
-      setValidationError(validation);
+    const validationMsg = validateUrl(url);
+    if (validationMsg) {
+      setError(validationMsg);
       return;
     }
-    setLoading(true);
+    const username = parseUsername(url);
     setError("");
-    setReport(null);
+    setResults(null);
+    setAnalysisSaved(false);
+    setLoading(true);
+    resetPipeline();
     try {
+      setStageStatus(1, "running");
+      await delay(400);
+      setStageStatus(2, "running");
+      await delay(400);
+      setStageStatus(3, "running");
+      await delay(400);
+      setStageStatus(4, "running");
       const { data } = await api.post("/profiles/github/analyze", { username });
-      setReport(data);
+      setStageStatus(4, "done");
+      setStageStatus(5, "running");
+      await delay(600);
+      setStageStatus(5, "done");
+      setStageStatuses({ 1: "done", 2: "done", 3: "done", 4: "done", 5: "done" });
+      setResults(data);
+      setTimeout(() => {
+        var _a3;
+        (_a3 = resultsRef.current) == null ? void 0 : _a3.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 300);
     } catch (err) {
-      setError(((_b = (_a = err.response) == null ? void 0 : _a.data) == null ? void 0 : _b.error) || "Analysis failed. Please try again.");
+      setError(((_b2 = (_a2 = err.response) == null ? void 0 : _a2.data) == null ? void 0 : _b2.error) || "Analysis failed. Please try again.");
+      setStageStatuses((prev) => {
+        const updated = { ...prev };
+        for (const key of Object.keys(updated)) {
+          if (updated[key] === "running") updated[key] = "error";
+        }
+        return updated;
+      });
     } finally {
       setLoading(false);
     }
   };
-  const handleCopy = () => {
-    if (!(report == null ? void 0 : report.generatedReadme)) return;
-    navigator.clipboard.writeText(report.generatedReadme);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2e3);
+  const handleSaveAnalysis = async () => {
+    var _a2, _b2;
+    if (savingAnalysis || analysisSaved) return;
+    setSavingAnalysis(true);
+    try {
+      await api.post("/profiles/github/save", results);
+      setAnalysisSaved(true);
+      try {
+        const { data } = await api.get("/profiles/github/history");
+        setHistory(Array.isArray(data) ? data : data.history ?? []);
+      } catch {
+      }
+    } catch (err) {
+      setError(((_b2 = (_a2 = err.response) == null ? void 0 : _a2.data) == null ? void 0 : _b2.error) || "Failed to save analysis.");
+    } finally {
+      setSavingAnalysis(false);
+    }
   };
-  return /* @__PURE__ */ jsxs("div", { className: "w-full max-w-6xl mx-auto py-16 px-4 sm:px-6", children: [
-    /* @__PURE__ */ jsxs("div", { className: "text-center mb-16", children: [
-      /* @__PURE__ */ jsx("div", { className: "inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-slate-900/5 mb-6", children: /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-slate-900 text-3xl", style: { fontVariationSettings: "'FILL' 0" }, children: "code" }) }),
-      /* @__PURE__ */ jsx("h1", { className: "text-4xl font-black text-on-surface font-headline mb-4", children: "GitHub Profile Optimizer" }),
-      /* @__PURE__ */ jsx("p", { className: "text-lg text-on-surface-variant font-medium max-w-2xl mx-auto", children: "Analyze your GitHub profile or create a custom README from scratch." })
-    ] }),
-    /* @__PURE__ */ jsxs("div", { className: "flex gap-4 mb-12 justify-center border-b border-slate-200 dark:border-slate-700", children: [
-      /* @__PURE__ */ jsx(
-        "button",
-        {
-          onClick: () => setActiveTab("analyzer"),
-          className: `px-6 py-3 font-semibold transition-all border-b-2 ${activeTab === "analyzer" ? "border-blue-600 text-blue-600" : "border-transparent text-slate-600 hover:text-slate-900"}`,
-          children: "📊 Analyzer"
-        }
-      ),
-      /* @__PURE__ */ jsx(
-        "button",
-        {
-          onClick: () => setActiveTab("generator"),
-          className: `px-6 py-3 font-semibold transition-all border-b-2 ${activeTab === "generator" ? "border-blue-600 text-blue-600" : "border-transparent text-slate-600 hover:text-slate-900"}`,
-          children: "✏️ Generator"
-        }
-      )
-    ] }),
-    activeTab === "analyzer" && /* @__PURE__ */ jsxs(Fragment, { children: [
-      error && /* @__PURE__ */ jsx("div", { className: "max-w-2xl mx-auto mb-6 glass-card border-rose-200/50 p-4 rounded-2xl text-rose-600 text-sm font-medium", children: error }),
-      validationError && /* @__PURE__ */ jsx("div", { className: "max-w-2xl mx-auto mb-6 glass-card border-rose-200/50 p-4 rounded-2xl text-rose-600 text-sm font-medium", children: validationError }),
-      /* @__PURE__ */ jsx("form", { onSubmit: handleAnalyze, className: "max-w-2xl mx-auto mb-16", children: /* @__PURE__ */ jsx("div", { className: "relative glass-card rounded-3xl p-2 shadow-lg", children: /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 p-4", children: [
-        /* @__PURE__ */ jsx("div", { className: "w-12 h-12 rounded-2xl glass-card flex items-center justify-center", children: /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-slate-900 text-xl", style: { fontVariationSettings: "'FILL' 0" }, children: "person" }) }),
-        /* @__PURE__ */ jsx(
-          "input",
+  const handleStartOver = () => {
+    setUrl("");
+    setResults(null);
+    setError("");
+    setAnalysisSaved(false);
+    resetPipeline();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  const handleGenerateReadme = async (repo) => {
+    const repoName = typeof repo === "string" ? repo : repo.name;
+    setRepoReadmeModal({ open: true, repo: repoName, readme: null, loading: true });
+    try {
+      const username = (results == null ? void 0 : results.username) ?? parseUsername(url);
+      const { data } = await api.post("/profiles/github/generate-repo-readme", {
+        username,
+        repoName,
+        repoDescription: typeof repo === "object" ? repo.description : void 0,
+        language: typeof repo === "object" ? repo.language : void 0,
+        topics: typeof repo === "object" ? repo.topics : void 0,
+        stars: typeof repo === "object" ? repo.stars : void 0
+      });
+      setRepoReadmeModal((prev) => ({
+        ...prev,
+        readme: data.readme ?? data.content ?? (typeof data === "string" ? data : JSON.stringify(data)),
+        loading: false
+      }));
+    } catch {
+      setRepoReadmeModal((prev) => ({
+        ...prev,
+        readme: "# README generation failed\n\nPlease try again.",
+        loading: false
+      }));
+    }
+  };
+  const closeRepoModal = () => {
+    setRepoReadmeModal({ open: false, repo: null, readme: null, loading: false });
+  };
+  const stage1Data = (() => {
+    var _a2, _b2, _c2;
+    if (!results) return null;
+    const p = results.profile ?? {};
+    const s = results.scores ?? {};
+    return {
+      score: s.overall ?? results.score ?? 0,
+      scoreDescription: ((_a2 = results.report) == null ? void 0 : _a2.summary) ?? ((_b2 = results.stage4) == null ? void 0 : _b2.recruiterSummary) ?? "",
+      repoCount: p.publicRepos ?? ((_c2 = results.repos) == null ? void 0 : _c2.length) ?? "—",
+      stars: p.totalStars ?? 0,
+      followers: p.followers ?? 0,
+      languages: p.languages ?? []
+    };
+  })();
+  const stage2Data = (() => {
+    if (!results) return null;
+    const s = results.scores ?? {};
+    const scoreBreakdown = [
+      { label: "Profile README", score: s.profileReadme ?? 0, max: 15 },
+      { label: "Bio", score: s.bio ?? 0, max: 10 },
+      { label: "Repo Naming", score: s.repoNaming ?? 0, max: 10 },
+      { label: "Descriptions", score: s.descriptions ?? 0, max: 10 },
+      { label: "Topics", score: s.topics ?? 0, max: 10 },
+      { label: "README Quality", score: s.readmeQuality ?? 0, max: 15 },
+      { label: "Hosting", score: s.hosting ?? 0, max: 10 },
+      { label: "Activity", score: s.activity ?? 0, max: 10 },
+      { label: "Diversity", score: s.diversity ?? 0, max: 10 }
+    ];
+    return {
+      repos: results.repos ?? [],
+      auditScore: s.overall ?? null,
+      scoreBreakdown
+    };
+  })();
+  const stage3Data = (() => {
+    if (!results) return null;
+    const repoByName = new Map((results.repos ?? []).map((r) => [r.name, r]));
+    const topProjects = (results.showcaseProjects ?? []).map((name) => {
+      const r = repoByName.get(name) ?? {};
+      return { name, stars: r.stars ?? 0, description: r.description, language: r.language, homepage: r.homepage };
+    });
+    return { topProjects, hasPortfolio: results.hasPortfolio ?? false };
+  })();
+  const stage4Data = (() => {
+    var _a2;
+    if (!(results == null ? void 0 : results.stage4)) return null;
+    return {
+      profileReadme: results.stage4.profileReadme,
+      aiPowered: results.stage4.aiPowered,
+      bioSuggestion: results.stage4.bioSuggestion,
+      currentBio: ((_a2 = results.profile) == null ? void 0 : _a2.bio) ?? "",
+      repoSuggestions: results.stage4.repoSuggestions ?? [],
+      hostingRecs: results.stage4.hostingRecs ?? []
+    };
+  })();
+  const stage5Data = (() => {
+    if (!(results == null ? void 0 : results.report)) return null;
+    return {
+      summary: results.report.summary,
+      topPriorities: results.report.topPriorities ?? [],
+      quickWins: results.report.quickWins ?? [],
+      strengths: results.report.strengths ?? []
+    };
+  })();
+  const pipelineActive = Object.values(stageStatuses).some((s) => s !== "idle");
+  const showTracker = (loading || pipelineActive) && !results;
+  const showResults = !!results;
+  return /* @__PURE__ */ jsxs(Fragment, { children: [
+    /* @__PURE__ */ jsx(RepoReadmeModal, { modal: repoReadmeModal, onClose: closeRepoModal }),
+    /* @__PURE__ */ jsxs("div", { className: "w-full max-w-6xl mx-auto py-16 px-4 sm:px-6", children: [
+      /* @__PURE__ */ jsxs("div", { className: "text-center mb-14", children: [
+        /* @__PURE__ */ jsx("div", { className: "inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-slate-900/5 dark:bg-white/5 mb-6", children: /* @__PURE__ */ jsx(
+          "span",
           {
-            type: "text",
-            placeholder: "Enter your GitHub username",
-            className: `flex-1 bg-transparent outline-none font-medium text-on-surface placeholder:text-outline text-lg ${validationError ? "border-b-2 border-red-500" : ""}`,
-            value: username,
-            onChange: handleUsernameChange
+            className: "material-symbols-outlined text-slate-900 dark:text-white text-3xl",
+            style: { fontVariationSettings: "'FILL' 0" },
+            children: "code"
           }
-        ),
-        /* @__PURE__ */ jsx(
-          "button",
-          {
-            type: "submit",
-            disabled: loading || !!validationError,
-            className: "bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700/50 text-white px-8 py-3 rounded-2xl font-bold hover:from-slate-700 hover:to-slate-800 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100 shadow-[0px_10px_30px_rgba(15,23,42,0.3)] flex items-center gap-3",
-            children: loading ? /* @__PURE__ */ jsxs(Fragment, { children: [
-              /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined animate-spin text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "sync" }),
-              "Analyzing..."
-            ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
-              /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "search" }),
-              "Analyze Profile"
-            ] })
-          }
-        )
-      ] }) }) }),
-      loading && /* @__PURE__ */ jsx("div", { className: "max-w-2xl mx-auto text-center py-12", children: /* @__PURE__ */ jsxs("div", { className: "inline-flex flex-col items-center gap-4", children: [
-        /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined animate-spin text-slate-700 text-5xl", style: { fontVariationSettings: "'FILL' 0" }, children: "sync" }),
-        /* @__PURE__ */ jsx("p", { className: "text-on-surface-variant font-medium", children: "Fetching real GitHub data and generating custom README..." })
-      ] }) }),
-      report && !loading && /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 lg:grid-cols-3 gap-8", children: [
-        /* @__PURE__ */ jsxs("div", { className: "lg:col-span-1 space-y-8", children: [
-          /* @__PURE__ */ jsxs("div", { className: "glass-card p-8 rounded-3xl text-center", children: [
-            /* @__PURE__ */ jsxs("div", { className: "relative mb-6", children: [
-              /* @__PURE__ */ jsxs("svg", { viewBox: "0 0 36 36", className: "w-24 h-24 -rotate-90 mx-auto", children: [
-                /* @__PURE__ */ jsx("circle", { cx: "18", cy: "18", r: "15.9", fill: "none", stroke: "#e5eeff", strokeWidth: "3.2" }),
-                /* @__PURE__ */ jsx(
-                  "circle",
-                  {
-                    cx: "18",
-                    cy: "18",
-                    r: "15.9",
-                    fill: "none",
-                    stroke: getScoreColor$2(report.score),
-                    strokeWidth: "3.2",
-                    strokeDasharray: `${report.score / 100 * 100} 100`,
-                    strokeLinecap: "round"
-                  }
-                )
-              ] }),
-              /* @__PURE__ */ jsxs("div", { className: "absolute inset-0 flex flex-col items-center justify-center", children: [
-                /* @__PURE__ */ jsx("span", { className: "text-3xl font-black text-on-surface", children: report.score }),
-                /* @__PURE__ */ jsx("span", { className: "text-xs text-on-surface-variant font-bold", children: "/ 100" })
+        ) }),
+        /* @__PURE__ */ jsx("h1", { className: "text-4xl font-black text-on-surface font-headline mb-4", children: "GitHub Profile Optimizer" }),
+        /* @__PURE__ */ jsx("p", { className: "text-lg text-on-surface-variant font-medium max-w-2xl mx-auto", children: "Paste your GitHub URL and get an AI-powered recruiter report — profile score, showcase projects, README, and actionable priorities." })
+      ] }),
+      /* @__PURE__ */ jsxs("form", { onSubmit: handleAnalyze, className: "max-w-3xl mx-auto mb-10", children: [
+        /* @__PURE__ */ jsx("div", { className: "relative glass-card rounded-3xl p-2 shadow-lg", children: /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 p-4", children: [
+          /* @__PURE__ */ jsx("div", { className: "w-12 h-12 rounded-2xl glass-card flex items-center justify-center flex-shrink-0", children: /* @__PURE__ */ jsx(
+            "span",
+            {
+              className: "material-symbols-outlined text-slate-900 dark:text-white text-xl",
+              style: { fontVariationSettings: "'FILL' 0" },
+              children: "link"
+            }
+          ) }),
+          /* @__PURE__ */ jsx(
+            "input",
+            {
+              type: "text",
+              placeholder: "Paste your GitHub URL or username (e.g. github.com/pujithsoma)",
+              className: "flex-1 bg-transparent outline-none font-medium text-on-surface placeholder:text-outline text-base min-w-0",
+              value: url,
+              onChange: (e) => {
+                setUrl(e.target.value);
+                if (error) setError("");
+              },
+              disabled: loading
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            "button",
+            {
+              type: "submit",
+              disabled: loading,
+              className: "bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700/50 text-white px-6 py-3 rounded-2xl font-bold hover:from-slate-700 hover:to-slate-800 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100 shadow-[0px_10px_30px_rgba(15,23,42,0.3)] flex items-center gap-2 flex-shrink-0",
+              children: loading ? /* @__PURE__ */ jsxs(Fragment, { children: [
+                /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined animate-spin text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "sync" }),
+                /* @__PURE__ */ jsx("span", { className: "hidden sm:inline", children: "Analyzing..." })
+              ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
+                /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "search" }),
+                /* @__PURE__ */ jsx("span", { className: "hidden sm:inline", children: "Analyze Profile" })
               ] })
-            ] }),
-            /* @__PURE__ */ jsx(
-              "div",
-              {
-                className: "inline-block px-3 py-1 rounded-full text-xs font-bold mb-3",
-                style: { backgroundColor: `${getScoreColor$2(report.score)}20`, color: getScoreColor$2(report.score) },
-                children: report.scoreLabel || "Profile Score"
-              }
-            ),
-            /* @__PURE__ */ jsx("h3", { className: "text-xl font-bold text-on-surface mb-2 font-headline", children: "Profile Health" }),
-            report.scoreDescription && /* @__PURE__ */ jsx("p", { className: "text-on-surface-variant text-sm font-medium", children: report.scoreDescription }),
-            /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-2 gap-4 mt-6", children: [
-              /* @__PURE__ */ jsxs("div", { className: "glass-card bg-surface-container/30 p-4 rounded-2xl text-center", children: [
-                /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-outline text-xl mb-2 block", style: { fontVariationSettings: "'FILL' 0" }, children: "account_tree" }),
-                /* @__PURE__ */ jsx("div", { className: "font-black text-2xl text-on-surface", children: report.repoCount }),
-                /* @__PURE__ */ jsx("div", { className: "text-xs font-bold text-outline uppercase tracking-wider", children: "Repos" })
-              ] }),
-              /* @__PURE__ */ jsxs("div", { className: "glass-card bg-surface-container/30 p-4 rounded-2xl text-center", children: [
-                /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-amber-500 text-xl mb-2 block", style: { fontVariationSettings: "'FILL' 1" }, children: "star" }),
-                /* @__PURE__ */ jsx("div", { className: "font-black text-2xl text-on-surface", children: report.stars }),
-                /* @__PURE__ */ jsx("div", { className: "text-xs font-bold text-outline uppercase tracking-wider", children: "Stars" })
-              ] })
-            ] }),
-            report.languages && report.languages.length > 0 && /* @__PURE__ */ jsx("div", { className: "mt-4 flex flex-wrap gap-2 justify-center", children: report.languages.slice(0, 6).map((lang, i) => /* @__PURE__ */ jsx("span", { className: "px-2 py-1 glass-card bg-surface-container/30 rounded-lg text-xs font-bold text-on-surface-variant", children: lang }, i)) })
+            }
+          )
+        ] }) }),
+        error && /* @__PURE__ */ jsxs("div", { className: "mt-3 px-4 py-3 glass-card border-rose-200/50 rounded-2xl text-rose-600 text-sm font-medium flex items-center gap-2", children: [
+          /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-rose-500 text-base flex-shrink-0", style: { fontVariationSettings: "'FILL' 0" }, children: "error_outline" }),
+          error
+        ] })
+      ] }),
+      showTracker && /* @__PURE__ */ jsx("div", { className: "mb-12", children: /* @__PURE__ */ jsx(PipelineTracker, { statuses: stageStatuses }) }),
+      showResults && /* @__PURE__ */ jsxs("div", { ref: resultsRef, className: "space-y-8", children: [
+        /* @__PURE__ */ jsx("div", { className: "flex flex-wrap items-center justify-center gap-2", children: PIPELINE_STAGES.map((stage) => /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 rounded-xl", children: [
+          /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-emerald-500 text-sm", style: { fontVariationSettings: "'FILL' 1" }, children: "check_circle" }),
+          /* @__PURE__ */ jsx("span", { className: "text-emerald-700 dark:text-emerald-400 text-xs font-bold", children: stage.name })
+        ] }, stage.id)) }),
+        stage1Data && /* @__PURE__ */ jsx(Stage1ProfileHealth, { data: stage1Data }),
+        stage2Data && /* @__PURE__ */ jsx(Stage2RepoAudit, { data: stage2Data, onGenerateReadme: handleGenerateReadme }),
+        stage3Data && /* @__PURE__ */ jsx(Stage3ShowcaseProjects, { data: stage3Data }),
+        stage4Data && /* @__PURE__ */ jsx(Stage4AIRecommendations, { data: stage4Data }),
+        !stage4Data && (results == null ? void 0 : results.generatedReadme) && /* @__PURE__ */ jsxs("div", { className: "space-y-4", children: [
+          /* @__PURE__ */ jsxs("h2", { className: "text-xl font-bold text-on-surface font-headline flex items-center gap-3", children: [
+            /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-purple-500 text-xl", style: { fontVariationSettings: "'FILL' 1" }, children: "auto_awesome" }),
+            "Generated README"
           ] }),
-          report.strengths && report.strengths.length > 0 && /* @__PURE__ */ jsxs("div", { className: "glass-card p-8 rounded-3xl", children: [
+          /* @__PURE__ */ jsx(
+            ReadmePanel,
+            {
+              content: results.generatedReadme,
+              filename: "README.md",
+              badge: results.aiPowered ? "AI-generated" : "Template"
+            }
+          )
+        ] }),
+        !stage4Data && !stage5Data && (((_a = results == null ? void 0 : results.strengths) == null ? void 0 : _a.length) > 0 || ((_b = results == null ? void 0 : results.issues) == null ? void 0 : _b.length) > 0) && /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6", children: [
+          ((_c = results.strengths) == null ? void 0 : _c.length) > 0 && /* @__PURE__ */ jsxs("div", { className: "glass-card p-8 rounded-3xl", children: [
             /* @__PURE__ */ jsxs("h3", { className: "text-xl font-bold text-emerald-600 mb-6 flex items-center gap-3 font-headline", children: [
               /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-emerald-500 text-xl", style: { fontVariationSettings: "'FILL' 1" }, children: "check_circle" }),
               "Strengths"
             ] }),
-            /* @__PURE__ */ jsx("ul", { className: "space-y-4", children: report.strengths.map((s, i) => /* @__PURE__ */ jsxs("li", { className: "text-on-surface-variant font-medium flex gap-3 items-start", children: [
-              /* @__PURE__ */ jsx("span", { className: "w-2 h-2 mt-2 rounded-full bg-emerald-500 flex-shrink-0" }),
-              /* @__PURE__ */ jsx("span", { className: "text-sm leading-relaxed", children: s })
+            /* @__PURE__ */ jsx("ul", { className: "space-y-3", children: results.strengths.map((s, i) => /* @__PURE__ */ jsxs("li", { className: "text-on-surface-variant font-medium flex gap-3 items-start text-sm", children: [
+              /* @__PURE__ */ jsx("span", { className: "w-2 h-2 mt-1.5 rounded-full bg-emerald-500 flex-shrink-0" }),
+              s
             ] }, i)) })
           ] }),
-          report.issues && report.issues.length > 0 && /* @__PURE__ */ jsxs("div", { className: "glass-card p-8 rounded-3xl", children: [
+          ((_d = results.issues) == null ? void 0 : _d.length) > 0 && /* @__PURE__ */ jsxs("div", { className: "glass-card p-8 rounded-3xl", children: [
             /* @__PURE__ */ jsxs("h3", { className: "text-xl font-bold text-rose-600 mb-6 flex items-center gap-3 font-headline", children: [
               /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-rose-500 text-xl", style: { fontVariationSettings: "'FILL' 0" }, children: "warning" }),
               "Improvements"
             ] }),
-            /* @__PURE__ */ jsx("ul", { className: "space-y-4", children: report.issues.map((iss, i) => /* @__PURE__ */ jsxs("li", { className: "text-on-surface-variant font-medium flex gap-3 items-start", children: [
-              /* @__PURE__ */ jsx("span", { className: "w-2 h-2 mt-2 rounded-full bg-rose-500 flex-shrink-0" }),
-              /* @__PURE__ */ jsx("span", { className: "text-sm leading-relaxed", children: iss })
+            /* @__PURE__ */ jsx("ul", { className: "space-y-3", children: results.issues.map((iss, i) => /* @__PURE__ */ jsxs("li", { className: "text-on-surface-variant font-medium flex gap-3 items-start text-sm", children: [
+              /* @__PURE__ */ jsx("span", { className: "w-2 h-2 mt-1.5 rounded-full bg-rose-500 flex-shrink-0" }),
+              iss
             ] }, i)) })
           ] })
         ] }),
-        /* @__PURE__ */ jsx("div", { className: "lg:col-span-2", children: /* @__PURE__ */ jsxs("div", { className: "glass-card border-slate-700/50 rounded-3xl shadow-[0px_25px_50px_rgba(15,23,42,0.25)] overflow-hidden flex flex-col", style: { minHeight: "500px" }, children: [
-          /* @__PURE__ */ jsxs("div", { className: "glass-panel border-b border-white/20 bg-slate-800/50 px-8 py-6 flex justify-between items-center", children: [
-            /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4", children: [
-              /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-slate-400 text-xl", style: { fontVariationSettings: "'FILL' 0" }, children: "description" }),
-              /* @__PURE__ */ jsxs("div", { children: [
-                /* @__PURE__ */ jsx("h3", { className: "text-white font-bold text-lg", children: "Generated Profile README.md" }),
-                /* @__PURE__ */ jsx("p", { className: "text-slate-400 text-sm", children: "AI-generated from your real GitHub data" })
+        stage5Data && /* @__PURE__ */ jsx(
+          Stage5RecruiterReport,
+          {
+            data: stage5Data,
+            onSave: handleSaveAnalysis,
+            savingAnalysis,
+            analysisSaved,
+            onStartOver: handleStartOver
+          }
+        ),
+        !stage5Data && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 flex-wrap", children: [
+          /* @__PURE__ */ jsx(
+            "button",
+            {
+              onClick: handleSaveAnalysis,
+              disabled: savingAnalysis || analysisSaved,
+              className: "bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700/50 text-white px-6 py-3 rounded-2xl font-bold hover:from-slate-700 hover:to-slate-800 active:scale-95 transition-all duration-200 disabled:opacity-60 shadow-[0px_10px_30px_rgba(15,23,42,0.3)] flex items-center gap-2",
+              children: savingAnalysis ? /* @__PURE__ */ jsxs(Fragment, { children: [
+                /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined animate-spin text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "sync" }),
+                "Saving..."
+              ] }) : analysisSaved ? /* @__PURE__ */ jsxs(Fragment, { children: [
+                /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-lg text-emerald-400", style: { fontVariationSettings: "'FILL' 1" }, children: "check_circle" }),
+                "Saved!"
+              ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
+                /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "save" }),
+                "Save Analysis"
               ] })
-            ] }),
-            /* @__PURE__ */ jsxs(
-              "button",
-              {
-                onClick: handleCopy,
-                className: "glass-card hover:bg-white/10 text-white px-4 py-2 rounded-xl font-medium transition-colors flex items-center gap-2 border border-slate-600/50",
-                children: [
-                  /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-sm", style: { fontVariationSettings: "'FILL' 0" }, children: copied ? "check" : "content_copy" }),
-                  copied ? "Copied!" : "Copy"
-                ]
-              }
-            )
-          ] }),
-          /* @__PURE__ */ jsx("div", { className: "p-8 overflow-y-auto flex-grow", children: /* @__PURE__ */ jsx("pre", { className: "text-slate-300 font-mono text-sm whitespace-pre-wrap leading-relaxed", children: report.generatedReadme || "No README generated." }) })
-        ] }) })
-      ] })
-    ] }),
-    activeTab === "generator" && /* @__PURE__ */ jsx(GitHubReadmeGenerator, {})
+            }
+          ),
+          /* @__PURE__ */ jsxs(
+            "button",
+            {
+              onClick: handleStartOver,
+              className: "px-6 py-3 glass-card hover:bg-white/10 text-on-surface-variant font-bold rounded-2xl transition-all border border-white/10 flex items-center gap-2",
+              children: [
+                /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "restart_alt" }),
+                "Start Over"
+              ]
+            }
+          )
+        ] })
+      ] }),
+      /* @__PURE__ */ jsx(HistoryPanel, { history })
+    ] })
   ] });
 }
 function PortfolioBuilder() {
@@ -10570,17 +10872,12 @@ function ProtectedRoute({ children, requireOnboarding = false }) {
 }
 function ProtectedToolRoute({ children, toolPath }) {
   const { isAuthenticated } = useAuthStore();
-  const { onboardingComplete, onboardingChecked, getUserPlan } = useSubscriptionStore();
-  useEffect(() => {
-    if (isAuthenticated) {
-      getUserPlan();
-    }
-  }, [isAuthenticated, getUserPlan]);
+  const { onboardingComplete, onboardingChecked } = useSubscriptionStore();
   if (!isAuthenticated) return /* @__PURE__ */ jsx(Navigate, { to: "/login", replace: true });
   if (!onboardingChecked) {
     return /* @__PURE__ */ jsx("div", { className: "w-full min-h-[60vh] flex items-center justify-center", children: /* @__PURE__ */ jsxs("div", { className: "text-center", children: [
-      /* @__PURE__ */ jsx("div", { className: "inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 mb-4 animate-spin", children: /* @__PURE__ */ jsx("div", { className: "w-8 h-8 rounded-full border-2 border-white border-t-transparent" }) }),
-      /* @__PURE__ */ jsx("p", { className: "text-slate-600 font-semibold", children: "Loading your tools..." })
+      /* @__PURE__ */ jsx("div", { className: "inline-block w-8 h-8 rounded-full border-2 border-blue-600 border-t-transparent animate-spin mb-3" }),
+      /* @__PURE__ */ jsx("p", { className: "text-slate-500 text-sm font-medium", children: "Loading your tools..." })
     ] }) });
   }
   if (!onboardingComplete) return /* @__PURE__ */ jsx(Navigate, { to: "/onboarding", replace: true });
@@ -10589,26 +10886,26 @@ function ProtectedToolRoute({ children, toolPath }) {
   const requiredPlan = getRequiredPlan(toolName);
   return /* @__PURE__ */ jsx(PlanGate, { toolName, requiredPlan, children });
 }
+function AppLoader() {
+  return /* @__PURE__ */ jsx("div", { className: "min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50", children: /* @__PURE__ */ jsxs("div", { className: "text-center", children: [
+    /* @__PURE__ */ jsx("div", { className: "inline-block w-10 h-10 rounded-full border-2 border-blue-600 border-t-transparent animate-spin mb-4" }),
+    /* @__PURE__ */ jsx("p", { className: "text-slate-600 font-semibold", children: "Loading..." })
+  ] }) });
+}
 function App() {
   const { checkAuth, isLoading, sessionBlocked } = useAuthStore();
-  const { checkOnboarded } = useSubscriptionStore();
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => {
-    setHydrated(true);
-  }, []);
+  const { checkOnboarded, getUserPlan } = useSubscriptionStore();
   useEffect(() => {
     if (!isBrowser) return;
-    checkAuth().then(() => checkOnboarded());
-  }, [checkAuth, checkOnboarded]);
-  if (hydrated && sessionBlocked) {
-    return /* @__PURE__ */ jsx(SessionBlocked, {});
-  }
-  if (hydrated && isLoading) {
-    return /* @__PURE__ */ jsx("div", { className: "min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50", children: /* @__PURE__ */ jsxs("div", { className: "text-center", children: [
-      /* @__PURE__ */ jsx("div", { className: "inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 mb-4 animate-spin", children: /* @__PURE__ */ jsx("div", { className: "w-8 h-8 rounded-full border-2 border-white border-t-transparent" }) }),
-      /* @__PURE__ */ jsx("p", { className: "text-slate-600 font-semibold", children: "Loading..." })
-    ] }) });
-  }
+    checkAuth().then(async () => {
+      const isAuthed = useAuthStore.getState().isAuthenticated;
+      if (!isAuthed) return;
+      const onboarded = await checkOnboarded();
+      if (onboarded) getUserPlan();
+    });
+  }, []);
+  if (sessionBlocked) return /* @__PURE__ */ jsx(SessionBlocked, {});
+  if (isBrowser && isLoading) return /* @__PURE__ */ jsx(AppLoader, {});
   return /* @__PURE__ */ jsx(ErrorBoundary, { children: /* @__PURE__ */ jsxs(Routes, { children: [
     /* @__PURE__ */ jsxs(Route, { path: "/", element: /* @__PURE__ */ jsx(Layout, {}), children: [
       /* @__PURE__ */ jsx(Route, { index: true, element: /* @__PURE__ */ jsx(Home, {}) }),
@@ -10630,20 +10927,8 @@ function App() {
       /* @__PURE__ */ jsx(Route, { path: "learning", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/learning", children: /* @__PURE__ */ jsx(ContentVault, {}) }) }),
       /* @__PURE__ */ jsx(Route, { path: "projects", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/projects", children: /* @__PURE__ */ jsx(ProjectIdeas, {}) }) }),
       /* @__PURE__ */ jsx(Route, { path: "blog", element: /* @__PURE__ */ jsx(BlogList, {}) }),
-      /* @__PURE__ */ jsx(
-        Route,
-        {
-          path: "dashboard",
-          element: /* @__PURE__ */ jsx(ProtectedRoute, { children: /* @__PURE__ */ jsx(Dashboard, {}) })
-        }
-      ),
-      /* @__PURE__ */ jsx(
-        Route,
-        {
-          path: "dashboard/settings/plans",
-          element: /* @__PURE__ */ jsx(ProtectedRoute, { children: /* @__PURE__ */ jsx(PlanSettings, {}) })
-        }
-      ),
+      /* @__PURE__ */ jsx(Route, { path: "dashboard", element: /* @__PURE__ */ jsx(ProtectedRoute, { children: /* @__PURE__ */ jsx(Dashboard, {}) }) }),
+      /* @__PURE__ */ jsx(Route, { path: "dashboard/settings/plans", element: /* @__PURE__ */ jsx(ProtectedRoute, { children: /* @__PURE__ */ jsx(PlanSettings, {}) }) }),
       /* @__PURE__ */ jsx(Route, { path: "interview", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/interview", children: /* @__PURE__ */ jsx(MockInterview, {}) }) }),
       /* @__PURE__ */ jsx(Route, { path: "jobmatch", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/jobmatch", children: /* @__PURE__ */ jsx(JobMatcher, {}) }) }),
       /* @__PURE__ */ jsx(Route, { path: "discover", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/discover", children: /* @__PURE__ */ jsx(JobDiscovery, {}) }) }),
@@ -10715,8 +11000,12 @@ function resetStoresForSsr() {
     sessionId: null,
     isAuthenticated: false,
     isLoading: false,
+    // SSR never has a token; no auth check needed
     error: null,
-    hasCompletedOnboarding: false
+    hasCompletedOnboarding: false,
+    sessionBlocked: false,
+    sessionBlockedMessage: null,
+    accountInUse: null
   });
   useSubscriptionStore.setState({
     userPlan: null,

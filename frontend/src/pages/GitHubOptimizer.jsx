@@ -1044,6 +1044,13 @@ export default function GitHubOptimizer() {
 
       const { data } = await api.post('/profiles/github/analyze', { username });
 
+      console.log('🔍 GitHub Optimizer Response:', {
+        repos_count: data.repos?.length,
+        profile_publicRepos: data.profile?.publicRepos,
+        total_stars: data.profile?.totalStars,
+        score: data.scores?.overall,
+      });
+
       setStageStatus(4, 'done');
       setStageStatus(5, 'running');
       await delay(600);

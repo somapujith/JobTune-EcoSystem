@@ -12,32 +12,26 @@ const PLAN_COLORS = {
 };
 
 export default function PlanGate({ toolName, requiredPlan = 'Tune & Polish', children, fallback = null }) {
-  const { userPlan, onboardingComplete } = useSubscriptionStore();
+  const { userPlan } = useSubscriptionStore();
 
-  // Hasn't completed onboarding yet, show loading
-  if (!onboardingComplete) {
+  // Plan not loaded yet — show a brief inline loader rather than a full-screen block
+  if (!userPlan) {
     return fallback || (
-      <div className="w-full h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      <div className="w-full min-h-[40vh] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin mb-4">
-            <Zap className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-          </div>
-          <p className="text-slate-600 dark:text-slate-400 font-medium">Setting up your plan...</p>
+          <div className="inline-block w-8 h-8 rounded-full border-2 border-blue-600 border-t-transparent animate-spin mb-3" />
+          <p className="text-slate-500 text-sm font-medium">Checking access...</p>
         </div>
       </div>
     );
   }
 
-  // Check if user has access using tier-based comparison
-  const userTier = userPlan ? (PLAN_TIERS[userPlan.name] || 0) : 0;
+  const userTier = PLAN_TIERS[userPlan.name] || 0;
   const requiredTier = PLAN_TIERS[requiredPlan] || PLAN_TIERS[TOOL_ACCESS[toolName]] || 1;
   const hasAccess = userTier >= requiredTier;
 
-  if (hasAccess) {
-    return children;
-  }
+  if (hasAccess) return children;
 
-  // Show locked UI
   const planConfig = PLAN_COLORS[requiredPlan] || PLAN_COLORS['Tune & Polish'];
   const IconComponent = planConfig.icon;
 
