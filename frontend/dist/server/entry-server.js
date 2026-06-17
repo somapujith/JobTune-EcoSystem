@@ -5563,7 +5563,7 @@ function GitHubOptimizer() {
     return "";
   };
   const handleAnalyze = async (e) => {
-    var _a2, _b2;
+    var _a2, _b2, _c2, _d2, _e, _f;
     e.preventDefault();
     const validationMsg = validateUrl(url);
     if (validationMsg) {
@@ -5585,6 +5585,12 @@ function GitHubOptimizer() {
       await delay(400);
       setStageStatus(4, "running");
       const { data } = await api.post("/profiles/github/analyze", { username });
+      console.log("🔍 GitHub Optimizer Response:", {
+        repos_count: (_a2 = data.repos) == null ? void 0 : _a2.length,
+        profile_publicRepos: (_b2 = data.profile) == null ? void 0 : _b2.publicRepos,
+        total_stars: (_c2 = data.profile) == null ? void 0 : _c2.totalStars,
+        score: (_d2 = data.scores) == null ? void 0 : _d2.overall
+      });
       setStageStatus(4, "done");
       setStageStatus(5, "running");
       await delay(600);
@@ -5596,7 +5602,7 @@ function GitHubOptimizer() {
         (_a3 = resultsRef.current) == null ? void 0 : _a3.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 300);
     } catch (err) {
-      setError(((_b2 = (_a2 = err.response) == null ? void 0 : _a2.data) == null ? void 0 : _b2.error) || "Analysis failed. Please try again.");
+      setError(((_f = (_e = err.response) == null ? void 0 : _e.data) == null ? void 0 : _f.error) || "Analysis failed. Please try again.");
       setStageStatuses((prev) => {
         const updated = { ...prev };
         for (const key of Object.keys(updated)) {
@@ -5668,11 +5674,12 @@ function GitHubOptimizer() {
     if (!results) return null;
     const p = results.profile ?? {};
     const s = results.scores ?? {};
+    const repoCount = (results.repos ?? []).length > 0 ? (results.repos ?? []).length : p.publicRepos ?? "—";
     return {
       score: s.overall ?? results.score ?? 0,
       scoreDescription: ((_a2 = results.report) == null ? void 0 : _a2.summary) ?? ((_b2 = results.stage4) == null ? void 0 : _b2.recruiterSummary) ?? "",
-      repoCount: p.publicRepos ?? ((_c2 = results.repos) == null ? void 0 : _c2.length) ?? "—",
-      stars: p.totalStars ?? 0,
+      repoCount,
+      stars: p.totalStars ?? ((_c2 = results.repos) == null ? void 0 : _c2.reduce((sum, r) => sum + (r.stars || 0), 0)) ?? 0,
       followers: p.followers ?? 0,
       languages: p.languages ?? []
     };

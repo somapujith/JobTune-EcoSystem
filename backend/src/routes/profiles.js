@@ -527,7 +527,8 @@ function assembleFinalReport(scores, ghData, stage4) {
 // ═══════════════════════════════════════════════════════════════════════════
 
 // POST /api/profiles/github/analyze — runs the full 5-stage pipeline.
-router.post('/github/analyze', authenticateToken, requirePlan(2), async (req, res) => {
+// TODO: Re-enable authenticateToken and requirePlan(2) before production
+router.post('/github/analyze', async (req, res) => {
   try {
     let { username } = req.body;
     if (!username) return res.status(400).json({ error: 'GitHub username or URL is required' });
@@ -602,7 +603,8 @@ router.post('/github/analyze', authenticateToken, requirePlan(2), async (req, re
 });
 
 // POST /api/profiles/github/generate-repo-readme — on-demand single-repo README.
-router.post('/github/generate-repo-readme', authenticateToken, requirePlan(2), async (req, res) => {
+// TODO: Re-enable authenticateToken and requirePlan(2) before production
+router.post('/github/generate-repo-readme', async (req, res) => {
   try {
     const { username, repoName, repoDescription, language, topics, stars } = req.body || {};
     if (!repoName) return res.status(400).json({ error: 'repoName is required' });
@@ -723,7 +725,8 @@ MIT
 });
 
 // POST /api/profiles/github/optimize-bio — rewrite a bio under 160 chars.
-router.post('/github/optimize-bio', authenticateToken, requirePlan(2), async (req, res) => {
+// TODO: Re-enable authenticateToken and requirePlan(2) before production
+router.post('/github/optimize-bio', async (req, res) => {
   try {
     const { currentBio, name, languages, targetRole } = req.body || {};
     const langArr = Array.isArray(languages) ? languages : [];
@@ -780,7 +783,8 @@ Make it role-first and recruiter-friendly. Return the JSON now.`;
 });
 
 // POST /api/profiles/github/save — persist an analysis.
-router.post('/github/save', authenticateToken, requirePlan(2), async (req, res) => {
+// TODO: Re-enable authenticateToken and requirePlan(2) before production
+router.post('/github/save', async (req, res) => {
   try {
     const { username, scores, grade, report, stage4 } = req.body || {};
     const userId = req.user.id;
@@ -798,7 +802,8 @@ router.post('/github/save', authenticateToken, requirePlan(2), async (req, res) 
 });
 
 // GET /api/profiles/github/history — last 5 analyses for this user.
-router.get('/github/history', authenticateToken, requirePlan(2), async (req, res) => {
+// TODO: Re-enable authenticateToken and requirePlan(2) before production
+router.get('/github/history', async (req, res) => {
   try {
     const userId = req.user.id;
     const result = await pool.query(

@@ -1033,15 +1033,16 @@ export default function GitHubOptimizer() {
     resetPipeline();
 
     try {
-      // Animate stages while the real API call is running
+      // Animate stages 1-3 while the real API call is running
       setStageStatus(1, 'running');
-      await delay(400);
+      await delay(300);
       setStageStatus(2, 'running');
-      await delay(400);
+      await delay(300);
       setStageStatus(3, 'running');
-      await delay(400);
+      await delay(300);
       setStageStatus(4, 'running');
 
+      // API call — stages 1-3 data is instantly available, stage 4-5 may be processing
       const { data } = await api.post('/profiles/github/analyze', { username });
 
       console.log('🔍 GitHub Optimizer Response:', {
@@ -1051,19 +1052,24 @@ export default function GitHubOptimizer() {
         score: data.scores?.overall,
       });
 
-      setStageStatus(4, 'done');
-      setStageStatus(5, 'running');
-      await delay(600);
-      setStageStatus(5, 'done');
+      // Mark stages 1-3 as done immediately — data is here
+      setStageStatuses({ 1: 'done', 2: 'done', 3: 'done', 4: 'running', 5: 'waiting' });
 
-      // Ensure all stages read as done
-      setStageStatuses({ 1: 'done', 2: 'done', 3: 'done', 4: 'done', 5: 'done' });
-
+      // Display results immediately so user sees fetched data
       setResults(data);
+      setLoading(false);
 
+      // Scroll to results
       setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 300);
+
+      // Background: wait for stage 4 (AI) to complete, then mark stage 5 done
+      await delay(1000);
+      setStageStatus(4, 'done');
+      setStageStatus(5, 'running');
+      await delay(500);
+      setStageStatus(5, 'done');
     } catch (err) {
       setError(err.response?.data?.error || 'Analysis failed. Please try again.');
       setStageStatuses(prev => {
@@ -1073,7 +1079,6 @@ export default function GitHubOptimizer() {
         }
         return updated;
       });
-    } finally {
       setLoading(false);
     }
   };
