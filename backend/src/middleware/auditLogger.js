@@ -2,13 +2,8 @@ const { pool } = require('../config/database');
 
 const auditLogger = (action, resource) => {
   return async (req, res, next) => {
-    // We want to log after the request has finished to see if it was successful,
-    // or log it upfront. Logging upfront is simpler, but logging after is better.
     res.on('finish', async () => {
-      // Only log if successful or if we want to log failures too. Let's log all.
-      // But we need the user_id if they are logged in.
       const userId = req.user ? req.user.id : null;
-      
       const details = {
         method: req.method,
         url: req.originalUrl,

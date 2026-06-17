@@ -37,10 +37,8 @@ async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature 
     ? Math.min(maxTokens, 1200)
     : maxTokens;
 
-  // Fallback to mock if explicitly enabled
   const isMock = process.env.MOCK_AI === 'true';
   if (isMock) {
-    console.log(`🤖 AI Client: Mock mode enabled`);
     await new Promise(resolve => setTimeout(resolve, 800));
 
     const promptLower = userPrompt.toLowerCase();
@@ -56,8 +54,6 @@ async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature 
   }
 
   try {
-    console.log(`📡 Calling LM Studio: ${selectedModel} at ${baseURL}`);
-
     let response = await fetch(`${baseURL}/chat/completions`, {
       method: 'POST',
       headers: {
@@ -134,7 +130,6 @@ async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature 
       return { ok: false, error: 'Empty LM Studio response', data: null };
     }
 
-    console.log(`✅ LM Studio response received (${content.length} chars)`);
     return { ok: true, error: null, data: content };
   } catch (err) {
     const message = err.message || String(err);

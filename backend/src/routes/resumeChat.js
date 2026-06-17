@@ -12,8 +12,7 @@ async function embedAndStoreResume(userId, resumeId, resumeText) {
     await pool.query('DELETE FROM resume_embeddings WHERE resume_id = $1', [resumeId]);
 
     // Chunk the resume text
-    const chunks = chunkText(resumeText, 500); // ~500 token chunks
-    console.log(`📝 Chunked resume into ${chunks.length} pieces`);
+    const chunks = chunkText(resumeText, 500);
 
     // Embed each chunk
     for (let i = 0; i < chunks.length; i++) {
@@ -28,7 +27,6 @@ async function embedAndStoreResume(userId, resumeId, resumeText) {
       }
     }
 
-    console.log(`✅ Stored ${chunks.length} embeddings for resume ${resumeId}`);
   } catch (err) {
     console.error('Error embedding resume:', err.message);
   }
