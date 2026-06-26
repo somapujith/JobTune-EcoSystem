@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '../store/useAuthStore';
+import { useActivityTracker } from '../hooks/useActivityTracker';
 import { BookmarkIcon, Code2, Play, Send, Lightbulb, ChevronLeft, ChevronRight, Filter, Search, Flame, Trophy, Target, CheckCircle2, XCircle, Loader2, X } from 'lucide-react';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -661,6 +662,7 @@ function ProblemDetail({ problemId, onBack }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function CodingPractice() {
+  useActivityTracker('Coding Practice');
   const [view, setView] = useState('list'); // 'list' | 'detail'
   const [selectedProblem, setSelectedProblem] = useState(null);
   const [problems, setProblems] = useState([]);

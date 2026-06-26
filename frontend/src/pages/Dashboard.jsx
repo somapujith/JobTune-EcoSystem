@@ -1,300 +1,220 @@
-import React, { useEffect, useState } from 'react';
-import useAuthStore, { api } from '../store/useAuthStore';
+import React from 'react';
+import useAuthStore from '../store/useAuthStore';
 import useSubscriptionStore from '../store/useSubscriptionStore';
 import { Navigate, Link } from 'react-router-dom';
 import {
-  Target,
-  Activity,
-  FileText,
-  CheckCircle2,
-  TrendingUp,
-  ArrowRight,
+  Flame,
   Zap,
-  Star,
+  Calendar,
+  Wrench,
   Clock,
-  ExternalLink,
-  Linkedin,
-  Github,
-  Layout as LayoutIcon,
-  BookOpen,
-  Lightbulb,
-  Lock,
   Crown,
-  TrendingUp as TrendingUpIcon,
-  Search,
-  Gauge,
-  ListChecks,
-  Map as MapIcon,
-  GraduationCap,
-  Route,
-  StickyNote,
-  Layers,
-  HelpCircle,
-  MessageSquare,
-  Code2,
-  ClipboardCheck,
-  FolderKanban,
-  Briefcase,
-  Users,
-  Building2,
-  UserCheck,
-  BadgeCheck,
-  Mail,
-  Brain
+  ArrowRight,
+  TrendingUp,
 } from 'lucide-react';
+import { useDashboardData } from '../hooks/useDashboardData';
+import { useActivityTracker } from '../hooks/useActivityTracker';
+import { LEARNING_JOURNEY_STEPS, ACHIEVEMENT_DEFINITIONS } from '../config/learningJourney';
+import ActivityHeatmap from '../components/dashboard/ActivityHeatmap';
+import LearningJourneyStepper from '../components/dashboard/LearningJourneyStepper';
+import WeeklyActivityChart from '../components/dashboard/WeeklyActivityChart';
+import AchievementBadges from '../components/dashboard/AchievementBadges';
+import ProgressOverviewCards from '../components/dashboard/ProgressOverviewCards';
 
-// Mirrors the JobTube Subscription Plans PDF tiers exactly.
-const ALL_TOOLS = [
-  // Learn & Build (₹199/month)
-  { name: 'Skill Assessment', icon: Activity, path: '/skills', color: 'bg-blue-500', tier: 'Foundation', plan: 'Learn & Build' },
-  { name: 'Career Roadmap', icon: MapIcon, path: '/career', color: 'bg-teal-500', tier: 'Foundation', plan: 'Learn & Build' },
-  { name: 'Learning Hub', icon: BookOpen, path: '/learning', color: 'bg-amber-500', tier: 'Foundation', plan: 'Learn & Build' },
-  { name: 'Project Builder', icon: Lightbulb, path: '/projects', color: 'bg-rose-500', tier: 'Foundation', plan: 'Learn & Build' },
-  { name: 'Portfolio Builder', icon: LayoutIcon, path: '/portfolio', color: 'bg-indigo-500', tier: 'Foundation', plan: 'Learn & Build' },
-  { name: 'AI Tutor', icon: GraduationCap, path: '/ai-tutor', color: 'bg-violet-500', tier: 'Foundation', plan: 'Learn & Build' },
-  { name: 'Doubt Solver', icon: HelpCircle, path: '/doubt-solver', color: 'bg-orange-500', tier: 'Foundation', plan: 'Learn & Build' },
-  { name: 'Course Library', icon: BookOpen, path: '/courses', color: 'bg-blue-600', tier: 'Foundation', plan: 'Learn & Build' },
-  { name: 'Learning Paths', icon: Route, path: '/learning-paths', color: 'bg-emerald-600', tier: 'Foundation', plan: 'Learn & Build' },
-  { name: 'AI Notes Generator', icon: StickyNote, path: '/notes', color: 'bg-yellow-500', tier: 'Foundation', plan: 'Learn & Build' },
-  { name: 'AI Flashcards', icon: Layers, path: '/flashcards', color: 'bg-pink-500', tier: 'Foundation', plan: 'Learn & Build' },
-  { name: 'AI Quiz Generator', icon: ClipboardCheck, path: '/quiz', color: 'bg-red-500', tier: 'Foundation', plan: 'Learn & Build' },
-  { name: 'Coding Practice', icon: Code2, path: '/coding-practice', color: 'bg-green-600', tier: 'Foundation', plan: 'Learn & Build' },
-  { name: 'Assessments', icon: BadgeCheck, path: '/assessments', color: 'bg-sky-600', tier: 'Foundation', plan: 'Learn & Build' },
-  { name: 'AI Project Builder', icon: FolderKanban, path: '/project-builder', color: 'bg-purple-600', tier: 'Foundation', plan: 'Learn & Build' },
-  { name: 'Project Workspace', icon: Briefcase, path: '/project-workspace', color: 'bg-slate-600', tier: 'Foundation', plan: 'Learn & Build' },
-  { name: 'Community Hub', icon: Users, path: '/community', color: 'bg-teal-600', tier: 'Foundation', plan: 'Learn & Build' },
+function DailyGoalBar({ progress }) {
+  const clamped = Math.min(100, Math.max(0, progress));
+  return (
+    <div className="flex items-center gap-3 w-full max-w-xs">
+      <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-orange-400 to-amber-500 transition-all duration-700"
+          style={{ width: `${clamped}%` }}
+        />
+      </div>
+      <span className="text-xs font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">
+        {clamped}%
+      </span>
+    </div>
+  );
+}
 
-  // Tune & Polish (₹299/month)
-  { name: 'Resume Optimizer', icon: FileText, path: '/resume', color: 'bg-emerald-500', tier: 'Profile', plan: 'Tune & Polish' },
-  { name: 'ATS Checker', icon: CheckCircle2, path: '/ats-checker', color: 'bg-green-500', tier: 'Profile', plan: 'Tune & Polish' },
-  { name: 'LinkedIn Optimizer', icon: Linkedin, path: '/linkedin', color: 'bg-sky-500', tier: 'Profile', plan: 'Tune & Polish' },
-  { name: 'GitHub Optimizer', icon: Github, path: '/github', color: 'bg-slate-900', tier: 'Profile', plan: 'Tune & Polish' },
-  { name: 'Recruiter Visibility Checker', icon: Gauge, path: '/recruiter-visibility', color: 'bg-fuchsia-500', tier: 'Profile', plan: 'Tune & Polish' },
-  { name: 'Resume Consistency Checker', icon: CheckCircle2, path: '/resume-consistency', color: 'bg-lime-600', tier: 'Profile', plan: 'Tune & Polish' },
-  { name: 'Achievement Enhancer', icon: FileText, path: '/achievement-enhancer', color: 'bg-amber-600', tier: 'Profile', plan: 'Tune & Polish' },
-  { name: 'Application Assistant', icon: FileText, path: '/cover-letter', color: 'bg-orange-500', tier: 'Profile', plan: 'Tune & Polish' },
-  { name: 'Job Discovery', icon: Search, path: '/discover', color: 'bg-cyan-500', tier: 'Profile', plan: 'Tune & Polish' },
-  { name: 'Communication Skills', icon: Mail, path: '/communication-skills', color: 'bg-rose-600', tier: 'Profile', plan: 'Tune & Polish' },
-  { name: 'AI Code Reviewer', icon: Code2, path: '/code-reviewer', color: 'bg-gray-700', tier: 'Profile', plan: 'Tune & Polish' },
+function QuickStatCard({ icon: Icon, label, value, color, bg }) {
+  return (
+    <div className="stat-card">
+      <div className={`stat-icon ${bg} ${color}`}>
+        <Icon className="w-5 h-5" />
+      </div>
+      <div>
+        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{label}</p>
+        <p className="text-lg font-extrabold text-slate-900 dark:text-white">{value}</p>
+      </div>
+    </div>
+  );
+}
 
-  // Zero To Hero (₹499/month)
-  { name: 'Interview Prep', icon: Zap, path: '/interview', color: 'bg-purple-500', tier: 'Advanced', plan: 'Zero to Hero' },
-  { name: 'Job Analytics', icon: TrendingUpIcon, path: '/jobs', color: 'bg-cyan-700', tier: 'Advanced', plan: 'Zero to Hero' },
-  { name: 'Career Readiness Dashboard', icon: ListChecks, path: '/career-readiness', color: 'bg-violet-600', tier: 'Advanced', plan: 'Zero to Hero' },
-  { name: 'Evidence Dashboard', icon: ListChecks, path: '/evidence', color: 'bg-indigo-700', tier: 'Advanced', plan: 'Zero to Hero' },
-  { name: 'Job Fit Analysis', icon: Target, path: '/job-fit', color: 'bg-pink-600', tier: 'Advanced', plan: 'Zero to Hero' },
-  { name: 'Job Description Analyzer', icon: ListChecks, path: '/job-analyzer', color: 'bg-stone-600', tier: 'Advanced', plan: 'Zero to Hero' },
-  { name: 'AI Career Coach', icon: Brain, path: '/career-coach', color: 'bg-amber-700', tier: 'Advanced', plan: 'Zero to Hero' },
-  { name: 'University Dashboard', icon: Building2, path: '/university-dashboard', color: 'bg-blue-800', tier: 'Advanced', plan: 'Zero to Hero' },
-  { name: 'Faculty Panel', icon: UserCheck, path: '/faculty-panel', color: 'bg-teal-800', tier: 'Advanced', plan: 'Zero to Hero' },
-  { name: 'Recruiter Portal', icon: MessageSquare, path: '/recruiter-portal', color: 'bg-indigo-800', tier: 'Advanced', plan: 'Zero to Hero' },
-];
-
-const PLAN_TIERS = {
-  'Learn & Build': 1,
-  'Tune & Polish': 2,
-  'Zero to Hero': 3,
-};
-
-export default function Dashboard() {
-  const { user, isAuthenticated } = useAuthStore();
-  const { userPlan, getUserPlan } = useSubscriptionStore();
-  const [overview, setOverview] = useState(null);
-  const [visibleTools, setVisibleTools] = useState([]);
-
-  useEffect(() => {
-    // Fetch user's plan on mount
-    getUserPlan();
-    api.get('/dashboard/overview')
-      .then(({ data }) => setOverview(data))
-      .catch(() => {/* keep static fallback */});
-  }, []);
-
-  useEffect(() => {
-    if (userPlan) {
-      const userTier = PLAN_TIERS[userPlan.name] || 0;
-      const available = ALL_TOOLS.filter(tool => {
-        const toolTier = PLAN_TIERS[tool.plan] || 0;
-        return toolTier <= userTier;
-      });
-      setVisibleTools(available);
-    } else {
-      // Show free tools if plan not loaded yet
-      const available = ALL_TOOLS.filter(tool => PLAN_TIERS[tool.plan] === 1);
-      setVisibleTools(available);
-    }
-  }, [userPlan]);
-
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+function RecentActivityFeed({ activities }) {
+  const items = activities?.length > 0 ? activities : [
+    { id: 1, action: 'Welcome to JobTune!', date: 'Just now' },
+  ];
 
   return (
-    <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 w-full">
-      {/* Header section with welcome and readiness */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12 gap-8">
-        <div>
-           <div className="flex items-center gap-2 text-blue-600 font-bold text-sm uppercase tracking-widest mb-2">
-              <Zap className="w-4 h-4 fill-current" /> Ecosystem Dashboard
-           </div>
-           <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">
-              Hello, {user?.email?.split('@')[0] || 'Professional'}!
-           </h1>
-           <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">
-             Your plan: <span className="font-bold text-blue-600">{userPlan?.name || 'Loading...'}</span>
-             {userPlan && <span className="text-emerald-600 ml-2">• {visibleTools.length} tools available</span>}
-           </p>
-        </div>
-        <div className="flex flex-col gap-3">
-          {userPlan && (
-            <div className="flex items-center gap-3 glass-card p-4 rounded-2xl">
-              <Crown className="w-5 h-5 text-amber-500" />
-              <div>
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-tighter">Current Plan</p>
-                <p className="text-sm font-black text-slate-900 dark:text-white">{userPlan.name}</p>
-              </div>
-            </div>
-          )}
-          <div className="flex items-center gap-4 glass-card p-2 rounded-2xl">
-             <div className="flex -space-x-2 px-2">
-                {[1, 2, 3].map(i => (
-                   <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center overflow-hidden">
-                      <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i + 42}`} alt="User" />
-                   </div>
-                ))}
-             </div>
-             <div className="h-8 w-px bg-slate-100 mx-2"></div>
-             <div className="pr-4">
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Your Network</p>
-                <p className="text-sm font-black text-slate-900 dark:text-white">+124 Peers</p>
-             </div>
-          </div>
-        </div>
+    <div className="card rounded-2xl p-6 h-full">
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">Recent Activity</h3>
+        <Clock className="w-4 h-4 text-slate-400" />
       </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        {[
-          { label: 'Readiness Score', val: overview ? `${overview.readinessScore}/100` : '45/100', icon: Target, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-950/50' },
-          { label: 'Skills Verified', val: overview ? `${overview.skillScore}/100` : '60/100', icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-950/50' },
-          { label: 'Resume Score', val: overview ? `${overview.resumeScore}/100` : '70/100', icon: Star, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-950/50' },
-          { label: 'Interviews Done', val: overview ? overview.interviewsCompleted || '0' : '0', icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-950/50' },
-        ].map((stat, i) => (
-          <div key={i} className="glass-card p-6 rounded-3xl flex items-center gap-5 group transition-colors">
-            <div className={`w-14 h-14 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
-              <stat.icon className="w-7 h-7" />
-            </div>
+      <div className="space-y-4">
+        {items.slice(0, 6).map((act, i) => (
+          <div key={act.id ?? i} className="flex gap-3">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 shrink-0" />
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
-              <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{stat.val}</p>
+              <p className="text-sm font-bold text-slate-800 dark:text-slate-200 leading-snug">{act.action}</p>
+              <p className="text-[10px] text-slate-400 mt-0.5 font-bold uppercase tracking-tighter">{act.date}</p>
             </div>
           </div>
         ))}
       </div>
+    </div>
+  );
+}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        {/* Main Tool Applications Hub */}
-        <div className="lg:col-span-2 space-y-8">
-           <div className="flex justify-between items-center">
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Your Tool Ecosystem ({visibleTools.length})</h3>
-              <Link to="/" className="text-sm font-bold text-blue-600 flex items-center gap-1 hover:underline">
-                 View Introduction <ExternalLink className="w-3 h-3" />
-              </Link>
-           </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               {ALL_TOOLS.map((tool, i) => {
-                 const isAvailable = visibleTools.some(t => t.name === tool.name);
-                 return isAvailable ? (
-                   <Link key={i} to={tool.path} className="group flex items-center justify-between p-6 glass-card rounded-3xl transition-all duration-300 hover:shadow-lg">
-                      <div className="flex items-center gap-4">
-                         <div className={`w-12 h-12 ${tool.color} rounded-xl flex items-center justify-center text-white shadow-lg`}>
-                            <tool.icon className="w-6 h-6" />
-                         </div>
-                         <div>
-                            <p className="text-[10px] font-black uppercase tracking-tighter text-slate-400">{tool.tier}</p>
-                            <h4 className="font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{tool.name}</h4>
-                         </div>
-                      </div>
-                      <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
-                   </Link>
-                 ) : (
-                   <div
-                    key={i}
-                    className="flex items-center justify-between p-6 glass-card rounded-3xl cursor-not-allowed opacity-50"
-                    title={`Available in ${tool.plan} plan or higher`}
-                   >
-                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-slate-200 rounded-xl flex items-center justify-center text-slate-400">
-                           <tool.icon className="w-6 h-6" />
-                        </div>
-                        <div>
-                           <p className="text-[10px] font-black uppercase tracking-tighter text-slate-400 flex items-center gap-1">
-                             {tool.tier} <Lock className="w-2.5 h-2.5" />
-                           </p>
-                           <h4 className="font-bold text-slate-400">{tool.name}</h4>
-                           <p className="text-xs text-slate-400 mt-1">{tool.plan}+</p>
-                        </div>
-                     </div>
-                     <Lock className="w-5 h-5 text-slate-300" />
-                   </div>
-                 );
-               })}
-            </div>
-        </div>
+export default function Dashboard() {
+  const { user, isAuthenticated } = useAuthStore();
+  const { userPlan, getUserPlan } = useSubscriptionStore();
+  const { overview, heatmapData, weeklyData, stats, achievements, isLoading } = useDashboardData();
 
-        {/* Action Center & Walkthrough */}
-        <div className="space-y-8">
-           <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Priority Actions</h3>
-           <div className="glass-panel border border-white/20 dark:border-white/10 rounded-[2.5rem] p-8 text-slate-900 dark:text-white relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 opacity-10">
-                 <Zap className="w-32 h-32 text-blue-400" />
-              </div>
-              <div className="relative z-10 space-y-6">
-                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-400 text-xs font-bold uppercase tracking-wider">
-                    Walkthrough Guide
-                 </div>
-                 <div className="space-y-4">
-                    <div className="flex gap-4">
-                       <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-black border-2 border-slate-100 dark:border-slate-900 shrink-0 relative z-20 text-white">1</div>
-                       <p className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-snug">
-                          Complete the <span className="text-slate-900 dark:text-white font-bold">Technical Assessment</span> to unlock your learning path.
-                       </p>
-                    </div>
-                    <div className="flex gap-4">
-                       <div className="w-6 h-6 rounded-full bg-slate-300 dark:bg-slate-800 flex items-center justify-center text-[10px] font-black border-2 border-slate-100 dark:border-slate-900 shrink-0 relative z-20 text-slate-600 dark:text-slate-400">2</div>
-                       <p className="text-sm font-medium text-slate-600 dark:text-slate-400 leading-snug">
-                          Optimize your <span className="text-slate-800 dark:text-white/60 font-bold">LinkedIn Headline</span> based on suggested keywords.
-                       </p>
-                    </div>
-                 </div>
-                 <Link to="/skills" className="flex items-center justify-center gap-2 w-full py-4 glass-card text-slate-900 dark:text-white rounded-2xl font-black hover:bg-white/80 dark:hover:bg-slate-800/80 transition-all active:scale-95 text-sm">
-                    Continue Placement Path <ArrowRight className="w-4 h-4" />
-                 </Link>
-              </div>
-           </div>
+  useActivityTracker('Dashboard');
 
-           {/* Activity Log */}
-           <div className="glass-card rounded-3xl p-8">
-              <div className="flex items-center justify-between mb-6">
-                 <h4 className="font-black text-slate-900 dark:text-white tracking-tight">Recent Activity</h4>
-                 <Clock className="w-4 h-4 text-slate-400" />
-              </div>
-              <div className="space-y-6">
-                 {(overview?.recentActivity ?? [
-                   { id: 1, action: "Skills Verified: React.js", date: "2h ago" },
-                   { id: 2, action: "Resume Scored 85/100", date: "1d ago" },
-                   { id: 3, action: "Ecosystem Initialized", date: "2d ago" },
-                 ]).map((act, i) => (
-                    <div key={act.id ?? i} className="flex gap-4">
-                       <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2"></div>
-                       <div className="flex-grow">
-                          <p className="text-sm font-bold text-slate-800 dark:text-slate-200 leading-none">{act.action}</p>
-                          <p className="text-[10px] text-slate-400 mt-1 font-bold uppercase tracking-tighter">{act.date}</p>
-                       </div>
-                    </div>
-                 ))}
-              </div>
-           </div>
+  React.useEffect(() => { getUserPlan(); }, []);
+
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+
+  const completionStatus = overview?.completionStatus || {};
+  const completedSteps = LEARNING_JOURNEY_STEPS.filter(s => completionStatus[s.completionKey]).length;
+
+  if (isLoading) {
+    return (
+      <div className="page-container">
+        <div className="flex flex-col items-center justify-center py-32 gap-4">
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-slate-400 font-medium">Loading your dashboard...</p>
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="page-container space-y-6">
+      {/* ─── Header ─── */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+        <div>
+          <div className="flex items-center gap-2 text-blue-600 font-bold text-sm uppercase tracking-widest mb-1">
+            <Zap className="w-4 h-4 fill-current" /> Student Dashboard
+          </div>
+          <h1 className="page-title">
+            Hello, {user?.email?.split('@')[0] || 'Student'}!
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium text-sm">
+            Your plan: <span className="font-bold text-blue-600">{userPlan?.name || 'Loading...'}</span>
+            <span className="text-slate-400 mx-2">|</span>
+            <span className="text-emerald-600 font-bold">{completedSteps}/8 steps completed</span>
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          {/* Streak Badge */}
+          <div className="flex items-center gap-3 card px-5 py-3 rounded-2xl">
+            <Flame className="w-6 h-6 text-orange-500" />
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Streak</p>
+              <p className="text-xl font-extrabold text-slate-900 dark:text-white leading-none">
+                {stats.currentStreak} <span className="text-xs font-bold text-slate-400">days</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Daily Goal */}
+          <div className="flex flex-col gap-1">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Daily Goal</p>
+            <DailyGoalBar progress={stats.dailyGoalProgress || 0} />
+          </div>
+
+          {/* Plan Badge */}
+          {userPlan && (
+            <div className="flex items-center gap-2 card px-4 py-3 rounded-2xl">
+              <Crown className="w-4 h-4 text-amber-500" />
+              <span className="text-sm font-extrabold text-slate-900 dark:text-white">{userPlan.name}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ─── Quick Stats ─── */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <QuickStatCard icon={Calendar} label="Days Active" value={stats.daysActive || 0} color="text-blue-600" bg="bg-blue-50 dark:bg-blue-950/50" />
+        <QuickStatCard icon={Wrench} label="Tools Used" value={stats.toolsUsed || 0} color="text-emerald-600" bg="bg-emerald-50 dark:bg-emerald-950/50" />
+        <QuickStatCard icon={TrendingUp} label="Readiness" value={`${overview?.readinessScore || 0}/100`} color="text-violet-600" bg="bg-violet-50 dark:bg-violet-950/50" />
+        <QuickStatCard icon={Flame} label="Best Streak" value={`${stats.longestStreak || 0} days`} color="text-orange-600" bg="bg-orange-50 dark:bg-orange-950/50" />
+      </div>
+
+      {/* ─── Activity Heatmap ─── */}
+      <ActivityHeatmap data={heatmapData} />
+
+      {/* ─── Progress Overview Cards ─── */}
+      <ProgressOverviewCards overview={overview} />
+
+      {/* ─── Learning Journey Stepper ─── */}
+      <div className="card rounded-2xl p-6 lg:p-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">Your Learning Journey</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              Follow the path from beginner to job-ready
+            </p>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-600 text-xs font-bold">
+            {completedSteps}/{LEARNING_JOURNEY_STEPS.length} Complete
+          </div>
+        </div>
+        <LearningJourneyStepper
+          steps={LEARNING_JOURNEY_STEPS}
+          completionStatus={completionStatus}
+          userPlan={userPlan?.name || ''}
+        />
+      </div>
+
+      {/* ─── Weekly Chart + Activity Feed ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <WeeklyActivityChart data={weeklyData} />
+        <RecentActivityFeed activities={overview?.recentActivity} />
+      </div>
+
+      {/* ─── Achievements ─── */}
+      <AchievementBadges
+        unlockedAchievements={achievements}
+        definitions={ACHIEVEMENT_DEFINITIONS}
+      />
+
+      {/* ─── Quick Access: Next Step CTA ─── */}
+      {(() => {
+        const nextStep = LEARNING_JOURNEY_STEPS.find(s => !completionStatus[s.completionKey]);
+        if (!nextStep) return null;
+        return (
+          <div className="card rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-bold text-blue-500 uppercase tracking-wider mb-1">Next Step</p>
+              <p className="text-lg font-extrabold text-slate-900 dark:text-white">{nextStep.title}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{nextStep.description}</p>
+            </div>
+            <Link
+              to={nextStep.route}
+              className="btn-primary shrink-0"
+            >
+              Continue <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        );
+      })()}
     </div>
   );
 }

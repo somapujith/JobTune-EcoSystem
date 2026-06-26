@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../store/useAuthStore';
+import { useActivityTracker } from '../hooks/useActivityTracker';
 
 function getScoreColor(score) {
   if (score >= 80) return '#10b981';
@@ -213,6 +214,7 @@ function LoadingContent({ headline, about }) {
 }
 
 export default function LinkedInOptimizer() {
+  useActivityTracker('LinkedIn Optimizer');
   const [step, setStep] = useState(0);
   const [responses, setResponses] = useState({
     role: null,

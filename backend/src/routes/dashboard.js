@@ -95,7 +95,94 @@ router.get('/overview', authenticateToken, async (req, res) => {
       skillScore
     });
 
-    // 7. Return comprehensive dashboard data
+    // 7. Streak data from learning_streaks
+    let streak = { current: 0, longest: 0, dailyGoal: 30 };
+    try {
+      const streakResult = await pool.query(
+        'SELECT current, longest, daily_goal FROM learning_streaks WHERE user_id = $1',
+        [userId]
+      );
+      if (streakResult.rows.length > 0) {
+        streak = {
+          current: streakResult.rows[0].current || 0,
+          longest: streakResult.rows[0].longest || 0,
+          dailyGoal: streakResult.rows[0].daily_goal || 30
+        };
+      }
+    } catch (err) {
+      // learning_streaks table may not exist
+    }
+
+    // 8. Activity stats from daily_activity
+    let daysActive = 0;
+    let toolsUsed = 0;
+    try {
+      const activityStats = await pool.query(
+        `SELECT COUNT(DISTINCT activity_date) AS days_active,
+                COUNT(DISTINCT tool_name) AS tools_used
+         FROM daily_activity WHERE user_id = $1`,
+        [userId]
+      );
+      if (activityStats.rows.length > 0) {
+        daysActive = parseInt(activityStats.rows[0].days_active) || 0;
+        toolsUsed = parseInt(activityStats.rows[0].tools_used) || 0;
+      }
+    } catch (err) {
+      // daily_activity table may not exist
+    }
+
+    // 9. Profile completion percentage
+    let profileCompletion = 0;
+    try {
+      const [hasResume, hasAssessment, hasLinkedin, hasRoadmap] = await Promise.all([
+        pool.query('SELECT EXISTS(SELECT 1 FROM resumes WHERE user_id = $1) AS e', [userId]),
+        pool.query('SELECT EXISTS(SELECT 1 FROM skill_assessments WHERE user_id = $1) AS e', [userId]),
+        pool.query('SELECT EXISTS(SELECT 1 FROM linkedin_analyses WHERE user_id = $1) AS e', [userId]),
+        pool.query('SELECT EXISTS(SELECT 1 FROM career_roadmaps WHERE user_id = $1) AS e', [userId])
+      ]);
+      if (hasResume.rows[0].e) profileCompletion += 25;
+      if (hasAssessment.rows[0].e) profileCompletion += 25;
+      if (hasLinkedin.rows[0].e) profileCompletion += 25;
+      if (hasRoadmap.rows[0].e) profileCompletion += 25;
+    } catch (err) {
+      // Some tables may not exist
+    }
+
+    // 10. Completion status for learning journey steps
+    const completionStatus = {
+      hasSkillAssessment: false,
+      hasCareerRoadmap: false,
+      hasLearningPath: false,
+      hasCourseProgress: false,
+      hasPractice: false,
+      hasProfile: false,
+      hasInterviewPrep: false,
+      hasJobApplications: false
+    };
+
+    const statusChecks = [
+      { key: 'hasSkillAssessment', query: 'SELECT EXISTS(SELECT 1 FROM skill_assessments WHERE user_id = $1) AS e' },
+      { key: 'hasCareerRoadmap', query: 'SELECT EXISTS(SELECT 1 FROM career_roadmaps WHERE user_id = $1) AS e' },
+      { key: 'hasLearningPath', query: 'SELECT EXISTS(SELECT 1 FROM course_enrollments WHERE user_id = $1) AS e' },
+      { key: 'hasCourseProgress', query: 'SELECT EXISTS(SELECT 1 FROM course_enrollments WHERE user_id = $1 AND progress > 0) AS e' },
+      { key: 'hasPractice', query: 'SELECT EXISTS(SELECT 1 FROM practice_submissions WHERE user_id = $1) AS e' },
+      { key: 'hasProfile', query: 'SELECT EXISTS(SELECT 1 FROM resumes WHERE user_id = $1) AS e' },
+      { key: 'hasInterviewPrep', query: 'SELECT EXISTS(SELECT 1 FROM mock_interviews WHERE user_id = $1) AS e' },
+      { key: 'hasJobApplications', query: 'SELECT EXISTS(SELECT 1 FROM job_applications WHERE user_id = $1) AS e' }
+    ];
+
+    await Promise.allSettled(
+      statusChecks.map(async ({ key, query }) => {
+        try {
+          const result = await pool.query(query, [userId]);
+          completionStatus[key] = result.rows[0].e;
+        } catch (err) {
+          // Table may not exist, keep default false
+        }
+      })
+    );
+
+    // 11. Return comprehensive dashboard data
     res.json({
       readinessScore,
       resumeScore: latestResumeScore,
@@ -110,6 +197,11 @@ router.get('/overview', authenticateToken, async (req, res) => {
       replyRate: jobStats.replyRate,
       recentActivity: recentActivity.slice(0, 5),
       actionItems,
+      streak,
+      daysActive,
+      toolsUsed,
+      profileCompletion,
+      completionStatus,
       lastUpdated: new Date().toISOString()
     });
   } catch (err) {

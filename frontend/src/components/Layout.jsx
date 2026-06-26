@@ -39,7 +39,6 @@ const PREP_ITEMS_UNLOCKED = [
 ];
 
 const Navbar = () => {
-  // App.jsx owns checkAuth — Navbar just reads state, no duplicate call
   const { user, logout, isAuthenticated } = useAuthStore();
   const { userPlan } = useSubscriptionStore();
   const [isDark, setIsDark] = useDarkMode();
@@ -50,7 +49,6 @@ const Navbar = () => {
   const [prepUnlocked, setPrepUnlocked] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Fetch prep-onboarding status once on login; listen for custom events only
   useEffect(() => {
     if (!isAuthenticated) {
       setPrepUnlocked(false);
@@ -104,43 +102,36 @@ const Navbar = () => {
   const isGroupActive = (group) => group.items.some(item => location.pathname.startsWith(item.path));
 
   return (
-    <header className="fixed top-0 w-full z-50 glass-panel border-b border-white/40 dark:border-slate-800/50">
-      <div className="flex items-center px-6 lg:px-10 h-16 w-full gap-4">
-        <Link to="/" className="text-2xl font-black tracking-tight text-blue-800 font-headline flex-shrink-0 mr-2">
+    <header className="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60">
+      <div className="flex items-center px-5 lg:px-8 h-16 w-full max-w-[1400px] mx-auto gap-4">
+        <Link to="/" className="text-xl font-extrabold tracking-tight text-blue-700 dark:text-blue-400 font-headline flex-shrink-0 mr-1">
           JobTune
         </Link>
 
-        <nav className="hidden lg:flex items-center gap-5 flex-1 justify-center min-w-0" ref={dropdownRef}>
-          <Link
-            to="/dashboard"
-            className={`text-sm font-semibold transition-all duration-200 ${
-              location.pathname === '/dashboard'
-                ? 'text-blue-700 border-b-2 border-blue-600 pb-0.5'
-                : 'text-slate-500 hover:text-blue-600'
-            }`}
-          >
-            Dashboard
-          </Link>
-          <Link
-            to="/resume"
-            className={`text-sm font-semibold transition-all duration-200 ${
-              location.pathname.startsWith('/resume')
-                ? 'text-blue-700 border-b-2 border-blue-600 pb-0.5'
-                : 'text-slate-500 hover:text-blue-600'
-            }`}
-          >
-            Resume Forge
-          </Link>
-          <Link
-            to="/blog"
-            className={`text-sm font-semibold transition-all duration-200 ${
-              location.pathname === '/blog'
-                ? 'text-blue-700 border-b-2 border-blue-600 pb-0.5'
-                : 'text-slate-500 hover:text-blue-600'
-            }`}
-          >
-            Blog
-          </Link>
+        <nav className="hidden lg:flex items-center gap-1 flex-1 justify-center min-w-0" ref={dropdownRef}>
+          {[
+            { label: 'Dashboard', path: '/dashboard', exact: true },
+            { label: 'Resume Forge', path: '/resume', prefix: true },
+            { label: 'Blog', path: '/blog', exact: true },
+          ].map(link => {
+            const isActive = link.exact
+              ? location.pathname === link.path
+              : location.pathname.startsWith(link.path);
+            return (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                  isActive
+                    ? 'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
+
           {NAV_GROUPS.map((group) => {
             const active = isGroupActive(group);
             const isOpen = openGroup === group.label;
@@ -148,23 +139,33 @@ const Navbar = () => {
               <div key={group.label} className="relative">
                 <button
                   onClick={() => setOpenGroup(isOpen ? null : group.label)}
-                  className={`flex items-center gap-1 text-sm font-semibold transition-colors duration-200 ${
-                    active || isOpen ? 'text-blue-700' : 'text-slate-500 hover:text-blue-600'
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                    active || isOpen
+                      ? 'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50'
                   }`}
                 >
                   {group.label}
-                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {isOpen && (
-                  <div className="absolute top-full left-0 mt-6 w-64 bg-white rounded-2xl shadow-[0px_16px_40px_rgba(0,78,159,0.12)] border border-slate-100 py-2 z-50">
+                  <div className="absolute top-full left-0 mt-3 w-60 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 py-1.5 z-50 animate-fade-in">
                     {group.items.map(item => (
                       <Link
                         key={item.path}
                         to={item.path}
-                        className="flex flex-col px-4 py-3 hover:bg-blue-50 transition-colors group rounded-xl mx-2"
+                        className={`flex flex-col px-4 py-2.5 mx-1.5 rounded-lg transition-colors ${
+                          location.pathname === item.path
+                            ? 'bg-blue-50 dark:bg-blue-950/40'
+                            : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                        }`}
                       >
-                        <span className="text-sm font-semibold text-slate-800 group-hover:text-blue-700">{item.label}</span>
-                        <span className="text-xs text-slate-400 mt-0.5">{item.desc}</span>
+                        <span className={`text-sm font-semibold ${
+                          location.pathname === item.path
+                            ? 'text-blue-700 dark:text-blue-400'
+                            : 'text-slate-800 dark:text-slate-200'
+                        }`}>{item.label}</span>
+                        <span className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{item.desc}</span>
                       </Link>
                     ))}
                   </div>
@@ -174,44 +175,44 @@ const Navbar = () => {
           })}
         </nav>
 
-        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+        <div className="flex items-center gap-1.5 flex-shrink-0 ml-auto">
           <button
             onClick={() => setIsDark(!isDark)}
             title={isDark ? 'Light mode' : 'Dark mode'}
-            className="p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
-            {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            {isDark ? <Sun className="w-4.5 h-4.5" /> : <Moon className="w-4.5 h-4.5" />}
           </button>
-          <span className="hidden xl:block text-sm text-slate-500 dark:text-slate-400 font-medium hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer transition-colors">Support</span>
-          <div className="hidden md:flex items-center gap-2 border-l pl-3 border-slate-200 dark:border-slate-700">
+
+          <div className="hidden md:flex items-center gap-1.5 border-l pl-3 ml-1 border-slate-200 dark:border-slate-700">
             {isAuthenticated ? (
               <>
                 {userPlan && (
                   <Link
                     to="/dashboard/settings/plans"
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors group"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-950/60 transition-colors"
                     title="Manage or switch your plan"
                   >
-                    <Crown className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    <span className="text-xs font-bold text-blue-700 dark:text-blue-300 hidden sm:inline group-hover:underline">{userPlan.name}</span>
+                    <Crown className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                    <span className="text-xs font-bold text-blue-700 dark:text-blue-300 hidden sm:inline">{userPlan.name}</span>
                   </Link>
                 )}
                 <button
                   onClick={logout}
                   title="Logout"
-                  className="flex items-center gap-2 text-sm text-slate-500 hover:text-rose-600 font-medium transition-colors px-3 py-2 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20"
+                  className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 font-medium transition-colors px-2.5 py-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20"
                 >
-                  <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>logout</span>
-                  <span className="hidden lg:inline">Sign Out</span>
+                  <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0" }}>logout</span>
+                  <span className="hidden lg:inline text-xs font-semibold">Sign Out</span>
                 </button>
-                <div className="h-9 w-9 rounded-full bg-blue-100 overflow-hidden border-2 border-blue-200 shrink-0">
+                <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/40 overflow-hidden border-2 border-blue-200 dark:border-blue-800 shrink-0">
                   <img alt="User avatar" className="w-full h-full object-cover" src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id || '42'}`} />
                 </div>
               </>
             ) : (
               <Link
                 to="/login"
-                className="px-5 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-colors shadow-sm"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
               >
                 Sign In
               </Link>
@@ -220,47 +221,34 @@ const Navbar = () => {
 
           <button
             onClick={() => setMobileOpen(prev => !prev)}
-            className="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+            className="lg:hidden p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             aria-label="Toggle menu"
           >
-            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </div>
 
       {mobileOpen && (
-        <div className="lg:hidden bg-white border-t border-slate-100 shadow-lg max-h-[80vh] overflow-y-auto">
-          <nav className="flex flex-col px-6 py-4 gap-2 w-full">
-            <Link
-              to="/dashboard"
-              className={`py-3 px-4 rounded-xl text-sm font-semibold transition-colors ${
-                location.pathname === '/dashboard'
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-blue-600'
-              }`}
-            >
-              Dashboard
-            </Link>
-            <Link
-              to="/resume"
-              className={`py-3 px-4 rounded-xl text-sm font-semibold transition-colors ${
-                location.pathname.startsWith('/resume')
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-blue-600'
-              }`}
-            >
-              Resume Forge
-            </Link>
-            <Link
-              to="/blog"
-              className={`py-3 px-4 rounded-xl text-sm font-semibold transition-colors ${
-                location.pathname === '/blog'
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-blue-600'
-              }`}
-            >
-              Blog
-            </Link>
+        <div className="lg:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shadow-lg max-h-[80vh] overflow-y-auto animate-fade-in">
+          <nav className="flex flex-col px-4 py-3 gap-0.5 w-full">
+            {[
+              { label: 'Dashboard', path: '/dashboard' },
+              { label: 'Resume Forge', path: '/resume' },
+              { label: 'Blog', path: '/blog' },
+            ].map(link => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors ${
+                  location.pathname === link.path || location.pathname.startsWith(link.path + '/')
+                    ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
 
             {NAV_GROUPS.map((group) => {
               const isOpen = openMobileGroup === group.label;
@@ -268,22 +256,22 @@ const Navbar = () => {
                 <div key={group.label} className="flex flex-col">
                   <button
                     onClick={() => setOpenMobileGroup(isOpen ? null : group.label)}
-                    className="flex items-center justify-between py-3 px-4 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                    className="flex items-center justify-between py-2.5 px-4 rounded-lg text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
                   >
                     {group.label}
-                    <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
                   </button>
 
                   {isOpen && (
-                    <div className="flex flex-col pl-4 border-l-2 border-slate-100 ml-6 mt-1 gap-1">
+                    <div className="flex flex-col pl-4 border-l-2 border-slate-100 dark:border-slate-800 ml-6 mt-0.5 gap-0.5">
                       {group.items.map(item => (
                         <Link
                           key={item.path}
                           to={item.path}
-                          className={`py-2 px-4 rounded-lg text-sm transition-colors ${
+                          className={`py-2 px-3 rounded-lg text-sm transition-colors ${
                             location.pathname === item.path
-                              ? 'text-blue-700 font-semibold bg-blue-50'
-                              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
+                              ? 'text-blue-700 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-950/40'
+                              : 'text-slate-500 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
                           }`}
                         >
                           {item.label}
@@ -295,17 +283,16 @@ const Navbar = () => {
               );
             })}
 
-            <div className="border-t border-slate-100 mt-2 pt-3 flex items-center justify-between">
-              <span className="text-sm text-slate-500 font-medium">Support</span>
+            <div className="border-t border-slate-100 dark:border-slate-800 mt-2 pt-2 flex items-center justify-between px-4">
               {isAuthenticated ? (
                 <button
                   onClick={logout}
-                  className="flex items-center gap-2 text-sm text-rose-600 font-semibold px-4 py-2 rounded-lg bg-rose-50"
+                  className="flex items-center gap-2 text-sm text-rose-600 dark:text-rose-400 font-semibold px-3 py-2 rounded-lg bg-rose-50 dark:bg-rose-900/20"
                 >
                   Sign Out
                 </button>
               ) : (
-                <Link to="/login" className="px-5 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold">
+                <Link to="/login" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold">
                   Sign In
                 </Link>
               )}
@@ -327,28 +314,31 @@ const Layout = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col font-body bg-slate-50 dark:bg-[#030712] text-slate-900 dark:text-slate-100 antialiased overflow-x-hidden relative transition-colors duration-500">
+    <div className="min-h-screen flex flex-col font-body bg-slate-50 dark:bg-[#030712] text-slate-900 dark:text-slate-100 antialiased overflow-x-hidden relative transition-colors duration-300">
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-blue-400/30 mix-blend-multiply filter blur-[120px] opacity-70 animate-blob dark:bg-blue-900/40 dark:mix-blend-screen" />
-        <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-indigo-400/30 mix-blend-multiply filter blur-[120px] opacity-70 animate-blob dark:bg-indigo-900/40 dark:mix-blend-screen" style={{ animationDelay: '3s' }} />
-        <div className="absolute bottom-[-20%] left-[20%] w-[60%] h-[60%] rounded-full bg-cyan-400/30 mix-blend-multiply filter blur-[120px] opacity-70 animate-blob dark:bg-cyan-900/40 dark:mix-blend-screen" style={{ animationDelay: '6s' }} />
+        <div className="absolute top-[-15%] left-[-15%] w-[50%] h-[50%] rounded-full bg-blue-200/40 mix-blend-multiply filter blur-[140px] opacity-50 animate-blob dark:bg-blue-950/30 dark:mix-blend-screen" />
+        <div className="absolute top-[-10%] right-[-15%] w-[50%] h-[50%] rounded-full bg-indigo-200/40 mix-blend-multiply filter blur-[140px] opacity-50 animate-blob dark:bg-indigo-950/30 dark:mix-blend-screen" style={{ animationDelay: '3s' }} />
+        <div className="absolute bottom-[-25%] left-[15%] w-[50%] h-[50%] rounded-full bg-cyan-200/30 mix-blend-multiply filter blur-[140px] opacity-40 animate-blob dark:bg-cyan-950/20 dark:mix-blend-screen" style={{ animationDelay: '6s' }} />
       </div>
 
       <div className="relative z-10 w-full flex flex-col flex-grow">
         <Navbar />
-        <div className="flex-grow flex pt-20">
+        <div className="flex-grow flex pt-16">
           <Outlet />
         </div>
 
-        <footer className="w-full border-t-0 bg-transparent flex justify-between items-center px-8 py-12 font-body text-sm relative z-10">
-          <div className="text-slate-500 dark:text-slate-400">
-            &copy; 2024 JobTune AI. Professional Vanguard System.
-          </div>
-          <div className="flex gap-8">
-            <a className="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors duration-300" href="#">Privacy Policy</a>
-            <a className="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors duration-300" href="#">Terms of Service</a>
-            <a className="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors duration-300" href="#">Help Center</a>
-            <a className="text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors duration-300" href="#">API</a>
+        <footer className="w-full bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm border-t border-slate-200/50 dark:border-slate-800/50 relative z-10">
+          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center px-6 py-6 gap-4">
+            <div className="text-sm text-slate-400 dark:text-slate-500 font-medium">
+              &copy; {new Date().getFullYear()} JobTune AI
+            </div>
+            <div className="flex gap-6">
+              {['Privacy Policy', 'Terms of Service', 'Help Center'].map(label => (
+                <a key={label} className="text-sm text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium" href="#">
+                  {label}
+                </a>
+              ))}
+            </div>
           </div>
         </footer>
       </div>

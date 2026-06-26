@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../store/useAuthStore';
+import { useActivityTracker } from '../hooks/useActivityTracker';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -975,6 +976,7 @@ function HistoryPanel({ history }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function GitHubOptimizer() {
+  useActivityTracker('GitHub Optimizer');
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { api } from '../store/useAuthStore';
+import { useActivityTracker } from '../hooks/useActivityTracker';
 
 const questions = [
   { id: 1, text: "How do you handle state in a large React application?", category: "React" },
@@ -32,6 +33,7 @@ const ScoreRing = ({ value, label, color }) => {
 };
 
 export default function SkillAssessment() {
+  useActivityTracker('Skill Assessment');
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(false);

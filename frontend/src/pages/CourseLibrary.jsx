@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, BookOpen, Clock, Users, Star, ChevronRight, X, Play, CheckCircle, Filter } from 'lucide-react';
 import { api } from '../store/useAuthStore';
+import { useActivityTracker } from '../hooks/useActivityTracker';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -275,6 +276,7 @@ function CourseDetailPanel({ course, onClose, onEnroll, isEnrolled, completedLes
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function CourseLibrary() {
+  useActivityTracker('Course Library');
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');

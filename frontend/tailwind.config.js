@@ -66,20 +66,25 @@ export default {
         "full": "9999px"
       },
       fontFamily: {
-        "headline": ["'Plus Jakarta Sans'", "sans-serif"],
+        "headline": ["'Plus Jakarta Sans'", "'Inter'", "sans-serif"],
         "body": ["'Inter'", "sans-serif"],
         "label": ["'Inter'", "sans-serif"]
       },
       boxShadow: {
-        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07), inset 0 0 0 1px rgba(255, 255, 255, 0.3)',
-        'glass-hover': '0 8px 32px 0 rgba(31, 38, 135, 0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.5)',
-        'glass-dark': '0 8px 32px 0 rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.05)',
-        'glass-dark-hover': '0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
-        'glass-strong': '0 16px 48px 0 rgba(31, 38, 135, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.4)',
+        'glass': '0 4px 24px 0 rgba(31, 38, 135, 0.06)',
+        'glass-hover': '0 8px 32px 0 rgba(31, 38, 135, 0.1)',
+        'glass-dark': '0 4px 24px 0 rgba(0, 0, 0, 0.2)',
+        'glass-dark-hover': '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
+        'glass-strong': '0 12px 40px 0 rgba(31, 38, 135, 0.08)',
+        'soft': '0 2px 16px 0 rgba(0, 0, 0, 0.05)',
+        'soft-lg': '0 4px 24px 0 rgba(0, 0, 0, 0.08)',
+        'colored': '0 8px 24px -4px',
       },
       animation: {
         'blob': 'blob 10s infinite',
         'pulse-slow': 'pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'fade-up': 'fadeUp 0.5s ease-out',
+        'fade-in': 'fadeIn 0.3s ease-out',
       },
       keyframes: {
         blob: {
@@ -87,8 +92,16 @@ export default {
           '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
           '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
           '100%': { transform: 'translate(0px, 0px) scale(1)' },
-        }
-      }
+        },
+        fadeUp: {
+          from: { opacity: '0', transform: 'translateY(12px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        fadeIn: {
+          from: { opacity: '0' },
+          to: { opacity: '1' },
+        },
+      },
     },
   },
   plugins: [

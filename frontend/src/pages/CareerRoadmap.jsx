@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Loader, CheckCircle, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 import { api } from '../store/useAuthStore';
+import { useActivityTracker } from '../hooks/useActivityTracker';
 
 export default function CareerRoadmap() {
+  useActivityTracker('Career Roadmap');
   const [step, setStep] = useState('form'); // form | generating | display
   const [formData, setFormData] = useState({
     currentRole: '',

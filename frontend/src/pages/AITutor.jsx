@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Sparkles, ChevronRight, BookOpen, MessageSquare, X } from 'lucide-react';
 import { api } from '../store/useAuthStore';
+import { useActivityTracker } from '../hooks/useActivityTracker';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Topic Data
@@ -131,6 +132,7 @@ function TypingIndicator() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function AITutor() {
+  useActivityTracker('AI Tutor');
   const [topics, setTopics] = useState([]);
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -267,7 +269,7 @@ export default function AITutor() {
   const hasStarted = messages.length > 0;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="page-container">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
@@ -276,7 +278,7 @@ export default function AITutor() {
               school
             </span>
           </div>
-          <h1 className="text-3xl font-black text-on-surface font-headline">AI Tutor</h1>
+          <h1 className="text-3xl font-extrabold text-on-surface dark:text-white font-headline page-title">AI Tutor</h1>
         </div>
         <p className="text-on-surface-variant text-sm ml-[52px]">
           Your personal AI tutor for CS concepts, coding, and interview prep
@@ -290,7 +292,7 @@ export default function AITutor() {
             {/* New Chat Button */}
             <button
               onClick={startNewSession}
-              className="w-full flex items-center gap-2 px-4 py-3 glass-card rounded-2xl hover:bg-white/10 transition-colors text-on-surface font-bold text-sm"
+              className="w-full flex items-center gap-2 px-4 py-3 card rounded-2xl hover:bg-white/10 transition-colors text-on-surface dark:text-white font-bold text-sm"
             >
               <span className="material-symbols-outlined text-sky-400 text-lg">add</span>
               New Conversation
@@ -349,7 +351,7 @@ export default function AITutor() {
           {!hasStarted ? (
             /* Welcome Screen */
             <div className="flex-1 flex flex-col items-center justify-center py-12">
-              <div className="w-16 h-16 rounded-3xl bg-emerald-500/15 flex items-center justify-center mb-6">
+              <div className="w-16 h-16 rounded-2xl bg-emerald-500/15 flex items-center justify-center mb-6">
                 <Sparkles size={32} className="text-emerald-400" />
               </div>
               <h2 className="text-2xl font-black text-on-surface font-headline mb-2">What would you like to learn?</h2>

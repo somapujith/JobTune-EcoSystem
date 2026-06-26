@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronRight, Clock, BookOpen, Plus, X, Check, Flame, Target, Trophy, Lock, PlayCircle, CheckCircle2 } from 'lucide-react';
 import { api } from '../store/useAuthStore';
+import { useActivityTracker } from '../hooks/useActivityTracker';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -417,6 +418,7 @@ function CreateCustomPathModal({ allCourses, onClose, onSave }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function LearningPaths() {
+  useActivityTracker('Learning Paths');
   const [paths, setPaths] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPath, setSelectedPath] = useState(null);

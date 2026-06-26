@@ -37,6 +37,7 @@ const aiCoachRoutes = require('./routes/aiCoach');
 const communityRoutes = require('./routes/community');
 const practiceRoutes = require('./routes/practice');
 const adminPanelsRoutes = require('./routes/adminPanels');
+const activityRoutes = require('./routes/activity');
 const { errorHandler } = require('./middleware/errorHandler');
 const { auditLogger } = require('./middleware/auditLogger');
 const path = require('path');
@@ -104,6 +105,7 @@ app.use('/api/ai-coach', aiCoachRoutes);
 app.use('/api/community', communityRoutes);
 app.use('/api/practice', practiceRoutes);
 app.use('/api/admin-panels', adminPanelsRoutes);
+app.use('/api/activity', activityRoutes);
 
 // Admin UI Route
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));

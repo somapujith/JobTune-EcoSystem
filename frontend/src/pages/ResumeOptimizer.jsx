@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { api } from '../store/useAuthStore';
+import { useActivityTracker } from '../hooks/useActivityTracker';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function scoreColor(s) {
@@ -175,6 +176,7 @@ function RecentUploads({ resumes, onResumeClick, onDeleteClick }) {
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 export default function ResumeOptimizer() {
+  useActivityTracker('Resume Optimizer');
   const [activeTab, setActiveTab] = useState('analyze'); // 'analyze' | 'forge'
 
   // Analyze tab state
