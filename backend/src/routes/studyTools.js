@@ -120,15 +120,15 @@ router.post('/notes/generate', authenticateToken, requirePlan(1), async (req, re
     let systemPrompt, userPrompt, maxTokens;
 
     if (type === 'mindmap') {
-      systemPrompt = `You are a study assistant. Create a text-based hierarchical mind map / outline for the given topic. Use tree characters (├── │ └──) for structure. Return ONLY valid JSON.`;
+      systemPrompt = `You are a study expert who creates visual mind maps that mirror how the brain naturally organizes information — from big concepts to specific details, with clear connections between related ideas. Use tree characters for hierarchy. Return ONLY valid JSON.`;
       userPrompt = `Create a mind map outline for: ${topic}\n\nReturn ONLY this JSON:\n{\n  "title": "${topic}",\n  "type": "mindmap",\n  "content": "the full mind map as a multi-line string using tree characters"\n}`;
       maxTokens = 800;
     } else if (type === 'revision') {
-      systemPrompt = `You are a study assistant. Create condensed revision notes for quick review. Return ONLY valid JSON.`;
+      systemPrompt = `You are a study expert who creates revision notes optimized for spaced repetition and exam performance. Focus on: key definitions, common exam questions, frequently confused concepts, and mnemonics. Return ONLY valid JSON.`;
       userPrompt = `Create concise revision notes for: ${topic}\n\nReturn ONLY this JSON:\n{\n  "title": "${topic} - Revision Notes",\n  "type": "revision",\n  "keyConcepts": ["concept1", "concept2", "concept3"],\n  "summary": "A concise 2-3 sentence summary",\n  "keyTakeaways": ["takeaway1", "takeaway2", "takeaway3"]\n}`;
       maxTokens = 600;
     } else {
-      systemPrompt = `You are a comprehensive study assistant. Generate detailed, well-structured study notes. Include code examples if the topic is technical. Return ONLY valid JSON.`;
+      systemPrompt = `You are a comprehensive study expert who writes notes that could replace a textbook chapter. Include: clear definitions, real-world analogies, production-quality code examples with inline comments, common interview questions about this topic, and edge cases that trip up beginners. Return ONLY valid JSON.`;
       userPrompt = `Generate detailed study notes for: ${topic}\n\nReturn ONLY this JSON:\n{\n  "title": "${topic}",\n  "type": "detailed",\n  "keyConcepts": [{"term": "Term1", "description": "Description1"}, {"term": "Term2", "description": "Description2"}],\n  "detailedExplanation": "A thorough multi-paragraph explanation",\n  "codeExamples": [{"language": "javascript", "code": "example code", "description": "what the code does"}],\n  "summary": "A concise summary paragraph",\n  "keyTakeaways": ["takeaway1", "takeaway2", "takeaway3", "takeaway4"]\n}`;
       maxTokens = 1200;
     }
@@ -175,7 +175,7 @@ router.post('/flashcards/generate', authenticateToken, requirePlan(1), async (re
 
     const cardCount = Math.min(Math.max(count, 5), 15);
 
-    const systemPrompt = `You are a study assistant specializing in creating effective flashcards. Create flashcards with clear, concise questions on the front and comprehensive answers on the back. Assign difficulty: "easy", "medium", or "hard". Return ONLY valid JSON.`;
+    const systemPrompt = `You are a study expert who creates flashcards using proven learning science: active recall, interleaving, and elaborative interrogation. Create cards that test UNDERSTANDING not memorization. Bad: "What is a closure?" Good: "What will this code output and why? [code snippet]". Vary difficulty. Return ONLY valid JSON.`;
 
     const userPrompt = `Create ${cardCount} study flashcards about: ${topic}\n\nReturn ONLY this JSON:\n{\n  "flashcards": [\n    {"front": "Question text", "back": "Answer text", "difficulty": "easy|medium|hard"}\n  ]\n}`;
 
@@ -221,7 +221,7 @@ router.post('/quiz/generate', authenticateToken, requirePlan(1), async (req, res
 
     const qCount = Math.min(Math.max(count, 5), 15);
 
-    const systemPrompt = `You are a quiz creator for students. Generate multiple-choice questions with exactly 4 options each. The "correct" field must be the 0-based index of the correct option. Include a brief explanation for each answer. Return ONLY valid JSON.`;
+    const systemPrompt = `You are an expert quiz creator who designs scenario-based questions that test real understanding, not just definition recall. For technical topics, include code snippets in questions when possible. Each question should have exactly 4 plausible options (avoid obviously wrong answers). The "correct" field must be the 0-based index of the correct option. Include a detailed explanation for each answer that teaches WHY the correct answer is right and WHY common wrong answers are tempting. Return ONLY valid JSON.`;
 
     const userPrompt = `Create ${qCount} ${difficulty}-difficulty multiple-choice questions about: ${topic}\n\nReturn ONLY this JSON:\n{\n  "questions": [\n    {\n      "question": "Question text?",\n      "options": ["Option A", "Option B", "Option C", "Option D"],\n      "correct": 0,\n      "explanation": "Why option A is correct"\n    }\n  ]\n}`;
 

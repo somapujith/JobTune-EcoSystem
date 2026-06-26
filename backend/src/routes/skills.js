@@ -6,28 +6,38 @@ const { pool } = require('../config/database');
 const { callAI, extractJSON } = require('../utils/aiClient');
 
 // ── AI Skill Gap Analysis ────────────────────────────────────────────────────
-const SYSTEM_PROMPT_SKILLS = `You are a senior technical interviewer at a FAANG company. 
-Given a candidate's answers to technical and behavioural questions, you must evaluate them accurately.
+const SYSTEM_PROMPT_SKILLS = `You are a senior technical assessment specialist who has evaluated 10,000+ candidates at companies like Google, Microsoft, and Amazon.
 
-Return ONLY valid JSON (no markdown, no extra text) in this exact format:
+You analyze candidate responses with surgical precision — identifying not just what they know, but HOW they think, WHERE their mental models break down, and WHAT specific actions will close their gaps fastest.
+
+Given a candidate's answers to technical and behavioral questions, produce a thorough evaluation.
+
+Return ONLY valid JSON (no markdown fences, no extra text):
 {
-  "strengths": ["strength1", "strength2", "strength3"],
-  "gaps": ["gap1", "gap2", "gap3"],
-  "role_matches": ["Role 1", "Role 2"],
-  "analysis": "One paragraph (2-3 sentences) summary of the candidate's overall readiness.",
+  "strengths": ["Be SPECIFIC — name exact technologies, patterns, or soft skills demonstrated. Example: 'Strong understanding of React component lifecycle and state management patterns' NOT 'good at React'"],
+  "gaps": ["Be SPECIFIC — name exact missing knowledge. Example: 'No evidence of database optimization knowledge (indexing, query planning, N+1 prevention)' NOT 'needs database skills'"],
+  "role_matches": ["Match to specific job titles with seniority level, e.g. 'Junior Frontend Developer', 'Associate Data Analyst'"],
+  "analysis": "Write 3-4 sentences. First sentence: overall impression. Second: strongest area with evidence. Third: most critical gap and its career impact. Fourth: specific next step.",
   "scores": {
-    "technical_depth": 72,
-    "problem_solving": 65,
-    "communication": 80,
-    "industry_readiness": 58
-  }
+    "technical_depth": 0-100,
+    "problem_solving": 0-100,
+    "communication": 0-100,
+    "industry_readiness": 0-100
+  },
+  "recommendations": [
+    {"skill": "specific skill name", "action": "concrete learning action", "resource": "specific resource name", "timeframe": "realistic timeframe"},
+    {"skill": "...", "action": "...", "resource": "...", "timeframe": "..."}
+  ]
 }
 
-Rules:
-- Strengths/gaps must be SPECIFIC (not vague like "good skills"). Use real technology or skill names.
-- Role matches should be realistic entry-level or junior roles.
-- Scores are 0-100. Be honest, not generous.
-- Analysis should be encouraging but truthful.`;
+Scoring calibration:
+- 0-30: No demonstrated knowledge
+- 31-50: Awareness but cannot apply
+- 51-70: Can apply with guidance
+- 71-85: Independent proficiency
+- 86-100: Expert/teaching level (rare for entry-level)
+
+Be honest. Inflated scores waste the candidate's time. A truthful 45 helps more than a generous 72.`;
 
 // Intelligent fallback when API is unavailable
 function generateFallbackAnalysis(answers) {
@@ -109,7 +119,7 @@ router.post('/assessment', authenticateToken, requirePlan(1), async (req, res, n
     const aiResult = await callAI({
       systemPrompt: SYSTEM_PROMPT_SKILLS,
       userPrompt,
-      maxTokens: 800,
+      maxTokens: 1200,
       model: process.env.LM_STUDIO_MODEL_SKILLS
     });
     

@@ -13,6 +13,7 @@ function isReasoningModel(model) {
 
 function getProvider() {
   const provider = (process.env.AI_PROVIDER || '').toLowerCase();
+  if (provider === 'anthropic' && process.env.ANTHROPIC_API_KEY) return 'anthropic';
   if (provider === 'gemini' && process.env.GEMINI_API_KEY) return 'gemini';
   return 'lmstudio';
 }
@@ -75,6 +76,56 @@ async function callGemini({ systemPrompt, userPrompt, maxTokens = 1024, temperat
     const message = err.message || String(err);
     console.error(`❌ Gemini connection error: ${message}`);
     return { ok: false, error: `Gemini error: ${message}`, data: null };
+  }
+}
+
+// ── Anthropic Claude provider ──
+
+async function callAnthropic({ systemPrompt, userPrompt, maxTokens = 1024, temperature = 0.4 }) {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const model = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6';
+  const url = 'https://api.anthropic.com/v1/messages';
+
+  const body = {
+    model,
+    max_tokens: maxTokens,
+    temperature,
+    system: systemPrompt,
+    messages: [
+      { role: 'user', content: userPrompt }
+    ],
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(90000),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error(`❌ Anthropic API error ${response.status}:`, errText);
+      return { ok: false, error: `Anthropic API error ${response.status}: ${errText}`, data: null };
+    }
+
+    const json = await response.json();
+    const content = json.content?.[0]?.text;
+
+    if (!content) {
+      return { ok: false, error: 'Empty Anthropic response', data: null };
+    }
+
+    return { ok: true, error: null, data: content };
+  } catch (err) {
+    const message = err.message || String(err);
+    console.error(`❌ Anthropic connection error: ${message}`);
+    return { ok: false, error: `Anthropic error: ${message}`, data: null };
   }
 }
 
@@ -195,6 +246,10 @@ async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature 
   }
 
   const provider = getProvider();
+
+  if (provider === 'anthropic') {
+    return callAnthropic({ systemPrompt, userPrompt, maxTokens, temperature });
+  }
 
   if (provider === 'gemini') {
     return callGemini({ systemPrompt, userPrompt, maxTokens, temperature });

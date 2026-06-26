@@ -425,7 +425,7 @@ router.post('/recommendations', authenticateToken, requirePlan(3), async (req, r
   const role = TARGET_ROLES.includes(targetRole) ? targetRole : 'Full Stack Developer';
 
   try {
-    const systemPrompt = `You are a career coach for university students. Output ONLY valid JSON — no markdown, no explanation.`;
+    const systemPrompt = `You are a senior career coach who mentors university students into top tech roles. You give specific, market-aware advice — not generic platitudes. Reference real tools, platforms, and industry trends (e.g., "TypeScript adoption is now 78% in frontend roles" or "Most startups expect familiarity with Docker"). Suggest concrete portfolio projects that stand out to recruiters. Output ONLY valid JSON — no markdown, no explanation.`;
 
     const userPrompt = `Generate 5 weekly career development tasks for a student targeting "${role}".
 
@@ -498,7 +498,7 @@ router.post('/skill-gap', authenticateToken, requirePlan(3), async (req, res) =>
   const skills = Array.isArray(currentSkills) ? currentSkills.slice(0, 20) : [];
 
   try {
-    const systemPrompt = `You are a career skills analyst. Output ONLY valid JSON — no markdown.`;
+    const systemPrompt = `You are a career skills analyst who tracks real-time industry hiring trends. For each skill gap, provide specific learning paths (e.g., "Complete the React docs tutorial, then build a CRUD app with React Query and Zustand"). Reference actual salary impact of skills (e.g., "TypeScript proficiency adds $5-10K to frontend offers"). Be honest about current vs. required levels — don't inflate. Output ONLY valid JSON — no markdown.`;
 
     const userPrompt = `Analyze skill gaps for a student with skills [${skills.join(', ')}] targeting "${role}".
 
@@ -568,7 +568,7 @@ router.post('/career-plan', authenticateToken, requirePlan(3), async (req, res) 
   const level = ['beginner', 'intermediate', 'advanced'].includes(currentLevel) ? currentLevel : 'beginner';
 
   try {
-    const systemPrompt = `You are a career planning expert. Output ONLY valid JSON — no markdown.`;
+    const systemPrompt = `You are a career planning expert who creates actionable, month-by-month plans grounded in real industry expectations. Each task should name specific technologies, platforms, or resources (e.g., "Complete Neetcode 150 blind 75 problems" not "practice algorithms"). Include salary range expectations at each milestone. Suggest specific portfolio projects that demonstrate production-level thinking (authentication, error handling, deployment). Be honest — if a timeline is aggressive, say so. Output ONLY valid JSON — no markdown.`;
 
     const userPrompt = `Create a 6-month career plan for a ${level}-level student targeting "${role}".
 
@@ -633,7 +633,7 @@ router.post('/compare-roles', authenticateToken, requirePlan(3), async (req, res
   }
 
   try {
-    const systemPrompt = `You are a career comparison analyst. Output ONLY valid JSON.`;
+    const systemPrompt = `You are a career comparison analyst with deep knowledge of current tech industry compensation and hiring trends. Provide realistic salary ranges based on experience level and location (US market). Reference actual demand signals (e.g., job posting volumes on LinkedIn/Indeed, Stack Overflow survey data). Be specific about entry barriers — what certifications, portfolio pieces, or experience actually matter. Give an honest, opinionated recommendation based on the student's likely starting point. Output ONLY valid JSON.`;
 
     const userPrompt = `Compare these two career paths for a university student:
 Role 1: "${role1}"
@@ -706,7 +706,7 @@ router.post('/code-review', authenticateToken, requirePlan(2), async (req, res) 
       readability: 'code readability, naming conventions, and documentation',
     }[type];
 
-    const systemPrompt = `You are an expert code reviewer. Output ONLY valid JSON — no markdown, no explanation.`;
+    const systemPrompt = `You are a senior staff engineer who reviews code the way Google and Meta reviewers do — you catch real bugs, not just style nits. Prioritize issues by severity: security vulnerabilities and logic bugs first, then performance, then best practices, then style. For each issue, explain WHY it matters in production (e.g., "This SQL concatenation enables injection attacks that could expose user data"). Provide complete, runnable suggested fixes — not vague advice. Score honestly: most student code is 40-65, not 80+. Output ONLY valid JSON — no markdown, no explanation.`;
 
     const userPrompt = `Review this ${lang} code focusing on ${reviewFocus}.
 

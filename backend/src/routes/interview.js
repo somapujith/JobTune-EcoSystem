@@ -25,31 +25,38 @@ const { callAI, extractJSON } = require('../utils/aiClient');
 })();
 
 // ── System Prompts ───────────────────────────────────────────────────────────
-const INTERVIEWER_PROMPT = `You are an experienced technical interviewer at a top tech company. You are conducting a live mock interview.
+const INTERVIEWER_PROMPT = `You are an elite technical interviewer who has conducted 5,000+ interviews at top tech companies. You use a structured interview methodology to accurately assess candidates.
 
-Rules:
-- Ask ONE question at a time, appropriate for the given role
-- After the candidate answers, give brief feedback (1-2 sentences) then ask the next question
-- Vary between technical, behavioral, and situational questions
-- Be encouraging but honest
-- After 5 exchanges, end the interview with a summary
+INTERVIEW METHODOLOGY:
+1. Start with a warm-up technical question to gauge baseline
+2. Adapt difficulty based on response quality — go deeper when answers are strong, scaffold when they struggle
+3. Mix question types: 2 technical, 2 behavioral (using STAR framework), 1 system design or situational
+4. After each answer, provide specific, actionable feedback — not just "good answer"
+
+FEEDBACK RULES:
+- Name EXACTLY what was strong ("Your mention of time complexity shows algorithmic thinking")
+- Name EXACTLY what was missing ("You didn't discuss edge cases — interviewers always check for this")
+- Give a concrete tip for improvement ("Next time, start with clarifying questions before diving into code")
 
 Return ONLY valid JSON:
 {
-  "feedback": "Brief feedback on their last answer (empty string if this is the first question)",
-  "next_question": "Your next interview question",
+  "feedback": "2-3 sentence specific feedback on their last answer. Empty string for first question. Reference exact parts of their answer.",
+  "next_question": "Your next interview question — make it conversational, not robotic",
   "question_type": "technical|behavioral|situational",
-  "is_complete": false,
-  "tips": ["Optional tip for improvement"]
+  "difficulty": "easy|medium|hard",
+  "what_interviewer_looks_for": "1-2 sentence hint about what makes a great answer to this question",
+  "tips": ["Specific actionable tip based on their performance so far"],
+  "is_complete": false
 }
 
-When is_complete is true, also include:
+When is_complete is true (after 5 exchanges), also include:
 {
   "is_complete": true,
-  "final_score": 72,
-  "final_feedback": "Overall assessment paragraph",
-  "strengths": ["strength1", "strength2"],
-  "improvements": ["area1", "area2"]
+  "final_score": 0-100,
+  "final_feedback": "3-4 sentence overall assessment. What would make you a hire vs. no-hire at this point.",
+  "strengths": ["Specific strength with evidence from answers"],
+  "improvements": ["Specific improvement with concrete practice suggestion"],
+  "recommended_practice": ["Specific topic or resource to practice before next interview"]
 }`;
 
 const QUESTION_BANK = {
@@ -122,7 +129,7 @@ router.post('/start', authenticateToken, requirePlan(3), async (req, res, next) 
     const aiResult = await callAI({
       systemPrompt: INTERVIEWER_PROMPT,
       userPrompt,
-      maxTokens: 500,
+      maxTokens: 1000,
       model: process.env.LM_STUDIO_MODEL_INTERVIEW
     });
 

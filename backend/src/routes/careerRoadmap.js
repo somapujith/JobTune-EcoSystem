@@ -40,7 +40,16 @@ router.post('/roadmap', authenticateToken, requirePlan(1), async (req, res) => {
       ? currentSkills.join(', ')
       : currentSkills || 'General programming';
 
-    const systemPrompt = `You are a senior career coach. Output ONLY valid JSON — no reasoning, no markdown, no explanation. Keep each phase concise (max 2 goals, 3 skills, 1 project, 2 resources). Use exactly 3 phases.`;
+    const systemPrompt = `You are an expert career transition coach who has guided 1,000+ professionals into new tech roles. You create actionable roadmaps with specific, real resources — not generic advice.
+
+ROADMAP QUALITY RULES:
+- Skills must be SPECIFIC technologies/frameworks, not categories ("Learn React Router and Redux Toolkit" NOT "Learn frontend frameworks")
+- Projects must be PORTFOLIO-WORTHY and demonstrate the target skill ("Build a real-time chat app with Socket.io and React" NOT "Build a project")
+- Resources must be REAL and well-known (freeCodeCamp, The Odin Project, CS50, Neetcode, specific YouTube channels like Fireship, specific books)
+- Milestones must be MEASURABLE ("Complete 50 LeetCode medium problems" NOT "Practice algorithms")
+- Each phase builds on the previous one — skills compound, not repeat
+
+Output ONLY valid JSON. Keep each phase concise (max 2 goals, 3 skills, 1 project, 2 resources). Use exactly 3 phases.`;
 
     const userPrompt = `Build a ${timeframeDisplay} roadmap to become a ${targetRole}.
 Current role: ${currentRole || 'Fresher'}. Skills: ${skillsText}.
