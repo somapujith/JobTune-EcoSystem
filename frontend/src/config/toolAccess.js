@@ -10,6 +10,20 @@ export const TOOL_ACCESS = {
   'Project Builder': 'Learn & Build',
   'Portfolio Builder': 'Learn & Build',
 
+  'AI Tutor': 'Learn & Build',
+  'Doubt Solver': 'Learn & Build',
+  'Course Library': 'Learn & Build',
+  'Learning Paths': 'Learn & Build',
+  'AI Notes Generator': 'Learn & Build',
+  'AI Flashcards': 'Learn & Build',
+  'AI Quiz Generator': 'Learn & Build',
+
+  'Community Hub': 'Learn & Build',
+  'Coding Practice': 'Learn & Build',
+  'Assessments': 'Learn & Build',
+  'AI Project Builder': 'Learn & Build',
+  'Project Workspace': 'Learn & Build',
+
   // Tune & Polish tier (₹299/month) — includes everything above, plus:
   'Resume Optimizer': 'Tune & Polish',
   'ATS Checker': 'Tune & Polish',
@@ -19,11 +33,17 @@ export const TOOL_ACCESS = {
   'Resume Consistency Checker': 'Tune & Polish',
   'Achievement Enhancer': 'Tune & Polish',
   'Application Assistant': 'Tune & Polish',
+  'Communication Skills': 'Tune & Polish',
+  'AI Code Reviewer': 'Tune & Polish',
 
   // Zero To Hero tier (₹499/month) — includes everything above, plus:
   'Interview Prep': 'Zero to Hero',
   'Job Analytics': 'Zero to Hero',
   'Career Readiness Dashboard': 'Zero to Hero',
+  'AI Career Coach': 'Zero to Hero',
+  'University Dashboard': 'Zero to Hero',
+  'Faculty Panel': 'Zero to Hero',
+  'Recruiter Portal': 'Zero to Hero',
 
   // Tools not explicitly named in the pricing PDF — kept at their closest
   // existing tier so they remain reachable rather than orphaned.
@@ -67,6 +87,24 @@ export const ROUTE_TOOLS = {
   '/evidence': 'Evidence Dashboard',
   '/job-fit': 'Job Fit Analysis',
   '/job-analyzer': 'Job Analyzer',
+  '/ai-tutor': 'AI Tutor',
+  '/doubt-solver': 'Doubt Solver',
+  '/courses': 'Course Library',
+  '/learning-paths': 'Learning Paths',
+  '/notes': 'AI Notes Generator',
+  '/flashcards': 'AI Flashcards',
+  '/quiz': 'AI Quiz Generator',
+  '/community': 'Community Hub',
+  '/communication-skills': 'Communication Skills',
+  '/coding-practice': 'Coding Practice',
+  '/assessments': 'Assessments',
+  '/project-builder': 'AI Project Builder',
+  '/project-workspace': 'Project Workspace',
+  '/career-coach': 'AI Career Coach',
+  '/code-reviewer': 'AI Code Reviewer',
+  '/university-dashboard': 'University Dashboard',
+  '/faculty-panel': 'Faculty Panel',
+  '/recruiter-portal': 'Recruiter Portal',
 };
 
 export const PLAN_TIERS = {

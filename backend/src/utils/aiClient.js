@@ -1,7 +1,8 @@
 /**
- * LM Studio AI Client
- * Uses OpenAI-compatible API (http://172.19.80.1:1234/v1)
- * Designed for local LLMs running in LM Studio — no cloud dependencies
+ * AI Client — Gemini Flash 2.5 + LM Studio (fallback)
+ *
+ * When AI_PROVIDER=gemini and GEMINI_API_KEY is set, all callAI() requests
+ * go through the Google Gemini REST API. Otherwise falls back to LM Studio.
  */
 
 const REASONING_MODEL_PATTERN = /reasoning|qwq|deepseek-r1|r1-distill/i;
@@ -10,7 +11,12 @@ function isReasoningModel(model) {
   return REASONING_MODEL_PATTERN.test(model || '');
 }
 
-/** Prefer a fast instruct model for structured JSON — reasoning models blow the context window. */
+function getProvider() {
+  const provider = (process.env.AI_PROVIDER || '').toLowerCase();
+  if (provider === 'gemini' && process.env.GEMINI_API_KEY) return 'gemini';
+  return 'lmstudio';
+}
+
 function modelForStructuredJson(preferredModel) {
   if (preferredModel && !isReasoningModel(preferredModel)) {
     return preferredModel;
@@ -23,7 +29,58 @@ function modelForStructuredJson(preferredModel) {
   );
 }
 
-async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature = 0.4, model, structuredJson = false }) {
+// ── Gemini provider ──
+
+async function callGemini({ systemPrompt, userPrompt, maxTokens = 1024, temperature = 0.4 }) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+  const body = {
+    contents: [
+      { role: 'user', parts: [{ text: userPrompt }] }
+    ],
+    systemInstruction: {
+      parts: [{ text: systemPrompt }]
+    },
+    generationConfig: {
+      temperature,
+      maxOutputTokens: maxTokens,
+    }
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(60000)
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error(`❌ Gemini API error ${response.status}:`, errText);
+      return { ok: false, error: `Gemini API error ${response.status}: ${errText}`, data: null };
+    }
+
+    const json = await response.json();
+    const content = json.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!content) {
+      return { ok: false, error: 'Empty Gemini response', data: null };
+    }
+
+    return { ok: true, error: null, data: content };
+  } catch (err) {
+    const message = err.message || String(err);
+    console.error(`❌ Gemini connection error: ${message}`);
+    return { ok: false, error: `Gemini error: ${message}`, data: null };
+  }
+}
+
+// ── LM Studio provider ──
+
+async function callLMStudio({ systemPrompt, userPrompt, maxTokens = 1024, temperature = 0.4, model, structuredJson = false }) {
   const baseURL = process.env.LM_STUDIO_URL || 'http://172.19.80.1:1234/v1';
   let selectedModel = model || process.env.LM_STUDIO_MODEL || 'mistral-7b-instruct-v0.3';
 
@@ -37,28 +94,10 @@ async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature 
     ? Math.min(maxTokens, 1200)
     : maxTokens;
 
-  const isMock = process.env.MOCK_AI === 'true';
-  if (isMock) {
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    const promptLower = userPrompt.toLowerCase();
-    let mockResponse = "I'm currently in mock mode. Switch MOCK_AI=false in .env to use real LM Studio models.";
-
-    if (promptLower.includes('summary')) {
-      mockResponse = "### Optimized Professional Summary (Mock)\n\nResults-driven professional with a strong foundation in software development and a passion for building scalable applications. Experienced in modern JavaScript frameworks and collaborative team environments.";
-    } else if (promptLower.includes('linkedin') || promptLower.includes('about')) {
-      mockResponse = "### LinkedIn About Section (Mock)\n\n🚀 Passionate Software Engineer dedicated to building impactful digital solutions. \n\nWith a focus on performance and user experience, I leverage React and Node.js to create seamless web applications. I thrive in collaborative environments and am always eager to learn new technologies.";
-    }
-
-    return { ok: true, error: null, data: mockResponse };
-  }
-
   try {
     let response = await fetch(`${baseURL}/chat/completions`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: selectedModel,
         messages: [
@@ -66,7 +105,7 @@ async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature 
           { role: 'user', content: userPrompt }
         ],
         max_tokens: effectiveMaxTokens,
-        temperature: temperature,
+        temperature,
         stream: false
       }),
       signal: AbortSignal.timeout(120000)
@@ -84,22 +123,17 @@ async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature 
         };
       }
 
-      // Self-healing: if "system" role is rejected, retry by merging prompts into a single user message
       if (response.status === 400 && (errText.toLowerCase().includes('role') || errText.toLowerCase().includes('system') || errText.toLowerCase().includes('template'))) {
         console.log(`⚠️ LM Studio system role rejected. Retrying with merged user prompt...`);
         const mergedPrompt = `[System Instructions]\n${systemPrompt}\n\n[User Input]\n${userPrompt}`;
         response = await fetch(`${baseURL}/chat/completions`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             model: selectedModel,
-            messages: [
-              { role: 'user', content: mergedPrompt }
-            ],
+            messages: [{ role: 'user', content: mergedPrompt }],
             max_tokens: effectiveMaxTokens,
-            temperature: temperature,
+            temperature,
             stream: false
           }),
           signal: AbortSignal.timeout(120000)
@@ -108,11 +142,7 @@ async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature 
         if (!response.ok) {
           const retryErrText = await response.text();
           console.warn(`LM Studio retry error: ${response.status}`, retryErrText);
-          return {
-            ok: false,
-            error: `LM Studio API retry error ${response.status}.`,
-            data: null
-          };
+          return { ok: false, error: `LM Studio API retry error ${response.status}.`, data: null };
         }
       } else {
         return {
@@ -143,6 +173,34 @@ async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature 
       data: null
     };
   }
+}
+
+// ── Main dispatcher ──
+
+async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature = 0.4, model, structuredJson = false }) {
+  const isMock = process.env.MOCK_AI === 'true';
+  if (isMock) {
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    const promptLower = userPrompt.toLowerCase();
+    let mockResponse = "I'm currently in mock mode. Switch MOCK_AI=false in .env to use real AI models.";
+
+    if (promptLower.includes('summary')) {
+      mockResponse = "### Optimized Professional Summary (Mock)\n\nResults-driven professional with a strong foundation in software development and a passion for building scalable applications. Experienced in modern JavaScript frameworks and collaborative team environments.";
+    } else if (promptLower.includes('linkedin') || promptLower.includes('about')) {
+      mockResponse = "### LinkedIn About Section (Mock)\n\n🚀 Passionate Software Engineer dedicated to building impactful digital solutions. \n\nWith a focus on performance and user experience, I leverage React and Node.js to create seamless web applications. I thrive in collaborative environments and am always eager to learn new technologies.";
+    }
+
+    return { ok: true, error: null, data: mockResponse };
+  }
+
+  const provider = getProvider();
+
+  if (provider === 'gemini') {
+    return callGemini({ systemPrompt, userPrompt, maxTokens, temperature });
+  }
+
+  return callLMStudio({ systemPrompt, userPrompt, maxTokens, temperature, model, structuredJson });
 }
 
 /**

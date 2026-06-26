@@ -131,13 +131,13 @@ function ReadmePanel({ content, filename = 'README.md', badge = null }) {
   };
 
   return (
-    <div className="glass-card border-slate-700/50 rounded-3xl bg-slate-800/50 overflow-hidden flex flex-col">
-      <div className="glass-panel border-b border-white/10 bg-slate-900/50 px-6 py-4 flex justify-between items-center">
+    <div className="glass-card border-slate-600/50 rounded-3xl bg-slate-900/80 overflow-hidden flex flex-col">
+      <div className="glass-panel border-b border-white/10 bg-slate-950/80 px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <span className="material-symbols-outlined text-slate-400 text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>
+          <span className="material-symbols-outlined text-slate-200 text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>
             description
           </span>
-          <span className="text-white font-bold text-sm">{filename}</span>
+          <span className="text-white font-bold text-base">{filename}</span>
           {badge && (
             <span
               className={`px-2 py-0.5 rounded-lg text-xs font-bold ${
@@ -151,7 +151,7 @@ function ReadmePanel({ content, filename = 'README.md', badge = null }) {
         <div className="flex items-center gap-2">
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1.5 px-3 py-1.5 glass-card hover:bg-white/10 text-slate-300 rounded-xl text-xs font-bold border border-slate-600/50 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 glass-card hover:bg-slate-700/50 text-white rounded-xl text-xs font-bold border border-slate-500/70 transition-colors"
           >
             <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>
               {copied ? 'check' : 'content_copy'}
@@ -160,15 +160,15 @@ function ReadmePanel({ content, filename = 'README.md', badge = null }) {
           </button>
           <button
             onClick={handleDownload}
-            className="flex items-center gap-1.5 px-3 py-1.5 glass-card hover:bg-white/10 text-slate-300 rounded-xl text-xs font-bold border border-slate-600/50 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 glass-card hover:bg-slate-700/50 text-white rounded-xl text-xs font-bold border border-slate-500/70 transition-colors"
           >
             <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>download</span>
             .md
           </button>
         </div>
       </div>
-      <div className="p-6 overflow-y-auto max-h-96">
-        <pre className="text-slate-300 font-mono text-sm whitespace-pre-wrap leading-relaxed">
+      <div className="p-6 overflow-y-auto max-h-96 bg-slate-950/80">
+        <pre className="text-white font-mono text-sm whitespace-pre-wrap leading-relaxed font-semibold">
           {content || '— No content —'}
         </pre>
       </div>

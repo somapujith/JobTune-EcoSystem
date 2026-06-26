@@ -1,390 +1,262 @@
 # LinkedIn Profile Optimizer Workflow
 
-## Overview
-AI-powered tool that analyzes and optimizes LinkedIn profiles to increase visibility, attract recruiters, and improve job search outcomes.
+## Goal
+Build a real-data LinkedIn optimization pipeline that helps a user turn their profile into a recruiter-ready asset. The pipeline must use only data the user provides or data that can be fetched from publicly available profile pages. It must not invent jobs, employers, metrics, recommendations, endorsements, or credentials.
 
-## Workflow Steps
+## Current Implementation
+- Frontend: `frontend/src/pages/LinkedInOptimizer.jsx`
+- API route: `POST /api/profiles/linkedin/analyze`
+- Pipeline service: `backend/src/services/linkedinOptimizerService.js`
+- Local LLM adapter: `backend/src/utils/aiClient.js`
+- Model env override: `LM_STUDIO_MODEL_LINKEDIN`
+- Access level: authenticated users with Tune & Polish plan or higher
 
-### 1. **LinkedIn Profile Analysis Input**
-- User provides:
-  - LinkedIn profile URL
-  - Or copy/paste profile content
-  - Target roles/industries
-- Frontend: `LinkedInOptimizer.jsx`
+## Data Policy
+LinkedIn blocks or limits many unauthenticated profile requests. This workflow therefore has three real-data modes:
 
-### 2. **Profile Content Extraction**
-- Service: `profiles.js`
-- Extract:
-  - Headline
-  - About/summary section
-  - Experience descriptions
-  - Skills
-  - Education
-  - Endorsements
-  - Recommendations
-  - Activity level
+1. User-entered structured fields
+   - Headline
+   - About
+   - Skills
+   - Target roles and industries
+   - Experience entries
+   - Profile completeness signals
 
-### 3. **AI Profile Audit**
-**LLM: Qwen/qwen3.5-9b**
+2. User-pasted LinkedIn profile text
+   - Copy/paste from the user's own profile
+   - LinkedIn export text when available
+   - No scraping assumptions
 
-AI analyzes:
-- **Headline Effectiveness**
-  - Keyword density
-  - Clarity and appeal
-  - Industry relevance
-  - SEO optimization
+3. Best-effort public URL fetch
+   - URL must match `https://www.linkedin.com/in/...`
+   - Fetches public HTML only
+   - Extracts title, meta description, and visible page text when LinkedIn allows it
+   - If LinkedIn blocks access, the response records the failure reason and continues with user-provided data
 
-- **About Section**
-  - Storytelling quality
-  - Value proposition clarity
-  - Keyword optimization
-  - Personality reflection
+## Pipeline Stages
 
-- **Experience Descriptions**
-  - Action verb usage
-  - Quantified achievements
-  - Skill demonstration
-  - Impact communication
-
-- **Overall Profile**
-  - Recruiter-friendliness
-  - Completeness
-  - Professionalism
-  - Search algorithm optimization
-
-### 4. **Keyword Intelligence**
-- Service: `keywordIntelligence.js`
-- Identify:
-  - High-value keywords for target roles
-  - Missing keywords in profile
-  - Keyword placement opportunities
-  - Synonym variations
-
-### 5. **Recruiter Search Optimization**
-AI checks for:
-- LinkedIn recruiter search visibility
-- Profile rank in recruiter searches
-- Keyword placement for discoverability
-- Profile completeness impact
-
-### 6. **Competitive Benchmarking**
-AI analyzes:
-- How profile compares to peers
-- Missing elements that competitors have
-- Unique value proposition clarity
-- Differentiation factors
-
-### 7. **Content Improvement Suggestions**
-AI generates:
-- Improved headline options
-- Better about section
-- Enhanced experience descriptions
-- Call-to-action suggestions
-- Activity recommendations
-
-### 8. **Skills Optimization**
-- Suggest relevant skills to add
-- Reorder skills by relevance/endorsements
-- Remove obsolete skills
-- Identify skills to pursue
-
-### 9. **Achievement Highlighting**
-- Extract achievements from descriptions
-- Quantify where possible
-- Use strong action verbs
-- Highlight impact and ROI
-
-### 10. **Implementation Guidance**
-- Step-by-step optimization guide
-- Priority recommendations
-- Quick wins (easy improvements)
-- Long-term improvements
-
-## AI Usage Details
-
-### Model: Qwen/qwen3.5-9b
-
-**Key Prompts:**
-1. **Profile Audit** - Comprehensive analysis
-2. **Headline Optimization** - Better headline versions
-3. **About Section** - Rewrite compelling summary
-4. **Experience Enhancement** - Better descriptions
-5. **Keyword Insertion** - Where/how to add keywords
-6. **Recruiter Optimization** - Search visibility improvement
-7. **Competitive Analysis** - How to stand out
-
-**AI Capabilities:**
-- LinkedIn algorithm understanding
-- Recruiter search behavior knowledge
-- Professional writing expertise
-- Keyword optimization skills
-- Industry trend awareness
-- Personal branding guidance
-
-### LinkedIn Algorithm Factors
-
-AI optimizes for:
-1. **Keyword Relevance** (30%)
-   - Profile completeness
-   - Keyword density
-   - Skill alignment
-
-2. **Engagement** (25%)
-   - Post likes/comments
-   - Profile views
-   - Connection activity
-
-3. **Profile Completeness** (20%)
-   - All sections filled
-   - Photo quality
-   - Recommendations/endorsements
-
-4. **Recency** (15%)
-   - Recent activity
-   - Recent position
-   - Profile updates
-
-5. **Recommendations** (10%)
-   - Number of recommendations
-   - Quality of recommendations
-   - Relevance
-
-## Response Structure
+### 1. Input Normalization
+Accepts:
 
 ```json
 {
-  "status": "success",
-  "data": {
-    "profileScore": 68,
-    "targetScore": 92,
-    "improvementPotential": 24,
-    "audit": {
-      "headline": {
-        "score": 45,
-        "current": "Software Engineer at TechCorp",
-        "issues": [
-          "Generic and not descriptive",
-          "Missing keywords",
-          "No differentiation"
-        ],
-        "suggestions": [
-          "Senior React Developer | Full-Stack Specialist | Building Scalable Web Apps",
-          "Lead Frontend Engineer | React | TypeScript | System Design Expert"
-        ]
-      },
-      "aboutSection": {
-        "score": 55,
-        "characterCount": 520,
-        "issues": [
-          "Weak opening hook",
-          "Passive voice usage",
-          "Missing value proposition"
-        ],
-        "suggestion": "[Improved about section text]"
-      },
-      "experience": {
-        "score": 62,
-        "bulletPoints": [
-          {
-            "current": "Worked on React components",
-            "improved": "Led development of 15+ React components, improving page load time by 40%",
-            "actionScore": 3,
-            "impactScore": 2
-          }
-        ]
-      },
-      "skills": {
-        "score": 70,
-        "current": ["React", "JavaScript", "Node.js", "CSS"],
-        "suggested_additions": [
-          "TypeScript",
-          "Docker",
-          "System Design",
-          "Team Leadership"
-        ],
-        "reorder_suggestion": [
-          "React (reorder to top)",
-          "TypeScript (add)",
-          "JavaScript",
-          "Node.js"
-        ]
-      },
-      "keywords": {
-        "current": ["React", "JavaScript"],
-        "missing_high_value": [
-          "TypeScript",
-          "Full-Stack",
-          "Leadership",
-          "System Design"
-        ],
-        "opportunities": [
-          "Add 3-4 more keywords to headline",
-          "Include keywords in about section",
-          "Highlight in experience descriptions"
-        ]
-      }
-    },
-    "improvements": {
-      "quick_wins": [
-        {
-          "action": "Update headline",
-          "effort": "5 minutes",
-          "impact": "high",
-          "example": "Senior React Developer | Full-Stack | Problem Solver"
-        },
-        {
-          "action": "Reorder top 3 skills",
-          "effort": "2 minutes",
-          "impact": "medium"
-        }
-      ],
-      "medium_effort": [
-        {
-          "action": "Rewrite about section",
-          "effort": "30 minutes",
-          "impact": "high"
-        },
-        {
-          "action": "Update experience descriptions",
-          "effort": "45 minutes",
-          "impact": "high"
-        }
-      ],
-      "ongoing": [
-        {
-          "action": "Post regular content",
-          "frequency": "2x per week",
-          "impact": "medium"
-        },
-        {
-          "action": "Request recommendations",
-          "count": "5-10 per year",
-          "impact": "medium"
-        }
-      ]
-    },
-    "recruiterOptimization": {
-      "currentVisibility": "Medium",
-      "potentialVisibility": "High",
-      "searchTerms": [
-        "React Developer",
-        "Full-Stack Engineer",
-        "Senior Frontend"
-      ],
-      "visibility": {
-        "term": "React Developer",
-        "currentRank": 2500,
-        "potentialRank": 450,
-        "changes": ["Add TypeScript", "Increase activity"]
-      }
-    },
-    "competitiveAnalysis": {
-      "yourScore": 68,
-      "peerAverage": 72,
-      "topPerformers": 88,
-      "differentiationOpportunities": [
-        "Highlight unique projects",
-        "Show thought leadership",
-        "Build personal brand"
-      ]
-    },
-    "activityRecommendations": [
-      {
-        "activity": "Post about React best practices",
-        "frequency": "Biweekly",
-        "benefit": "Increase engagement and visibility"
-      },
-      {
-        "activity": "Share article about industry trends",
-        "frequency": "Weekly",
-        "benefit": "Establish expertise"
-      }
-    ],
-    "implementationPlan": {
-      "week1": [
-        "Update headline",
-        "Reorder skills",
-        "Update photo if needed"
-      ],
-      "week2": [
-        "Rewrite about section",
-        "Request 2-3 recommendations"
-      ],
-      "week3": [
-        "Update experience descriptions",
-        "Add 5-8 new skills"
-      ],
-      "ongoing": [
-        "Post weekly content",
-        "Engage with industry posts",
-        "Request periodic recommendations"
-      ]
+  "profileUrl": "https://www.linkedin.com/in/example",
+  "headline": "Frontend Engineer | React | TypeScript",
+  "about": "Profile about text...",
+  "skills": "React, TypeScript, Node.js",
+  "targetRoles": "Frontend Engineer, Full Stack Engineer",
+  "targetIndustries": "SaaS, FinTech",
+  "experiences": [
+    {
+      "title": "Frontend Developer",
+      "company": "Acme",
+      "description": "Built dashboards used by 2,000 users."
     }
-  }
+  ],
+  "experienceCount": 3,
+  "yearsOfExperience": 2,
+  "connections": "100to500",
+  "hasPhoto": true,
+  "hasFeatured": true,
+  "openToWork": true,
+  "activityLevel": "monthly"
 }
 ```
 
-## User Flow
-1. Login → Dashboard → LinkedIn Optimizer
-2. Input LinkedIn profile (URL or content)
-3. View profile score and gap analysis
-4. See suggested improvements by priority
-5. Get quick wins list (easy 5-minute updates)
-6. Review detailed suggestions for each section
-7. Read recruiter visibility impact
-8. Implement changes step-by-step
-9. Re-upload for updated score
-10. Monitor progress over time
+Normalization converts comma/newline strings into arrays, trims text fields, and keeps a clear distinction between user-provided and fetched data.
 
-## Key Features
+### 2. Public Data Fetch
+`fetchLinkedInPublicData(profileUrl)` attempts a real HTTP fetch of the public LinkedIn page.
 
-### Comprehensive Audit
-- Analyzes all profile sections
-- Identifies optimization opportunities
-- Provides specific improvements
-- Shows impact of each change
+Returned source metadata:
 
-### Recruiter Optimization
-- LinkedIn algorithm alignment
-- Recruiter search visibility
-- Keyword placement strategy
-- Ranking improvement potential
+```json
+{
+  "fetched": true,
+  "source": "public_linkedin_page",
+  "title": "...",
+  "description": "...",
+  "pageText": "..."
+}
+```
 
-### Priority Recommendations
-- Quick wins (5-30 minutes)
-- Medium effort (30 min - 2 hours)
-- Long-term improvements
-- Ongoing activities
+If blocked:
 
-### Competitive Benchmarking
-- Compare to peers
-- Show differentiation opportunities
-- Highlight unique value
-- Suggest thought leadership
+```json
+{
+  "fetched": false,
+  "status": 999,
+  "reason": "LinkedIn returned HTTP 999."
+}
+```
 
-### Implementation Guide
-- Step-by-step plan
-- Timeline for improvements
-- Before/after examples
-- Progress tracking
+No fallback mock profile is inserted. The pipeline uses only real available input.
 
-## Files Involved
+### 3. Signal Extraction
+The service derives:
+- Detected technical and role keywords
+- Quantified claims
+- Action verb count
+- Total available word count
+- Experience proof density
 
-**Backend:**
-- Routes: `backend/src/routes/linkedIn.js`
-- Services:
-  - `profiles.js` - profile analysis
-  - `keywordIntelligence.js` - keyword optimization
-  - `jobAnalyzer.js` - job requirement analysis
+These signals feed scoring and the LLM prompt.
 
-**Frontend:**
-- `pages/LinkedInOptimizer.jsx` - main interface
-- `pages/LinkedInOptimizerEnhanced.jsx` - enhanced version
-- Components for audit results
+### 4. Deterministic Scoring
+The profile receives five section scores:
 
-## Performance Metrics
-- Profile analysis time: 30-60 seconds
-- LLM calls: 5-8 per audit
-- Improvement potential average: 25%
-- User satisfaction: 4.3/5 stars
-- Average score improvement: +24 points
+| Section | Weight | What It Measures |
+| --- | ---: | --- |
+| Headline Impact | 22% | Role clarity, keywords, positioning, structure |
+| About Section Depth | 24% | Length, story, proof, measurable outcomes, CTA |
+| Experience Proof | 20% | Entry count, years, action verbs, quantified results |
+| Skills Search Fit | 19% | Skill count, target-role alignment, recruiter keywords |
+| Profile Completeness | 15% | Photo, Featured, network, activity, Open to Work |
+
+The deterministic layer always returns a useful report, even if the local LLM is offline.
+
+### 5. Keyword Intelligence
+The keyword stage compares:
+- Current explicit skills
+- Keywords detected in headline/about/experience
+- Target role and industry terms
+
+Output:
+
+```json
+{
+  "current": ["react", "typescript", "api"],
+  "missingHighValue": ["aws", "docker"],
+  "opportunities": [
+    "Put the top 3 role keywords in the headline.",
+    "Use the same keywords naturally in About and Experience.",
+    "Keep skills ordered by target-role relevance."
+  ]
+}
+```
+
+### 6. Local LLM Optimization
+The optimizer calls LM Studio through `callAI`.
+
+Prompt rules:
+- Use only the supplied real profile data
+- Do not invent employers, degrees, awards, metrics, or endorsements
+- Return structured JSON only
+- Focus on recruiter search visibility, truthful rewrites, and practical next actions
+
+Expected LLM output:
+
+```json
+{
+  "headlineOptions": ["..."],
+  "aboutRewrite": "...",
+  "experienceImprovements": [
+    {
+      "current": "...",
+      "improved": "...",
+      "reason": "..."
+    }
+  ],
+  "quickWins": [
+    {
+      "action": "Rewrite headline with role + stack + outcome.",
+      "effort": "5 minutes",
+      "impact": "high"
+    }
+  ],
+  "recruiterSummary": "...",
+  "activityRecommendations": ["..."],
+  "skillRecommendations": ["..."]
+}
+```
+
+If the model is unreachable or returns invalid JSON, the service uses deterministic fallback suggestions and marks `aiPowered: false`.
+
+### 7. API Response Shape
+`POST /api/profiles/linkedin/analyze` returns:
+
+```json
+{
+  "success": true,
+  "score": 72,
+  "scoreLabel": "Strong",
+  "scoreDescription": "Your LinkedIn profile scores 72/100 based on real supplied profile data.",
+  "dataSources": {
+    "userProvided": {
+      "headline": true,
+      "about": true,
+      "skills": 12,
+      "pastedText": false,
+      "experiences": 2
+    },
+    "publicFetch": {
+      "fetched": false,
+      "reason": "LinkedIn returned HTTP 999."
+    }
+  },
+  "metrics": [
+    { "label": "Headline Impact", "val": 80, "status": "good" }
+  ],
+  "audit": {
+    "headline": {
+      "score": 80,
+      "current": "Frontend Engineer | React | TypeScript",
+      "issues": []
+    }
+  },
+  "keywords": {
+    "current": ["react", "typescript"],
+    "missingHighValue": ["docker"],
+    "opportunities": []
+  },
+  "optimizations": {
+    "aiPowered": true,
+    "headlineOptions": [],
+    "aboutRewrite": "",
+    "quickWins": []
+  },
+  "suggestions": [],
+  "aiPowered": true,
+  "generatedAt": "2026-06-18T00:00:00.000Z"
+}
+```
+
+Legacy frontend fields remain supported:
+- `score`
+- `scoreLabel`
+- `scoreDescription`
+- `metrics`
+- `suggestions`
+
+## Frontend Workflow
+1. User opens LinkedIn Optimizer.
+2. User provides a LinkedIn URL and/or real profile text and fields.
+3. Frontend posts to `/api/profiles/linkedin/analyze`.
+4. UI shows:
+   - Overall score
+   - Section metrics
+   - Real data source status
+   - AI headline options
+   - Rewritten About section
+   - Quick wins
+   - Keyword gaps
+   - Detailed suggestions
+
+## Implementation Checklist
+- [x] Move LinkedIn pipeline into `backend/src/services/linkedinOptimizerService.js`
+- [x] Add real-data public URL fetch with blocked-state reporting
+- [x] Add deterministic scoring and keyword intelligence
+- [x] Link pipeline to local LM Studio via `callAI`
+- [x] Keep rule-based fallback for LLM outage or malformed output
+- [x] Replace old `/profiles/linkedin/analyze` route logic
+- [x] Expand frontend fields for URL, target roles, activity, and experience entries
+- [x] Add history persistence for LinkedIn analyses
+- [ ] Add export/copy actions for optimized headline and About section
+- [ ] Add integration with Recruiter Visibility Checker
+
+## Guardrails
+- Never fabricate LinkedIn data.
+- Never claim private LinkedIn fields were fetched when only public data was available.
+- Store source metadata with every analysis.
+- Keep local LLM usage optional and recoverable.
+- Prefer precise suggestions over generic motivational advice.

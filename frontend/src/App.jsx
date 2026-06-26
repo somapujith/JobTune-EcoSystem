@@ -39,6 +39,24 @@ import LearnAndBuildTrack from './pages/LearnAndBuildTrack';
 import RecruiterVisibility from './pages/RecruiterVisibility';
 import ResumeConsistency from './pages/ResumeConsistency';
 import AchievementEnhancer from './pages/AchievementEnhancer';
+import AITutor from './pages/AITutor';
+import AIDoubtSolver from './pages/AIDoubtSolver';
+import CourseLibrary from './pages/CourseLibrary';
+import LearningPaths from './pages/LearningPaths';
+import AINotesGenerator from './pages/AINotesGenerator';
+import AIFlashcards from './pages/AIFlashcards';
+import AIQuizGenerator from './pages/AIQuizGenerator';
+import Community from './pages/Community';
+import CommunicationSkills from './pages/CommunicationSkills';
+import CodingPractice from './pages/CodingPractice';
+import Assessments from './pages/Assessments';
+import AIProjectBuilder from './pages/AIProjectBuilder';
+import ProjectWorkspace from './pages/ProjectWorkspace';
+import AICareerCoach from './pages/AICareerCoach';
+import AICodeReviewer from './pages/AICodeReviewer';
+import UniversityDashboard from './pages/UniversityDashboard';
+import FacultyPanel from './pages/FacultyPanel';
+import RecruiterPortal from './pages/RecruiterPortal';
 import ComingSoon from './pages/ComingSoon';
 import useAuthStore from './store/useAuthStore';
 import useSubscriptionStore from './store/useSubscriptionStore';
@@ -166,6 +184,24 @@ function App() {
           <Route path="recruiter-visibility" element={<ProtectedToolRoute toolPath="/recruiter-visibility"><RecruiterVisibility /></ProtectedToolRoute>} />
           <Route path="resume-consistency" element={<ProtectedToolRoute toolPath="/resume-consistency"><ResumeConsistency /></ProtectedToolRoute>} />
           <Route path="achievement-enhancer" element={<ProtectedToolRoute toolPath="/achievement-enhancer"><AchievementEnhancer /></ProtectedToolRoute>} />
+          <Route path="ai-tutor" element={<ProtectedToolRoute toolPath="/ai-tutor"><AITutor /></ProtectedToolRoute>} />
+          <Route path="doubt-solver" element={<ProtectedToolRoute toolPath="/doubt-solver"><AIDoubtSolver /></ProtectedToolRoute>} />
+          <Route path="courses" element={<ProtectedToolRoute toolPath="/courses"><CourseLibrary /></ProtectedToolRoute>} />
+          <Route path="learning-paths" element={<ProtectedToolRoute toolPath="/learning-paths"><LearningPaths /></ProtectedToolRoute>} />
+          <Route path="notes" element={<ProtectedToolRoute toolPath="/notes"><AINotesGenerator /></ProtectedToolRoute>} />
+          <Route path="flashcards" element={<ProtectedToolRoute toolPath="/flashcards"><AIFlashcards /></ProtectedToolRoute>} />
+          <Route path="quiz" element={<ProtectedToolRoute toolPath="/quiz"><AIQuizGenerator /></ProtectedToolRoute>} />
+          <Route path="community" element={<ProtectedToolRoute toolPath="/community"><Community /></ProtectedToolRoute>} />
+          <Route path="communication-skills" element={<ProtectedToolRoute toolPath="/communication-skills"><CommunicationSkills /></ProtectedToolRoute>} />
+          <Route path="coding-practice" element={<ProtectedToolRoute toolPath="/coding-practice"><CodingPractice /></ProtectedToolRoute>} />
+          <Route path="assessments" element={<ProtectedToolRoute toolPath="/assessments"><Assessments /></ProtectedToolRoute>} />
+          <Route path="project-builder" element={<ProtectedToolRoute toolPath="/project-builder"><AIProjectBuilder /></ProtectedToolRoute>} />
+          <Route path="project-workspace" element={<ProtectedToolRoute toolPath="/project-workspace"><ProjectWorkspace /></ProtectedToolRoute>} />
+          <Route path="career-coach" element={<ProtectedToolRoute toolPath="/career-coach"><AICareerCoach /></ProtectedToolRoute>} />
+          <Route path="code-reviewer" element={<ProtectedToolRoute toolPath="/code-reviewer"><AICodeReviewer /></ProtectedToolRoute>} />
+          <Route path="university-dashboard" element={<ProtectedToolRoute toolPath="/university-dashboard"><UniversityDashboard /></ProtectedToolRoute>} />
+          <Route path="faculty-panel" element={<ProtectedToolRoute toolPath="/faculty-panel"><FacultyPanel /></ProtectedToolRoute>} />
+          <Route path="recruiter-portal" element={<ProtectedToolRoute toolPath="/recruiter-portal"><RecruiterPortal /></ProtectedToolRoute>} />
           <Route path="career-readiness" element={<ProtectedToolRoute toolPath="/career-readiness"><ComingSoon toolName="Career Readiness Dashboard" description="A unified career score with progress tracking and improvement recommendations across your whole journey. Launching soon." /></ProtectedToolRoute>} />
         </Route>
         <Route path="/login" element={<Login />} />

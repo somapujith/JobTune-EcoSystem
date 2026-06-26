@@ -24,7 +24,23 @@ import {
   Search,
   Gauge,
   ListChecks,
-  Map as MapIcon
+  Map as MapIcon,
+  GraduationCap,
+  Route,
+  StickyNote,
+  Layers,
+  HelpCircle,
+  MessageSquare,
+  Code2,
+  ClipboardCheck,
+  FolderKanban,
+  Briefcase,
+  Users,
+  Building2,
+  UserCheck,
+  BadgeCheck,
+  Mail,
+  Brain
 } from 'lucide-react';
 
 // Mirrors the JobTube Subscription Plans PDF tiers exactly.
@@ -35,6 +51,18 @@ const ALL_TOOLS = [
   { name: 'Learning Hub', icon: BookOpen, path: '/learning', color: 'bg-amber-500', tier: 'Foundation', plan: 'Learn & Build' },
   { name: 'Project Builder', icon: Lightbulb, path: '/projects', color: 'bg-rose-500', tier: 'Foundation', plan: 'Learn & Build' },
   { name: 'Portfolio Builder', icon: LayoutIcon, path: '/portfolio', color: 'bg-indigo-500', tier: 'Foundation', plan: 'Learn & Build' },
+  { name: 'AI Tutor', icon: GraduationCap, path: '/ai-tutor', color: 'bg-violet-500', tier: 'Foundation', plan: 'Learn & Build' },
+  { name: 'Doubt Solver', icon: HelpCircle, path: '/doubt-solver', color: 'bg-orange-500', tier: 'Foundation', plan: 'Learn & Build' },
+  { name: 'Course Library', icon: BookOpen, path: '/courses', color: 'bg-blue-600', tier: 'Foundation', plan: 'Learn & Build' },
+  { name: 'Learning Paths', icon: Route, path: '/learning-paths', color: 'bg-emerald-600', tier: 'Foundation', plan: 'Learn & Build' },
+  { name: 'AI Notes Generator', icon: StickyNote, path: '/notes', color: 'bg-yellow-500', tier: 'Foundation', plan: 'Learn & Build' },
+  { name: 'AI Flashcards', icon: Layers, path: '/flashcards', color: 'bg-pink-500', tier: 'Foundation', plan: 'Learn & Build' },
+  { name: 'AI Quiz Generator', icon: ClipboardCheck, path: '/quiz', color: 'bg-red-500', tier: 'Foundation', plan: 'Learn & Build' },
+  { name: 'Coding Practice', icon: Code2, path: '/coding-practice', color: 'bg-green-600', tier: 'Foundation', plan: 'Learn & Build' },
+  { name: 'Assessments', icon: BadgeCheck, path: '/assessments', color: 'bg-sky-600', tier: 'Foundation', plan: 'Learn & Build' },
+  { name: 'AI Project Builder', icon: FolderKanban, path: '/project-builder', color: 'bg-purple-600', tier: 'Foundation', plan: 'Learn & Build' },
+  { name: 'Project Workspace', icon: Briefcase, path: '/project-workspace', color: 'bg-slate-600', tier: 'Foundation', plan: 'Learn & Build' },
+  { name: 'Community Hub', icon: Users, path: '/community', color: 'bg-teal-600', tier: 'Foundation', plan: 'Learn & Build' },
 
   // Tune & Polish (₹299/month)
   { name: 'Resume Optimizer', icon: FileText, path: '/resume', color: 'bg-emerald-500', tier: 'Profile', plan: 'Tune & Polish' },
@@ -46,6 +74,8 @@ const ALL_TOOLS = [
   { name: 'Achievement Enhancer', icon: FileText, path: '/achievement-enhancer', color: 'bg-amber-600', tier: 'Profile', plan: 'Tune & Polish' },
   { name: 'Application Assistant', icon: FileText, path: '/cover-letter', color: 'bg-orange-500', tier: 'Profile', plan: 'Tune & Polish' },
   { name: 'Job Discovery', icon: Search, path: '/discover', color: 'bg-cyan-500', tier: 'Profile', plan: 'Tune & Polish' },
+  { name: 'Communication Skills', icon: Mail, path: '/communication-skills', color: 'bg-rose-600', tier: 'Profile', plan: 'Tune & Polish' },
+  { name: 'AI Code Reviewer', icon: Code2, path: '/code-reviewer', color: 'bg-gray-700', tier: 'Profile', plan: 'Tune & Polish' },
 
   // Zero To Hero (₹499/month)
   { name: 'Interview Prep', icon: Zap, path: '/interview', color: 'bg-purple-500', tier: 'Advanced', plan: 'Zero to Hero' },
@@ -54,6 +84,10 @@ const ALL_TOOLS = [
   { name: 'Evidence Dashboard', icon: ListChecks, path: '/evidence', color: 'bg-indigo-700', tier: 'Advanced', plan: 'Zero to Hero' },
   { name: 'Job Fit Analysis', icon: Target, path: '/job-fit', color: 'bg-pink-600', tier: 'Advanced', plan: 'Zero to Hero' },
   { name: 'Job Description Analyzer', icon: ListChecks, path: '/job-analyzer', color: 'bg-stone-600', tier: 'Advanced', plan: 'Zero to Hero' },
+  { name: 'AI Career Coach', icon: Brain, path: '/career-coach', color: 'bg-amber-700', tier: 'Advanced', plan: 'Zero to Hero' },
+  { name: 'University Dashboard', icon: Building2, path: '/university-dashboard', color: 'bg-blue-800', tier: 'Advanced', plan: 'Zero to Hero' },
+  { name: 'Faculty Panel', icon: UserCheck, path: '/faculty-panel', color: 'bg-teal-800', tier: 'Advanced', plan: 'Zero to Hero' },
+  { name: 'Recruiter Portal', icon: MessageSquare, path: '/recruiter-portal', color: 'bg-indigo-800', tier: 'Advanced', plan: 'Zero to Hero' },
 ];
 
 const PLAN_TIERS = {
@@ -101,10 +135,10 @@ export default function Dashboard() {
            <div className="flex items-center gap-2 text-blue-600 font-bold text-sm uppercase tracking-widest mb-2">
               <Zap className="w-4 h-4 fill-current" /> Ecosystem Dashboard
            </div>
-           <h1 className="text-4xl font-black text-slate-900 tracking-tight">
+           <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">
               Hello, {user?.email?.split('@')[0] || 'Professional'}!
            </h1>
-           <p className="text-slate-500 mt-2 font-medium">
+           <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">
              Your plan: <span className="font-bold text-blue-600">{userPlan?.name || 'Loading...'}</span>
              {userPlan && <span className="text-emerald-600 ml-2">• {visibleTools.length} tools available</span>}
            </p>
@@ -115,7 +149,7 @@ export default function Dashboard() {
               <Crown className="w-5 h-5 text-amber-500" />
               <div>
                 <p className="text-xs text-slate-400 font-bold uppercase tracking-tighter">Current Plan</p>
-                <p className="text-sm font-black text-slate-900">{userPlan.name}</p>
+                <p className="text-sm font-black text-slate-900 dark:text-white">{userPlan.name}</p>
               </div>
             </div>
           )}
@@ -130,7 +164,7 @@ export default function Dashboard() {
              <div className="h-8 w-px bg-slate-100 mx-2"></div>
              <div className="pr-4">
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Your Network</p>
-                <p className="text-sm font-black text-slate-900">+124 Peers</p>
+                <p className="text-sm font-black text-slate-900 dark:text-white">+124 Peers</p>
              </div>
           </div>
         </div>
@@ -139,10 +173,10 @@ export default function Dashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {[
-          { label: 'Readiness Score', val: overview ? `${overview.readinessScore}/100` : '45/100', icon: Target, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'Skills Verified', val: overview ? `${overview.skillScore}/100` : '60/100', icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Resume Score', val: overview ? `${overview.resumeScore}/100` : '70/100', icon: Star, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Interviews Done', val: overview ? overview.interviewsCompleted || '0' : '0', icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
+          { label: 'Readiness Score', val: overview ? `${overview.readinessScore}/100` : '45/100', icon: Target, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-950/50' },
+          { label: 'Skills Verified', val: overview ? `${overview.skillScore}/100` : '60/100', icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-950/50' },
+          { label: 'Resume Score', val: overview ? `${overview.resumeScore}/100` : '70/100', icon: Star, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-950/50' },
+          { label: 'Interviews Done', val: overview ? overview.interviewsCompleted || '0' : '0', icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-950/50' },
         ].map((stat, i) => (
           <div key={i} className="glass-card p-6 rounded-3xl flex items-center gap-5 group transition-colors">
             <div className={`w-14 h-14 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
@@ -150,7 +184,7 @@ export default function Dashboard() {
             </div>
             <div>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
-              <p className="text-2xl font-black text-slate-900 tracking-tight">{stat.val}</p>
+              <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{stat.val}</p>
             </div>
           </div>
         ))}
@@ -160,7 +194,7 @@ export default function Dashboard() {
         {/* Main Tool Applications Hub */}
         <div className="lg:col-span-2 space-y-8">
            <div className="flex justify-between items-center">
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight">Your Tool Ecosystem ({visibleTools.length})</h3>
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Your Tool Ecosystem ({visibleTools.length})</h3>
               <Link to="/" className="text-sm font-bold text-blue-600 flex items-center gap-1 hover:underline">
                  View Introduction <ExternalLink className="w-3 h-3" />
               </Link>
@@ -176,7 +210,7 @@ export default function Dashboard() {
                          </div>
                          <div>
                             <p className="text-[10px] font-black uppercase tracking-tighter text-slate-400">{tool.tier}</p>
-                            <h4 className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{tool.name}</h4>
+                            <h4 className="font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{tool.name}</h4>
                          </div>
                       </div>
                       <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
@@ -208,7 +242,7 @@ export default function Dashboard() {
 
         {/* Action Center & Walkthrough */}
         <div className="space-y-8">
-           <h3 className="text-2xl font-black text-slate-900 tracking-tight">Priority Actions</h3>
+           <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Priority Actions</h3>
            <div className="glass-panel border border-white/20 dark:border-white/10 rounded-[2.5rem] p-8 text-slate-900 dark:text-white relative overflow-hidden">
               <div className="absolute top-0 right-0 p-4 opacity-10">
                  <Zap className="w-32 h-32 text-blue-400" />
@@ -231,7 +265,7 @@ export default function Dashboard() {
                        </p>
                     </div>
                  </div>
-                 <Link to="/skills" className="flex items-center justify-center gap-2 w-full py-4 glass-card text-slate-900 rounded-2xl font-black hover:bg-white/80 transition-all active:scale-95 text-sm">
+                 <Link to="/skills" className="flex items-center justify-center gap-2 w-full py-4 glass-card text-slate-900 dark:text-white rounded-2xl font-black hover:bg-white/80 dark:hover:bg-slate-800/80 transition-all active:scale-95 text-sm">
                     Continue Placement Path <ArrowRight className="w-4 h-4" />
                  </Link>
               </div>
@@ -240,7 +274,7 @@ export default function Dashboard() {
            {/* Activity Log */}
            <div className="glass-card rounded-3xl p-8">
               <div className="flex items-center justify-between mb-6">
-                 <h4 className="font-black text-slate-900 tracking-tight">Recent Activity</h4>
+                 <h4 className="font-black text-slate-900 dark:text-white tracking-tight">Recent Activity</h4>
                  <Clock className="w-4 h-4 text-slate-400" />
               </div>
               <div className="space-y-6">
@@ -252,7 +286,7 @@ export default function Dashboard() {
                     <div key={act.id ?? i} className="flex gap-4">
                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2"></div>
                        <div className="flex-grow">
-                          <p className="text-sm font-bold text-slate-800 leading-none">{act.action}</p>
+                          <p className="text-sm font-bold text-slate-800 dark:text-slate-200 leading-none">{act.action}</p>
                           <p className="text-[10px] text-slate-400 mt-1 font-bold uppercase tracking-tighter">{act.date}</p>
                        </div>
                     </div>

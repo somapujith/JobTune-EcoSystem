@@ -29,6 +29,14 @@ const atsCheckerV2Routes = require('./routes/atsCheckerV2');
 const recruiterVisibilityRoutes = require('./routes/recruiterVisibility');
 const resumeConsistencyRoutes = require('./routes/resumeConsistency');
 const achievementEnhancerRoutes = require('./routes/achievementEnhancer');
+const aiTutorRoutes = require('./routes/aiTutor');
+const projectBuilderRoutes = require('./routes/projectBuilder');
+const studyToolsRoutes = require('./routes/studyTools');
+const coursesRoutes = require('./routes/courses');
+const aiCoachRoutes = require('./routes/aiCoach');
+const communityRoutes = require('./routes/community');
+const practiceRoutes = require('./routes/practice');
+const adminPanelsRoutes = require('./routes/adminPanels');
 const { errorHandler } = require('./middleware/errorHandler');
 const { auditLogger } = require('./middleware/auditLogger');
 const path = require('path');
@@ -45,6 +53,7 @@ app.use(cors({
   origin: [
     frontendUrl,
     'http://localhost:5173',
+    'http://localhost:5174',
     'http://localhost:3000',
     `http://localhost:${serverPort}`,
   ],
@@ -87,6 +96,14 @@ app.use('/api/progress', progressRoutes);
 app.use('/api/recruiter-visibility', recruiterVisibilityRoutes);
 app.use('/api/resume-consistency', resumeConsistencyRoutes);
 app.use('/api/jobs/achievement-enhancer', achievementEnhancerRoutes);
+app.use('/api/ai-tutor', aiTutorRoutes);
+app.use('/api/project-builder', projectBuilderRoutes);
+app.use('/api/study-tools', studyToolsRoutes);
+app.use('/api/courses', coursesRoutes);
+app.use('/api/ai-coach', aiCoachRoutes);
+app.use('/api/community', communityRoutes);
+app.use('/api/practice', practiceRoutes);
+app.use('/api/admin-panels', adminPanelsRoutes);
 
 // Admin UI Route
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));

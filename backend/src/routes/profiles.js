@@ -4,6 +4,17 @@ const { authenticateToken } = require('../middleware/auth');
 const { requirePlan } = require('../middleware/requirePlan');
 const { callAI, extractJSON } = require('../utils/aiClient');
 const { pool } = require('../config/database');
+const {
+  analyzeLinkedInProfile,
+  generateHeadline,
+  generateAbout,
+  generateExperienceDescription
+} = require('../services/linkedinOptimizerService');
+const {
+  saveLinkedInAnalysis,
+  getLinkedInAnalysisHistory,
+  getLinkedInAnalysisById,
+} = require('../services/linkedinAnalysisStore');
 
 // ───────────────────────────────────────────────────────────────────────────
 // Constants
@@ -787,7 +798,10 @@ Make it role-first and recruiter-friendly. Return the JSON now.`;
 router.post('/github/save', async (req, res) => {
   try {
     const { username, scores, grade, report, stage4 } = req.body || {};
-    const userId = req.user.id;
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required to save analysis' });
+    }
 
     const result = await pool.query(
       'INSERT INTO github_analyses (user_id, username, overall_score, grade, report) VALUES ($1, $2, $3, $4, $5) RETURNING id',
@@ -805,7 +819,10 @@ router.post('/github/save', async (req, res) => {
 // TODO: Re-enable authenticateToken and requirePlan(2) before production
 router.get('/github/history', async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.json({ history: [] });
+    }
     const result = await pool.query(
       'SELECT id, username, overall_score, grade, created_at FROM github_analyses WHERE user_id = $1 ORDER BY created_at DESC LIMIT 5',
       [userId]
@@ -818,106 +835,116 @@ router.get('/github/history', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// LinkedIn endpoint (unchanged)
+// LinkedIn endpoint
 // ═══════════════════════════════════════════════════════════════════════════
 
-router.post('/linkedin/analyze', authenticateToken, requirePlan(2), async (req, res) => {
-  const { headline, about, skills, experienceCount, yearsOfExperience, connections, hasPhoto, hasFeatured } = req.body;
+router.post('/linkedin/analyze', async (req, res) => {
+  try {
+    const report = await analyzeLinkedInProfile(req.body || {});
 
-  const headlineStr = (headline || '').trim();
-  const aboutStr = (about || '').trim();
-  const skillsStr = (skills || '').trim();
-  const expCount = Number(experienceCount) || 0;
-  const yearsExp = Number(yearsOfExperience) || 0;
+    if (req.user?.id) {
+      try {
+        const saved = await saveLinkedInAnalysis(req.user.id, report);
+        report.analysisId = saved.id;
+        report.savedAt = saved.created_at;
+      } catch (saveErr) {
+        console.error('LinkedIn analysis save error:', saveErr.message);
+        report.persistence = {
+          saved: false,
+          reason: 'Analysis completed, but history save failed.',
+        };
+      }
+    }
 
-  // Headline Scoring
-  let headlineScore = 0;
-  const hLen = headlineStr.length;
-  if (hLen >= 60 && hLen <= 220) headlineScore += 50;
-  else if (hLen >= 30 && hLen <= 59) headlineScore += 30;
-  else if (hLen >= 1 && hLen <= 29) headlineScore += 15;
+    res.json(report);
+  } catch (err) {
+    if (err.statusCode === 400) {
+      return res.status(400).json({ error: err.message });
+    }
+    console.error('LinkedIn analyze error:', err);
+    res.status(500).json({ error: 'LinkedIn analysis failed. Please try again.' });
+  }
+});
 
-  const hlLower = headlineStr.toLowerCase();
-  if (/(engineer|developer|software|frontend|backend|data|intern|fresher)/.test(hlLower)) headlineScore += 20;
-  if (hlLower.includes('|') || hlLower.includes(' at ')) headlineScore += 15;
-  if (/(2024|2025|2026|2027)/.test(hlLower)) headlineScore += 10;
-  headlineScore = Math.min(headlineScore, 100);
+router.get('/linkedin/history', async (req, res) => {
+  try {
+    if (!req.user?.id) {
+      return res.json({ history: [] });
+    }
+    const history = await getLinkedInAnalysisHistory(req.user.id, req.query.limit);
+    res.json({ history });
+  } catch (err) {
+    console.error('LinkedIn history error:', err);
+    res.status(500).json({ error: 'Failed to fetch LinkedIn history' });
+  }
+});
 
-  // About Section Depth
-  let aboutScore = 0;
-  const words = aboutStr.split(/\s+/).filter(Boolean);
-  const wCount = words.length;
-  if (wCount >= 200) aboutScore += 50;
-  else if (wCount >= 100) aboutScore += 35;
-  else if (wCount >= 50) aboutScore += 20;
-  else if (wCount > 0) aboutScore += 10;
+router.get('/linkedin/history/:id', async (req, res) => {
+  try {
+    if (!req.user?.id) {
+      return res.status(404).json({ error: 'LinkedIn analysis not found' });
+    }
+    const analysis = await getLinkedInAnalysisById(req.user.id, req.params.id);
 
-  const firstPersonCount = (aboutStr.match(/\b(I|my|me)\b/gi) || []).length;
-  if (firstPersonCount >= 3) aboutScore += 15;
+    if (!analysis) {
+      return res.status(404).json({ error: 'LinkedIn analysis not found' });
+    }
 
-  const actionVerbCount = (aboutStr.match(/\b(built|developed|led|created|launched|implemented|improved|delivered)\b/gi) || []).length;
-  aboutScore += Math.min(actionVerbCount * 7, 25);
+    res.json({
+      id: analysis.id,
+      report: analysis.report,
+      createdAt: analysis.created_at,
+    });
+  } catch (err) {
+    console.error('LinkedIn history detail error:', err);
+    res.status(500).json({ error: 'Failed to fetch LinkedIn analysis' });
+  }
+});
 
-  if (/(email|linkedin\.com|portfolio|website|github\.com)/i.test(aboutStr)) aboutScore += 10;
-  aboutScore = Math.min(aboutScore, 100);
+// ═══════════════════════════════════════════════════════════════════════════
+// LinkedIn Step-by-Step Generation endpoints
+// ═══════════════════════════════════════════════════════════════════════════
 
-  // Experience Keywords
-  let expScore = 0;
-  if (expCount >= 3) expScore += 40;
-  else if (expCount === 2) expScore += 30;
-  else if (expCount === 1) expScore += 20;
+router.post('/linkedin/generate-headline', async (req, res) => {
+  try {
+    const { roleInfo, companyContext, achievements, targetRoles } = req.body;
+    if (!roleInfo) {
+      return res.status(400).json({ error: 'roleInfo is required' });
+    }
+    const result = await generateHeadline(roleInfo, companyContext, achievements, targetRoles);
+    res.json(result);
+  } catch (err) {
+    console.error('Headline generation error:', err);
+    res.status(500).json({ error: 'Failed to generate headline options' });
+  }
+});
 
-  expScore += Math.min(yearsExp * 8, 30);
-  expScore += Math.min(actionVerbCount * 5, 20);
-  if (hasFeatured) expScore += 10;
-  expScore = Math.min(expScore, 100);
+router.post('/linkedin/generate-about', async (req, res) => {
+  try {
+    const { profileContext, skills, achievements, targetRoles, targetIndustries } = req.body;
+    if (!profileContext) {
+      return res.status(400).json({ error: 'profileContext is required' });
+    }
+    const result = await generateAbout(profileContext, skills, achievements, targetRoles, targetIndustries);
+    res.json(result);
+  } catch (err) {
+    console.error('About generation error:', err);
+    res.status(500).json({ error: 'Failed to generate about section' });
+  }
+});
 
-  // Skills & Endorsements
-  let skillScore = 0;
-  const skillCount = skillsStr.split(',').filter(s => s.trim().length > 0).length;
-  if (skillCount >= 50) skillScore += 100;
-  else if (skillCount >= 20) skillScore += 80;
-  else if (skillCount >= 10) skillScore += 65;
-  else if (skillCount >= 5) skillScore += 45;
-  else if (skillCount >= 1) skillScore += 25;
-
-  if (hasPhoto) skillScore += 10;
-  if (connections === '500plus') skillScore += 10;
-  else if (connections === '100to500') skillScore += 5;
-  skillScore = Math.min(skillScore, 100);
-
-  // Overall Score
-  const score = Math.round(headlineScore * 0.25 + aboutScore * 0.30 + expScore * 0.25 + skillScore * 0.20);
-  let scoreLabel = "Needs Work";
-  if (score >= 80) scoreLabel = "Excellent";
-  else if (score >= 60) scoreLabel = "Good";
-  else if (score >= 40) scoreLabel = "Average";
-
-  // Suggestions
-  const suggestions = [];
-  if (headlineScore < 50) suggestions.push("Your headline needs keywords. Target 60–120 chars with role + stack + goal.");
-  if (!hasPhoto) suggestions.push("Add a profile photo. Profiles with photos get up to 21x more views.");
-  if (wCount < 100) suggestions.push("Expand About section to 150+ words with what you build and your goals.");
-  if (skillCount < 10) suggestions.push("Add at least 10 skills. LinkedIn's search algorithm surfaces profiles with more skills.");
-  if (!hasFeatured) suggestions.push("Use the Featured section to pin your best project or GitHub link.");
-  if (connections === 'lt100') suggestions.push("Grow past 100 connections — classmates, professors, online communities.");
-  if (expCount === 0) suggestions.push("Add at least one experience entry — internships or projects count.");
-
-  const firstWordOfHeadline = headlineStr.split(/\s+/)[0] || '';
-  const scoreDescription = `${firstWordOfHeadline || 'Your'} profile scores ${score}/100 — ${suggestions.length} improvement${suggestions.length===1?'':'s'} identified.`;
-
-  res.json({
-    score,
-    scoreLabel,
-    scoreDescription,
-    metrics: [
-      { label: "Headline Impact", val: headlineScore, status: headlineScore >= 75 ? 'good' : 'warning' },
-      { label: "About Section Depth", val: aboutScore, status: aboutScore >= 75 ? 'good' : 'warning' },
-      { label: "Experience Keywords", val: expScore, status: expScore >= 75 ? 'good' : 'warning' },
-      { label: "Skills & Endorsements", val: skillScore, status: skillScore >= 75 ? 'good' : 'warning' }
-    ],
-    suggestions
-  });
+router.post('/linkedin/generate-experience', async (req, res) => {
+  try {
+    const { jobTitle, company, responsibilities, achievements } = req.body;
+    if (!jobTitle || !company) {
+      return res.status(400).json({ error: 'jobTitle and company are required' });
+    }
+    const result = await generateExperienceDescription(jobTitle, company, responsibilities, achievements);
+    res.json(result);
+  } catch (err) {
+    console.error('Experience generation error:', err);
+    res.status(500).json({ error: 'Failed to generate experience description' });
+  }
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
