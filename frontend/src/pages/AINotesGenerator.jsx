@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { BookOpen, Copy, Download, Trash2, ChevronRight, RefreshCw, Sparkles } from 'lucide-react';
 import { api } from '../store/useAuthStore';
+import { useStudyHistory } from '../hooks/useStudyHistory';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Suggested topics
@@ -81,24 +82,35 @@ function notesToText(notes) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function AINotesGenerator() {
+  const { history: apiHistory, saveSession, isLoading: historyLoading } = useStudyHistory('notes');
+
   const [topic, setTopic] = useState('');
   const [notes, setNotes] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingType, setLoadingType] = useState(null);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
-  const [history, setHistory] = useState(() => {
+  const [localHistory, setLocalHistory] = useState(() => {
     try { return JSON.parse(localStorage.getItem('jt_notes_history') || '[]'); }
     catch { return []; }
   });
+  // Use API history with localStorage as fallback
+  const history = apiHistory.length > 0 ? apiHistory : localHistory;
   const [showSidebar, setShowSidebar] = useState(true);
   const inputRef = useRef(null);
 
   function saveHistory(newNotes) {
+    // Save to localStorage (fallback)
     const entry = { id: Date.now(), topic: newNotes.title || topic, type: newNotes.type, createdAt: new Date().toISOString() };
-    const updated = [entry, ...history].slice(0, 20);
-    setHistory(updated);
+    const updated = [entry, ...localHistory].slice(0, 20);
+    setLocalHistory(updated);
     localStorage.setItem('jt_notes_history', JSON.stringify(updated));
+    // Save to API
+    saveSession({
+      sessionType: 'notes',
+      topic: newNotes.title || topic,
+      data: { type: newNotes.type },
+    });
   }
 
   async function generateNotes(type = 'detailed', topicOverride) {
@@ -154,14 +166,14 @@ export default function AINotesGenerator() {
   }
 
   function clearHistory() {
-    setHistory([]);
+    setLocalHistory([]);
     localStorage.removeItem('jt_notes_history');
   }
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen p-4 md:p-8 max-w-7xl mx-auto">
+    <div className="page-container">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
@@ -175,7 +187,7 @@ export default function AINotesGenerator() {
         {/* Main content */}
         <div className="flex-1 min-w-0">
           {/* Input area */}
-          <div className="glass-card rounded-2xl p-6 mb-6">
+          <div className="card rounded-2xl p-6 mb-6">
             <label className="text-on-surface font-semibold text-sm mb-2 block">Enter a topic or paste content</label>
             <div className="flex gap-3">
               <input
@@ -223,14 +235,14 @@ export default function AINotesGenerator() {
 
           {/* Error */}
           {error && (
-            <div className="glass-card rounded-2xl p-4 mb-6 border-l-4 border-red-500">
+            <div className="card rounded-2xl p-4 mb-6 border-l-4 border-red-500">
               <p className="text-red-400 text-sm">{error}</p>
             </div>
           )}
 
           {/* Loading state */}
           {loading && (
-            <div className="glass-card rounded-2xl p-12 mb-6 flex flex-col items-center justify-center">
+            <div className="card rounded-2xl p-12 mb-6 flex flex-col items-center justify-center">
               <div className="w-12 h-12 rounded-full border-3 border-blue-500 border-t-transparent animate-spin mb-4" />
               <p className="text-on-surface font-semibold">
                 {loadingType === 'mindmap' ? 'Generating mind map...' : loadingType === 'revision' ? 'Creating revision notes...' : 'Generating detailed notes...'}
@@ -241,7 +253,7 @@ export default function AINotesGenerator() {
 
           {/* Notes display */}
           {notes && !loading && (
-            <div className="glass-card rounded-2xl overflow-hidden">
+            <div className="card rounded-2xl overflow-hidden">
               {/* Notes header */}
               <div className="p-6 border-b border-outline/10">
                 <div className="flex items-start justify-between gap-4">
@@ -369,7 +381,7 @@ export default function AINotesGenerator() {
 
           {/* Empty state */}
           {!notes && !loading && !error && (
-            <div className="glass-card rounded-2xl p-12 flex flex-col items-center justify-center text-center">
+            <div className="card rounded-2xl p-12 flex flex-col items-center justify-center text-center">
               <span className="material-symbols-outlined text-5xl text-on-surface-variant/30 mb-4">auto_stories</span>
               <h3 className="text-on-surface font-semibold text-lg mb-2">Ready to generate notes</h3>
               <p className="text-on-surface-variant text-sm max-w-md">
@@ -382,7 +394,7 @@ export default function AINotesGenerator() {
         {/* Sidebar */}
         <div className={`lg:w-72 shrink-0 ${showSidebar ? '' : 'hidden lg:block'}`}>
           {/* Topic Suggestions */}
-          <div className="glass-card rounded-2xl p-5 mb-4">
+          <div className="card rounded-2xl p-5 mb-4">
             <h3 className="text-on-surface font-semibold text-sm mb-3 flex items-center gap-2">
               <span className="material-symbols-outlined text-amber-500 text-lg">tips_and_updates</span> Topic Ideas
             </h3>
@@ -402,7 +414,7 @@ export default function AINotesGenerator() {
           </div>
 
           {/* History */}
-          <div className="glass-card rounded-2xl p-5">
+          <div className="card rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-on-surface font-semibold text-sm flex items-center gap-2">
                 <span className="material-symbols-outlined text-blue-500 text-lg">history</span> History
@@ -417,15 +429,15 @@ export default function AINotesGenerator() {
               <p className="text-on-surface-variant/50 text-xs">No notes generated yet</p>
             ) : (
               <div className="space-y-1.5 max-h-64 overflow-y-auto">
-                {history.map(h => (
+                {history.map((h, idx) => (
                   <button
-                    key={h.id}
+                    key={h.id || idx}
                     onClick={() => handleTopicClick(h.topic)}
                     className="w-full text-left px-3 py-2 rounded-lg hover:bg-surface-container/50 transition-all"
                   >
                     <p className="text-on-surface text-sm truncate">{h.topic}</p>
                     <p className="text-on-surface-variant/50 text-xs mt-0.5">
-                      {h.type} &middot; {new Date(h.createdAt).toLocaleDateString()}
+                      {h.type || h.data?.type || 'detailed'} &middot; {new Date(h.createdAt).toLocaleDateString()}
                     </p>
                   </button>
                 ))}

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Clock, CheckCircle2, XCircle, RotateCcw, ChevronRight, Trophy, Target, Zap } from 'lucide-react';
+import { Clock, CheckCircle2, XCircle, RotateCcw, ChevronRight, Trophy, Target, Zap, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { api } from '../store/useAuthStore';
+import { useStudyHistory } from '../hooks/useStudyHistory';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -25,6 +26,8 @@ function formatTime(seconds) {
 export default function AIQuizGenerator() {
   // ── State ──────────────────────────────────────────────────────────────────
 
+  const { history: apiHistory, saveSession, isLoading: historyLoading } = useStudyHistory('quiz');
+
   const [phase, setPhase] = useState('setup'); // setup | loading | quiz | review | results
   const [topic, setTopic] = useState('');
   const [difficulty, setDifficulty] = useState('medium');
@@ -43,11 +46,12 @@ export default function AIQuizGenerator() {
   const [results, setResults] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // History
-  const [history, setHistory] = useState(() => {
+  // History — use API data with localStorage as fallback
+  const [localHistory, setLocalHistory] = useState(() => {
     try { return JSON.parse(localStorage.getItem('jt_quiz_history') || '[]'); }
     catch { return []; }
   });
+  const history = apiHistory.length > 0 ? apiHistory : localHistory;
   const [showHistory, setShowHistory] = useState(false);
   const [error, setError] = useState('');
 
@@ -133,7 +137,7 @@ export default function AIQuizGenerator() {
       });
       if (data.success && data.data) {
         setResults(data.data);
-        // Save to history
+        // Save to localStorage history (fallback)
         const entry = {
           id: Date.now(),
           topic: quizData.topic,
@@ -144,9 +148,19 @@ export default function AIQuizGenerator() {
           timeTaken: timer,
           date: new Date().toISOString(),
         };
-        const updated = [entry, ...history].slice(0, 30);
-        setHistory(updated);
+        const updated = [entry, ...localHistory].slice(0, 30);
+        setLocalHistory(updated);
         localStorage.setItem('jt_quiz_history', JSON.stringify(updated));
+        // Save to API
+        saveSession({
+          sessionType: 'quiz',
+          topic: quizData.topic,
+          difficulty: quizData.difficulty,
+          score: data.data.score,
+          totalQuestions: quizData.questions.length,
+          timeSpentSeconds: timer,
+          data: {},
+        });
         setPhase('results');
       }
     } catch {
@@ -217,7 +231,7 @@ export default function AIQuizGenerator() {
         <div className="grid md:grid-cols-3 gap-6">
           {/* Setup form */}
           <div className="md:col-span-2">
-            <div className="glass-card rounded-2xl p-6">
+            <div className="card rounded-2xl p-6">
               <h2 className="text-on-surface font-semibold text-lg mb-5">Create Your Quiz</h2>
 
               {/* Topic */}
@@ -288,26 +302,59 @@ export default function AIQuizGenerator() {
 
           {/* History sidebar */}
           <div>
-            <div className="glass-card rounded-2xl p-5">
+            <div className="card rounded-2xl p-5">
               <h3 className="text-on-surface font-semibold text-sm mb-3 flex items-center gap-2">
                 <span className="material-symbols-outlined text-sky-500 text-lg">history</span> Quiz History
               </h3>
+
+              {/* Performance trend */}
+              {history.length >= 2 && (() => {
+                const scores = history.slice(0, 10).map(h => h.score);
+                const recentAvg = scores.slice(0, Math.ceil(scores.length / 2)).reduce((a, b) => a + b, 0) / Math.ceil(scores.length / 2);
+                const olderAvg = scores.slice(Math.ceil(scores.length / 2)).reduce((a, b) => a + b, 0) / (scores.length - Math.ceil(scores.length / 2));
+                const diff = recentAvg - olderAvg;
+                const trend = diff > 3 ? 'improving' : diff < -3 ? 'declining' : 'steady';
+                return (
+                  <div className={`flex items-center gap-2 mb-3 px-3 py-2 rounded-lg text-xs font-semibold ${
+                    trend === 'improving' ? 'bg-emerald-500/10 text-emerald-400' :
+                    trend === 'declining' ? 'bg-rose-500/10 text-rose-400' :
+                    'bg-sky-500/10 text-sky-400'
+                  }`}>
+                    {trend === 'improving' ? <TrendingUp className="w-3.5 h-3.5" /> :
+                     trend === 'declining' ? <TrendingDown className="w-3.5 h-3.5" /> :
+                     <Minus className="w-3.5 h-3.5" />}
+                    {trend === 'improving' ? 'Performance improving' :
+                     trend === 'declining' ? 'Performance declining' :
+                     'Performance steady'}
+                    <span className="text-on-surface-variant/50 font-normal ml-auto">
+                      avg {Math.round(recentAvg)}%
+                    </span>
+                  </div>
+                );
+              })()}
+
               {history.length === 0 ? (
                 <p className="text-on-surface-variant/50 text-xs">No quizzes taken yet</p>
               ) : (
                 <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {history.map(h => (
-                    <div key={h.id} className="bg-surface-container/50 rounded-xl p-3 border border-outline/10">
+                  {history.map((h, idx) => (
+                    <div key={h.id || idx} className="bg-surface-container/50 rounded-xl p-3 border border-outline/10">
                       <p className="text-on-surface text-sm font-medium truncate">{h.topic}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <span className={`text-xs font-semibold ${h.score >= 70 ? 'text-emerald-400' : h.score >= 50 ? 'text-amber-400' : 'text-rose-400'}`}>
                           {h.score}%
                         </span>
-                        <span className="text-on-surface-variant/40 text-xs">{h.correct}/{h.total}</span>
-                        <span className="text-on-surface-variant/40 text-xs">&middot;</span>
-                        <span className="text-on-surface-variant/40 text-xs">{formatTime(h.timeTaken)}</span>
+                        {h.correct != null && h.total != null && (
+                          <>
+                            <span className="text-on-surface-variant/40 text-xs">{h.correct}/{h.total}</span>
+                            <span className="text-on-surface-variant/40 text-xs">&middot;</span>
+                          </>
+                        )}
+                        {h.timeTaken != null && (
+                          <span className="text-on-surface-variant/40 text-xs">{formatTime(h.timeTaken || h.timeSpentSeconds || 0)}</span>
+                        )}
                       </div>
-                      <p className="text-on-surface-variant/30 text-xs mt-0.5">{new Date(h.date).toLocaleDateString()}</p>
+                      <p className="text-on-surface-variant/30 text-xs mt-0.5">{new Date(h.date || h.createdAt).toLocaleDateString()}</p>
                     </div>
                   ))}
                 </div>
@@ -324,7 +371,7 @@ export default function AIQuizGenerator() {
   if (phase === 'loading') {
     return (
       <div className="min-h-screen p-4 md:p-8 max-w-4xl mx-auto flex items-center justify-center">
-        <div className="glass-card rounded-2xl p-12 flex flex-col items-center text-center">
+        <div className="card rounded-2xl p-12 flex flex-col items-center text-center">
           <div className="w-14 h-14 rounded-full border-3 border-sky-500 border-t-transparent animate-spin mb-5" />
           <h2 className="text-on-surface font-bold text-xl mb-2">Generating Your Quiz</h2>
           <p className="text-on-surface-variant text-sm">Creating {questionCount} {difficulty} questions about {topic}...</p>
@@ -374,7 +421,7 @@ export default function AIQuizGenerator() {
         </div>
 
         {/* Question card */}
-        <div className="glass-card rounded-2xl overflow-hidden mb-6">
+        <div className="card rounded-2xl overflow-hidden mb-6">
           <div className="p-6 border-b border-outline/10">
             <p className="text-on-surface-variant text-xs font-semibold mb-2">Question {currentQ + 1}</p>
             <h2 className="text-on-surface font-semibold text-lg leading-relaxed">{question.question}</h2>
@@ -510,7 +557,7 @@ export default function AIQuizGenerator() {
         </div>
 
         {/* Score card */}
-        <div className="glass-card rounded-2xl p-8 mb-6 text-center">
+        <div className="card rounded-2xl p-8 mb-6 text-center">
           <div className={`w-28 h-28 rounded-full border-4 ${scoreRing} flex items-center justify-center mx-auto mb-5`}>
             <span className={`text-4xl font-bold ${scoreColor}`}>{results.score}%</span>
           </div>
@@ -554,7 +601,7 @@ export default function AIQuizGenerator() {
 
         {/* Suggestions */}
         {results.suggestions && results.suggestions.length > 0 && (
-          <div className="glass-card rounded-2xl p-5 mb-6">
+          <div className="card rounded-2xl p-5 mb-6">
             <h3 className="text-on-surface font-semibold text-sm mb-3 flex items-center gap-2">
               <span className="material-symbols-outlined text-amber-500 text-lg">tips_and_updates</span> Suggestions
             </h3>
@@ -571,7 +618,7 @@ export default function AIQuizGenerator() {
 
         {/* Question breakdown */}
         {results.breakdown && (
-          <div className="glass-card rounded-2xl overflow-hidden mb-6">
+          <div className="card rounded-2xl overflow-hidden mb-6">
             <div className="p-5 border-b border-outline/10">
               <h3 className="text-on-surface font-semibold text-sm flex items-center gap-2">
                 <span className="material-symbols-outlined text-sky-500 text-lg">fact_check</span> Question Breakdown

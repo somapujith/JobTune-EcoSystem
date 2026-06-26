@@ -85,7 +85,8 @@ Provide a helpful answer based on the resume above.`;
       userPrompt,
       maxTokens: 500,
       temperature: 0.5,
-      model: process.env.LM_STUDIO_MODEL_INTERVIEW // Use interview model for conversational response
+      model: process.env.LM_STUDIO_MODEL_INTERVIEW, // Use interview model for conversational response
+      cache: false
     });
 
     if (!aiResult.ok) {

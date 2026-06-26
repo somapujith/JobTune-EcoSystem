@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Shuffle, RotateCcw, Save, Trash2, BarChart3 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Shuffle, RotateCcw, Save, Trash2, BarChart3, Clock, Brain } from 'lucide-react';
 import { api } from '../store/useAuthStore';
+import { useActivityTracker } from '../hooks/useActivityTracker';
+import { useSRS } from '../hooks/useSRS';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -37,6 +39,9 @@ function getDifficultyColor(d) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function AIFlashcards() {
+  useActivityTracker('AI Flashcards');
+  const { decks: srsDecks, dueCards, saveDeck: saveSRSDeck, reviewCard, fetchDueCards } = useSRS();
+
   const [topic, setTopic] = useState('');
   const [cardCount, setCardCount] = useState(10);
   const [cards, setCards] = useState([]);
@@ -54,6 +59,9 @@ export default function AIFlashcards() {
   });
   const [showDeckList, setShowDeckList] = useState(false);
   const [deckTopic, setDeckTopic] = useState('');
+  const [srsMode, setSrsMode] = useState(false);
+  const [srsCurrentIndex, setSrsCurrentIndex] = useState(0);
+  const [srsFlipped, setSrsFlipped] = useState(false);
 
   // ── Derived stats ──────────────────────────────────────────────────────────
 
@@ -195,11 +203,45 @@ export default function AIFlashcards() {
     return `${difficult} card${difficult > 1 ? 's' : ''} marked for review. Switch to "Difficult Only" mode to focus on them.`;
   }
 
+  // ── SRS functions ───────────────────────────────────────────────────────────
+
+  function handleSaveToSRS() {
+    if (cards.length === 0) return;
+    const deckId = (deckTopic || topic).trim().toLowerCase().replace(/\s+/g, '-');
+    saveSRSDeck(deckId, cards.map(c => ({ front: c.front, back: c.back, difficulty: c.difficulty })));
+  }
+
+  function enterSrsReviewMode() {
+    if (dueCards.length === 0) return;
+    setSrsMode(true);
+    setSrsCurrentIndex(0);
+    setSrsFlipped(false);
+  }
+
+  function exitSrsReviewMode() {
+    setSrsMode(false);
+    setSrsCurrentIndex(0);
+    setSrsFlipped(false);
+    fetchDueCards();
+  }
+
+  async function handleSrsReview(quality) {
+    const card = dueCards[srsCurrentIndex];
+    if (!card) return;
+    await reviewCard(card.id || card.cardId, quality);
+    if (srsCurrentIndex < dueCards.length - 1) {
+      setSrsCurrentIndex(i => i + 1);
+      setSrsFlipped(false);
+    } else {
+      exitSrsReviewMode();
+    }
+  }
+
   // ── Keyboard navigation ────────────────────────────────────────────────────
 
   useEffect(() => {
     function handleKey(e) {
-      if (cards.length === 0) return;
+      if (cards.length === 0 && !srsMode) return;
       if (e.key === 'ArrowLeft') goPrev();
       else if (e.key === 'ArrowRight') goNext();
       else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setIsFlipped(f => !f); }
@@ -221,10 +263,25 @@ export default function AIFlashcards() {
           <h1 className="font-headline text-2xl md:text-3xl text-on-surface font-bold">AI Flashcards</h1>
         </div>
         <p className="text-on-surface-variant text-sm md:text-base">Generate flashcards on any topic and study with spaced repetition.</p>
+        {dueCards.length > 0 && !srsMode && (
+          <div className="flex items-center gap-3 mt-2">
+            <span className="text-on-surface-variant text-xs flex items-center gap-1.5">
+              <Brain className="w-3.5 h-3.5 text-purple-400" />
+              {srsDecks.length} deck{srsDecks.length !== 1 ? 's' : ''} saved
+            </span>
+            <button
+              onClick={enterSrsReviewMode}
+              className="px-3 py-1.5 rounded-lg bg-purple-600/20 border border-purple-500/30 text-purple-400 text-xs font-semibold hover:bg-purple-600/30 transition-all flex items-center gap-1.5"
+            >
+              <Clock className="w-3.5 h-3.5" />
+              Review Due Cards ({dueCards.length})
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Input + controls */}
-      <div className="glass-card rounded-2xl p-6 mb-6">
+      <div className="card rounded-2xl p-6 mb-6">
         <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="text"
@@ -273,6 +330,9 @@ export default function AIFlashcards() {
               <button onClick={saveDeck} className="text-on-surface-variant text-xs hover:text-emerald-400 transition-colors flex items-center gap-1.5">
                 <Save className="w-3.5 h-3.5" /> Save Deck
               </button>
+              <button onClick={handleSaveToSRS} className="text-on-surface-variant text-xs hover:text-purple-400 transition-colors flex items-center gap-1.5">
+                <Brain className="w-3.5 h-3.5" /> Save to Spaced Repetition
+              </button>
               <button onClick={resetProgress} className="text-on-surface-variant text-xs hover:text-amber-400 transition-colors flex items-center gap-1.5">
                 <RotateCcw className="w-3.5 h-3.5" /> Reset
               </button>
@@ -283,14 +343,14 @@ export default function AIFlashcards() {
 
       {/* Error */}
       {error && (
-        <div className="glass-card rounded-2xl p-4 mb-6 border-l-4 border-red-500">
+        <div className="card rounded-2xl p-4 mb-6 border-l-4 border-red-500">
           <p className="text-red-400 text-sm">{error}</p>
         </div>
       )}
 
       {/* Saved decks list */}
       {showDeckList && (
-        <div className="glass-card rounded-2xl p-5 mb-6">
+        <div className="card rounded-2xl p-5 mb-6">
           <h3 className="text-on-surface font-semibold text-sm mb-3">Saved Decks</h3>
           {savedDecks.length === 0 ? (
             <p className="text-on-surface-variant/50 text-xs">No saved decks yet</p>
@@ -314,7 +374,7 @@ export default function AIFlashcards() {
 
       {/* Stats panel */}
       {showStats && cards.length > 0 && (
-        <div className="glass-card rounded-2xl p-5 mb-6">
+        <div className="card rounded-2xl p-5 mb-6">
           <h3 className="text-on-surface font-semibold text-sm mb-4 flex items-center gap-2">
             <BarChart3 className="w-4 h-4 text-purple-500" /> Study Statistics
           </h3>
@@ -337,7 +397,7 @@ export default function AIFlashcards() {
 
       {/* Loading */}
       {loading && (
-        <div className="glass-card rounded-2xl p-12 flex flex-col items-center justify-center">
+        <div className="card rounded-2xl p-12 flex flex-col items-center justify-center">
           <div className="w-12 h-12 rounded-full border-3 border-purple-500 border-t-transparent animate-spin mb-4" />
           <p className="text-on-surface font-semibold">Generating flashcards...</p>
           <p className="text-on-surface-variant text-sm mt-1">Creating {cardCount} cards for you</p>
@@ -400,7 +460,7 @@ export default function AIFlashcards() {
               >
                 {/* Front */}
                 <div
-                  className="absolute inset-0 glass-card rounded-2xl p-8 flex flex-col items-center justify-center text-center"
+                  className="absolute inset-0 card rounded-2xl p-8 flex flex-col items-center justify-center text-center"
                   style={{ backfaceVisibility: 'hidden' }}
                 >
                   <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold mb-4 ${getDifficultyColor(currentCard.difficulty)}`}>
@@ -412,7 +472,7 @@ export default function AIFlashcards() {
 
                 {/* Back */}
                 <div
-                  className="absolute inset-0 glass-card rounded-2xl p-8 flex flex-col items-center justify-center text-center bg-gradient-to-br from-purple-900/20 to-blue-900/20"
+                  className="absolute inset-0 card rounded-2xl p-8 flex flex-col items-center justify-center text-center bg-gradient-to-br from-purple-900/20 to-blue-900/20"
                   style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
                 >
                   <span className="material-symbols-outlined text-purple-500 text-2xl mb-3">lightbulb</span>
@@ -490,9 +550,109 @@ export default function AIFlashcards() {
         </>
       )}
 
+      {/* SRS Review Mode */}
+      {srsMode && dueCards.length > 0 && (
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-on-surface font-semibold text-lg flex items-center gap-2">
+              <Brain className="w-5 h-5 text-purple-500" /> Spaced Repetition Review
+            </h2>
+            <button
+              onClick={exitSrsReviewMode}
+              className="px-3 py-1.5 rounded-lg bg-surface-container/50 border border-outline/20 text-on-surface-variant text-xs font-semibold hover:bg-surface-container transition-all"
+            >
+              Exit Review
+            </button>
+          </div>
+
+          {/* SRS Progress */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1 h-2 bg-surface-container/50 rounded-full overflow-hidden border border-outline/10">
+              <div
+                className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-300 rounded-full"
+                style={{ width: `${((srsCurrentIndex + 1) / dueCards.length) * 100}%` }}
+              />
+            </div>
+            <span className="text-on-surface-variant text-xs font-medium shrink-0">
+              {srsCurrentIndex + 1} / {dueCards.length}
+            </span>
+          </div>
+
+          {/* SRS Card */}
+          {dueCards[srsCurrentIndex] && (
+            <div className="perspective-1000 mb-6" style={{ perspective: '1000px' }}>
+              <div
+                onClick={() => setSrsFlipped(f => !f)}
+                className="relative w-full cursor-pointer transition-transform duration-500"
+                style={{
+                  transformStyle: 'preserve-3d',
+                  transform: srsFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+                  minHeight: '280px',
+                }}
+              >
+                {/* Front */}
+                <div
+                  className="absolute inset-0 card rounded-2xl p-8 flex flex-col items-center justify-center text-center"
+                  style={{ backfaceVisibility: 'hidden' }}
+                >
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold mb-4 bg-purple-500/20 text-purple-400">
+                    SRS Review
+                  </span>
+                  <p className="text-on-surface font-semibold text-lg md:text-xl leading-relaxed">
+                    {dueCards[srsCurrentIndex].front}
+                  </p>
+                  <p className="text-on-surface-variant/40 text-xs mt-6">Click to reveal answer</p>
+                </div>
+
+                {/* Back */}
+                <div
+                  className="absolute inset-0 card rounded-2xl p-8 flex flex-col items-center justify-center text-center bg-gradient-to-br from-purple-900/20 to-pink-900/20"
+                  style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+                >
+                  <span className="material-symbols-outlined text-purple-500 text-2xl mb-3">lightbulb</span>
+                  <p className="text-on-surface text-base md:text-lg leading-relaxed">
+                    {dueCards[srsCurrentIndex].back}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SRS Quality Buttons */}
+          {srsFlipped && (
+            <div className="flex items-center justify-center gap-3">
+              <button
+                onClick={() => handleSrsReview(0)}
+                className="px-5 py-2.5 rounded-xl bg-rose-600/20 border border-rose-500/30 text-rose-400 text-sm font-semibold hover:bg-rose-600/30 transition-all"
+              >
+                Again
+              </button>
+              <button
+                onClick={() => handleSrsReview(2)}
+                className="px-5 py-2.5 rounded-xl bg-amber-600/20 border border-amber-500/30 text-amber-400 text-sm font-semibold hover:bg-amber-600/30 transition-all"
+              >
+                Hard
+              </button>
+              <button
+                onClick={() => handleSrsReview(4)}
+                className="px-5 py-2.5 rounded-xl bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 text-sm font-semibold hover:bg-emerald-600/30 transition-all"
+              >
+                Good
+              </button>
+              <button
+                onClick={() => handleSrsReview(5)}
+                className="px-5 py-2.5 rounded-xl bg-sky-600/20 border border-sky-500/30 text-sky-400 text-sm font-semibold hover:bg-sky-600/30 transition-all"
+              >
+                Easy
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Empty state */}
-      {cards.length === 0 && !loading && !error && (
-        <div className="glass-card rounded-2xl p-12 flex flex-col items-center justify-center text-center">
+      {cards.length === 0 && !loading && !error && !srsMode && (
+        <div className="card rounded-2xl p-12 flex flex-col items-center justify-center text-center">
           <span className="material-symbols-outlined text-5xl text-on-surface-variant/30 mb-4">style</span>
           <h3 className="text-on-surface font-semibold text-lg mb-2">Create your flashcards</h3>
           <p className="text-on-surface-variant text-sm max-w-md mb-1">

@@ -295,6 +295,60 @@ const tables = [
       );
       CREATE INDEX IF NOT EXISTS idx_student_achievements_user_id ON student_achievements(user_id);
     `
+  },
+  {
+    name: 'tutor_conversations',
+    query: `
+      CREATE TABLE IF NOT EXISTS tutor_conversations (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        topic VARCHAR(100) NOT NULL,
+        title VARCHAR(255),
+        messages JSONB NOT NULL DEFAULT '[]',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_tutor_conversations_user ON tutor_conversations(user_id, updated_at DESC);
+    `
+  },
+  {
+    name: 'study_sessions',
+    query: `
+      CREATE TABLE IF NOT EXISTS study_sessions (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        session_type VARCHAR(20) NOT NULL,
+        topic VARCHAR(255) NOT NULL,
+        difficulty VARCHAR(20),
+        score INTEGER,
+        total_questions INTEGER,
+        time_spent_seconds INTEGER,
+        data JSONB DEFAULT '{}',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_study_sessions_user ON study_sessions(user_id, session_type, created_at DESC);
+    `
+  },
+  {
+    name: 'srs_cards',
+    query: `
+      CREATE TABLE IF NOT EXISTS srs_cards (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        deck_id VARCHAR(100) NOT NULL,
+        front TEXT NOT NULL,
+        back TEXT NOT NULL,
+        difficulty VARCHAR(10) DEFAULT 'medium',
+        ease_factor REAL DEFAULT 2.5,
+        interval_days INTEGER DEFAULT 0,
+        repetitions INTEGER DEFAULT 0,
+        next_review DATE DEFAULT CURRENT_DATE,
+        last_reviewed TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, deck_id, front)
+      );
+      CREATE INDEX IF NOT EXISTS idx_srs_cards_review ON srs_cards(user_id, next_review);
+    `
   }
 ];
 

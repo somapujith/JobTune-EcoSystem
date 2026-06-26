@@ -440,6 +440,7 @@ Make tasks specific, actionable, and relevant to the target role. Vary prioritie
       maxTokens: 800,
       temperature: 0.6,
       structuredJson: true,
+      cache: false,
     });
 
     let recommendations;
@@ -513,6 +514,7 @@ Include 6-8 skills. Be realistic about gaps. currentLevel should be higher for s
       maxTokens: 600,
       temperature: 0.5,
       structuredJson: true,
+      cache: false,
     });
 
     let gaps;
@@ -583,6 +585,7 @@ Include 6 monthly phases. Keep tasks concise and actionable.`;
       maxTokens: 1000,
       temperature: 0.5,
       structuredJson: true,
+      cache: false,
     });
 
     let plan;
@@ -648,6 +651,7 @@ JSON schema:
       maxTokens: 600,
       temperature: 0.5,
       structuredJson: true,
+      cache: false,
     });
 
     let comparison;
@@ -726,6 +730,7 @@ Be specific about line numbers. Provide actionable fixes. Score reflects overall
       maxTokens: 1200,
       temperature: 0.3,
       structuredJson: true,
+      cache: false,
     });
 
     let review;

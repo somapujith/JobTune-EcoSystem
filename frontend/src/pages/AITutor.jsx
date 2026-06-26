@@ -91,8 +91,8 @@ function MessageBubble({ message }) {
       <div className={`max-w-[80%] ${isUser ? 'text-right' : ''}`}>
         <div className={`rounded-2xl px-5 py-3.5 ${
           isUser
-            ? 'bg-sky-500/15 border border-sky-500/20 text-on-surface'
-            : 'glass-card text-on-surface'
+            ? 'bg-sky-500/15 border border-sky-500/20 text-on-surface dark:text-white'
+            : 'card text-on-surface dark:text-white'
         }`}>
           <div className="text-sm leading-relaxed whitespace-pre-wrap">
             {renderContent(message.content)}
@@ -116,7 +116,7 @@ function TypingIndicator() {
       <div className="flex-shrink-0 w-9 h-9 rounded-2xl flex items-center justify-center bg-emerald-500/20 text-emerald-400">
         <Bot size={18} />
       </div>
-      <div className="glass-card rounded-2xl px-5 py-4">
+      <div className="card rounded-2xl px-5 py-4">
         <div className="flex gap-1.5">
           <span className="w-2 h-2 rounded-full bg-on-surface-variant animate-bounce" style={{ animationDelay: '0ms' }} />
           <span className="w-2 h-2 rounded-full bg-on-surface-variant animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -146,10 +146,87 @@ export default function AITutor() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Fetch available topics on mount
+  // Fetch available topics and conversations on mount
   useEffect(() => {
     fetchTopics();
+    fetchConversations();
   }, []);
+
+  async function fetchConversations() {
+    try {
+      const { data } = await api.get('/ai-tutor/conversations');
+      if (data.conversations) {
+        setChatSessions(data.conversations.map(c => ({
+          id: c.id,
+          topic: c.topic || 'General',
+          preview: c.title || c.messages?.[0]?.content?.slice(0, 50) + '...' || 'Conversation',
+          messageCount: c.messages?.length || c.messageCount || 0,
+          timestamp: c.updatedAt || c.createdAt || new Date().toLocaleString(),
+          messages: c.messages,
+        })));
+      }
+    } catch (err) {
+      console.warn('Failed to fetch conversations:', err.message);
+    }
+  }
+
+  async function loadConversation(session) {
+    try {
+      const { data } = await api.get(`/ai-tutor/conversations/${session.id}`);
+      if (data.conversation?.messages) {
+        setMessages(data.conversation.messages);
+        setActiveSessionId(session.id);
+        if (data.conversation.topic) {
+          const topicObj = topics.find(t => t.id === data.conversation.topic);
+          if (topicObj) setSelectedTopic(topicObj);
+        }
+      }
+    } catch (err) {
+      // Fallback: use cached messages if available
+      if (session.messages) {
+        setMessages(session.messages);
+        setActiveSessionId(session.id);
+      }
+      console.warn('Failed to load conversation:', err.message);
+    }
+  }
+
+  async function deleteConversation(e, sessionId) {
+    e.stopPropagation();
+    try {
+      await api.delete(`/ai-tutor/conversations/${sessionId}`);
+      setChatSessions(prev => prev.filter(s => s.id !== sessionId));
+      if (activeSessionId === sessionId) {
+        setMessages([]);
+        setActiveSessionId(0);
+      }
+    } catch (err) {
+      console.warn('Failed to delete conversation:', err.message);
+      // Remove locally even if API fails
+      setChatSessions(prev => prev.filter(s => s.id !== sessionId));
+    }
+  }
+
+  async function saveConversation(allMessages) {
+    try {
+      if (activeSessionId && typeof activeSessionId === 'string') {
+        // Update existing conversation
+        await api.put(`/ai-tutor/conversations/${activeSessionId}`, { messages: allMessages });
+      } else {
+        // Create new conversation
+        const { data } = await api.post('/ai-tutor/conversations', {
+          topic: selectedTopic?.id || 'general',
+          title: allMessages[0]?.content?.slice(0, 50) || 'Conversation',
+          messages: allMessages,
+        });
+        if (data.conversation?.id) {
+          setActiveSessionId(data.conversation.id);
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to save conversation:', err.message);
+    }
+  }
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -182,20 +259,14 @@ export default function AITutor() {
 
   function startNewSession() {
     if (messages.length > 0) {
-      setChatSessions(prev => [
-        ...prev,
-        {
-          id: activeSessionId,
-          topic: selectedTopic?.name || 'General',
-          preview: messages[0]?.content?.slice(0, 50) + '...',
-          messageCount: messages.length,
-          timestamp: new Date().toLocaleString()
-        }
-      ]);
+      // Save current conversation to API before starting new one
+      saveConversation(messages);
+      fetchConversations();
     }
     setMessages([]);
     setSuggestedTopics([]);
-    setActiveSessionId(prev => prev + 1);
+    setActiveSessionId(0);
+    setSelectedTopic(null);
     inputRef.current?.focus();
   }
 
@@ -237,11 +308,18 @@ export default function AITutor() {
         history: history.slice(-8)
       });
 
-      setMessages(prev => [...prev, {
+      const aiMessage = {
         role: 'assistant',
         content: data.reply,
         timestamp: getTimestamp()
-      }]);
+      };
+
+      setMessages(prev => {
+        const updatedMessages = [...prev, aiMessage];
+        // Save conversation to API (fire-and-forget)
+        saveConversation(updatedMessages);
+        return updatedMessages;
+      });
 
       if (data.suggestedTopics?.length > 0) {
         setSuggestedTopics(data.suggestedTopics);
@@ -329,11 +407,20 @@ export default function AITutor() {
                   {chatSessions.slice(-5).reverse().map(session => (
                     <div
                       key={session.id}
-                      className="px-3 py-2.5 rounded-xl text-sm text-on-surface-variant hover:bg-white/5 transition-colors cursor-default"
+                      onClick={() => loadConversation(session)}
+                      className={`px-3 py-2.5 rounded-xl text-sm text-on-surface-variant hover:bg-white/5 transition-colors cursor-pointer group ${
+                        activeSessionId === session.id ? 'bg-sky-500/10 border border-sky-500/20' : ''
+                      }`}
                     >
                       <div className="flex items-center gap-2">
                         <MessageSquare size={14} className="text-on-surface-variant flex-shrink-0" />
-                        <span className="truncate text-on-surface text-xs font-medium">{session.preview}</span>
+                        <span className="truncate text-on-surface text-xs font-medium flex-1">{session.preview}</span>
+                        <button
+                          onClick={(e) => deleteConversation(e, session.id)}
+                          className="opacity-0 group-hover:opacity-100 text-on-surface-variant/50 hover:text-rose-400 transition-all flex-shrink-0"
+                        >
+                          <X size={12} />
+                        </button>
                       </div>
                       <div className="text-xs text-on-surface-variant mt-1 pl-[22px]">
                         {session.topic} &middot; {session.messageCount} msgs
@@ -354,7 +441,7 @@ export default function AITutor() {
               <div className="w-16 h-16 rounded-2xl bg-emerald-500/15 flex items-center justify-center mb-6">
                 <Sparkles size={32} className="text-emerald-400" />
               </div>
-              <h2 className="text-2xl font-black text-on-surface font-headline mb-2">What would you like to learn?</h2>
+              <h2 className="text-2xl font-extrabold text-on-surface dark:text-white font-headline mb-2">What would you like to learn?</h2>
               <p className="text-on-surface-variant text-sm mb-8 text-center max-w-md">
                 Choose a topic below or ask any CS question. I'll explain concepts, give examples, and help you practice.
               </p>
@@ -365,7 +452,7 @@ export default function AITutor() {
                   <button
                     key={topic.id}
                     onClick={() => selectTopic(topic)}
-                    className="glass-card rounded-2xl p-4 hover:bg-white/10 transition-all group text-left"
+                    className="card rounded-2xl p-4 hover:bg-white/10 transition-all group text-left"
                   >
                     <span className="material-symbols-outlined text-2xl text-sky-400 group-hover:text-sky-300 mb-2 block" style={{ fontVariationSettings: "'FILL' 0" }}>
                       {TOPIC_ICONS[topic.id] || 'category'}
@@ -388,7 +475,7 @@ export default function AITutor() {
                         if (topic) setSelectedTopic(topic);
                         handleSend(qt.label);
                       }}
-                      className="px-4 py-2 glass-card rounded-full text-sm text-on-surface-variant hover:text-on-surface hover:bg-white/10 transition-colors flex items-center gap-1.5"
+                      className="px-4 py-2 card rounded-full text-sm text-on-surface-variant dark:text-slate-400 hover:text-on-surface hover:bg-white/10 transition-colors flex items-center gap-1.5"
                     >
                       <BookOpen size={14} />
                       {qt.label}
@@ -399,7 +486,7 @@ export default function AITutor() {
             </div>
           ) : (
             /* Chat Messages */
-            <div className="flex-1 overflow-y-auto rounded-3xl glass-card p-6 mb-4" style={{ maxHeight: 'calc(100vh - 320px)', minHeight: '400px' }}>
+            <div className="flex-1 overflow-y-auto rounded-2xl card p-6 mb-4" style={{ maxHeight: 'calc(100vh - 320px)', minHeight: '400px' }}>
               {/* Topic Badge */}
               {selectedTopic && (
                 <div className="flex items-center justify-center mb-6">
@@ -445,7 +532,7 @@ export default function AITutor() {
           )}
 
           {/* Input Area */}
-          <div className="glass-card rounded-2xl p-3 flex items-end gap-3">
+          <div className="card rounded-2xl p-3 flex items-end gap-3">
             <div className="flex-1 relative">
               <textarea
                 ref={inputRef}

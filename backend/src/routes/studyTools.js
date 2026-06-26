@@ -3,6 +3,7 @@ const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
 const { requirePlan } = require('../middleware/requirePlan');
 const { callAI, extractJSON } = require('../utils/aiClient');
+const studyHistoryService = require('../services/studyHistoryService');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Fallback data generators (used when AI is unavailable)
@@ -154,6 +155,21 @@ router.post('/notes/generate', authenticateToken, requirePlan(1), async (req, re
       notes = generateFallbackNotes(topic, type);
     }
 
+    // Save session history (non-blocking)
+    try {
+      await studyHistoryService.saveSession(req.user.id, {
+        sessionType: 'notes',
+        topic,
+        difficulty: null,
+        score: null,
+        totalQuestions: null,
+        timeSpentSeconds: null,
+        data: { type, title: notes.title || topic }
+      });
+    } catch (saveErr) {
+      console.warn('Failed to save notes session:', saveErr.message);
+    }
+
     res.json({ success: true, data: notes });
   } catch (err) {
     console.error('Notes generation error:', err);
@@ -198,6 +214,21 @@ router.post('/flashcards/generate', authenticateToken, requirePlan(1), async (re
       }
     } else {
       flashcards = generateFallbackFlashcards(topic, cardCount);
+    }
+
+    // Save session history (non-blocking)
+    try {
+      await studyHistoryService.saveSession(req.user.id, {
+        sessionType: 'flashcards',
+        topic,
+        difficulty: null,
+        score: null,
+        totalQuestions: Array.isArray(flashcards) ? flashcards.length : null,
+        timeSpentSeconds: null,
+        data: { cardCount: Array.isArray(flashcards) ? flashcards.length : 0 }
+      });
+    } catch (saveErr) {
+      console.warn('Failed to save flashcards session:', saveErr.message);
     }
 
     res.json({ success: true, data: flashcards });
@@ -295,6 +326,26 @@ router.post('/quiz/submit', authenticateToken, requirePlan(1), async (req, res) 
     if (score < 70) suggestions.push('Generate study notes on this topic for deeper understanding');
     if (score < 50) suggestions.push('Create flashcards to memorize key concepts');
     suggestions.push('Try the quiz again after reviewing to track improvement');
+
+    // Save quiz session history (non-blocking)
+    try {
+      const wrongAnswers = breakdown.filter(b => !b.isCorrect).map(b => ({
+        question: b.question,
+        userAnswer: b.userAnswer,
+        correctAnswer: b.correctAnswer,
+      }));
+      await studyHistoryService.saveSession(req.user.id, {
+        sessionType: 'quiz',
+        topic: topic || 'Unknown',
+        difficulty,
+        score,
+        totalQuestions: questions.length,
+        timeSpentSeconds: timeTaken || null,
+        data: { correctCount: correct, wrongAnswers: wrongAnswers.slice(0, 5) }
+      });
+    } catch (saveErr) {
+      console.warn('Failed to save quiz session:', saveErr.message);
+    }
 
     res.json({
       success: true,

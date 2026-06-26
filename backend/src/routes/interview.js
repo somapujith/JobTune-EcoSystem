@@ -130,7 +130,8 @@ router.post('/start', authenticateToken, requirePlan(3), async (req, res, next) 
       systemPrompt: INTERVIEWER_PROMPT,
       userPrompt,
       maxTokens: 1000,
-      model: process.env.LM_STUDIO_MODEL_INTERVIEW
+      model: process.env.LM_STUDIO_MODEL_INTERVIEW,
+      cache: false
     });
 
     let response;
@@ -208,7 +209,7 @@ router.post('/:id/respond', authenticateToken, async (req, res, next) => {
 
     const userPrompt = `Interview for: ${interview.role}\n\nConversation so far:\n${conversationHistory}\n\nThe candidate has answered ${Math.floor(messages.length / 2)} questions so far. ${messages.length >= 10 ? 'This should be the final question - wrap up the interview.' : 'Continue the interview.'}`;
 
-    const aiResult = await callAI({ systemPrompt: INTERVIEWER_PROMPT, userPrompt, maxTokens: 800 });
+    const aiResult = await callAI({ systemPrompt: INTERVIEWER_PROMPT, userPrompt, maxTokens: 800, cache: false });
 
     let response;
     let aiPowered = false;

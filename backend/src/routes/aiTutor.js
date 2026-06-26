@@ -230,7 +230,8 @@ router.post('/chat', authenticateToken, requirePlan(1), async (req, res, next) =
       maxTokens: 1024,
       temperature: 0.6,
       structuredJson: true,
-      model: process.env.LM_STUDIO_MODEL_TUTOR
+      model: process.env.LM_STUDIO_MODEL_TUTOR,
+      cache: false
     });
 
     let result;
@@ -309,6 +310,48 @@ router.post('/doubt', authenticateToken, requirePlan(1), async (req, res, next) 
   } catch (err) {
     next(err);
   }
+});
+
+// ── Conversation History ───────────────────────────────────────────────────
+
+const tutorHistoryService = require('../services/tutorHistoryService');
+
+router.get('/conversations', authenticateToken, async (req, res, next) => {
+  try {
+    const conversations = await tutorHistoryService.getConversations(req.user.id);
+    res.json({ conversations });
+  } catch (err) { next(err); }
+});
+
+router.get('/conversations/:id', authenticateToken, async (req, res, next) => {
+  try {
+    const conversation = await tutorHistoryService.getConversation(req.params.id, req.user.id);
+    if (!conversation) return res.status(404).json({ error: 'Conversation not found' });
+    res.json({ conversation });
+  } catch (err) { next(err); }
+});
+
+router.post('/conversations', authenticateToken, async (req, res, next) => {
+  try {
+    const { topic, title, messages } = req.body;
+    const result = await tutorHistoryService.saveConversation(req.user.id, topic, title, messages || []);
+    res.json({ success: true, conversation: result });
+  } catch (err) { next(err); }
+});
+
+router.put('/conversations/:id', authenticateToken, async (req, res, next) => {
+  try {
+    const { messages } = req.body;
+    await tutorHistoryService.updateConversation(req.params.id, req.user.id, messages);
+    res.json({ success: true });
+  } catch (err) { next(err); }
+});
+
+router.delete('/conversations/:id', authenticateToken, async (req, res, next) => {
+  try {
+    await tutorHistoryService.deleteConversation(req.params.id, req.user.id);
+    res.json({ success: true });
+  } catch (err) { next(err); }
 });
 
 module.exports = router;

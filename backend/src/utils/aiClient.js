@@ -3,7 +3,13 @@
  *
  * When AI_PROVIDER=gemini and GEMINI_API_KEY is set, all callAI() requests
  * go through the Google Gemini REST API. Otherwise falls back to LM Studio.
+ *
+ * Features:
+ * - In-memory LRU cache (1h TTL, 500 entries) to avoid duplicate API calls
+ * - Retry with exponential backoff (up to 2 retries) for transient failures
  */
+
+const aiCache = require('./aiCache');
 
 const REASONING_MODEL_PATTERN = /reasoning|qwq|deepseek-r1|r1-distill/i;
 
@@ -228,7 +234,7 @@ async function callLMStudio({ systemPrompt, userPrompt, maxTokens = 1024, temper
 
 // ── Main dispatcher ──
 
-async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature = 0.4, model, structuredJson = false }) {
+async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature = 0.4, model, structuredJson = false, cache = true }) {
   const isMock = process.env.MOCK_AI === 'true';
   if (isMock) {
     await new Promise(resolve => setTimeout(resolve, 800));
@@ -245,17 +251,47 @@ async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature 
     return { ok: true, error: null, data: mockResponse };
   }
 
+  // Check cache first (skip for non-cacheable calls)
+  if (cache) {
+    const cached = aiCache.get(systemPrompt, userPrompt, maxTokens, temperature);
+    if (cached) {
+      return { ok: true, error: null, data: cached, cached: true };
+    }
+  }
+
   const provider = getProvider();
+  let result;
+  let lastError;
 
-  if (provider === 'anthropic') {
-    return callAnthropic({ systemPrompt, userPrompt, maxTokens, temperature });
+  // Retry with exponential backoff (max 2 retries)
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt > 0) {
+      const delay = Math.min(1000 * Math.pow(2, attempt - 1), 4000);
+      await new Promise(r => setTimeout(r, delay));
+    }
+
+    if (provider === 'anthropic') {
+      result = await callAnthropic({ systemPrompt, userPrompt, maxTokens, temperature });
+    } else if (provider === 'gemini') {
+      result = await callGemini({ systemPrompt, userPrompt, maxTokens, temperature });
+    } else {
+      result = await callLMStudio({ systemPrompt, userPrompt, maxTokens, temperature, model, structuredJson });
+    }
+
+    if (result.ok) {
+      // Cache successful response
+      if (cache && result.data) {
+        aiCache.set(systemPrompt, userPrompt, maxTokens, temperature, result.data);
+      }
+      return result;
+    }
+
+    lastError = result.error;
+    // Don't retry on 4xx errors (bad request, not transient)
+    if (result.error && /400|401|403|422/.test(result.error)) break;
   }
 
-  if (provider === 'gemini') {
-    return callGemini({ systemPrompt, userPrompt, maxTokens, temperature });
-  }
-
-  return callLMStudio({ systemPrompt, userPrompt, maxTokens, temperature, model, structuredJson });
+  return { ok: false, error: lastError || 'AI call failed after retries', data: null };
 }
 
 /**
@@ -280,4 +316,4 @@ function extractJSON(text) {
   }
 }
 
-module.exports = { callAI, extractJSON, isReasoningModel, modelForStructuredJson };
+module.exports = { callAI, extractJSON, isReasoningModel, modelForStructuredJson, getAICacheStats: () => aiCache.getStats() };
