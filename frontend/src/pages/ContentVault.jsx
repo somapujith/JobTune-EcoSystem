@@ -36,10 +36,10 @@ export default function ContentVault() {
   });
 
   return (
-    <div className="w-full max-w-7xl mx-auto py-16 px-4 sm:px-6">
+    <div className="page-container">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12 gap-8">
         <div>
-          <h1 className="text-4xl font-black text-on-surface font-headline mb-3 flex items-center gap-4">
+          <h1 className="text-4xl font-extrabold text-on-surface font-headline mb-3 flex items-center gap-4">
             <span className="material-symbols-outlined text-amber-500 text-4xl" style={{ fontVariationSettings: "'FILL' 0" }}>library_books</span>
             Content Vault
           </h1>
@@ -79,7 +79,7 @@ export default function ContentVault() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filtered.map(item => (
-          <div key={item.id} className="group glass-card rounded-3xl p-6 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+          <div key={item.id} className="group card rounded-2xl p-6 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
             <div
               className="absolute top-0 left-0 w-full h-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               style={{ background: `linear-gradient(90deg, ${item.color} 0%, ${item.color}80 100%)` }}

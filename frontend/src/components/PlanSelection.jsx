@@ -45,7 +45,7 @@ export default function PlanSelection({ recommendation, onPlanSelected }) {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-black text-slate-900 dark:text-white mb-3">Choose Your Perfect Plan</h1>
+          <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white mb-3">Choose Your Perfect Plan</h1>
           <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
             We recommend <span className="font-bold text-blue-600 dark:text-blue-400">{recommendation?.recommendedPlan?.name}</span> based on your answers, but you can choose any plan.
           </p>
@@ -91,10 +91,10 @@ export default function PlanSelection({ recommendation, onPlanSelected }) {
                   {planData.price !== undefined && (
                     <div className="mb-6">
                       {planData.price === 0 ? (
-                        <p className="text-3xl font-black text-blue-600">Free</p>
+                        <p className="text-3xl font-extrabold text-blue-600">Free</p>
                       ) : (
                         <>
-                          <p className="text-4xl font-black text-slate-900 dark:text-white">${planData.price}</p>
+                          <p className="text-4xl font-extrabold text-slate-900 dark:text-white">${planData.price}</p>
                           <p className="text-sm text-slate-600 dark:text-slate-400">/month</p>
                         </>
                       )}

@@ -1,9 +1,25 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
+const Joi = require('joi');
 const { pool } = require('../config/database');
 const { authenticateToken } = require('../middleware/auth');
 const sessionService = require('../services/sessionService');
+
+const signupSchema = Joi.object({
+  email: Joi.string().email().max(255).required(),
+  password: Joi.string().min(8).max(128).required(),
+  github_username: Joi.string().max(39).pattern(/^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i).allow('', null),
+  linkedin_url: Joi.string().uri().max(500).allow('', null),
+  deviceName: Joi.string().max(100).allow('', null),
+});
+
+const loginSchema = Joi.object({
+  email: Joi.string().email().max(255).required(),
+  password: Joi.string().max(128).required(),
+  replaceDevice: Joi.boolean(),
+  deviceName: Joi.string().max(100).allow('', null),
+});
 
 function sanitizeUser(user) {
   const { password_hash, ...safe } = user;
@@ -32,11 +48,11 @@ function handleAccountInUse(err, res, next) {
 // Signup
 router.post('/signup', async (req, res, next) => {
   try {
-    const { email, password, github_username, linkedin_url } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+    const { error: validationError, value } = signupSchema.validate(req.body, { stripUnknown: true });
+    if (validationError) {
+      return res.status(400).json({ error: validationError.details[0].message });
     }
+    const { email, password, github_username, linkedin_url } = value;
 
     const existingResult = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
     if (existingResult.rows.length > 0) {
@@ -74,7 +90,11 @@ router.post('/signup', async (req, res, next) => {
 // Login — one active device per account (pass replaceDevice: true to take over)
 router.post('/login', async (req, res, next) => {
   try {
-    const { email, password, replaceDevice } = req.body;
+    const { error: validationError, value } = loginSchema.validate(req.body, { stripUnknown: true });
+    if (validationError) {
+      return res.status(400).json({ error: 'Invalid credentials' });
+    }
+    const { email, password, replaceDevice } = value;
 
     const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     if (result.rows.length === 0) {
@@ -140,7 +160,7 @@ router.post('/logout', async (req, res, next) => {
       const token = authHeader.slice(7);
       try {
         const jwt = require('jsonwebtoken');
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
         if (decoded.sessionId) {
           await sessionService.revokeSession(decoded.sessionId, decoded.id);
           return res.json({ success: true });

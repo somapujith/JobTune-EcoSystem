@@ -23,11 +23,11 @@ class ErrorBoundary extends Component {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 px-4">
-          <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 text-center">
+          <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8 text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-6">
               <AlertTriangle className="w-8 h-8 text-red-600" />
             </div>
-            <h1 className="text-2xl font-black text-slate-900 mb-2">Something went wrong</h1>
+            <h1 className="text-2xl font-extrabold text-slate-900 mb-2">Something went wrong</h1>
             <p className="text-slate-600 mb-6">
               We encountered an unexpected error. Please try again or contact support.
             </p>

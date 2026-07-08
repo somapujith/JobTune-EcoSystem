@@ -9,7 +9,7 @@ export default function GitHubReadmePreview({ markdown, onCopy, onDownload, copi
     let html = md
       .replace(/^### (.*?)$/gm, '<h3 class="text-xl font-bold mt-4 mb-2">$1</h3>')
       .replace(/^## (.*?)$/gm, '<h2 class="text-2xl font-bold mt-6 mb-3">$1</h2>')
-      .replace(/^# (.*?)$/gm, '<h1 class="text-4xl font-black mb-3">$1</h1>')
+      .replace(/^# (.*?)$/gm, '<h1 class="text-4xl font-extrabold mb-3">$1</h1>')
       .replace(/^\*\*\*$/gm, '<hr class="my-6 border-slate-300">')
       .replace(/^---$/gm, '<hr class="my-6 border-slate-300">')
       .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold">$1</strong>')

@@ -102,7 +102,7 @@ export default function OnboardingQuestionnaire({ onComplete }) {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
             <MessageCircle className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-            <h1 className="text-4xl font-black text-slate-900 dark:text-white">Let's Get Started</h1>
+            <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white">Let's Get Started</h1>
           </div>
           <p className="text-lg text-slate-600 dark:text-slate-400">Answer a few questions to find your perfect plan</p>
         </div>

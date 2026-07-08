@@ -91,7 +91,7 @@ function formatDate(dateStr) {
 function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="glass-card rounded-xl p-3 shadow-lg border border-outline/20">
+    <div className="card rounded-xl p-3 shadow-lg border border-outline/20">
       <p className="text-on-surface text-sm font-medium mb-1">{label}</p>
       {payload.map((entry, i) => (
         <p key={i} className="text-sm" style={{ color: entry.color }}>
@@ -216,11 +216,11 @@ export default function FacultyPanel() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 w-full">
+    <div className="page-container">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="font-headline text-3xl text-on-surface flex items-center gap-3">
+          <h1 className="page-title font-headline text-3xl text-on-surface flex items-center gap-3">
             <span className="material-symbols-outlined text-4xl text-teal-500" style={{ fontVariationSettings: "'FILL' 1" }}>person</span>
             Faculty Panel
           </h1>
@@ -228,16 +228,16 @@ export default function FacultyPanel() {
         </div>
         {/* Quick Actions */}
         <div className="flex items-center gap-2 flex-wrap">
-          <button className="glass-card rounded-xl px-3 py-2 flex items-center gap-1.5 text-xs text-on-surface hover:bg-surface-container/50 transition-colors border border-outline/20">
+          <button className="card rounded-xl px-3 py-2 flex items-center gap-1.5 text-xs text-on-surface hover:bg-surface-container/50 transition-colors border border-outline/20">
             <Megaphone className="w-3.5 h-3.5" /> Announce
           </button>
-          <button className="glass-card rounded-xl px-3 py-2 flex items-center gap-1.5 text-xs text-on-surface hover:bg-surface-container/50 transition-colors border border-outline/20">
+          <button className="card rounded-xl px-3 py-2 flex items-center gap-1.5 text-xs text-on-surface hover:bg-surface-container/50 transition-colors border border-outline/20">
             <PenLine className="w-3.5 h-3.5" /> Create Quiz
           </button>
-          <button className="glass-card rounded-xl px-3 py-2 flex items-center gap-1.5 text-xs text-on-surface hover:bg-surface-container/50 transition-colors border border-outline/20">
+          <button className="card rounded-xl px-3 py-2 flex items-center gap-1.5 text-xs text-on-surface hover:bg-surface-container/50 transition-colors border border-outline/20">
             <Upload className="w-3.5 h-3.5" /> Upload Material
           </button>
-          <button className="glass-card rounded-xl px-3 py-2 flex items-center gap-1.5 text-xs text-on-surface hover:bg-surface-container/50 transition-colors border border-outline/20">
+          <button className="card rounded-xl px-3 py-2 flex items-center gap-1.5 text-xs text-on-surface hover:bg-surface-container/50 transition-colors border border-outline/20">
             <Download className="w-3.5 h-3.5" /> Export Grades
           </button>
         </div>
@@ -272,7 +272,7 @@ export default function FacultyPanel() {
       {activeTab === 'courses' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {courses.map(course => (
-            <div key={course.id} className="glass-card rounded-2xl p-6 border border-outline/20 hover:shadow-lg transition-shadow">
+            <div key={course.id} className="card rounded-2xl p-6 border border-outline/20 hover:shadow-lg transition-shadow">
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <h3 className="font-headline text-lg text-on-surface">{course.name}</h3>
@@ -312,7 +312,7 @@ export default function FacultyPanel() {
           {/* Submissions modal */}
           {viewingSubmissions && (
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setViewingSubmissions(null)}>
-              <div className="glass-card rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto border border-outline/20" onClick={e => e.stopPropagation()}>
+              <div className="card rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto border border-outline/20" onClick={e => e.stopPropagation()}>
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-headline text-lg text-on-surface">Submissions: {viewingSubmissions.title}</h3>
                   <button onClick={() => setViewingSubmissions(null)} className="text-on-surface-variant hover:text-on-surface"><X className="w-5 h-5" /></button>
@@ -356,7 +356,7 @@ export default function FacultyPanel() {
 
           {/* Create Assignment Form */}
           {showCreateForm && (
-            <div className="glass-card rounded-2xl p-6 border border-outline/20 mb-6">
+            <div className="card rounded-2xl p-6 border border-outline/20 mb-6">
               <h3 className="font-headline text-base text-on-surface mb-4">New Assignment</h3>
               <form onSubmit={handleCreateAssignment} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
@@ -366,7 +366,7 @@ export default function FacultyPanel() {
                     required
                     value={newAssignment.title}
                     onChange={e => setNewAssignment(p => ({ ...p, title: e.target.value }))}
-                    className="w-full px-4 py-2.5 rounded-xl bg-surface-container/50 border border-outline/20 text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+                    className="input-field"
                     placeholder="Assignment title"
                   />
                 </div>
@@ -376,7 +376,7 @@ export default function FacultyPanel() {
                     value={newAssignment.description}
                     onChange={e => setNewAssignment(p => ({ ...p, description: e.target.value }))}
                     rows={3}
-                    className="w-full px-4 py-2.5 rounded-xl bg-surface-container/50 border border-outline/20 text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 resize-none"
+                    className="input-field resize-none"
                     placeholder="Assignment description..."
                   />
                 </div>
@@ -386,7 +386,7 @@ export default function FacultyPanel() {
                     required
                     value={newAssignment.courseId}
                     onChange={e => setNewAssignment(p => ({ ...p, courseId: e.target.value }))}
-                    className="w-full px-4 py-2.5 rounded-xl bg-surface-container/50 border border-outline/20 text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+                    className="input-field"
                   >
                     <option value="">Select course</option>
                     {courses.map(c => <option key={c.id} value={c.id}>{c.code} - {c.name}</option>)}
@@ -399,7 +399,7 @@ export default function FacultyPanel() {
                     required
                     value={newAssignment.dueDate}
                     onChange={e => setNewAssignment(p => ({ ...p, dueDate: e.target.value }))}
-                    className="w-full px-4 py-2.5 rounded-xl bg-surface-container/50 border border-outline/20 text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+                    className="input-field"
                   />
                 </div>
                 <div>
@@ -410,7 +410,7 @@ export default function FacultyPanel() {
                     min={1}
                     value={newAssignment.maxMarks}
                     onChange={e => setNewAssignment(p => ({ ...p, maxMarks: e.target.value }))}
-                    className="w-full px-4 py-2.5 rounded-xl bg-surface-container/50 border border-outline/20 text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+                    className="input-field"
                   />
                 </div>
                 <div className="flex items-end gap-2">
@@ -436,7 +436,7 @@ export default function FacultyPanel() {
           {/* Assignments list */}
           <div className="space-y-3">
             {assignments.map(a => (
-              <div key={a.id} className="glass-card rounded-2xl p-5 border border-outline/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div key={a.id} className="card rounded-2xl p-5 border border-outline/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="text-on-surface font-medium truncate">{a.title}</h3>
@@ -474,26 +474,26 @@ export default function FacultyPanel() {
           {/* Student detail modal */}
           {selectedStudent && (
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setSelectedStudent(null)}>
-              <div className="glass-card rounded-2xl p-6 max-w-md w-full border border-outline/20" onClick={e => e.stopPropagation()}>
+              <div className="card rounded-2xl p-6 max-w-md w-full border border-outline/20" onClick={e => e.stopPropagation()}>
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-headline text-lg text-on-surface">{selectedStudent.name}</h3>
                   <button onClick={() => setSelectedStudent(null)} className="text-on-surface-variant hover:text-on-surface"><X className="w-5 h-5" /></button>
                 </div>
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="glass-card rounded-xl p-4 border border-outline/20 text-center">
+                    <div className="card rounded-xl p-4 border border-outline/20 text-center">
                       <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{selectedStudent.quizAvg}</div>
                       <div className="text-xs text-on-surface-variant mt-1">Quiz Average</div>
                     </div>
-                    <div className="glass-card rounded-xl p-4 border border-outline/20 text-center">
+                    <div className="card rounded-xl p-4 border border-outline/20 text-center">
                       <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{selectedStudent.assignmentAvg}</div>
                       <div className="text-xs text-on-surface-variant mt-1">Assignment Avg</div>
                     </div>
-                    <div className="glass-card rounded-xl p-4 border border-outline/20 text-center">
+                    <div className="card rounded-xl p-4 border border-outline/20 text-center">
                       <div className={`text-2xl font-bold ${getGradeColor(selectedStudent.overallGrade)}`}>{selectedStudent.overallGrade}</div>
                       <div className="text-xs text-on-surface-variant mt-1">Overall Grade</div>
                     </div>
-                    <div className="glass-card rounded-xl p-4 border border-outline/20 text-center">
+                    <div className="card rounded-xl p-4 border border-outline/20 text-center">
                       <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{selectedStudent.attendance}%</div>
                       <div className="text-xs text-on-surface-variant mt-1">Attendance</div>
                     </div>
@@ -544,7 +544,7 @@ export default function FacultyPanel() {
           </div>
 
           {/* Students table */}
-          <div className="glass-card rounded-2xl border border-outline/20 overflow-hidden">
+          <div className="card rounded-2xl border border-outline/20 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -607,7 +607,7 @@ export default function FacultyPanel() {
       {/* ─── Analytics Tab ─── */}
       {activeTab === 'analytics' && (
         <div className="space-y-6">
-          <div className="glass-card rounded-2xl p-6 border border-outline/20">
+          <div className="card rounded-2xl p-6 border border-outline/20">
             <h2 className="font-headline text-lg text-on-surface mb-4 flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-teal-500" />
               Class Performance Comparison
@@ -629,7 +629,7 @@ export default function FacultyPanel() {
           {/* Course summary cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {courses.map(course => (
-              <div key={course.id} className="glass-card rounded-2xl p-5 border border-outline/20 text-center">
+              <div key={course.id} className="card rounded-2xl p-5 border border-outline/20 text-center">
                 <div className="text-sm text-on-surface-variant mb-1">{course.code}</div>
                 <div className="text-2xl font-bold text-on-surface">{course.avgScore}</div>
                 <div className="text-xs text-on-surface-variant">Class Average</div>

@@ -218,7 +218,7 @@ export default function AIQuizGenerator() {
 
   if (phase === 'setup') {
     return (
-      <div className="min-h-screen p-4 md:p-8 max-w-4xl mx-auto">
+      <div className="page-container">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -370,7 +370,7 @@ export default function AIQuizGenerator() {
 
   if (phase === 'loading') {
     return (
-      <div className="min-h-screen p-4 md:p-8 max-w-4xl mx-auto flex items-center justify-center">
+      <div className="page-container flex items-center justify-center">
         <div className="card rounded-2xl p-12 flex flex-col items-center text-center">
           <div className="w-14 h-14 rounded-full border-3 border-sky-500 border-t-transparent animate-spin mb-5" />
           <h2 className="text-on-surface font-bold text-xl mb-2">Generating Your Quiz</h2>
@@ -549,7 +549,7 @@ export default function AIQuizGenerator() {
     const wrongCount = results.breakdown?.filter(b => !b.isCorrect).length || 0;
 
     return (
-      <div className="min-h-screen p-4 md:p-8 max-w-4xl mx-auto">
+      <div className="page-container">
         {/* Header */}
         <div className="text-center mb-8">
           <span className="material-symbols-outlined text-4xl text-sky-500 mb-2">emoji_events</span>

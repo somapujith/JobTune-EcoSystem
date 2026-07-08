@@ -64,7 +64,7 @@ function useTimer(durationMinutes, onTimeout) {
 
 function AssessmentCard({ assessment, onStart }) {
   return (
-    <div className="glass-card rounded-2xl p-5 border border-outline/20 bg-surface-container/50 hover:border-sky-500/30 transition-all group">
+    <div className="card rounded-2xl p-5 border border-outline/20 bg-surface-container/50 hover:border-sky-500/30 transition-all group">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div>
           <span className={`inline-block px-2.5 py-0.5 rounded-lg text-xs font-bold border mb-2 ${TYPE_BADGES[assessment.type] || TYPE_BADGES['Topic Tests']}`}>
@@ -74,7 +74,7 @@ function AssessmentCard({ assessment, onStart }) {
         </div>
         {assessment.bestScore !== null && (
           <div className="text-right shrink-0">
-            <span className="text-2xl font-black text-on-surface">{assessment.bestScore}</span>
+            <span className="text-2xl font-extrabold text-on-surface">{assessment.bestScore}</span>
             <span className="text-xs text-on-surface-variant block">best score</span>
           </div>
         )}
@@ -136,12 +136,12 @@ function InstructionsScreen({ assessment, mode, onBegin, onBack }) {
         <ChevronLeft className="w-4 h-4" />
         Back to assessments
       </button>
-      <div className="glass-card rounded-2xl p-8 border border-outline/20 bg-surface-container/50">
+      <div className="card rounded-2xl p-8 border border-outline/20 bg-surface-container/50">
         <div className="text-center mb-6">
           <span className={`inline-block px-3 py-1 rounded-xl text-sm font-bold border mb-3 ${TYPE_BADGES[assessment.type]}`}>
             {assessment.type}
           </span>
-          <h2 className="text-on-surface font-headline text-2xl font-black mb-2">{assessment.title}</h2>
+          <h2 className="text-on-surface font-headline text-2xl font-extrabold mb-2">{assessment.title}</h2>
           <p className="text-on-surface-variant text-sm">
             {mode === 'exam' ? 'Timed assessment — answers shown at the end' : 'Practice mode — see answers immediately'}
           </p>
@@ -259,10 +259,10 @@ function ActiveTest({ assessment, mode, onSubmit, onBack }) {
   return (
     <div className="flex gap-4 h-full" style={{ minHeight: 'calc(100vh - 200px)' }}>
       {/* Question Navigator Sidebar */}
-      <div className="w-56 shrink-0 glass-card rounded-2xl border border-outline/20 bg-surface-container/50 p-4 flex flex-col">
+      <div className="w-56 shrink-0 card rounded-2xl border border-outline/20 bg-surface-container/50 p-4 flex flex-col">
         {mode === 'exam' && timer && (
           <div className="mb-4 text-center">
-            <p className={`text-2xl font-mono font-black ${timer.percentage < 20 ? 'text-rose-400' : 'text-on-surface'}`}>
+            <p className={`text-2xl font-mono font-extrabold ${timer.percentage < 20 ? 'text-rose-400' : 'text-on-surface'}`}>
               {timer.formatted}
             </p>
             <div className="w-full h-1.5 rounded-full bg-slate-800 mt-2 overflow-hidden">
@@ -311,7 +311,7 @@ function ActiveTest({ assessment, mode, onSubmit, onBack }) {
       </div>
 
       {/* Question Area */}
-      <div className="flex-1 flex flex-col glass-card rounded-2xl border border-outline/20 bg-surface-container/50 overflow-hidden">
+      <div className="flex-1 flex flex-col card rounded-2xl border border-outline/20 bg-surface-container/50 overflow-hidden">
         {/* Question header */}
         <div className="px-6 py-4 border-b border-outline/10 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -486,26 +486,26 @@ function ResultsScreen({ results, assessment, onBack }) {
       </button>
 
       {/* Score card */}
-      <div className={`glass-card rounded-2xl p-8 border border-outline/20 bg-gradient-to-br ${scoreBg} to-transparent mb-6`}>
+      <div className={`card rounded-2xl p-8 border border-outline/20 bg-gradient-to-br ${scoreBg} to-transparent mb-6`}>
         <div className="text-center mb-6">
-          <h2 className="text-on-surface font-headline text-xl font-black mb-1">Assessment Complete</h2>
+          <h2 className="text-on-surface font-headline text-xl font-extrabold mb-1">Assessment Complete</h2>
           <p className="text-on-surface-variant text-sm">{assessment?.title}</p>
         </div>
         <div className="grid grid-cols-4 gap-4 mb-6">
           <div className="text-center">
-            <p className={`text-4xl font-black ${scoreColor}`}>{results.score}%</p>
+            <p className={`text-4xl font-extrabold ${scoreColor}`}>{results.score}%</p>
             <p className="text-on-surface-variant text-xs mt-1">Score</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-black text-on-surface">{results.correct}/{results.total}</p>
+            <p className="text-2xl font-extrabold text-on-surface">{results.correct}/{results.total}</p>
             <p className="text-on-surface-variant text-xs mt-1">Correct</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-black text-sky-400">{results.percentile}th</p>
+            <p className="text-2xl font-extrabold text-sky-400">{results.percentile}th</p>
             <p className="text-on-surface-variant text-xs mt-1">Percentile</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-black text-on-surface">
+            <p className="text-2xl font-extrabold text-on-surface">
               {timeMins > 0 ? `${timeMins}m ` : ''}{timeSecs}s
             </p>
             <p className="text-on-surface-variant text-xs mt-1">Time</p>
@@ -526,7 +526,7 @@ function ResultsScreen({ results, assessment, onBack }) {
       {/* Review toggle */}
       <button
         onClick={() => setShowReview(!showReview)}
-        className="w-full glass-card rounded-2xl p-4 border border-outline/20 bg-surface-container/50 text-left flex items-center justify-between hover:border-sky-500/30 transition-colors mb-4"
+        className="w-full card rounded-2xl p-4 border border-outline/20 bg-surface-container/50 text-left flex items-center justify-between hover:border-sky-500/30 transition-colors mb-4"
       >
         <span className="text-on-surface font-bold text-sm flex items-center gap-2">
           <BarChart3 className="w-4 h-4 text-sky-400" />
@@ -663,7 +663,7 @@ export default function Assessments() {
   const selectedMeta = assessments.find(a => a.id === selectedId);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8" style={{ minHeight: 'calc(100vh - 120px)' }}>
+    <div className="page-container" style={{ minHeight: 'calc(100vh - 120px)' }}>
       {/* Page Header */}
       {phase === 'lobby' && (
         <>
@@ -672,7 +672,7 @@ export default function Assessments() {
               <span className="material-symbols-outlined text-purple-400 text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>
                 quiz
               </span>
-              <h1 className="font-headline text-on-surface text-2xl font-black">Assessments</h1>
+              <h1 className="font-headline text-on-surface text-2xl font-extrabold">Assessments</h1>
             </div>
             <p className="text-on-surface-variant text-sm">
               Test your knowledge with topic tests, mock exams, and skill assessments

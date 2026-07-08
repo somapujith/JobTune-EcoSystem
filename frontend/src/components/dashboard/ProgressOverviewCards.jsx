@@ -1,5 +1,5 @@
 import { BookOpen, Activity, Target, UserCheck } from 'lucide-react';
-import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
+import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
 
 const DEFAULT_SKILLS = [
   { subject: 'Technical', value: 0 },
@@ -66,7 +66,7 @@ function ProgressRing({ value, size = 80, stroke = 6 }) {
         y="50%"
         dominantBaseline="central"
         textAnchor="middle"
-        className="fill-slate-900 dark:fill-white text-sm font-black"
+        className="fill-slate-900 dark:fill-white text-sm font-extrabold"
       >
         {value}%
       </text>
@@ -76,7 +76,7 @@ function ProgressRing({ value, size = 80, stroke = 6 }) {
 
 function CardWrapper({ children }) {
   return (
-    <div className="glass-card p-6 rounded-3xl">
+    <div className="glass-card p-6 rounded-2xl">
       {children}
     </div>
   );
@@ -88,7 +88,7 @@ function CardHeader({ icon: Icon, iconBg, iconColor, title }) {
       <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${iconBg}`}>
         <Icon size={20} className={iconColor} />
       </div>
-      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+      <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 leading-none">
         {title}
       </span>
     </div>
@@ -107,12 +107,12 @@ function LearningProgressCard({ overview }) {
         iconColor="text-blue-500"
         title="Learning Progress"
       />
-      <p className="text-3xl font-black text-slate-900 dark:text-white">
+      <p className="text-3xl font-extrabold text-slate-900 dark:text-white">
         {coursesEnrolled}
       </p>
       <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">Courses enrolled</p>
       <ProgressBar value={learningProgress} />
-      <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">{learningProgress}% complete</p>
+      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{learningProgress}% complete</p>
     </CardWrapper>
   );
 }
@@ -129,8 +129,8 @@ function SkillsGrowthCard({ overview }) {
         title="Skills Growth"
       />
       <div className="flex justify-center">
-        <ResponsiveContainer width={150} height={150}>
-          <RadarChart data={skillScores} cx="50%" cy="50%" outerRadius="70%">
+        <div style={{ width: 150, height: 150 }}>
+          <RadarChart width={150} height={150} data={skillScores} cx="50%" cy="50%" outerRadius="70%">
             <PolarGrid stroke="#e2e8f0" className="dark:stroke-slate-700" />
             <PolarAngleAxis
               dataKey="subject"
@@ -145,7 +145,7 @@ function SkillsGrowthCard({ overview }) {
               strokeWidth={1.5}
             />
           </RadarChart>
-        </ResponsiveContainer>
+        </div>
       </div>
     </CardWrapper>
   );
@@ -182,7 +182,7 @@ function ProfileCompletionCard({ overview }) {
         iconColor="text-amber-500"
         title="Profile Completion"
       />
-      <p className="text-3xl font-black text-slate-900 dark:text-white">
+      <p className="text-3xl font-extrabold text-slate-900 dark:text-white">
         {profileCompletion}%
       </p>
       <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">Complete</p>
@@ -198,7 +198,7 @@ function ProfileCompletionCard({ overview }) {
                     : 'bg-slate-200 dark:bg-slate-700'
                 }`}
               />
-              <span className={`text-[9px] font-medium ${
+              <span className={`text-[10px] font-medium ${
                 done ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'
               }`}>
                 {seg.label}

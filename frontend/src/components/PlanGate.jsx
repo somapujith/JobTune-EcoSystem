@@ -42,7 +42,7 @@ export default function PlanGate({ toolName, requiredPlan = 'Tune & Polish', chi
           <Lock className={`w-10 h-10 text-${planConfig.color}-600 dark:text-${planConfig.color}-400`} />
         </div>
 
-        <h1 className="text-3xl font-black text-slate-900 dark:text-white mb-3">
+        <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-3">
           {toolName} Locked
         </h1>
 

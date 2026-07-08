@@ -18,6 +18,10 @@ jest.mock('../src/middleware/auth', () => ({
   }
 }));
 
+jest.mock('../src/middleware/requirePlan', () => ({
+  requirePlan: () => (req, _res, next) => next(),
+}));
+
 const request = require('supertest');
 const { pool } = require('../src/config/database');
 const app = require('../src/app');

@@ -27,12 +27,12 @@ export default function ProjectIdeas() {
   const filtered = filter === 'All' ? projects : projects.filter(p => p.category === filter);
 
   return (
-    <div className="w-full max-w-7xl mx-auto py-16 px-4 sm:px-6">
+    <div className="page-container">
       <div className="text-center mb-16">
         <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-rose-500/5 mb-6">
           <span className="material-symbols-outlined text-rose-600 text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>lightbulb</span>
         </div>
-        <h1 className="text-4xl font-black text-on-surface font-headline mb-4">
+        <h1 className="text-4xl font-extrabold text-on-surface font-headline mb-4 page-title dark:text-white">
           Project Ideas & Templates
         </h1>
         <p className="text-lg text-on-surface-variant font-medium max-w-2xl mx-auto">
@@ -48,7 +48,7 @@ export default function ProjectIdeas() {
             className={`px-8 py-3 rounded-2xl font-bold whitespace-nowrap transition-all duration-200 ${
               filter === c
                 ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/30'
-                : 'glass-card hover:bg-white/40 text-on-surface-variant hover:text-on-surface'
+                : 'card hover:bg-white/40 text-on-surface-variant hover:text-on-surface'
             }`}
           >
             {c}
@@ -58,7 +58,7 @@ export default function ProjectIdeas() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filtered.map(proj => (
-          <div key={proj.id} className="group glass-card rounded-3xl p-8 hover:-translate-y-2 transition-all duration-300 flex flex-col">
+          <div key={proj.id} className="group card rounded-2xl p-8 hover:-translate-y-2 transition-all duration-300 flex flex-col">
             <div className="flex justify-between items-start mb-6">
               <span className={`px-4 py-2 rounded-2xl text-xs font-bold uppercase tracking-wider ${
                 proj.diff === 'Beginner' ? 'bg-emerald-500/10 text-emerald-700' :
@@ -85,7 +85,7 @@ export default function ProjectIdeas() {
                 <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>play_arrow</span>
                 Start Guide
               </button>
-              <button className="px-5 py-4 glass-card hover:bg-white/40 text-on-surface font-bold rounded-2xl active:scale-95 transition-all duration-200">
+              <button className="px-5 py-4 card hover:bg-white/40 text-on-surface font-bold rounded-2xl active:scale-95 transition-all duration-200">
                 <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>code</span>
               </button>
             </div>

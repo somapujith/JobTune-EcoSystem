@@ -37,7 +37,7 @@ function SectionBadge({ children }) {
 
 function DarkBadge({ children }) {
   return (
-    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/8 border border-white/10 text-blue-300 text-xs font-bold tracking-widest uppercase">
+    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/8 border border-slate-200 dark:border-white/10 text-blue-300 text-xs font-bold tracking-widest uppercase">
       {children}
     </span>
   );
@@ -92,7 +92,7 @@ function AssessmentVisual() {
     { label: 'Behavioral',     pct: 91, color: '#8b5cf6' },
   ];
   return (
-    <div className="bg-slate-900/80 rounded-2xl p-6 space-y-4 shadow-glass backdrop-blur-md border border-white/10">
+    <div className="bg-slate-900/80 rounded-2xl p-6 space-y-4 shadow-glass backdrop-blur-md border border-slate-200 dark:border-white/10">
       <div className="flex items-center justify-between">
         <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Skill Radar</span>
         <span className="text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2.5 py-1 rounded-full">
@@ -115,12 +115,12 @@ function AssessmentVisual() {
       ))}
       <div className="pt-3 border-t border-white/5 flex items-center gap-2">
         <div className="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
-        <p className="text-[11px] text-slate-500">
+        <p className="text-xs text-slate-500">
           Gap detected: <span className="text-amber-400 font-semibold">System Design</span>
         </p>
       </div>
       <div className="bg-blue-500/8 rounded-xl p-3 border border-blue-500/15">
-        <p className="text-[11px] text-blue-300 font-medium">
+        <p className="text-xs text-blue-300 font-medium">
           ✦ Suggested path: System Design for SDE-1
         </p>
       </div>
@@ -130,7 +130,7 @@ function AssessmentVisual() {
 
 function ResumeVisual() {
   return (
-    <div className="bg-slate-900/80 rounded-2xl p-6 border border-white/10 shadow-glass backdrop-blur-md space-y-4">
+    <div className="bg-slate-900/80 rounded-2xl p-6 border border-slate-200 dark:border-white/10 shadow-glass backdrop-blur-md space-y-4">
       <div className="flex items-center gap-4">
         <div className="relative w-16 h-16 shrink-0">
           <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
@@ -156,7 +156,7 @@ function ResumeVisual() {
         ].map(r => (
           <div key={r.label} className="flex items-center justify-between py-2 border-b border-white/5">
             <span className="text-xs text-slate-400">{r.label}</span>
-            <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${r.ok ? 'text-emerald-400 bg-emerald-400/10' : 'text-rose-400 bg-rose-400/10'}`}>
+            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${r.ok ? 'text-emerald-400 bg-emerald-400/10' : 'text-rose-400 bg-rose-400/10'}`}>
               {r.status}
             </span>
           </div>
@@ -174,10 +174,10 @@ function VaultVisual() {
     { title: 'Behavioral Interview Guide',type: 'PDF',         dur: '1h',  c: '#f59e0b' },
   ];
   return (
-    <div className="bg-slate-900/80 rounded-2xl p-6 border border-white/10 shadow-glass backdrop-blur-md space-y-2">
+    <div className="bg-slate-900/80 rounded-2xl p-6 border border-slate-200 dark:border-white/10 shadow-glass backdrop-blur-md space-y-2">
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">For you</span>
-        <span className="text-[11px] text-blue-400 font-semibold">4 new</span>
+        <span className="text-xs text-blue-400 font-semibold">4 new</span>
       </div>
       {items.map(it => (
         <div key={it.title} className="flex items-center gap-3 p-3 rounded-xl bg-white/3 hover:bg-white/6 transition-colors cursor-pointer group">
@@ -186,7 +186,7 @@ function VaultVisual() {
           </div>
           <div className="flex-grow min-w-0">
             <p className="text-sm font-semibold text-white truncate">{it.title}</p>
-            <p className="text-[11px] text-slate-500">{it.type} · {it.dur}</p>
+            <p className="text-xs text-slate-500">{it.type} · {it.dur}</p>
           </div>
           <ChevronRight className="w-4 h-4 text-slate-700 group-hover:text-slate-400 shrink-0 transition-colors" />
         </div>
@@ -274,7 +274,7 @@ export default function Home() {
             </Link>
             <a
               href="#how-it-works"
-              className="inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-white/5 border border-white/10 text-slate-300 rounded-xl font-bold text-base hover:bg-white/10 transition-all duration-200 backdrop-blur-sm"
+              className="inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-white/5 border border-slate-200 dark:border-white/10 text-slate-300 rounded-xl font-bold text-base hover:bg-slate-100 dark:hover:bg-white/10 transition-all duration-200 backdrop-blur-sm"
             >
               See how it works
             </a>
@@ -323,7 +323,7 @@ export default function Home() {
 
       {/* ── Stats Bar ────────────────────────────────────────────────────── */}
       <section className="glass-panel border-t border-white/20 border-b border-white/20 dark:border-white/5 relative z-10">
-        <div className="max-w-5xl mx-auto px-4 py-16 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0 md:divide-x md:divide-slate-300 dark:md:divide-white/10">
+        <div className="max-w-5xl mx-auto px-4 py-16 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0 md:divide-x md:divide-slate-300 dark:md:divide-slate-200 dark:divide-white/10">
           <StatCounter value={50000} suffix="+" label="Students enrolled" />
           <StatCounter value={87}    suffix="%" label="Reported better interviews" />
           <StatCounter value={7}     suffix=""  label="Interconnected tools" />
@@ -359,7 +359,7 @@ export default function Home() {
 
                 {/* Visual */}
                 <div className={`${!isEven ? 'lg:col-start-1 lg:row-start-1' : ''}`}>
-                  <div className="rounded-2xl overflow-hidden glass-card border border-white/30 dark:border-white/10">
+                  <div className="rounded-2xl overflow-hidden glass-card border border-white/30 dark:border-slate-200 dark:border-white/10">
                     <div className="bg-slate-200/50 dark:bg-slate-800/50 px-4 py-3 flex items-center gap-2 border-b border-white/20 dark:border-white/5">
                       <div className="flex gap-1.5">
                         <div className="w-3 h-3 rounded-full bg-rose-400/80" />
@@ -416,7 +416,7 @@ export default function Home() {
                     <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-slate-800">
                       <Lock className="w-5 h-5 text-slate-600" />
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 border border-white/8 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <span className="text-xs font-black uppercase tracking-widest text-slate-600 border border-white/8 px-2 py-0.5 rounded-full flex items-center gap-1">
                       {tool.tag} <Lock className="w-2.5 h-2.5" />
                     </span>
                   </div>
@@ -444,7 +444,7 @@ export default function Home() {
                     >
                       <Icon className="w-5 h-5" style={{ color: tool.accent }} />
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 border border-white/8 px-2 py-0.5 rounded-full">
+                    <span className="text-xs font-black uppercase tracking-widest text-slate-600 border border-white/8 px-2 py-0.5 rounded-full">
                       {tool.tag}
                     </span>
                   </div>
@@ -548,7 +548,7 @@ export default function Home() {
                 </Link>
                 <Link
                   to="/skills"
-                  className="inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-white/5 border border-white/10 text-slate-300 rounded-xl font-bold text-base hover:bg-white/10 transition-all duration-200"
+                  className="inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-white/5 border border-slate-200 dark:border-white/10 text-slate-300 rounded-xl font-bold text-base hover:bg-slate-100 dark:hover:bg-white/10 transition-all duration-200"
                 >
                   <Zap className="w-4 h-4 text-blue-400" />
                   Take the assessment first

@@ -80,7 +80,7 @@ function StepItem({ step, state, index }) {
           {step.description}
         </p>
         {state === 'locked' && step.plan && (
-          <p className="text-[10px] text-slate-400 dark:text-slate-600 mt-1">
+          <p className="text-xs text-slate-400 dark:text-slate-600 mt-1">
             Requires {step.plan}
           </p>
         )}
@@ -110,7 +110,7 @@ export default function LearningJourneyStepper({ steps = [], completionStatus = 
 
   if (steps.length === 0) {
     return (
-      <div className="glass-card rounded-3xl p-6">
+      <div className="glass-card rounded-2xl p-6">
         <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Your Learning Journey</h3>
         <p className="text-sm text-slate-400 dark:text-slate-500">No steps configured yet.</p>
       </div>
@@ -118,7 +118,7 @@ export default function LearningJourneyStepper({ steps = [], completionStatus = 
   }
 
   return (
-    <div className="glass-card rounded-3xl p-6">
+    <div className="glass-card rounded-2xl p-6">
       <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Your Learning Journey</h3>
 
       <div className="flex flex-col md:flex-row md:items-start gap-0 md:gap-0">

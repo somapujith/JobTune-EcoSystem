@@ -45,12 +45,12 @@ function StatDelta({ label, oldVal, newVal }) {
   const isPositive = delta >= 0;
 
   return (
-    <div className="flex items-center justify-between p-3 glass-card rounded-lg">
-      <span className="text-sm font-medium text-slate-700">{label}</span>
+    <div className="flex items-center justify-between p-3 card rounded-lg">
+      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{label}</span>
       <div className="flex items-center gap-3">
-        <span className="text-sm text-slate-500">{oldVal}</span>
+        <span className="text-sm text-slate-500 dark:text-slate-400">{oldVal}</span>
         <span className="text-xs text-slate-400">→</span>
-        <span className="text-sm font-bold text-slate-900">{newVal}</span>
+        <span className="text-sm font-bold text-slate-900 dark:text-white">{newVal}</span>
         {delta !== 0 && (
           <span className={`text-xs font-bold px-2 py-1 rounded-full ${isPositive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
             {isPositive ? '+' : ''}{delta}
@@ -101,13 +101,13 @@ export default function ResumeComparison() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto py-12 px-4 sm:px-6">
+    <div className="page-container">
       <Link to="/resume/history" className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold mb-8">
         <ChevronLeft className="w-4 h-4" /> Back to History
       </Link>
 
       <div className="mb-8">
-        <h1 className="text-4xl font-black text-slate-900 mb-2">Compare Resume Versions</h1>
+        <h1 className="text-4xl font-extrabold text-slate-900 mb-2">Compare Resume Versions</h1>
         <p className="text-slate-600">See what changed between two versions side-by-side</p>
       </div>
 
@@ -157,7 +157,7 @@ export default function ResumeComparison() {
       {comparison && (
         <div className="space-y-8">
           {/* Stats summary */}
-          <div className="glass-card rounded-3xl p-6">
+          <div className="card rounded-2xl p-6">
             <h2 className="text-xl font-bold text-slate-900 mb-4">Changes Summary</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <StatDelta label="Keywords" oldVal={comparison.oldStats?.keywords || 0} newVal={comparison.newStats?.keywords || 0} />
@@ -168,7 +168,7 @@ export default function ResumeComparison() {
           </div>
 
           {/* Sections diff */}
-          <div className="glass-card rounded-3xl p-6">
+          <div className="card rounded-2xl p-6">
             <h2 className="text-xl font-bold text-slate-900 mb-4">Content Changes</h2>
             <div className="space-y-6">
               {comparison.sections?.map((section) => (

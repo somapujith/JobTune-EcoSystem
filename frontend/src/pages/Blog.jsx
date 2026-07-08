@@ -208,7 +208,7 @@ const BlogList = () => {
 
   if (selectedPost) {
     return (
-      <div className="w-full max-w-4xl mx-auto py-16 px-4 sm:px-6">
+      <div className="page-container">
         <div className="mx-auto">
           <button
             onClick={() => setSelectedPost(null)}
@@ -217,7 +217,7 @@ const BlogList = () => {
             ← Back to Blog
           </button>
 
-          <article className="glass-card rounded-3xl p-8">
+          <article className="card rounded-2xl p-8">
             <div className={`w-full h-64 rounded-lg mb-8 ${BlogPost[selectedPost].image}`} />
 
             <div className="flex flex-wrap gap-4 mb-6 text-sm text-on-surface-variant font-medium">
@@ -250,7 +250,7 @@ const BlogList = () => {
       {/* Hero */}
       <div className="max-w-6xl mx-auto px-6 py-20">
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-black text-on-surface font-headline mb-4">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-on-surface font-headline mb-4">
             JobTube Blog
           </h1>
           <p className="text-xl text-on-surface-variant font-medium max-w-2xl mx-auto">
@@ -264,7 +264,7 @@ const BlogList = () => {
             <div
               key={post.id}
               onClick={() => setSelectedPost(post.id)}
-              className="group cursor-pointer glass-card rounded-3xl overflow-hidden hover:shadow-lg hover:-translate-y-2 transition-all duration-300"
+              className="group cursor-pointer card rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-2 transition-all duration-300"
             >
               <div className={`w-full h-48 ${post.image} relative overflow-hidden`}>
                 <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition" />
@@ -301,7 +301,7 @@ const BlogList = () => {
         </div>
 
         {/* Featured */}
-        <div className="mt-20 glass-card border-blue-200/50 rounded-3xl p-8">
+        <div className="mt-20 glass-card border-blue-200/50 rounded-2xl p-8">
           <h3 className="text-2xl font-bold text-on-surface font-headline mb-4">
             💡 Pro Tip: Start Here
           </h3>

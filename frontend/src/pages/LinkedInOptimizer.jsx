@@ -64,10 +64,10 @@ function ProgressBar({ current, total }) {
   return (
     <div className="mb-8">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-bold text-on-surface">Step {current} of {total}</span>
-        <span className="text-sm font-bold text-on-surface-variant">{Math.round((current / total) * 100)}%</span>
+        <span className="text-sm font-bold text-slate-900 dark:text-white">Step {current} of {total}</span>
+        <span className="text-sm font-bold text-slate-500 dark:text-slate-400">{Math.round((current / total) * 100)}%</span>
       </div>
-      <div className="w-full h-2 bg-surface-container/60 rounded-full overflow-hidden">
+      <div className="w-full h-2 bg-slate-200/60 dark:bg-slate-700/60 rounded-full overflow-hidden">
         <div
           className="h-full bg-gradient-to-r from-sky-500 to-sky-600 rounded-full transition-all duration-300"
           style={{ width: `${(current / total) * 100}%` }}
@@ -100,10 +100,10 @@ function SelectionGrid({ options, selected, onSelect, multiple = false, columns 
                 onSelect(option);
               }
             }}
-            className={`p-4 rounded-2xl border-2 font-bold transition-all text-center ${
+            className={`p-4 rounded-xl border-2 font-bold transition-all text-center ${
               isSelected
-                ? 'border-sky-500 bg-sky-500/10 text-on-surface'
-                : 'border-outline/20 bg-surface-container/30 text-on-surface-variant hover:border-sky-500/50'
+                ? 'border-sky-500 bg-sky-500/10 text-slate-900 dark:text-white'
+                : 'border-slate-200/60 dark:border-slate-700/60 bg-slate-50/30 dark:bg-slate-800/30 text-slate-500 dark:text-slate-400 hover:border-sky-500/50'
             }`}
           >
             {option}
@@ -121,18 +121,14 @@ function MultiSelectSkills({ selected, onSelect }) {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-sm font-bold text-on-surface mb-3">Select a category:</p>
-        <div className="flex flex-wrap gap-2">
+        <p className="input-label">Select a category:</p>
+        <div className="tab-bar flex-wrap">
           {SKILL_CATEGORIES.map(cat => (
             <button
               key={cat.label}
               type="button"
               onClick={() => setActiveCategory(cat.label)}
-              className={`px-4 py-2 rounded-xl font-bold transition-all text-sm ${
-                activeCategory === cat.label
-                  ? 'bg-sky-500 text-white'
-                  : 'bg-surface-container/50 text-on-surface hover:bg-surface-container'
-              }`}
+              className={activeCategory === cat.label ? 'tab-active' : 'tab-inactive'}
             >
               {cat.label}
             </button>
@@ -141,7 +137,7 @@ function MultiSelectSkills({ selected, onSelect }) {
       </div>
 
       <div>
-        <p className="text-sm font-bold text-on-surface mb-3">Choose skills:</p>
+        <p className="input-label">Choose skills:</p>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {activeSkills.map(skill => {
             const isSelected = selected.includes(skill);
@@ -158,8 +154,8 @@ function MultiSelectSkills({ selected, onSelect }) {
                 }}
                 className={`p-3 rounded-xl border-2 font-bold transition-all text-sm ${
                   isSelected
-                    ? 'border-emerald-500 bg-emerald-500/10 text-on-surface'
-                    : 'border-outline/20 bg-surface-container/30 text-on-surface-variant hover:border-emerald-500/50'
+                    ? 'border-emerald-500 bg-emerald-500/10 text-slate-900 dark:text-white'
+                    : 'border-slate-200/60 dark:border-slate-700/60 bg-slate-50/30 dark:bg-slate-800/30 text-slate-500 dark:text-slate-400 hover:border-emerald-500/50'
                 }`}
               >
                 {skill}
@@ -170,8 +166,8 @@ function MultiSelectSkills({ selected, onSelect }) {
       </div>
 
       {selected.length > 0 && (
-        <div className="bg-sky-500/10 rounded-2xl p-4 border border-sky-500/30">
-          <p className="text-sm font-bold text-on-surface mb-2">Selected ({selected.length}):</p>
+        <div className="bg-sky-500/10 dark:bg-sky-500/5 rounded-2xl p-4 border border-sky-500/30">
+          <p className="text-sm font-bold text-slate-900 dark:text-white mb-2">Selected ({selected.length}):</p>
           <div className="flex flex-wrap gap-2">
             {selected.map((skill, idx) => (
               <span
@@ -193,20 +189,20 @@ function LoadingContent({ headline, about }) {
     <div className="space-y-6">
       <div className="text-center py-12">
         <span className="material-symbols-outlined animate-spin text-sky-500 text-5xl block mb-4" style={{ fontVariationSettings: "'FILL' 0" }}>sync</span>
-        <p className="text-on-surface-variant font-bold">Generating your LinkedIn content...</p>
+        <p className="text-slate-500 dark:text-slate-400 font-bold">Generating your LinkedIn content...</p>
       </div>
 
       {headline && (
-        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-6">
-          <p className="text-sm font-bold text-emerald-700 mb-3">✨ Generated Headline</p>
-          <p className="text-on-surface font-bold">{headline}</p>
+        <div className="bg-emerald-500/10 dark:bg-emerald-500/5 border border-emerald-500/30 rounded-2xl p-6">
+          <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400 mb-3">Generated Headline</p>
+          <p className="text-slate-900 dark:text-white font-bold">{headline}</p>
         </div>
       )}
 
       {about && (
-        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-6">
-          <p className="text-sm font-bold text-emerald-700 mb-3">✨ Generated About Section</p>
-          <p className="text-on-surface font-medium text-sm leading-relaxed">{about}</p>
+        <div className="bg-emerald-500/10 dark:bg-emerald-500/5 border border-emerald-500/30 rounded-2xl p-6">
+          <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400 mb-3">Generated About Section</p>
+          <p className="text-slate-900 dark:text-white font-medium text-sm leading-relaxed">{about}</p>
         </div>
       )}
     </div>
@@ -415,23 +411,30 @@ export default function LinkedInOptimizer() {
 
   if (showResults && report && !loadingFinal) {
     return (
-      <div className="w-full max-w-5xl mx-auto py-16 px-4 sm:px-6">
+      <div className="page-container">
         <button
           onClick={resetForm}
-          className="mb-8 text-sky-600 hover:text-sky-700 font-bold flex items-center gap-2"
+          className="btn-secondary mb-8"
         >
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>arrow_back</span>
           Start Over
         </button>
 
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-black text-on-surface font-headline mb-4">Your Profile Analysis</h1>
-          <p className="text-lg text-on-surface-variant font-medium">Here's what we recommend for your LinkedIn</p>
+        <div className="page-header">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="page-header-icon bg-sky-100 dark:bg-sky-900/40">
+              <span className="material-symbols-outlined text-sky-600 dark:text-sky-400" style={{ fontVariationSettings: "'FILL' 0" }}>analytics</span>
+            </div>
+            <div>
+              <h1 className="page-title">Your Profile Analysis</h1>
+              <p className="page-subtitle">Here's what we recommend for your LinkedIn</p>
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Profile Score */}
-          <div className="glass-card p-8 rounded-3xl flex flex-col items-center justify-center text-center">
+          <div className="card p-8 rounded-2xl flex flex-col items-center justify-center text-center">
             <div className="relative mb-8">
               <svg viewBox="0 0 36 36" className="w-32 h-32 -rotate-90 mx-auto">
                 <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e5eeff" strokeWidth="3.2" />
@@ -444,8 +447,8 @@ export default function LinkedInOptimizer() {
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-4xl font-black text-on-surface">{report.score}</span>
-                <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">/ 100</span>
+                <span className="text-4xl font-extrabold text-slate-900 dark:text-white">{report.score}</span>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">/ 100</span>
               </div>
             </div>
             <div
@@ -454,23 +457,23 @@ export default function LinkedInOptimizer() {
             >
               {report.scoreLabel}
             </div>
-            <h3 className="text-2xl font-bold text-on-surface mb-3 font-headline">Profile Score</h3>
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3 font-headline">Profile Score</h3>
           </div>
 
           {/* Metrics */}
-          <div className="glass-card p-8 rounded-3xl">
-            <h3 className="text-xl font-bold text-on-surface mb-8 flex items-center gap-3 font-headline">
-              <span className="material-symbols-outlined text-sky-600" style={{ fontVariationSettings: "'FILL' 0" }}>bar_chart</span>
+          <div className="card p-8 rounded-2xl">
+            <h3 className="section-title mb-8">
+              <span className="material-symbols-outlined text-sky-600 dark:text-sky-400" style={{ fontVariationSettings: "'FILL' 0" }}>bar_chart</span>
               Metrics
             </h3>
             <div className="space-y-6">
               {report.metrics?.slice(0, 5).map((m, i) => (
                 <div key={i}>
                   <div className="flex justify-between text-sm font-bold mb-2">
-                    <span className="text-on-surface">{m.label}</span>
+                    <span className="text-slate-900 dark:text-white">{m.label}</span>
                     <span style={{ color: getScoreColor(m.val) }}>{m.val}/100</span>
                   </div>
-                  <div className="w-full bg-surface-container/50 h-2 rounded-full overflow-hidden">
+                  <div className="w-full bg-slate-200/50 dark:bg-slate-700/50 h-2 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all"
                       style={{
@@ -485,15 +488,15 @@ export default function LinkedInOptimizer() {
           </div>
 
           {report.optimizations?.headlineOptions && (
-            <div className="glass-card p-8 rounded-3xl">
-              <h3 className="text-xl font-bold text-on-surface mb-6 flex items-center gap-3 font-headline">
-                <span className="material-symbols-outlined text-sky-600" style={{ fontVariationSettings: "'FILL' 1" }}>edit_note</span>
+            <div className="card p-8 rounded-2xl">
+              <h3 className="section-title mb-6">
+                <span className="material-symbols-outlined text-sky-600 dark:text-sky-400" style={{ fontVariationSettings: "'FILL' 1" }}>edit_note</span>
                 Headline Ideas
               </h3>
               <div className="space-y-3">
                 {report.optimizations.headlineOptions.slice(0, 3).map((h, i) => (
-                  <div key={i} className="bg-surface-container/40 rounded-2xl p-4 border border-outline/10">
-                    <p className="text-on-surface font-bold text-sm">{h}</p>
+                  <div key={i} className="bg-slate-50/80 dark:bg-slate-800/40 rounded-2xl p-4 border border-slate-200/60 dark:border-slate-700/60">
+                    <p className="text-slate-900 dark:text-white font-bold text-sm">{h}</p>
                   </div>
                 ))}
               </div>
@@ -501,28 +504,28 @@ export default function LinkedInOptimizer() {
           )}
 
           {report.optimizations?.aboutRewrite && (
-            <div className="glass-card p-8 rounded-3xl">
-              <h3 className="text-xl font-bold text-on-surface mb-6 flex items-center gap-3 font-headline">
-                <span className="material-symbols-outlined text-sky-600" style={{ fontVariationSettings: "'FILL' 1" }}>article</span>
+            <div className="card p-8 rounded-2xl">
+              <h3 className="section-title mb-6">
+                <span className="material-symbols-outlined text-sky-600 dark:text-sky-400" style={{ fontVariationSettings: "'FILL' 1" }}>article</span>
                 About Section
               </h3>
-              <div className="bg-surface-container/40 rounded-2xl p-5 border border-outline/10 text-on-surface font-medium text-sm leading-relaxed">
+              <div className="bg-slate-50/80 dark:bg-slate-800/40 rounded-2xl p-5 border border-slate-200/60 dark:border-slate-700/60 text-slate-900 dark:text-white font-medium text-sm leading-relaxed">
                 {report.optimizations.aboutRewrite}
               </div>
             </div>
           )}
 
           {report.optimizations?.quickWins && (
-            <div className="lg:col-span-2 glass-card p-8 rounded-3xl">
-              <h3 className="text-xl font-bold text-on-surface mb-6 flex items-center gap-3 font-headline">
-                <span className="material-symbols-outlined text-sky-600" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
+            <div className="lg:col-span-2 card p-8 rounded-2xl">
+              <h3 className="section-title mb-6">
+                <span className="material-symbols-outlined text-sky-600 dark:text-sky-400" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
                 Quick Wins
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {report.optimizations.quickWins.slice(0, 4).map((win, i) => (
-                  <div key={i} className="bg-surface-container/40 rounded-2xl p-4 border border-outline/10">
-                    <p className="text-on-surface font-bold text-sm">{win.action}</p>
-                    <p className="text-xs text-on-surface-variant mt-2">{win.effort}</p>
+                  <div key={i} className="bg-slate-50/80 dark:bg-slate-800/40 rounded-2xl p-4 border border-slate-200/60 dark:border-slate-700/60">
+                    <p className="text-slate-900 dark:text-white font-bold text-sm">{win.action}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">{win.effort}</p>
                   </div>
                 ))}
               </div>
@@ -535,7 +538,7 @@ export default function LinkedInOptimizer() {
 
   if (loadingFinal) {
     return (
-      <div className="w-full max-w-2xl mx-auto py-16 px-4 sm:px-6">
+      <div className="page-container max-w-2xl">
         <LoadingContent
           headline={generatedContent.headline}
           about={generatedContent.about}
@@ -545,33 +548,33 @@ export default function LinkedInOptimizer() {
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto py-16 px-4 sm:px-6">
-      <div className="text-center mb-12">
-        <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-sky-500/5 mb-6">
-          <span className="material-symbols-outlined text-sky-600 text-3xl" style={{ fontVariationSettings: "'FILL' 0" }}>group</span>
+    <div className="page-container max-w-2xl">
+      <div className="page-header">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="page-header-icon bg-sky-100 dark:bg-sky-900/40">
+            <span className="material-symbols-outlined text-sky-600 dark:text-sky-400 text-2xl" style={{ fontVariationSettings: "'FILL' 0" }}>group</span>
+          </div>
+          <div>
+            <h1 className="page-title">LinkedIn Profile Builder</h1>
+            <p className="page-subtitle">Answer a few quick questions and get AI-generated recommendations</p>
+          </div>
         </div>
-        <h1 className="text-4xl font-black text-on-surface font-headline mb-4">
-          LinkedIn Profile Builder
-        </h1>
-        <p className="text-lg text-on-surface-variant font-medium">
-          Answer a few quick questions and get AI-generated recommendations
-        </p>
       </div>
 
       {error && (
-        <div className="mb-6 glass-card border-rose-200/50 p-4 rounded-2xl text-rose-600 text-sm font-medium">
+        <div className="error-banner mb-6">
           {error}
         </div>
       )}
 
-      <div className="glass-card rounded-3xl p-8">
+      <div className="card rounded-2xl p-8">
         <ProgressBar current={step + 1} total={STEPS.length} />
 
         <div className="mb-12">
-          <h2 className="text-3xl font-black text-on-surface font-headline mb-2">
+          <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white font-headline mb-2">
             {currentStep.title}
           </h2>
-          <p className="text-lg text-on-surface-variant font-medium">
+          <p className="text-lg text-slate-500 dark:text-slate-400 font-medium">
             {currentStep.description}
           </p>
         </div>
@@ -606,54 +609,54 @@ export default function LinkedInOptimizer() {
           <div>
             <textarea
               placeholder="E.g., Led team of 5, reduced latency by 40%, built mobile app..."
-              className="w-full bg-surface-container/50 border border-outline/20 rounded-2xl px-6 py-4 font-medium text-on-surface placeholder:text-outline/50 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500 resize-none"
+              className="input-field resize-none"
               rows="4"
               value={responses.achievements || ''}
               onChange={e => setResponses(prev => ({ ...prev, achievements: e.target.value }))}
             />
-            <p className="text-sm text-on-surface-variant mt-2">(Optional - helps with better recommendations)</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">(Optional - helps with better recommendations)</p>
           </div>
         )}
 
         {/* Show preview if content is being generated or already generated */}
         {(generatingHeadline || generatedContent.headline) && step >= 1 && (
-          <div className="mt-8 p-6 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl">
+          <div className="mt-8 p-6 bg-emerald-500/10 dark:bg-emerald-500/5 border border-emerald-500/30 rounded-2xl">
             {generatingHeadline ? (
               <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined animate-spin text-emerald-600" style={{ fontVariationSettings: "'FILL' 0" }}>sync</span>
-                <p className="text-sm font-bold text-emerald-700">Generating headline...</p>
+                <span className="material-symbols-outlined animate-spin text-emerald-600 dark:text-emerald-400" style={{ fontVariationSettings: "'FILL' 0" }}>sync</span>
+                <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">Generating headline...</p>
               </div>
             ) : (
               <>
-                <p className="text-sm font-bold text-emerald-700 mb-3">✨ Your Generated Headline</p>
-                <p className="text-on-surface font-bold">{generatedContent.headline}</p>
+                <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400 mb-3">Your Generated Headline</p>
+                <p className="text-slate-900 dark:text-white font-bold">{generatedContent.headline}</p>
               </>
             )}
           </div>
         )}
 
         {(generatingAbout || generatedContent.about) && step >= 6 && (
-          <div className="mt-4 p-6 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl">
+          <div className="mt-4 p-6 bg-emerald-500/10 dark:bg-emerald-500/5 border border-emerald-500/30 rounded-2xl">
             {generatingAbout ? (
               <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined animate-spin text-emerald-600" style={{ fontVariationSettings: "'FILL' 0" }}>sync</span>
-                <p className="text-sm font-bold text-emerald-700">Generating about section...</p>
+                <span className="material-symbols-outlined animate-spin text-emerald-600 dark:text-emerald-400" style={{ fontVariationSettings: "'FILL' 0" }}>sync</span>
+                <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">Generating about section...</p>
               </div>
             ) : (
               <>
-                <p className="text-sm font-bold text-emerald-700 mb-3">✨ Your Generated About Section</p>
-                <p className="text-on-surface font-medium text-sm leading-relaxed">{generatedContent.about}</p>
+                <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400 mb-3">Your Generated About Section</p>
+                <p className="text-slate-900 dark:text-white font-medium text-sm leading-relaxed">{generatedContent.about}</p>
               </>
             )}
           </div>
         )}
 
-        <div className="flex items-center gap-3 pt-8 mt-8 border-t border-outline/10">
+        <div className="flex items-center gap-3 pt-8 mt-8 border-t border-slate-200/60 dark:border-slate-700/60">
           <button
             type="button"
             onClick={handlePrev}
             disabled={step === 0}
-            className="px-6 py-3 border border-outline/20 rounded-xl font-bold text-on-surface hover:bg-surface-container/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-secondary"
           >
             Back
           </button>
@@ -661,7 +664,7 @@ export default function LinkedInOptimizer() {
             type="button"
             onClick={handleNext}
             disabled={loadingFinal}
-            className="flex-1 bg-gradient-to-r from-sky-500 to-sky-600 text-white px-8 py-3 rounded-xl font-bold hover:from-sky-600 hover:to-sky-700 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 shadow-lg flex items-center justify-center gap-3"
+            className="flex-1 btn-gradient bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700"
           >
             {isLastStep ? 'Get Recommendations' : 'Confirm & Continue'}
             <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>

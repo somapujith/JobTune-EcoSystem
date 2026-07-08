@@ -20,6 +20,7 @@ import LearningJourneyStepper from '../components/dashboard/LearningJourneyStepp
 import WeeklyActivityChart from '../components/dashboard/WeeklyActivityChart';
 import AchievementBadges from '../components/dashboard/AchievementBadges';
 import ProgressOverviewCards from '../components/dashboard/ProgressOverviewCards';
+import TrackProgressPanel from '../components/dashboard/TrackProgressPanel';
 
 function DailyGoalBar({ progress }) {
   const clamped = Math.min(100, Math.max(0, progress));
@@ -45,7 +46,7 @@ function QuickStatCard({ icon: Icon, label, value, color, bg }) {
         <Icon className="w-5 h-5" />
       </div>
       <div>
-        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{label}</p>
+        <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider leading-none">{label}</p>
         <p className="text-lg font-extrabold text-slate-900 dark:text-white">{value}</p>
       </div>
     </div>
@@ -69,7 +70,7 @@ function RecentActivityFeed({ activities }) {
             <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 shrink-0" />
             <div>
               <p className="text-sm font-bold text-slate-800 dark:text-slate-200 leading-snug">{act.action}</p>
-              <p className="text-[10px] text-slate-400 mt-0.5 font-bold uppercase tracking-tighter">{act.date}</p>
+              <p className="text-xs text-slate-400 mt-0.5 font-medium">{act.date}</p>
             </div>
           </div>
         ))}
@@ -126,7 +127,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-3 card px-5 py-3 rounded-2xl">
             <Flame className="w-6 h-6 text-orange-500" />
             <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Streak</p>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider leading-none">Streak</p>
               <p className="text-xl font-extrabold text-slate-900 dark:text-white leading-none">
                 {stats.currentStreak} <span className="text-xs font-bold text-slate-400">days</span>
               </p>
@@ -135,7 +136,7 @@ export default function Dashboard() {
 
           {/* Daily Goal */}
           <div className="flex flex-col gap-1">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Daily Goal</p>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider leading-none">Daily Goal</p>
             <DailyGoalBar progress={stats.dailyGoalProgress || 0} />
           </div>
 
@@ -183,10 +184,17 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* ─── Weekly Chart + Activity Feed ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <WeeklyActivityChart data={weeklyData} />
-        <RecentActivityFeed activities={overview?.recentActivity} />
+      {/* ─── Weekly Chart + Activity Feed + Track Progress ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <TrackProgressPanel />
+        </div>
+        <div className="lg:col-span-1">
+          <WeeklyActivityChart data={weeklyData} />
+        </div>
+        <div className="lg:col-span-1">
+          <RecentActivityFeed activities={overview?.recentActivity} />
+        </div>
       </div>
 
       {/* ─── Achievements ─── */}

@@ -45,7 +45,7 @@ function MessageBubble({ message }) {
         const lang = lines[0].trim();
         const code = lang ? lines.slice(1).join('\n') : lines.join('\n');
         return (
-          <pre key={i} className="bg-black/40 rounded-xl p-4 my-3 overflow-x-auto border border-white/10">
+          <pre key={i} className="bg-black/40 rounded-xl p-4 my-3 overflow-x-auto border border-slate-200 dark:border-white/10">
             {lang && (
               <div className="text-xs text-sky-400 font-bold mb-2 uppercase tracking-wide">{lang}</div>
             )}
@@ -370,7 +370,7 @@ export default function AITutor() {
             {/* New Chat Button */}
             <button
               onClick={startNewSession}
-              className="w-full flex items-center gap-2 px-4 py-3 card rounded-2xl hover:bg-white/10 transition-colors text-on-surface dark:text-white font-bold text-sm"
+              className="w-full flex items-center gap-2 px-4 py-3 card rounded-2xl hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-on-surface dark:text-white font-bold text-sm"
             >
               <span className="material-symbols-outlined text-sky-400 text-lg">add</span>
               New Conversation
@@ -387,7 +387,7 @@ export default function AITutor() {
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors text-left ${
                       selectedTopic?.id === topic.id
                         ? 'bg-sky-500/15 text-sky-400 font-bold'
-                        : 'text-on-surface-variant hover:bg-white/5 hover:text-on-surface'
+                        : 'text-on-surface-variant hover:bg-slate-50 dark:hover:bg-white/5 hover:text-on-surface'
                     }`}
                   >
                     <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>
@@ -408,7 +408,7 @@ export default function AITutor() {
                     <div
                       key={session.id}
                       onClick={() => loadConversation(session)}
-                      className={`px-3 py-2.5 rounded-xl text-sm text-on-surface-variant hover:bg-white/5 transition-colors cursor-pointer group ${
+                      className={`px-3 py-2.5 rounded-xl text-sm text-on-surface-variant hover:bg-slate-50 dark:hover:bg-white/5 transition-colors cursor-pointer group ${
                         activeSessionId === session.id ? 'bg-sky-500/10 border border-sky-500/20' : ''
                       }`}
                     >
@@ -452,7 +452,7 @@ export default function AITutor() {
                   <button
                     key={topic.id}
                     onClick={() => selectTopic(topic)}
-                    className="card rounded-2xl p-4 hover:bg-white/10 transition-all group text-left"
+                    className="card rounded-2xl p-4 hover:bg-slate-100 dark:hover:bg-white/10 transition-all group text-left"
                   >
                     <span className="material-symbols-outlined text-2xl text-sky-400 group-hover:text-sky-300 mb-2 block" style={{ fontVariationSettings: "'FILL' 0" }}>
                       {TOPIC_ICONS[topic.id] || 'category'}
@@ -475,7 +475,7 @@ export default function AITutor() {
                         if (topic) setSelectedTopic(topic);
                         handleSend(qt.label);
                       }}
-                      className="px-4 py-2 card rounded-full text-sm text-on-surface-variant dark:text-slate-400 hover:text-on-surface hover:bg-white/10 transition-colors flex items-center gap-1.5"
+                      className="px-4 py-2 card rounded-full text-sm text-on-surface-variant dark:text-slate-400 hover:text-on-surface hover:bg-slate-100 dark:hover:bg-white/10 transition-colors flex items-center gap-1.5"
                     >
                       <BookOpen size={14} />
                       {qt.label}
@@ -522,7 +522,7 @@ export default function AITutor() {
                 <button
                   key={i}
                   onClick={() => handleSend(st)}
-                  className="px-3 py-1.5 text-xs font-bold rounded-full border border-outline/20 text-on-surface-variant hover:text-on-surface hover:bg-white/10 transition-colors flex items-center gap-1.5"
+                  className="px-3 py-1.5 text-xs font-bold rounded-full border border-outline/20 text-on-surface-variant hover:text-on-surface hover:bg-slate-100 dark:hover:bg-white/10 transition-colors flex items-center gap-1.5"
                 >
                   <ChevronRight size={12} />
                   {st}

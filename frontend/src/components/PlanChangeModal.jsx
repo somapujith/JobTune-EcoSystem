@@ -22,7 +22,7 @@ export default function PlanChangeModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onCancel} />
 
-      <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         <button
           onClick={onCancel}
           disabled={isLoading}
@@ -36,7 +36,7 @@ export default function PlanChangeModal({
           <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">
             {isDowngrade ? 'Confirm downgrade' : 'Confirm plan change'}
           </p>
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-6">
+          <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-6">
             Switch to {targetPlan.name}?
           </h2>
 

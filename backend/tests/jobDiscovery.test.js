@@ -28,6 +28,10 @@ jest.mock('../src/middleware/auth', () => ({
   }
 }));
 
+jest.mock('../src/middleware/requirePlan', () => ({
+  requirePlan: () => (req, _res, next) => next(),
+}));
+
 // We will mock node-fetch for RemotiveSource tests
 jest.mock('node-fetch', () => jest.fn(), { virtual: true });
 
@@ -336,7 +340,7 @@ describe('GET /api/jobs/discover', () => {
     expect(upsertCall[0]).toMatch(/ON CONFLICT.*DO NOTHING/is);
   });
 
-  it('falls back to mock when source=remotive and fetch fails', async () => {
+  it('returns empty array when source=remotive and fetch fails (graceful degradation)', async () => {
     pool.query.mockResolvedValue({ rows: [] });
     const fetchMock = require('node-fetch');
     fetchMock.mockRejectedValueOnce(new Error('API down'));
@@ -346,8 +350,9 @@ describe('GET /api/jobs/discover', () => {
       .set('Authorization', 'Bearer test-token');
 
     expect(res.status).toBe(200);
-    expect(res.body.data.jobs).toHaveLength(5);
-    expect(res.body.data.source).toBe('mock');
+    // RemotiveSource catches errors internally and returns [], route no longer falls back
+    expect(res.body.data.jobs).toHaveLength(0);
+    expect(res.body.data.source).toBe('remotive');
   });
 
   it('returns remotive jobs when API is available', async () => {
@@ -408,30 +413,23 @@ describe('GET /api/jobs/discover', () => {
     expect(res.body.data.jobs).toHaveLength(5);
   });
 
-  it('route catch block: falls back to mock when source.search() throws', async () => {
+  it('returns empty when remotive source errors internally (graceful degradation)', async () => {
     pool.query.mockResolvedValue({ rows: [] });
-    // We need the source to throw at the route level — patch getSource temporarily
-    const discoveryIndex = require('../src/services/discovery/index');
-    const original = discoveryIndex.getSource;
-    discoveryIndex.getSource = (name) => {
-      if (name === 'remotive') {
-        return { search: async () => { throw new Error('source crashed'); } };
-      }
-      return original(name);
-    };
+    // RemotiveSource catches errors internally and returns []
+    // The route no longer falls back to mock on empty results
+    const fetchMock = require('node-fetch');
+    fetchMock.mockRejectedValueOnce(new Error('source crashed'));
 
     const res = await request(app)
       .get('/api/jobs/discover?source=remotive&query=test')
       .set('Authorization', 'Bearer test-token');
 
-    discoveryIndex.getSource = original; // restore
-
     expect(res.status).toBe(200);
-    expect(res.body.data.source).toBe('mock');
-    expect(res.body.data.jobs).toHaveLength(5);
+    expect(res.body.data.source).toBe('remotive');
+    expect(res.body.data.jobs).toHaveLength(0);
   });
 
-  it('falls back to mock when remotive returns empty array', async () => {
+  it('returns empty array when remotive returns no jobs (no fallback on 0 results)', async () => {
     pool.query.mockResolvedValue({ rows: [] });
     const fetchMock = require('node-fetch');
     fetchMock.mockResolvedValueOnce({ ok: true, json: async () => ({ jobs: [] }) });
@@ -441,8 +439,8 @@ describe('GET /api/jobs/discover', () => {
       .set('Authorization', 'Bearer test-token');
 
     expect(res.status).toBe(200);
-    expect(res.body.data.jobs).toHaveLength(5);
-    expect(res.body.data.source).toBe('mock');
+    expect(res.body.data.jobs).toHaveLength(0);
+    expect(res.body.data.source).toBe('remotive');
   });
 
   it('no query param defaults to empty string', async () => {

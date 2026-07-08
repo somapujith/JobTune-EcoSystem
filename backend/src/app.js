@@ -41,6 +41,7 @@ const practiceRoutes = require('./routes/practice');
 const adminPanelsRoutes = require('./routes/adminPanels');
 const activityRoutes = require('./routes/activity');
 const studyHistoryRoutes = require('./routes/studyHistory');
+const learningModulesRoutes = require('./routes/learningModules');
 const { errorHandler } = require('./middleware/errorHandler');
 const { auditLogger } = require('./middleware/auditLogger');
 const path = require('path');
@@ -54,7 +55,7 @@ app.disable('x-powered-by');
 // Rate limiting
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: process.env.NODE_ENV === 'development' ? 500 : 100,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many requests, please try again later.' },
@@ -80,6 +81,7 @@ const allowedOrigins = [
   ...(process.env.NODE_ENV === 'development' ? [
     'http://localhost:5173',
     'http://localhost:5174',
+    'http://localhost:5175',
     'http://localhost:3000',
     `http://localhost:${serverPort}`,
   ] : []),
@@ -145,6 +147,7 @@ app.use('/api/practice', practiceRoutes);
 app.use('/api/admin-panels', adminPanelsRoutes);
 app.use('/api/activity', activityRoutes);
 app.use('/api/study-history', studyHistoryRoutes);
+app.use('/api/learning-modules', learningModulesRoutes);
 
 // Admin UI Route
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));

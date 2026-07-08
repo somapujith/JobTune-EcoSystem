@@ -131,7 +131,7 @@ describe('linkedinOptimizerService', () => {
   });
 
   it('rejects empty analysis input', async () => {
-    await expect(analyzeLinkedInProfile({})).rejects.toThrow('LinkedIn profile URL is required');
+    await expect(analyzeLinkedInProfile({})).rejects.toThrow('Provide either a LinkedIn profile URL or profile data');
   });
 
   it('rejects a URL when LinkedIn public data is blocked', async () => {

@@ -3,8 +3,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { pool } = require('../config/database');
 
-const ACCESS_TOKEN_TTL = process.env.ACCESS_TOKEN_TTL || '1h';
-const REFRESH_TOKEN_DAYS = Number(process.env.REFRESH_TOKEN_DAYS || 30);
+const ACCESS_TOKEN_TTL = process.env.ACCESS_TOKEN_TTL || '15m';
+const REFRESH_TOKEN_DAYS = Math.min(Number(process.env.REFRESH_TOKEN_DAYS || 7), 30);
 
 function hashToken(token) {
   return crypto.createHash('sha256').update(token).digest('hex');
@@ -107,7 +107,7 @@ class SessionService {
     const accessToken = jwt.sign(
       { id: userId, sessionId: session.id },
       process.env.JWT_SECRET,
-      { expiresIn: ACCESS_TOKEN_TTL }
+      { expiresIn: ACCESS_TOKEN_TTL, algorithm: 'HS256' }
     );
 
     return {
@@ -131,7 +131,7 @@ class SessionService {
   }
 
   async isSessionActive(sessionId) {
-    if (!sessionId) return true;
+    if (!sessionId || !Number.isInteger(Number(sessionId))) return false;
     const result = await pool.query(
       `SELECT id FROM user_sessions
        WHERE id = $1 AND revoked_at IS NULL AND expires_at > CURRENT_TIMESTAMP`,
@@ -157,7 +157,7 @@ class SessionService {
     const accessToken = jwt.sign(
       { id: session.user_id, sessionId: session.id },
       process.env.JWT_SECRET,
-      { expiresIn: ACCESS_TOKEN_TTL }
+      { expiresIn: ACCESS_TOKEN_TTL, algorithm: 'HS256' }
     );
 
     await this.touchSession(session.id);

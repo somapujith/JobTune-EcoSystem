@@ -84,7 +84,7 @@ function CourseCard({ course, onSelect, isEnrolled, progress }) {
   return (
     <button
       onClick={() => onSelect(course)}
-      className="glass-card rounded-2xl overflow-hidden text-left hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group w-full"
+      className="card rounded-2xl overflow-hidden text-left hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group w-full"
     >
       <CourseThumbnail course={course} />
       <div className="p-5 space-y-3">
@@ -92,14 +92,14 @@ function CourseCard({ course, onSelect, isEnrolled, progress }) {
           <h3 className="text-sm font-bold text-on-surface leading-tight line-clamp-2 group-hover:text-amber-600 transition-colors">
             {course.title}
           </h3>
-          <span className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${DIFFICULTY_COLORS[course.difficulty] || ''}`}>
+          <span className={`shrink-0 text-xs font-bold px-2 py-0.5 rounded-full ${DIFFICULTY_COLORS[course.difficulty] || ''}`}>
             {course.difficulty}
           </span>
         </div>
 
         <p className="text-xs text-on-surface-variant font-medium">{course.instructor}</p>
 
-        <div className="flex items-center gap-3 text-[11px] text-on-surface-variant">
+        <div className="flex items-center gap-3 text-xs text-on-surface-variant">
           <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" />{course.duration_hrs}h</span>
           <span className="inline-flex items-center gap-1"><BookOpen className="w-3 h-3" />{course.lesson_count} lessons</span>
           <span className="inline-flex items-center gap-1"><Users className="w-3 h-3" />{(course.enrolled || 0).toLocaleString()}</span>
@@ -110,7 +110,7 @@ function CourseCard({ course, onSelect, isEnrolled, progress }) {
         {isEnrolled && (
           <div className="pt-1">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] font-bold text-amber-600">{progress}% complete</span>
+              <span className="text-xs font-bold text-amber-600">{progress}% complete</span>
             </div>
             <ProgressBar value={progress} />
           </div>
@@ -124,7 +124,7 @@ function ContinueLearningCard({ course, onSelect }) {
   return (
     <button
       onClick={() => onSelect(course)}
-      className="glass-card rounded-2xl p-4 flex items-center gap-4 hover:shadow-lg transition-all duration-200 min-w-[320px] shrink-0 text-left group"
+      className="card rounded-2xl p-4 flex items-center gap-4 hover:shadow-lg transition-all duration-200 min-w-[320px] shrink-0 text-left group"
     >
       <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${THUMBNAIL_GRADIENTS[course.category] || 'from-slate-500 to-slate-700'} flex items-center justify-center shrink-0`}>
         <span className="material-symbols-outlined text-white text-2xl" style={{ fontVariationSettings: "'FILL' 0" }}>
@@ -136,7 +136,7 @@ function ContinueLearningCard({ course, onSelect }) {
         <p className="text-xs text-on-surface-variant mt-0.5">{course.instructor}</p>
         <div className="mt-2">
           <ProgressBar value={course.progress} />
-          <span className="text-[10px] font-semibold text-amber-600 mt-1 block">{course.progress}% complete</span>
+          <span className="text-xs font-semibold text-amber-600 mt-1 block">{course.progress}% complete</span>
         </div>
       </div>
       <ChevronRight className="w-5 h-5 text-on-surface-variant shrink-0 group-hover:text-amber-500 transition-colors" />
@@ -160,10 +160,10 @@ function CourseDetailPanel({ course, onClose, onEnroll, isEnrolled, completedLes
             <div className="absolute top-4 right-8 w-32 h-32 rounded-full border-2 border-white/30" />
           </div>
           <div>
-            <span className={`text-[11px] font-bold px-3 py-1 rounded-full bg-white/20 text-white`}>
+            <span className={`text-xs font-bold px-3 py-1 rounded-full bg-white/20 text-white`}>
               {course.difficulty}
             </span>
-            <h2 className="text-2xl font-black text-white mt-3 leading-tight">{course.title}</h2>
+            <h2 className="text-2xl font-extrabold text-white mt-3 leading-tight">{course.title}</h2>
             <p className="text-white/80 text-sm mt-1">{course.instructor}</p>
           </div>
         </div>
@@ -255,7 +255,7 @@ function CourseDetailPanel({ course, onClose, onEnroll, isEnrolled, completedLes
                           {lesson.title}
                         </p>
                       </div>
-                      <span className="text-[11px] text-on-surface-variant shrink-0">{lesson.duration}</span>
+                      <span className="text-xs text-on-surface-variant shrink-0">{lesson.duration}</span>
                       {isEnrolled && (
                         <Play className={`w-4 h-4 shrink-0 ${done ? 'text-emerald-500' : 'text-on-surface-variant'}`} />
                       )}
@@ -374,7 +374,7 @@ export default function CourseLibrary() {
   // ─── Loading State ──────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="w-full max-w-7xl mx-auto py-24 flex justify-center">
+      <div className="page-container flex justify-center">
         <div className="text-center">
           <div className="inline-block w-10 h-10 rounded-full border-2 border-amber-500 border-t-transparent animate-spin mb-4" />
           <p className="text-on-surface-variant font-semibold">Loading courses...</p>
@@ -384,11 +384,11 @@ export default function CourseLibrary() {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto py-12 px-4 sm:px-6">
+    <div className="page-container">
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-6">
         <div>
-          <h1 className="text-4xl font-black text-on-surface font-headline mb-2 flex items-center gap-3">
+          <h1 className="text-4xl font-extrabold text-on-surface dark:text-white font-headline mb-2 flex items-center gap-3 page-title">
             <span className="material-symbols-outlined text-amber-500 text-4xl" style={{ fontVariationSettings: "'FILL' 0" }}>
               local_library
             </span>
@@ -421,7 +421,7 @@ export default function CourseLibrary() {
 
       {/* ── Filters ─────────────────────────────────────────────────────────── */}
       {showFilters && (
-        <div className="glass-card rounded-2xl p-5 mb-8 space-y-4">
+        <div className="card rounded-2xl p-5 mb-8 space-y-4">
           <div>
             <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wide mb-2 block">Difficulty</label>
             <div className="flex flex-wrap gap-2">
@@ -482,7 +482,7 @@ export default function CourseLibrary() {
       {/* ── Continue Learning ───────────────────────────────────────────────── */}
       {activeCourses.length > 0 && (
         <section className="mb-10">
-          <h2 className="text-xl font-black text-on-surface mb-4 flex items-center gap-2">
+          <h2 className="text-xl font-extrabold text-on-surface mb-4 flex items-center gap-2">
             <span className="material-symbols-outlined text-amber-500" style={{ fontVariationSettings: "'FILL' 1" }}>play_circle</span>
             Continue Learning
           </h2>
@@ -501,7 +501,7 @@ export default function CourseLibrary() {
       {/* ── Recommended For You ─────────────────────────────────────────────── */}
       {recommended.length > 0 && category === 'All' && !search && (
         <section className="mb-10">
-          <h2 className="text-xl font-black text-on-surface mb-4 flex items-center gap-2">
+          <h2 className="text-xl font-extrabold text-on-surface mb-4 flex items-center gap-2">
             <span className="material-symbols-outlined text-purple-500" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
             Recommended For You
           </h2>
@@ -522,14 +522,14 @@ export default function CourseLibrary() {
       {/* ── All Courses Grid ────────────────────────────────────────────────── */}
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-black text-on-surface">
+          <h2 className="text-xl font-extrabold text-on-surface">
             {category === 'All' ? 'All Courses' : category}
             <span className="ml-2 text-base font-medium text-on-surface-variant">({filtered.length})</span>
           </h2>
         </div>
 
         {filtered.length === 0 ? (
-          <div className="glass-card rounded-2xl p-12 text-center">
+          <div className="card rounded-2xl p-12 text-center">
             <span className="material-symbols-outlined text-5xl text-outline mb-3 block" style={{ fontVariationSettings: "'FILL' 0" }}>
               search_off
             </span>

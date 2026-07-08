@@ -99,7 +99,7 @@ export default function ActivityHeatmap({ data = [] }) {
   const isEmpty = data.length === 0;
 
   return (
-    <div className="glass-card rounded-3xl p-6">
+    <div className="glass-card rounded-2xl p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-bold text-slate-900 dark:text-white">Your Activity</h3>
         <span className="text-sm text-slate-500 dark:text-slate-400">

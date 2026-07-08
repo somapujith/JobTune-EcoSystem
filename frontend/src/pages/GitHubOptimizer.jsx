@@ -93,7 +93,7 @@ function ScoreGauge({ score, size = 120 }) {
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg viewBox="0 0 36 36" className="-rotate-90" style={{ width: size, height: size }}>
-        <circle cx="18" cy="18" r={r} fill="none" stroke="#e5eeff" strokeWidth="3.2" />
+        <circle cx="18" cy="18" r={r} fill="none" className="stroke-slate-200 dark:stroke-slate-700" strokeWidth="3.2" />
         <circle
           cx="18" cy="18" r={r} fill="none"
           stroke={color}
@@ -103,7 +103,7 @@ function ScoreGauge({ score, size = 120 }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-black text-on-surface" style={{ fontSize: size * 0.25 }}>{score}</span>
+        <span className="font-extrabold text-on-surface" style={{ fontSize: size * 0.25 }}>{score}</span>
         <span className="font-bold text-on-surface-variant" style={{ fontSize: size * 0.1 }}>/ 100</span>
       </div>
     </div>
@@ -132,17 +132,17 @@ function ReadmePanel({ content, filename = 'README.md', badge = null }) {
   };
 
   return (
-    <div className="glass-card border-slate-600/50 rounded-3xl bg-slate-900/80 overflow-hidden flex flex-col">
-      <div className="glass-panel border-b border-white/10 bg-slate-950/80 px-6 py-4 flex justify-between items-center">
+    <div className="rounded-2xl bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700/50 overflow-hidden flex flex-col">
+      <div className="border-b border-slate-200 dark:border-white/10 bg-slate-200/80 dark:bg-slate-950/80 px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <span className="material-symbols-outlined text-slate-200 text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>
+          <span className="material-symbols-outlined text-slate-600 dark:text-slate-200 text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>
             description
           </span>
-          <span className="text-white font-bold text-base">{filename}</span>
+          <span className="text-slate-900 dark:text-white font-bold text-base">{filename}</span>
           {badge && (
             <span
               className={`px-2 py-0.5 rounded-lg text-xs font-bold ${
-                badge === 'AI-generated' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-600/60 text-slate-300'
+                badge === 'AI-generated' ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-slate-200 dark:bg-slate-600/60 text-slate-600 dark:text-slate-300'
               }`}
             >
               {badge}
@@ -152,7 +152,7 @@ function ReadmePanel({ content, filename = 'README.md', badge = null }) {
         <div className="flex items-center gap-2">
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1.5 px-3 py-1.5 glass-card hover:bg-slate-700/50 text-white rounded-xl text-xs font-bold border border-slate-500/70 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-slate-300/50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-white rounded-xl text-xs font-bold border border-slate-300 dark:border-slate-500/70 transition-colors"
           >
             <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>
               {copied ? 'check' : 'content_copy'}
@@ -161,15 +161,15 @@ function ReadmePanel({ content, filename = 'README.md', badge = null }) {
           </button>
           <button
             onClick={handleDownload}
-            className="flex items-center gap-1.5 px-3 py-1.5 glass-card hover:bg-slate-700/50 text-white rounded-xl text-xs font-bold border border-slate-500/70 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-slate-300/50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-white rounded-xl text-xs font-bold border border-slate-300 dark:border-slate-500/70 transition-colors"
           >
             <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>download</span>
             .md
           </button>
         </div>
       </div>
-      <div className="p-6 overflow-y-auto max-h-96 bg-slate-950/80">
-        <pre className="text-white font-mono text-sm whitespace-pre-wrap leading-relaxed font-semibold">
+      <div className="p-6 overflow-y-auto max-h-96 bg-slate-100 dark:bg-slate-950/80">
+        <pre className="text-slate-800 dark:text-white font-mono text-sm whitespace-pre-wrap leading-relaxed font-semibold">
           {content || '— No content —'}
         </pre>
       </div>
@@ -180,10 +180,10 @@ function ReadmePanel({ content, filename = 'README.md', badge = null }) {
 function Collapsible({ title, icon, iconColor = 'text-on-surface-variant', defaultOpen = false, children }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="glass-card rounded-3xl overflow-hidden">
+    <div className="card rounded-2xl overflow-hidden">
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full px-8 py-6 flex items-center justify-between hover:bg-white/5 transition-colors"
+        className="w-full px-8 py-6 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
       >
         <h3 className="text-xl font-bold text-on-surface font-headline flex items-center gap-3">
           <span className={`material-symbols-outlined text-xl ${iconColor}`} style={{ fontVariationSettings: "'FILL' 0" }}>
@@ -199,7 +199,7 @@ function Collapsible({ title, icon, iconColor = 'text-on-surface-variant', defau
         </span>
       </button>
       {open && (
-        <div className="px-8 pb-8 border-t border-white/10">
+        <div className="px-8 pb-8 border-t border-slate-200 dark:border-white/10">
           <div className="pt-6">{children}</div>
         </div>
       )}
@@ -216,8 +216,8 @@ function RepoReadmeModal({ modal, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative glass-card rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
-        <div className="flex items-center justify-between px-8 py-6 border-b border-white/10">
+      <div className="relative card rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+        <div className="flex items-center justify-between px-8 py-6 border-b border-slate-200 dark:border-white/10">
           <div>
             <h3 className="text-xl font-bold text-on-surface font-headline">Repository README</h3>
             {modal.repo && (
@@ -226,7 +226,7 @@ function RepoReadmeModal({ modal, onClose }) {
           </div>
           <button
             onClick={onClose}
-            className="w-10 h-10 flex items-center justify-center glass-card rounded-2xl hover:bg-white/10 transition-colors"
+            className="w-10 h-10 flex items-center justify-center glass-card rounded-2xl hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
           >
             <span className="material-symbols-outlined text-on-surface-variant text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>close</span>
           </button>
@@ -258,7 +258,7 @@ function RepoReadmeModal({ modal, onClose }) {
 
 function PipelineTracker({ statuses }) {
   return (
-    <div className="glass-card p-8 rounded-3xl max-w-2xl mx-auto">
+    <div className="card p-8 rounded-2xl max-w-2xl mx-auto">
       <h3 className="text-base font-bold text-on-surface font-headline text-center mb-8">Analysis in Progress</h3>
       <div className="space-y-4">
         {PIPELINE_STAGES.map((stage) => {
@@ -325,7 +325,7 @@ function Stage1ProfileHealth({ data }) {
   const grade = getGradeLabel(score);
 
   return (
-    <div className="glass-card p-8 rounded-3xl">
+    <div className="card p-8 rounded-2xl">
       <h2 className="text-xl font-bold text-on-surface font-headline flex items-center gap-3 mb-8">
         <span className="material-symbols-outlined text-sky-500 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
         Profile Health Score
@@ -361,7 +361,7 @@ function Stage1ProfileHealth({ data }) {
                 >
                   {stat.icon}
                 </span>
-                <div className="font-black text-lg text-on-surface">{stat.value}</div>
+                <div className="font-extrabold text-lg text-on-surface">{stat.value}</div>
                 <div className="text-xs font-bold text-outline uppercase tracking-wider">{stat.label}</div>
               </div>
             ))}
@@ -400,7 +400,7 @@ function Stage2RepoAudit({ data, onGenerateReadme }) {
   };
 
   return (
-    <div className="glass-card p-8 rounded-3xl">
+    <div className="card p-8 rounded-2xl">
       <h2 className="text-xl font-bold text-on-surface font-headline flex items-center gap-3 mb-6">
         <span className="material-symbols-outlined text-amber-500 text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>folder_open</span>
         Repository Audit
@@ -451,7 +451,7 @@ function Stage2RepoAudit({ data, onGenerateReadme }) {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10">
+              <tr className="border-b border-slate-200 dark:border-white/10">
                 <th className="text-left text-xs font-bold text-outline uppercase tracking-wider pb-3 pr-4">Repo</th>
                 <th className="text-left text-xs font-bold text-outline uppercase tracking-wider pb-3 pr-4">Lang</th>
                 <th className="text-left text-xs font-bold text-outline uppercase tracking-wider pb-3 pr-4">Stars</th>
@@ -459,11 +459,11 @@ function Stage2RepoAudit({ data, onGenerateReadme }) {
                 <th className="text-left text-xs font-bold text-outline uppercase tracking-wider pb-3"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
               {repos.map((repo, i) => {
                 const st = statusIcon(repo.status);
                 return (
-                  <tr key={i} className="hover:bg-white/3 transition-colors">
+                  <tr key={i} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                     <td className="py-3 pr-4">
                       <div className="font-bold text-on-surface text-sm">{repo.name}</div>
                       {repo.description && (
@@ -499,7 +499,7 @@ function Stage2RepoAudit({ data, onGenerateReadme }) {
                     <td className="py-3">
                       <button
                         onClick={() => onGenerateReadme(repo)}
-                        className="px-3 py-1.5 glass-card hover:bg-white/10 rounded-xl text-xs font-bold text-on-surface-variant border border-white/10 transition-colors flex items-center gap-1"
+                        className="px-3 py-1.5 glass-card hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl text-xs font-bold text-on-surface-variant border border-slate-200 dark:border-white/10 transition-colors flex items-center gap-1"
                       >
                         <span className="material-symbols-outlined text-xs" style={{ fontVariationSettings: "'FILL' 0" }}>auto_awesome</span>
                         README
@@ -526,7 +526,7 @@ function Stage3ShowcaseProjects({ data }) {
   const hasPortfolio = data.hasPortfolio ?? false;
 
   return (
-    <div className="glass-card p-8 rounded-3xl">
+    <div className="card p-8 rounded-2xl">
       <h2 className="text-xl font-bold text-on-surface font-headline flex items-center gap-3 mb-6">
         <span className="material-symbols-outlined text-emerald-500 text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>workspace_premium</span>
         Showcase Projects
@@ -611,7 +611,7 @@ function BioSuggestion({ current, suggested }) {
           </div>
           <button
             onClick={handleCopy}
-            className="mt-2 flex items-center gap-1.5 px-3 py-1.5 glass-card hover:bg-white/10 rounded-xl text-xs font-bold text-on-surface-variant border border-white/10 transition-colors"
+            className="mt-2 flex items-center gap-1.5 px-3 py-1.5 glass-card hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl text-xs font-bold text-on-surface-variant border border-slate-200 dark:border-white/10 transition-colors"
           >
             <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>
               {copied ? 'check' : 'content_copy'}
@@ -629,7 +629,7 @@ function RepoSuggestionRow({ suggestion }) {
   const [copiedDesc, setCopiedDesc] = useState(false);
 
   return (
-    <tr className="hover:bg-white/3 transition-colors">
+    <tr className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
       <td className="py-3 pr-4 font-mono text-xs text-on-surface-variant">
         {suggestion.current ?? suggestion.currentName}
       </td>
@@ -644,7 +644,7 @@ function RepoSuggestionRow({ suggestion }) {
               setCopiedName(true);
               setTimeout(() => setCopiedName(false), 1500);
             }}
-            className="w-6 h-6 flex items-center justify-center glass-card hover:bg-white/10 rounded-lg text-outline border border-white/10 transition-colors"
+            className="w-6 h-6 flex items-center justify-center glass-card hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg text-outline border border-slate-200 dark:border-white/10 transition-colors"
           >
             <span className="material-symbols-outlined text-xs" style={{ fontVariationSettings: "'FILL' 0" }}>
               {copiedName ? 'check' : 'content_copy'}
@@ -662,7 +662,7 @@ function RepoSuggestionRow({ suggestion }) {
                 setCopiedDesc(true);
                 setTimeout(() => setCopiedDesc(false), 1500);
               }}
-              className="w-6 h-6 flex-shrink-0 flex items-center justify-center glass-card hover:bg-white/10 rounded-lg text-outline border border-white/10 transition-colors"
+              className="w-6 h-6 flex-shrink-0 flex items-center justify-center glass-card hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg text-outline border border-slate-200 dark:border-white/10 transition-colors"
             >
               <span className="material-symbols-outlined text-xs" style={{ fontVariationSettings: "'FILL' 0" }}>
                 {copiedDesc ? 'check' : 'content_copy'}
@@ -734,13 +734,13 @@ function Stage4AIRecommendations({ data }) {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10">
+                <tr className="border-b border-slate-200 dark:border-white/10">
                   <th className="text-left text-xs font-bold text-outline uppercase tracking-wider pb-3 pr-4">Current Name</th>
                   <th className="text-left text-xs font-bold text-outline uppercase tracking-wider pb-3 pr-4">Suggested Name</th>
                   <th className="text-left text-xs font-bold text-outline uppercase tracking-wider pb-3 pr-4">Suggested Description</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                 {repoSuggestions.map((s, i) => (
                   <RepoSuggestionRow key={i} suggestion={s} />
                 ))}
@@ -808,7 +808,7 @@ function Stage5RecruiterReport({ data, onSave, savingAnalysis, analysisSaved, on
   };
 
   return (
-    <div className="glass-card p-8 rounded-3xl">
+    <div className="card p-8 rounded-2xl">
       <h2 className="text-xl font-bold text-on-surface font-headline flex items-center gap-3 mb-6">
         <span className="material-symbols-outlined text-rose-500 text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>contact_page</span>
         Final Recruiter Report
@@ -834,7 +834,7 @@ function Stage5RecruiterReport({ data, onSave, savingAnalysis, analysisSaved, on
             {priorities.map((p, i) => (
               <div key={i} className="glass-card bg-surface-container/20 rounded-2xl p-5">
                 <div className="flex items-center gap-3 mb-2 flex-wrap">
-                  <span className="font-black text-on-surface-variant text-xs w-5 h-5 flex items-center justify-center bg-surface-container rounded-full flex-shrink-0">
+                  <span className="font-extrabold text-on-surface-variant text-xs w-5 h-5 flex items-center justify-center bg-surface-container rounded-full flex-shrink-0">
                     {i + 1}
                   </span>
                   <span className="font-bold text-on-surface text-sm flex-1">
@@ -900,7 +900,7 @@ function Stage5RecruiterReport({ data, onSave, savingAnalysis, analysisSaved, on
         )}
       </div>
 
-      <div className="flex items-center gap-4 flex-wrap pt-4 border-t border-white/10">
+      <div className="flex items-center gap-4 flex-wrap pt-4 border-t border-slate-200 dark:border-white/10">
         <button
           onClick={onSave}
           disabled={savingAnalysis || analysisSaved}
@@ -925,7 +925,7 @@ function Stage5RecruiterReport({ data, onSave, savingAnalysis, analysisSaved, on
         </button>
         <button
           onClick={onStartOver}
-          className="px-6 py-3 glass-card hover:bg-white/10 text-on-surface-variant font-bold rounded-2xl transition-all border border-white/10 flex items-center gap-2"
+          className="px-6 py-3 glass-card hover:bg-slate-100 dark:hover:bg-white/10 text-on-surface-variant font-bold rounded-2xl transition-all border border-slate-200 dark:border-white/10 flex items-center gap-2"
         >
           <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>restart_alt</span>
           Start Over
@@ -942,7 +942,7 @@ function Stage5RecruiterReport({ data, onSave, savingAnalysis, analysisSaved, on
 function HistoryPanel({ history }) {
   if (!history || history.length === 0) return null;
   return (
-    <div className="glass-card p-6 rounded-3xl mt-8">
+    <div className="card p-6 rounded-2xl mt-8">
       <h3 className="text-base font-bold text-on-surface font-headline flex items-center gap-2 mb-4">
         <span className="material-symbols-outlined text-outline text-base" style={{ fontVariationSettings: "'FILL' 0" }}>history</span>
         Past Analyses
@@ -1224,7 +1224,7 @@ export default function GitHubOptimizer() {
     <>
       <RepoReadmeModal modal={repoReadmeModal} onClose={closeRepoModal} />
 
-      <div className="w-full max-w-6xl mx-auto py-16 px-4 sm:px-6">
+      <div className="page-container">
 
         {/* Page Header */}
         <div className="text-center mb-14">
@@ -1236,7 +1236,7 @@ export default function GitHubOptimizer() {
               code
             </span>
           </div>
-          <h1 className="text-4xl font-black text-on-surface font-headline mb-4">
+          <h1 className="text-4xl font-extrabold text-on-surface font-headline mb-4">
             GitHub Profile Optimizer
           </h1>
           <p className="text-lg text-on-surface-variant font-medium max-w-2xl mx-auto">
@@ -1246,7 +1246,7 @@ export default function GitHubOptimizer() {
 
         {/* URL Input */}
         <form onSubmit={handleAnalyze} className="max-w-3xl mx-auto mb-10">
-          <div className="relative glass-card rounded-3xl p-2 shadow-lg">
+          <div className="relative card rounded-2xl p-2 shadow-lg">
             <div className="flex items-center gap-4 p-4">
               <div className="w-12 h-12 rounded-2xl glass-card flex items-center justify-center flex-shrink-0">
                 <span
@@ -1350,7 +1350,7 @@ export default function GitHubOptimizer() {
             {!stage4Data && !stage5Data && (results?.strengths?.length > 0 || results?.issues?.length > 0) && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {results.strengths?.length > 0 && (
-                  <div className="glass-card p-8 rounded-3xl">
+                  <div className="card p-8 rounded-2xl">
                     <h3 className="text-xl font-bold text-emerald-600 mb-6 flex items-center gap-3 font-headline">
                       <span className="material-symbols-outlined text-emerald-500 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                       Strengths
@@ -1366,7 +1366,7 @@ export default function GitHubOptimizer() {
                   </div>
                 )}
                 {results.issues?.length > 0 && (
-                  <div className="glass-card p-8 rounded-3xl">
+                  <div className="card p-8 rounded-2xl">
                     <h3 className="text-xl font-bold text-rose-600 mb-6 flex items-center gap-3 font-headline">
                       <span className="material-symbols-outlined text-rose-500 text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>warning</span>
                       Improvements
@@ -1422,7 +1422,7 @@ export default function GitHubOptimizer() {
                 </button>
                 <button
                   onClick={handleStartOver}
-                  className="px-6 py-3 glass-card hover:bg-white/10 text-on-surface-variant font-bold rounded-2xl transition-all border border-white/10 flex items-center gap-2"
+                  className="px-6 py-3 glass-card hover:bg-slate-100 dark:hover:bg-white/10 text-on-surface-variant font-bold rounded-2xl transition-all border border-slate-200 dark:border-white/10 flex items-center gap-2"
                 >
                   <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>restart_alt</span>
                   Start Over

@@ -241,7 +241,7 @@ export default function AIProjectBuilder() {
   function renderDescribeStep() {
     return (
       <div className="max-w-3xl mx-auto">
-        <div className="glass-card rounded-3xl p-8">
+        <div className="card rounded-2xl p-8">
           <h2 className="text-2xl font-bold text-on-surface mb-1">What do you want to build?</h2>
           <p className="text-on-surface-variant mb-6">
             Describe your project idea or pick a template to get started.
@@ -343,7 +343,7 @@ export default function AIProjectBuilder() {
     return (
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="glass-card rounded-3xl p-8">
+        <div className="card rounded-2xl p-8">
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div>
               <h2 className="text-2xl font-bold text-on-surface">{plan.name}</h2>
@@ -374,7 +374,7 @@ export default function AIProjectBuilder() {
         </div>
 
         {/* Tech Stack */}
-        <div className="glass-card rounded-3xl p-6">
+        <div className="card rounded-2xl p-6">
           <h3 className="text-lg font-bold text-on-surface mb-4 flex items-center gap-2">
             <span className="material-symbols-outlined text-blue-500">code</span>
             Tech Stack
@@ -410,7 +410,7 @@ export default function AIProjectBuilder() {
 
         {/* Folder Structure */}
         {plan.folderStructure?.length > 0 && (
-          <div className="glass-card rounded-3xl p-6">
+          <div className="card rounded-2xl p-6">
             <h3 className="text-lg font-bold text-on-surface mb-4 flex items-center gap-2">
               <span className="material-symbols-outlined text-amber-500">folder</span>
               Folder Structure
@@ -432,7 +432,7 @@ export default function AIProjectBuilder() {
 
         {/* Database Schema */}
         {plan.databaseSchema?.length > 0 && (
-          <div className="glass-card rounded-3xl p-6">
+          <div className="card rounded-2xl p-6">
             <h3 className="text-lg font-bold text-on-surface mb-4 flex items-center gap-2">
               <span className="material-symbols-outlined text-emerald-500">database</span>
               Database Schema
@@ -478,7 +478,7 @@ export default function AIProjectBuilder() {
 
         {/* API Endpoints */}
         {plan.apiEndpoints?.length > 0 && (
-          <div className="glass-card rounded-3xl p-6">
+          <div className="card rounded-2xl p-6">
             <h3 className="text-lg font-bold text-on-surface mb-4 flex items-center gap-2">
               <span className="material-symbols-outlined text-sky-500">api</span>
               API Endpoints
@@ -512,7 +512,7 @@ export default function AIProjectBuilder() {
 
         {/* Features */}
         {plan.features?.length > 0 && (
-          <div className="glass-card rounded-3xl p-6">
+          <div className="card rounded-2xl p-6">
             <h3 className="text-lg font-bold text-on-surface mb-4 flex items-center gap-2">
               <span className="material-symbols-outlined text-purple-500">stars</span>
               Key Features
@@ -541,7 +541,7 @@ export default function AIProjectBuilder() {
   function renderImplementationStep() {
     if (!plan?.implementationSteps?.length) {
       return (
-        <div className="max-w-3xl mx-auto glass-card rounded-3xl p-8 text-center">
+        <div className="max-w-3xl mx-auto card rounded-2xl p-8 text-center">
           <p className="text-on-surface-variant">No implementation steps available.</p>
         </div>
       );
@@ -549,7 +549,7 @@ export default function AIProjectBuilder() {
 
     return (
       <div className="max-w-3xl mx-auto space-y-4">
-        <div className="glass-card rounded-3xl p-6">
+        <div className="card rounded-2xl p-6">
           <h2 className="text-2xl font-bold text-on-surface mb-1">Implementation Guide</h2>
           <p className="text-on-surface-variant mb-6">Step-by-step instructions for building {plan.name}</p>
 
@@ -595,7 +595,7 @@ export default function AIProjectBuilder() {
   function renderReadmeStep() {
     if (readmeLoading) {
       return (
-        <div className="max-w-3xl mx-auto glass-card rounded-3xl p-8 flex flex-col items-center justify-center min-h-[300px]">
+        <div className="max-w-3xl mx-auto card rounded-2xl p-8 flex flex-col items-center justify-center min-h-[300px]">
           <Loader2 className="w-8 h-8 animate-spin text-blue-500 mb-4" />
           <p className="text-on-surface-variant">Generating professional README...</p>
         </div>
@@ -604,7 +604,7 @@ export default function AIProjectBuilder() {
 
     return (
       <div className="max-w-3xl mx-auto space-y-4">
-        <div className="glass-card rounded-3xl p-6">
+        <div className="card rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold text-on-surface flex items-center gap-2">
               <span className="material-symbols-outlined text-blue-500">description</span>
@@ -643,7 +643,7 @@ export default function AIProjectBuilder() {
   function renderDeployStep() {
     return (
       <div className="max-w-3xl mx-auto space-y-4">
-        <div className="glass-card rounded-3xl p-6">
+        <div className="card rounded-2xl p-6">
           <h2 className="text-2xl font-bold text-on-surface mb-4 flex items-center gap-2">
             <span className="material-symbols-outlined text-emerald-500">rocket_launch</span>
             Deployment Guide
@@ -723,7 +723,7 @@ export default function AIProjectBuilder() {
   const stepRenderers = [renderDescribeStep, renderPlanStep, renderImplementationStep, renderReadmeStep, renderDeployStep];
 
   return (
-    <div className="w-full py-8 px-4">
+    <div className="page-container">
       <div className="max-w-5xl mx-auto">
         {/* Page Header */}
         <div className="text-center mb-6">

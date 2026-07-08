@@ -1,14 +1,21 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const sessionService = require('../services/sessionService');
+
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET || JWT_SECRET.length < 32) {
+  console.error('FATAL: JWT_SECRET must be set and at least 32 characters long');
+  process.exit(1);
+}
 
 const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
-  if (token == null) return res.status(401).json({ error: 'Unauthorized' });
+  if (!token) return res.status(401).json({ error: 'Unauthorized' });
 
   try {
-    const user = jwt.verify(token, process.env.JWT_SECRET);
+    const user = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
 
     if (user.sessionId) {
       const active = await sessionService.isSessionActive(user.sessionId);

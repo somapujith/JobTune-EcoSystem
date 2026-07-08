@@ -21,7 +21,7 @@ function UnlockedBadge({ definition, unlockedAt }) {
         <div className="min-w-0">
           <p className="text-sm font-bold text-slate-900 dark:text-white">{definition.title}</p>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{definition.description}</p>
-          <p className="text-[10px] text-emerald-500 dark:text-emerald-400 mt-1 font-medium">
+          <p className="text-xs text-emerald-500 dark:text-emerald-400 mt-1 font-medium">
             Unlocked {formatDate(unlockedAt)}
           </p>
         </div>
@@ -61,7 +61,7 @@ export default function AchievementBadges({ unlockedAchievements = [], definitio
 
   if (definitions.length === 0) {
     return (
-      <div className="glass-card rounded-3xl p-6">
+      <div className="glass-card rounded-2xl p-6">
         <h3 className="text-lg font-bold text-slate-900 dark:text-white">Achievements</h3>
         <p className="text-sm text-slate-400 dark:text-slate-500 mt-2">No achievements available yet.</p>
       </div>
@@ -69,7 +69,7 @@ export default function AchievementBadges({ unlockedAchievements = [], definitio
   }
 
   return (
-    <div className="glass-card rounded-3xl p-6">
+    <div className="glass-card rounded-2xl p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-bold text-slate-900 dark:text-white">Achievements</h3>
         <span className="text-sm text-slate-500 dark:text-slate-400">

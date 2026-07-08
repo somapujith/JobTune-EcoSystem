@@ -154,11 +154,11 @@ export default function JobTracker() {
   }, {});
 
   return (
-    <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6">
+    <div className="page-container">
       <div className="mb-12">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-black text-slate-900 mb-2">Job Application Tracker</h1>
+            <h1 className="text-4xl font-extrabold text-slate-900 mb-2">Job Application Tracker</h1>
             <p className="text-slate-600">Keep track of every application and stay on top of your job search</p>
           </div>
           <button
@@ -179,7 +179,7 @@ export default function JobTracker() {
           ].map((stat, i) => (
             <div key={i} className="glass-card p-5 rounded-2xl">
               <p className="text-xs font-bold text-slate-500 uppercase mb-2">{stat.label}</p>
-              <p className={`text-2xl font-black ${stat.color}`}>{stat.value}</p>
+              <p className={`text-2xl font-extrabold ${stat.color}`}>{stat.value}</p>
             </div>
           ))}
         </div>
@@ -187,7 +187,7 @@ export default function JobTracker() {
 
       {/* Add form */}
       {showForm && (
-        <div className="glass-card rounded-3xl p-6 mb-8">
+        <div className="card rounded-2xl p-6 mb-8">
           <form onSubmit={handleAddJob} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input
@@ -248,7 +248,7 @@ export default function JobTracker() {
             key={status.id}
             onDragOver={handleDragOver}
             onDrop={() => handleDropColumn(status.id)}
-            className={`glass-card rounded-3xl p-4 min-h-[24rem] transition-all duration-300 ${
+            className={`card rounded-2xl p-4 min-h-[24rem] transition-all duration-300 ${
               draggedJob && draggedJob.status !== status.id ? 'ring-2 ring-blue-300 bg-blue-50/20' : ''
             }`}
           >

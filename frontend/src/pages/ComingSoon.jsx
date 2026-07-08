@@ -7,13 +7,13 @@ export default function ComingSoon({
   description = "We're building this feature right now. Check back soon!",
 }) {
   return (
-    <div className="max-w-3xl mx-auto py-20 px-4 sm:px-6 w-full text-center">
-      <div className="glass-card rounded-3xl p-12">
+    <div className="page-container text-center">
+      <div className="card rounded-2xl p-12">
         <div className="w-16 h-16 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto mb-6">
           <Sparkles className="w-8 h-8" />
         </div>
         <div className="text-blue-600 font-bold text-sm uppercase tracking-widest mb-2">Coming Soon</div>
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-3">{toolName}</h1>
+        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-3">{toolName}</h1>
         <p className="text-slate-500 font-medium max-w-md mx-auto mb-8">{description}</p>
         <Link
           to="/dashboard"

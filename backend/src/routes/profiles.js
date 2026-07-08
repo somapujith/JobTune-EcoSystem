@@ -67,11 +67,21 @@ const HOSTING_RULES = {
 // Stage 1 — Data Collection
 // ───────────────────────────────────────────────────────────────────────────
 
+function safeFetch(url, options = {}) {
+  if (!url.startsWith('https://api.github.com/')) {
+    throw new Error('Only GitHub API URLs are allowed');
+  }
+  return fetch(url, {
+    ...options,
+    signal: AbortSignal.timeout(10000),
+  });
+}
+
 async function fetchGitHubData(username) {
   try {
     const [userRes, reposRes] = await Promise.all([
-      fetch(`https://api.github.com/users/${username}`, { headers: GH_HEADERS }),
-      fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`, { headers: GH_HEADERS }),
+      safeFetch(`https://api.github.com/users/${encodeURIComponent(username)}`, { headers: GH_HEADERS }),
+      safeFetch(`https://api.github.com/users/${encodeURIComponent(username)}/repos?per_page=100&sort=updated`, { headers: GH_HEADERS }),
     ]);
 
     if (!userRes.ok) return null;
@@ -90,8 +100,8 @@ async function fetchGitHubData(username) {
     let existingReadmeContent = null;
     if (hasProfileReadme) {
       try {
-        const readmeRes = await fetch(
-          `https://api.github.com/repos/${username}/${username}/readme`,
+        const readmeRes = await safeFetch(
+          `https://api.github.com/repos/${encodeURIComponent(username)}/${encodeURIComponent(username)}/readme`,
           { headers: GH_HEADERS }
         );
         if (readmeRes.ok) {
@@ -538,8 +548,7 @@ function assembleFinalReport(scores, ghData, stage4) {
 // ═══════════════════════════════════════════════════════════════════════════
 
 // POST /api/profiles/github/analyze — runs the full 5-stage pipeline.
-// TODO: Re-enable authenticateToken and requirePlan(2) before production
-router.post('/github/analyze', async (req, res) => {
+router.post('/github/analyze', authenticateToken, requirePlan(2), async (req, res) => {
   try {
     let { username } = req.body;
     if (!username) return res.status(400).json({ error: 'GitHub username or URL is required' });
@@ -614,8 +623,7 @@ router.post('/github/analyze', async (req, res) => {
 });
 
 // POST /api/profiles/github/generate-repo-readme — on-demand single-repo README.
-// TODO: Re-enable authenticateToken and requirePlan(2) before production
-router.post('/github/generate-repo-readme', async (req, res) => {
+router.post('/github/generate-repo-readme', authenticateToken, requirePlan(2), async (req, res) => {
   try {
     const { username, repoName, repoDescription, language, topics, stars } = req.body || {};
     if (!repoName) return res.status(400).json({ error: 'repoName is required' });
@@ -736,8 +744,7 @@ MIT
 });
 
 // POST /api/profiles/github/optimize-bio — rewrite a bio under 160 chars.
-// TODO: Re-enable authenticateToken and requirePlan(2) before production
-router.post('/github/optimize-bio', async (req, res) => {
+router.post('/github/optimize-bio', authenticateToken, requirePlan(2), async (req, res) => {
   try {
     const { currentBio, name, languages, targetRole } = req.body || {};
     const langArr = Array.isArray(languages) ? languages : [];
@@ -794,14 +801,10 @@ Make it role-first and recruiter-friendly. Return the JSON now.`;
 });
 
 // POST /api/profiles/github/save — persist an analysis.
-// TODO: Re-enable authenticateToken and requirePlan(2) before production
-router.post('/github/save', async (req, res) => {
+router.post('/github/save', authenticateToken, requirePlan(2), async (req, res) => {
   try {
     const { username, scores, grade, report, stage4 } = req.body || {};
-    const userId = req.user?.id;
-    if (!userId) {
-      return res.status(401).json({ error: 'Authentication required to save analysis' });
-    }
+    const userId = req.user.id;
 
     const result = await pool.query(
       'INSERT INTO github_analyses (user_id, username, overall_score, grade, report) VALUES ($1, $2, $3, $4, $5) RETURNING id',
@@ -816,13 +819,9 @@ router.post('/github/save', async (req, res) => {
 });
 
 // GET /api/profiles/github/history — last 5 analyses for this user.
-// TODO: Re-enable authenticateToken and requirePlan(2) before production
-router.get('/github/history', async (req, res) => {
+router.get('/github/history', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user?.id;
-    if (!userId) {
-      return res.json({ history: [] });
-    }
+    const userId = req.user.id;
     const result = await pool.query(
       'SELECT id, username, overall_score, grade, created_at FROM github_analyses WHERE user_id = $1 ORDER BY created_at DESC LIMIT 5',
       [userId]
@@ -838,22 +837,20 @@ router.get('/github/history', async (req, res) => {
 // LinkedIn endpoint
 // ═══════════════════════════════════════════════════════════════════════════
 
-router.post('/linkedin/analyze', async (req, res) => {
+router.post('/linkedin/analyze', authenticateToken, requirePlan(2), async (req, res) => {
   try {
     const report = await analyzeLinkedInProfile(req.body || {});
 
-    if (req.user?.id) {
-      try {
-        const saved = await saveLinkedInAnalysis(req.user.id, report);
-        report.analysisId = saved.id;
-        report.savedAt = saved.created_at;
-      } catch (saveErr) {
-        console.error('LinkedIn analysis save error:', saveErr.message);
-        report.persistence = {
-          saved: false,
-          reason: 'Analysis completed, but history save failed.',
-        };
-      }
+    try {
+      const saved = await saveLinkedInAnalysis(req.user.id, report);
+      report.analysisId = saved.id;
+      report.savedAt = saved.created_at;
+    } catch (saveErr) {
+      console.error('LinkedIn analysis save error:', saveErr.message);
+      report.persistence = {
+        saved: false,
+        reason: 'Analysis completed, but history save failed.',
+      };
     }
 
     res.json(report);
@@ -866,11 +863,8 @@ router.post('/linkedin/analyze', async (req, res) => {
   }
 });
 
-router.get('/linkedin/history', async (req, res) => {
+router.get('/linkedin/history', authenticateToken, async (req, res) => {
   try {
-    if (!req.user?.id) {
-      return res.json({ history: [] });
-    }
     const history = await getLinkedInAnalysisHistory(req.user.id, req.query.limit);
     res.json({ history });
   } catch (err) {
@@ -879,11 +873,8 @@ router.get('/linkedin/history', async (req, res) => {
   }
 });
 
-router.get('/linkedin/history/:id', async (req, res) => {
+router.get('/linkedin/history/:id', authenticateToken, async (req, res) => {
   try {
-    if (!req.user?.id) {
-      return res.status(404).json({ error: 'LinkedIn analysis not found' });
-    }
     const analysis = await getLinkedInAnalysisById(req.user.id, req.params.id);
 
     if (!analysis) {
@@ -905,7 +896,7 @@ router.get('/linkedin/history/:id', async (req, res) => {
 // LinkedIn Step-by-Step Generation endpoints
 // ═══════════════════════════════════════════════════════════════════════════
 
-router.post('/linkedin/generate-headline', async (req, res) => {
+router.post('/linkedin/generate-headline', authenticateToken, requirePlan(2), async (req, res) => {
   try {
     const { roleInfo, companyContext, achievements, targetRoles } = req.body;
     if (!roleInfo) {
@@ -919,7 +910,7 @@ router.post('/linkedin/generate-headline', async (req, res) => {
   }
 });
 
-router.post('/linkedin/generate-about', async (req, res) => {
+router.post('/linkedin/generate-about', authenticateToken, requirePlan(2), async (req, res) => {
   try {
     const { profileContext, skills, achievements, targetRoles, targetIndustries } = req.body;
     if (!profileContext) {
@@ -933,7 +924,7 @@ router.post('/linkedin/generate-about', async (req, res) => {
   }
 });
 
-router.post('/linkedin/generate-experience', async (req, res) => {
+router.post('/linkedin/generate-experience', authenticateToken, requirePlan(2), async (req, res) => {
   try {
     const { jobTitle, company, responsibilities, achievements } = req.body;
     if (!jobTitle || !company) {

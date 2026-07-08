@@ -100,12 +100,12 @@ export default function RecruiterVisibility() {
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto py-16 px-4 sm:px-6">
+    <div className="page-container">
       <div className="text-center mb-16">
         <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-slate-900/5 mb-6">
           <span className="material-symbols-outlined text-slate-900 text-3xl" style={{ fontVariationSettings: "'FILL' 0" }}>visibility</span>
         </div>
-        <h1 className="text-4xl font-black text-on-surface font-headline mb-4">
+        <h1 className="page-title text-4xl font-extrabold text-on-surface font-headline mb-4">
           Recruiter Visibility Checker
         </h1>
         <p className="text-lg text-on-surface-variant font-medium max-w-2xl mx-auto">
@@ -114,7 +114,7 @@ export default function RecruiterVisibility() {
       </div>
 
       {/* How It Works Guide */}
-      <div className="max-w-5xl mx-auto mb-12 glass-card border-blue-200/50 rounded-3xl p-8">
+      <div className="max-w-5xl mx-auto mb-12 card rounded-2xl p-8">
         <h3 className="text-xl font-bold text-on-surface mb-4 flex items-center gap-2">
           <span className="material-symbols-outlined text-blue-600">info</span>
           How It Works
@@ -127,7 +127,7 @@ export default function RecruiterVisibility() {
       </div>
 
       {error && (
-        <div className="max-w-3xl mx-auto mb-6 glass-card border-rose-200/50 p-4 rounded-2xl text-rose-600 text-sm font-medium flex items-center gap-3">
+        <div className="max-w-3xl mx-auto mb-6 error-banner">
           <AlertCircle className="w-5 h-5 flex-shrink-0" />
           {error}
         </div>
@@ -135,8 +135,8 @@ export default function RecruiterVisibility() {
 
       <form onSubmit={handleAnalyze} className="max-w-3xl mx-auto mb-12 space-y-6">
         {/* Resume */}
-        <div className="glass-card rounded-3xl p-8">
-          <label className="flex items-center gap-2 text-sm font-bold text-on-surface mb-3">
+        <div className="card rounded-2xl p-8">
+          <label className="input-label">
             <FileText className="w-4 h-4 text-emerald-600" /> Resume Text
           </label>
           <textarea
@@ -144,13 +144,13 @@ export default function RecruiterVisibility() {
             onChange={(e) => setResumeText(e.target.value)}
             placeholder="Paste your resume text here..."
             rows={8}
-            className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-3 text-on-surface placeholder:text-outline/50 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+            className="input-field resize-none"
           />
         </div>
 
         {/* LinkedIn */}
-        <div className="glass-card rounded-3xl p-8 space-y-4">
-          <label className="flex items-center gap-2 text-sm font-bold text-on-surface">
+        <div className="card rounded-2xl p-8 space-y-4">
+          <label className="input-label">
             <Linkedin className="w-4 h-4 text-blue-600" /> LinkedIn (optional)
           </label>
           <input
@@ -158,26 +158,26 @@ export default function RecruiterVisibility() {
             value={linkedinHeadline}
             onChange={(e) => setLinkedinHeadline(e.target.value)}
             placeholder="Headline (e.g. Senior Software Engineer | React, Node.js, AWS)"
-            className="w-full px-4 py-2 bg-surface-container/50 border border-outline/20 rounded-xl text-on-surface placeholder:text-outline/50 focus:ring-1 focus:ring-blue-500 outline-none"
+            className="input-field"
           />
           <textarea
             value={linkedinAbout}
             onChange={(e) => setLinkedinAbout(e.target.value)}
             placeholder="About section..."
             rows={3}
-            className="w-full px-4 py-2 bg-surface-container/50 border border-outline/20 rounded-xl text-on-surface placeholder:text-outline/50 focus:ring-1 focus:ring-blue-500 outline-none resize-none"
+            className="input-field resize-none"
           />
           <input
             type="text"
             value={linkedinSkills}
             onChange={(e) => setLinkedinSkills(e.target.value)}
             placeholder="Skills, comma-separated (e.g. React, Node.js, AWS)"
-            className="w-full px-4 py-2 bg-surface-container/50 border border-outline/20 rounded-xl text-on-surface placeholder:text-outline/50 focus:ring-1 focus:ring-blue-500 outline-none"
+            className="input-field"
           />
         </div>
 
         {/* GitHub + target keywords */}
-        <div className="glass-card rounded-3xl p-8 space-y-4">
+        <div className="card rounded-2xl p-8 space-y-4">
           <label className="flex items-center gap-2 text-sm font-bold text-on-surface">
             <Github className="w-4 h-4 text-purple-600" /> GitHub Username (optional)
           </label>
@@ -233,9 +233,9 @@ export default function RecruiterVisibility() {
       {result && !loading && (
         <div className="max-w-3xl mx-auto space-y-8">
           {/* Overall score */}
-          <div className="glass-card rounded-3xl p-8 text-center">
+          <div className="card rounded-2xl p-8 text-center">
             <p className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase mb-2">Recruiter Visibility Score</p>
-            <p className={`text-6xl font-black ${scoreColor(result.visibilityScore)}`}>{result.visibilityScore}</p>
+            <p className={`text-6xl font-extrabold ${scoreColor(result.visibilityScore)}`}>{result.visibilityScore}</p>
             <p className="text-lg font-bold text-on-surface mt-2">{result.scoreLabel}</p>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">{result.scoreDescription}</p>
           </div>
@@ -246,14 +246,14 @@ export default function RecruiterVisibility() {
               const meta = SUB_META[key] || { label: key, icon: Eye };
               const Icon = meta.icon;
               return (
-                <div key={key} className="glass-card rounded-2xl p-6">
+                <div key={key} className="card rounded-2xl p-6">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <Icon className="w-5 h-5 text-slate-500" />
                       <span className="font-bold text-on-surface">{meta.label}</span>
                     </div>
                     {sub.available ? (
-                      <span className={`text-2xl font-black ${scoreColor(sub.score)}`}>{sub.score}</span>
+                      <span className={`text-2xl font-extrabold ${scoreColor(sub.score)}`}>{sub.score}</span>
                     ) : (
                       <span className="text-xs font-semibold text-slate-400 uppercase">Not provided</span>
                     )}
@@ -280,7 +280,7 @@ export default function RecruiterVisibility() {
 
           {/* Missing keywords */}
           {result.subScores.keywords?.missing?.length > 0 && (
-            <div className="glass-card rounded-3xl p-8">
+            <div className="card rounded-2xl p-8">
               <h3 className="text-lg font-bold text-on-surface mb-3">Keywords Recruiters Search For That You're Missing</h3>
               <div className="flex flex-wrap gap-2">
                 {result.subScores.keywords.missing.map((kw) => (
@@ -294,7 +294,7 @@ export default function RecruiterVisibility() {
 
           {/* Suggestions */}
           {result.suggestions.length > 0 && (
-            <div className="glass-card rounded-3xl p-8">
+            <div className="card rounded-2xl p-8">
               <div className="flex items-center gap-3 mb-4">
                 <Lightbulb className="w-6 h-6 text-amber-500" />
                 <h3 className="text-xl font-bold text-on-surface">Ranked Improvement Suggestions</h3>

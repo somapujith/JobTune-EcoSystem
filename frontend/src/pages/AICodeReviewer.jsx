@@ -167,12 +167,12 @@ export default function AICodeReviewer() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-cyan-950/20 to-slate-950 px-4 py-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="page-container space-y-6">
 
         {/* ── Header ──────────────────────────────────────────────────────── */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="font-headline text-3xl font-black text-on-surface flex items-center gap-3">
+            <h1 className="font-headline text-3xl font-extrabold text-on-surface flex items-center gap-3">
               <Code2 className="w-8 h-8 text-cyan-400" />
               AI Code Reviewer
             </h1>
@@ -209,7 +209,7 @@ export default function AICodeReviewer() {
             {/* Language and Review Type */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Language Selector */}
-              <div className="glass-card rounded-2xl border border-outline/20 p-5">
+              <div className="card rounded-2xl border border-outline/20 p-5">
                 <h3 className="font-bold text-on-surface text-sm mb-3 flex items-center gap-2">
                   <span className="material-symbols-outlined text-cyan-400">language</span>
                   Language
@@ -232,7 +232,7 @@ export default function AICodeReviewer() {
               </div>
 
               {/* Review Type Selector */}
-              <div className="glass-card rounded-2xl border border-outline/20 p-5">
+              <div className="card rounded-2xl border border-outline/20 p-5">
                 <h3 className="font-bold text-on-surface text-sm mb-3 flex items-center gap-2">
                   <span className="material-symbols-outlined text-cyan-400">tune</span>
                   Review Type
@@ -257,7 +257,7 @@ export default function AICodeReviewer() {
             </div>
 
             {/* Code Textarea */}
-            <div className="glass-card rounded-2xl border border-outline/20 overflow-hidden">
+            <div className="card rounded-2xl border border-outline/20 overflow-hidden">
               <div className="flex items-center justify-between px-5 py-3 border-b border-outline/10 bg-surface-container/30">
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-on-surface-variant">code</span>
@@ -276,7 +276,7 @@ export default function AICodeReviewer() {
 
             {/* Error */}
             {error && (
-              <div className="glass-card rounded-2xl border border-rose-500/30 p-4 text-rose-400 text-sm font-medium flex items-center gap-2">
+              <div className="card rounded-2xl border border-rose-500/30 p-4 text-rose-400 text-sm font-medium flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 flex-shrink-0" />
                 {error}
               </div>
@@ -311,7 +311,7 @@ export default function AICodeReviewer() {
             {/* Score + Metrics Row */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {/* Overall Score */}
-              <div className="glass-card rounded-2xl border border-outline/20 p-6 flex flex-col items-center">
+              <div className="card rounded-2xl border border-outline/20 p-6 flex flex-col items-center">
                 <h3 className="font-bold text-on-surface-variant text-xs uppercase tracking-wider mb-3">Quality Score</h3>
                 <div className="relative w-28 h-28">
                   <svg viewBox="0 0 36 36" className="-rotate-90 w-28 h-28">
@@ -325,7 +325,7 @@ export default function AICodeReviewer() {
                     />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-3xl font-black text-on-surface">{review.score}</span>
+                    <span className="text-3xl font-extrabold text-on-surface">{review.score}</span>
                     <span className="text-xs font-bold" style={{ color: getScoreColor(review.score) }}>
                       {getScoreLabel(review.score)}
                     </span>
@@ -339,16 +339,16 @@ export default function AICodeReviewer() {
                 { label: 'Complexity', value: review.metrics?.complexityScore || 0, icon: 'account_tree', color: 'text-amber-400' },
                 { label: 'Maintainability', value: review.metrics?.maintainabilityIndex || 0, icon: 'build', color: 'text-emerald-400' },
               ].map((metric) => (
-                <div key={metric.label} className="glass-card rounded-2xl border border-outline/20 p-6 flex flex-col items-center">
+                <div key={metric.label} className="card rounded-2xl border border-outline/20 p-6 flex flex-col items-center">
                   <h3 className="font-bold text-on-surface-variant text-xs uppercase tracking-wider mb-3">{metric.label}</h3>
                   <span className={`material-symbols-outlined text-3xl ${metric.color} mb-2`}>{metric.icon}</span>
-                  <span className="text-2xl font-black text-on-surface">{metric.value}</span>
+                  <span className="text-2xl font-extrabold text-on-surface">{metric.value}</span>
                 </div>
               ))}
             </div>
 
             {/* Issue Summary */}
-            <div className="glass-card rounded-2xl border border-outline/20 p-5">
+            <div className="card rounded-2xl border border-outline/20 p-5">
               <h3 className="font-bold text-on-surface text-lg mb-4">Issue Summary</h3>
               <div className="grid grid-cols-4 gap-3">
                 {[
@@ -358,7 +358,7 @@ export default function AICodeReviewer() {
                   { label: 'Suggestion', count: issueCounts.suggestion, color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
                 ].map((item) => (
                   <div key={item.label} className={`rounded-xl border p-3 text-center ${item.color}`}>
-                    <div className="text-2xl font-black">{item.count || 0}</div>
+                    <div className="text-2xl font-extrabold">{item.count || 0}</div>
                     <div className="text-xs font-bold">{item.label}</div>
                   </div>
                 ))}
@@ -369,7 +369,7 @@ export default function AICodeReviewer() {
             <div className="space-y-3">
               <h3 className="font-bold text-on-surface text-lg">Issues Found</h3>
               {review.issues.length === 0 ? (
-                <div className="glass-card rounded-2xl border border-outline/20 p-8 text-center">
+                <div className="card rounded-2xl border border-outline/20 p-8 text-center">
                   <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto mb-2" />
                   <p className="text-on-surface-variant font-medium">No issues found. Your code looks great!</p>
                 </div>
@@ -378,7 +378,7 @@ export default function AICodeReviewer() {
                   const config = getSeverityConfig(issue.severity);
                   const SeverityIcon = config.icon;
                   return (
-                    <div key={i} className="glass-card rounded-2xl border border-outline/20 p-5">
+                    <div key={i} className="card rounded-2xl border border-outline/20 p-5">
                       <div className="flex items-start gap-3">
                         <SeverityIcon className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: issue.severity === 'critical' ? '#fb7185' : issue.severity === 'warning' ? '#fbbf24' : issue.severity === 'suggestion' ? '#34d399' : '#38bdf8' }} />
                         <div className="flex-1 min-w-0">
@@ -417,7 +417,7 @@ export default function AICodeReviewer() {
 
             {/* Explanation Panel */}
             {review.explanation && (
-              <div className="glass-card rounded-2xl border border-cyan-500/20 p-5">
+              <div className="card rounded-2xl border border-cyan-500/20 p-5">
                 <div className="flex items-start gap-3">
                   <span className="material-symbols-outlined text-cyan-400 text-xl">auto_awesome</span>
                   <div>
@@ -486,7 +486,7 @@ export default function AICodeReviewer() {
             {codeViewMode === 'side-by-side' ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Original */}
-                <div className="glass-card rounded-2xl border border-outline/20 overflow-hidden">
+                <div className="card rounded-2xl border border-outline/20 overflow-hidden">
                   <div className="px-5 py-3 border-b border-outline/10 bg-surface-container/30 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-rose-400" />
                     <span className="font-bold text-on-surface text-sm">Original</span>
@@ -497,7 +497,7 @@ export default function AICodeReviewer() {
                 </div>
 
                 {/* Improved */}
-                <div className="glass-card rounded-2xl border border-outline/20 overflow-hidden">
+                <div className="card rounded-2xl border border-outline/20 overflow-hidden">
                   <div className="px-5 py-3 border-b border-outline/10 bg-surface-container/30 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-400" />
                     <span className="font-bold text-on-surface text-sm">Improved</span>
@@ -532,19 +532,19 @@ export default function AICodeReviewer() {
             </div>
 
             {loadingHistory ? (
-              <div className="glass-card rounded-2xl border border-outline/20 p-12 flex items-center justify-center">
+              <div className="card rounded-2xl border border-outline/20 p-12 flex items-center justify-center">
                 <span className="material-symbols-outlined text-cyan-400 text-4xl animate-spin">sync</span>
                 <span className="ml-3 text-on-surface-variant font-medium">Loading history...</span>
               </div>
             ) : history.length === 0 ? (
-              <div className="glass-card rounded-2xl border border-outline/20 p-12 text-center">
+              <div className="card rounded-2xl border border-outline/20 p-12 text-center">
                 <span className="material-symbols-outlined text-on-surface-variant text-5xl mb-3">history</span>
                 <p className="text-on-surface-variant">No reviews yet. Submit your first code review to see it here.</p>
               </div>
             ) : (
               <div className="grid gap-3">
                 {history.map((item) => (
-                  <div key={item.id} className="glass-card rounded-2xl border border-outline/20 p-5 flex items-center gap-4">
+                  <div key={item.id} className="card rounded-2xl border border-outline/20 p-5 flex items-center gap-4">
                     {/* Score circle */}
                     <div className="relative w-14 h-14 flex-shrink-0">
                       <svg viewBox="0 0 36 36" className="-rotate-90 w-14 h-14">
@@ -558,7 +558,7 @@ export default function AICodeReviewer() {
                         />
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-sm font-black text-on-surface">{item.score}</span>
+                        <span className="text-sm font-extrabold text-on-surface">{item.score}</span>
                       </div>
                     </div>
 
@@ -604,7 +604,7 @@ function ImprovedCodeToggle({ original, improved }) {
   const [showing, setShowing] = useState('improved');
 
   return (
-    <div className="glass-card rounded-2xl border border-outline/20 overflow-hidden">
+    <div className="card rounded-2xl border border-outline/20 overflow-hidden">
       <div className="px-5 py-3 border-b border-outline/10 bg-surface-container/30 flex items-center gap-3">
         <button
           onClick={() => setShowing('original')}

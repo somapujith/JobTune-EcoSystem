@@ -29,6 +29,10 @@ jest.mock('../src/middleware/auth', () => ({
   }
 }));
 
+jest.mock('../src/middleware/requirePlan', () => ({
+  requirePlan: () => (req, _res, next) => next(),
+}));
+
 // We control the callAI/AI module so we can simulate LLM success + failure
 const mockCallAI = jest.fn();
 jest.mock('../src/utils/aiClient', () => ({

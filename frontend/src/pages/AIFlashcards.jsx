@@ -255,7 +255,7 @@ export default function AIFlashcards() {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen p-4 md:p-8 max-w-5xl mx-auto">
+    <div className="page-container">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">

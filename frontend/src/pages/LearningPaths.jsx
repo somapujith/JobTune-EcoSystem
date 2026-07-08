@@ -45,7 +45,7 @@ function ProgressRing({ value, size = 56, stroke = 5, className = '' }) {
           <stop offset="100%" stopColor="#f97316" />
         </linearGradient>
       </defs>
-      <text x="50%" y="50%" dominantBaseline="central" textAnchor="middle" className="fill-on-surface text-xs font-black">
+      <text x="50%" y="50%" dominantBaseline="central" textAnchor="middle" className="fill-on-surface text-xs font-extrabold">
         {value}%
       </text>
     </svg>
@@ -68,7 +68,7 @@ function PathCard({ path, onSelect }) {
   return (
     <button
       onClick={() => onSelect(path)}
-      className="glass-card rounded-2xl overflow-hidden text-left hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group w-full"
+      className="card rounded-2xl overflow-hidden text-left hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group w-full"
     >
       <div className={`h-32 bg-gradient-to-br ${gradient} relative flex items-center justify-center overflow-hidden`}>
         <div className="absolute inset-0 opacity-10">
@@ -91,7 +91,7 @@ function PathCard({ path, onSelect }) {
         </h3>
         <p className="text-xs text-on-surface-variant leading-relaxed line-clamp-2">{path.description}</p>
 
-        <div className="flex items-center gap-3 text-[11px] text-on-surface-variant">
+        <div className="flex items-center gap-3 text-xs text-on-surface-variant">
           <span className="inline-flex items-center gap-1"><BookOpen className="w-3 h-3" />{path.total_courses} courses</span>
           <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" />{path.estimated_weeks} weeks</span>
           <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" />{path.total_hours}h total</span>
@@ -99,12 +99,12 @@ function PathCard({ path, onSelect }) {
 
         <div className="flex flex-wrap gap-1.5">
           {(path.skill_tags || []).slice(0, 4).map((tag, i) => (
-            <span key={i} className="px-2 py-0.5 rounded-full bg-surface-container/50 border border-outline/10 text-[10px] font-semibold text-on-surface-variant">
+            <span key={i} className="px-2 py-0.5 rounded-full bg-surface-container/50 border border-outline/10 text-xs font-semibold text-on-surface-variant">
               {tag}
             </span>
           ))}
           {(path.skill_tags || []).length > 4 && (
-            <span className="px-2 py-0.5 text-[10px] font-semibold text-on-surface-variant">
+            <span className="px-2 py-0.5 text-xs font-semibold text-on-surface-variant">
               +{path.skill_tags.length - 4}
             </span>
           )}
@@ -113,7 +113,7 @@ function PathCard({ path, onSelect }) {
         {path.progress > 0 && (
           <div className="pt-1">
             <ProgressBar value={path.progress} />
-            <span className="text-[10px] font-bold text-amber-600 mt-1 block">{path.progress}% complete</span>
+            <span className="text-xs font-bold text-amber-600 mt-1 block">{path.progress}% complete</span>
           </div>
         )}
       </div>
@@ -137,7 +137,7 @@ function PathTimeline({ path, onClose }) {
             <div className="absolute top-4 right-8 w-32 h-32 rounded-full border-2 border-white/30" />
           </div>
           <div>
-            <h2 className="text-2xl font-black text-white leading-tight">{path.title}</h2>
+            <h2 className="text-2xl font-extrabold text-white leading-tight">{path.title}</h2>
             <p className="text-white/80 text-sm mt-1">{path.description}</p>
             <div className="flex items-center gap-4 mt-3 text-white/70 text-xs">
               <span className="inline-flex items-center gap-1"><BookOpen className="w-3.5 h-3.5" />{path.total_courses} courses</span>
@@ -217,7 +217,7 @@ function PathTimeline({ path, onClose }) {
                             {course.title}
                           </h4>
                           <p className="text-xs text-on-surface-variant mt-0.5">{course.instructor}</p>
-                          <div className="flex items-center gap-3 mt-2 text-[11px] text-on-surface-variant">
+                          <div className="flex items-center gap-3 mt-2 text-xs text-on-surface-variant">
                             <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" />{course.duration_hrs}h</span>
                             <span className="inline-flex items-center gap-1"><BookOpen className="w-3 h-3" />{course.lesson_count} lessons</span>
                           </div>
@@ -228,7 +228,7 @@ function PathTimeline({ path, onClose }) {
                       {course.status !== 'locked' && course.progress > 0 && course.progress < 100 && (
                         <div className="mt-3">
                           <ProgressBar value={course.progress} />
-                          <span className="text-[10px] font-bold text-amber-600 mt-1 block">{course.progress}% complete</span>
+                          <span className="text-xs font-bold text-amber-600 mt-1 block">{course.progress}% complete</span>
                         </div>
                       )}
                     </div>
@@ -259,20 +259,20 @@ function WeeklyPlanSidebar({ streak, activeCourses }) {
   return (
     <div className="space-y-6">
       {/* Streak Card */}
-      <div className="glass-card rounded-2xl p-5">
+      <div className="card rounded-2xl p-5">
         <h3 className="text-sm font-bold text-on-surface mb-4 flex items-center gap-2">
           <Flame className="w-4 h-4 text-orange-500" />
           Learning Streak
         </h3>
         <div className="flex items-center gap-6">
           <div className="text-center">
-            <p className="text-3xl font-black text-amber-500">{streak.current}</p>
-            <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Current</p>
+            <p className="text-3xl font-extrabold text-amber-500">{streak.current}</p>
+            <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">Current</p>
           </div>
           <div className="w-px h-10 bg-outline/20" />
           <div className="text-center">
-            <p className="text-3xl font-black text-on-surface">{streak.longest}</p>
-            <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Best</p>
+            <p className="text-3xl font-extrabold text-on-surface">{streak.longest}</p>
+            <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">Best</p>
           </div>
         </div>
 
@@ -280,21 +280,21 @@ function WeeklyPlanSidebar({ streak, activeCourses }) {
         <div className="flex items-center gap-2 mt-4">
           {WEEKDAY_LABELS.map((label, i) => (
             <div key={label} className="flex-1 text-center">
-              <div className={`w-6 h-6 mx-auto rounded-full flex items-center justify-center text-[9px] font-bold ${
+              <div className={`w-6 h-6 mx-auto rounded-full flex items-center justify-center text-[10px] font-bold ${
                 i < dayOfWeek ? 'bg-emerald-500 text-white' :
                 i === dayOfWeek ? 'bg-amber-500 text-white ring-2 ring-amber-300' :
                 'bg-slate-200 dark:bg-slate-700 text-on-surface-variant'
               }`}>
                 {i < dayOfWeek ? <Check className="w-3 h-3" /> : label[0]}
               </div>
-              <p className={`text-[9px] mt-1 ${i === dayOfWeek ? 'font-bold text-amber-600' : 'text-on-surface-variant'}`}>{label}</p>
+              <p className={`text-[10px] mt-1 ${i === dayOfWeek ? 'font-bold text-amber-600' : 'text-on-surface-variant'}`}>{label}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Daily Goal */}
-      <div className="glass-card rounded-2xl p-5">
+      <div className="card rounded-2xl p-5">
         <h3 className="text-sm font-bold text-on-surface mb-3 flex items-center gap-2">
           <Target className="w-4 h-4 text-blue-500" />
           Daily Goal
@@ -309,7 +309,7 @@ function WeeklyPlanSidebar({ streak, activeCourses }) {
       </div>
 
       {/* Today's Tasks */}
-      <div className="glass-card rounded-2xl p-5">
+      <div className="card rounded-2xl p-5">
         <h3 className="text-sm font-bold text-on-surface mb-3 flex items-center gap-2">
           <span className="material-symbols-outlined text-purple-500 text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>
             today
@@ -355,7 +355,7 @@ function CreateCustomPathModal({ allCourses, onClose, onSave }) {
       <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden">
         <div className="p-6 border-b border-outline/10">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-black text-on-surface">Create Custom Path</h2>
+            <h2 className="text-lg font-extrabold text-on-surface">Create Custom Path</h2>
             <button onClick={onClose} className="p-2 rounded-full hover:bg-surface-container/50 text-on-surface-variant transition-colors">
               <X className="w-5 h-5" />
             </button>
@@ -388,7 +388,7 @@ function CreateCustomPathModal({ allCourses, onClose, onSave }) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-on-surface truncate">{course.title}</p>
-                <p className="text-[11px] text-on-surface-variant">{course.category} - {course.difficulty} - {course.duration_hrs}h</p>
+                <p className="text-xs text-on-surface-variant">{course.category} - {course.difficulty} - {course.duration_hrs}h</p>
               </div>
             </button>
           ))}
@@ -498,7 +498,7 @@ export default function LearningPaths() {
   // ─── Loading ────────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="w-full max-w-7xl mx-auto py-24 flex justify-center">
+      <div className="page-container flex justify-center">
         <div className="text-center">
           <div className="inline-block w-10 h-10 rounded-full border-2 border-amber-500 border-t-transparent animate-spin mb-4" />
           <p className="text-on-surface-variant font-semibold">Loading learning paths...</p>
@@ -508,11 +508,11 @@ export default function LearningPaths() {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto py-12 px-4 sm:px-6">
+    <div className="w-full page-container">
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-6">
         <div>
-          <h1 className="text-4xl font-black text-on-surface font-headline mb-2 flex items-center gap-3">
+          <h1 className="text-4xl font-extrabold text-on-surface font-headline mb-2 flex items-center gap-3">
             <span className="material-symbols-outlined text-amber-500 text-4xl" style={{ fontVariationSettings: "'FILL' 0" }}>
               route
             </span>
@@ -534,25 +534,25 @@ export default function LearningPaths() {
 
       {/* ── Progress Dashboard ──────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-        <div className="glass-card rounded-2xl p-5 text-center">
+        <div className="card rounded-2xl p-5 text-center">
           <Trophy className="w-6 h-6 text-amber-500 mx-auto mb-2" />
-          <p className="text-2xl font-black text-on-surface">{stats.completedCount}</p>
-          <p className="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">Completed</p>
+          <p className="text-2xl font-extrabold text-on-surface">{stats.completedCount}</p>
+          <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">Completed</p>
         </div>
-        <div className="glass-card rounded-2xl p-5 text-center">
+        <div className="card rounded-2xl p-5 text-center">
           <BookOpen className="w-6 h-6 text-blue-500 mx-auto mb-2" />
-          <p className="text-2xl font-black text-on-surface">{stats.enrollmentCount}</p>
-          <p className="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">Enrolled</p>
+          <p className="text-2xl font-extrabold text-on-surface">{stats.enrollmentCount}</p>
+          <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">Enrolled</p>
         </div>
-        <div className="glass-card rounded-2xl p-5 text-center">
+        <div className="card rounded-2xl p-5 text-center">
           <Clock className="w-6 h-6 text-emerald-500 mx-auto mb-2" />
-          <p className="text-2xl font-black text-on-surface">{Math.round(stats.totalMinutesLearned / 60)}h</p>
-          <p className="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">Hours Learned</p>
+          <p className="text-2xl font-extrabold text-on-surface">{Math.round(stats.totalMinutesLearned / 60)}h</p>
+          <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">Hours Learned</p>
         </div>
-        <div className="glass-card rounded-2xl p-5 text-center">
+        <div className="card rounded-2xl p-5 text-center">
           <Flame className="w-6 h-6 text-orange-500 mx-auto mb-2" />
-          <p className="text-2xl font-black text-on-surface">{streak.current}</p>
-          <p className="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide">Day Streak</p>
+          <p className="text-2xl font-extrabold text-on-surface">{streak.current}</p>
+          <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">Day Streak</p>
         </div>
       </div>
 
@@ -560,7 +560,7 @@ export default function LearningPaths() {
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Paths Grid */}
         <div className="flex-1 min-w-0">
-          <h2 className="text-xl font-black text-on-surface mb-5 flex items-center gap-2">
+          <h2 className="text-xl font-extrabold text-on-surface mb-5 flex items-center gap-2">
             <span className="material-symbols-outlined text-purple-500" style={{ fontVariationSettings: "'FILL' 1" }}>
               school
             </span>
@@ -574,7 +574,7 @@ export default function LearningPaths() {
           </div>
 
           {paths.length === 0 && (
-            <div className="glass-card rounded-2xl p-12 text-center">
+            <div className="card rounded-2xl p-12 text-center">
               <span className="material-symbols-outlined text-5xl text-outline mb-3 block" style={{ fontVariationSettings: "'FILL' 0" }}>
                 route
               </span>
@@ -585,7 +585,7 @@ export default function LearningPaths() {
 
         {/* Weekly Plan Sidebar */}
         <div className="w-full lg:w-80 shrink-0">
-          <h2 className="text-xl font-black text-on-surface mb-5 flex items-center gap-2">
+          <h2 className="text-xl font-extrabold text-on-surface mb-5 flex items-center gap-2">
             <span className="material-symbols-outlined text-emerald-500" style={{ fontVariationSettings: "'FILL' 1" }}>
               calendar_today
             </span>

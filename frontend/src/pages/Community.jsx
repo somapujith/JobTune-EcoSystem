@@ -240,7 +240,7 @@ export default function Community() {
             <span className="material-symbols-outlined text-lg">arrow_back</span> Back to threads
           </button>
 
-          <div className="glass-card rounded-3xl p-8">
+          <div className="card rounded-2xl p-8">
             <div className="flex items-start gap-4 mb-6">
               <div className="flex flex-col items-center gap-1">
                 <button onClick={() => handleVote(selectedThread.id, 'up')} className="p-1 hover:bg-emerald-500/10 rounded-lg transition-colors">
@@ -252,7 +252,7 @@ export default function Community() {
                 </button>
               </div>
               <div className="flex-1">
-                <h2 className="text-2xl font-black text-on-surface mb-2">{selectedThread.title}</h2>
+                <h2 className="text-2xl font-extrabold text-on-surface mb-2">{selectedThread.title}</h2>
                 <div className="flex items-center gap-3 mb-4">
                   <InitialsAvatar name={selectedThread.author} size="sm" />
                   <span className="font-semibold text-on-surface text-sm">{selectedThread.author}</span>
@@ -274,7 +274,7 @@ export default function Community() {
 
           <div className="space-y-4">
             {replies.map(reply => (
-              <div key={reply.id} className="glass-card rounded-2xl p-6 ml-8 border-l-2 border-outline/20">
+              <div key={reply.id} className="card rounded-2xl p-6 ml-8 border-l-2 border-outline/20">
                 <div className="flex items-center gap-3 mb-3">
                   <InitialsAvatar name={reply.author} size="sm" color="#10b981" />
                   <span className="font-semibold text-on-surface text-sm">{reply.author}</span>
@@ -285,7 +285,7 @@ export default function Community() {
             ))}
           </div>
 
-          <div className="glass-card rounded-2xl p-6">
+          <div className="card rounded-2xl p-6">
             <textarea
               value={replyText}
               onChange={e => setReplyText(e.target.value)}
@@ -339,7 +339,7 @@ export default function Community() {
           {filteredThreads.map(thread => {
             const cat = CATEGORIES.find(c => c.id === thread.category);
             return (
-              <div key={thread.id} onClick={() => openThread(thread)} className="glass-card rounded-2xl p-5 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group">
+              <div key={thread.id} onClick={() => openThread(thread)} className="card rounded-2xl p-5 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group">
                 <div className="flex items-start gap-4">
                   <div className="flex flex-col items-center gap-1 pt-1">
                     <button onClick={e => { e.stopPropagation(); handleVote(thread.id, 'up'); }} className="p-0.5 hover:bg-emerald-500/10 rounded transition-colors">
@@ -368,7 +368,7 @@ export default function Community() {
                     </div>
                     <div className="flex gap-1.5 mt-2">
                       {thread.tags?.slice(0, 3).map(tag => (
-                        <span key={tag} className="px-2 py-0.5 bg-surface-container/50 border border-outline/10 rounded-lg text-[10px] font-semibold text-on-surface-variant">#{tag}</span>
+                        <span key={tag} className="px-2 py-0.5 bg-surface-container/50 border border-outline/10 rounded-lg text-xs font-semibold text-on-surface-variant">#{tag}</span>
                       ))}
                     </div>
                   </div>
@@ -395,7 +395,7 @@ export default function Community() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {groups.map(group => (
-          <div key={group.id} className="glass-card rounded-3xl p-6 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+          <div key={group.id} className="card rounded-2xl p-6 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
             <div className="absolute top-0 left-0 w-full h-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(90deg, ${group.color}, ${group.color}80)` }} />
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
@@ -441,12 +441,12 @@ export default function Community() {
         const month = d.toLocaleString('en-US', { month: 'short' }).toUpperCase();
         const day = d.getDate();
         return (
-          <div key={event.id} className="glass-card rounded-3xl p-6 hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
+          <div key={event.id} className="card rounded-2xl p-6 hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(90deg, ${event.color}, ${event.color}80)` }} />
             <div className="flex items-start gap-4 mb-4">
               <div className="flex flex-col items-center justify-center w-16 h-16 rounded-2xl border-2 border-outline/20 bg-surface-container/50 shrink-0">
-                <span className="text-[10px] font-bold text-on-surface-variant tracking-wider">{month}</span>
-                <span className="text-2xl font-black text-on-surface leading-none">{day}</span>
+                <span className="text-xs font-bold text-on-surface-variant tracking-wider">{month}</span>
+                <span className="text-2xl font-extrabold text-on-surface leading-none">{day}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <span className="px-2.5 py-1 rounded-lg text-xs font-bold text-white mb-2 inline-block" style={{ background: event.color }}>{event.type}</span>
@@ -488,7 +488,7 @@ export default function Community() {
               <p className="font-bold text-on-surface text-sm mt-2 text-center">{u.name}</p>
               <p className="text-on-surface-variant text-xs font-semibold">{u.points} pts</p>
               <div className={`w-full ${heights[order[i]]} rounded-t-2xl mt-2 flex items-end justify-center pb-2`} style={{ background: `${medals[order[i]]}20`, borderTop: `3px solid ${medals[order[i]]}` }}>
-                <span className="text-2xl font-black" style={{ color: medals[order[i]] }}>#{u.rank}</span>
+                <span className="text-2xl font-extrabold" style={{ color: medals[order[i]] }}>#{u.rank}</span>
               </div>
             </div>
           );
@@ -496,7 +496,7 @@ export default function Community() {
       </div>
 
       {/* Full table */}
-      <div className="glass-card rounded-3xl overflow-hidden">
+      <div className="card rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -512,7 +512,7 @@ export default function Community() {
               {leaderboard.map(user => (
                 <tr key={user.rank} className="border-b border-outline/10 hover:bg-surface-container/30 transition-colors">
                   <td className="py-4 px-6">
-                    <span className={`font-black text-lg ${user.rank <= 3 ? 'text-amber-500' : 'text-on-surface-variant'}`}>#{user.rank}</span>
+                    <span className={`font-extrabold text-lg ${user.rank <= 3 ? 'text-amber-500' : 'text-on-surface-variant'}`}>#{user.rank}</span>
                   </td>
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-3">
@@ -542,13 +542,13 @@ export default function Community() {
 
       {/* Badge showcase */}
       <div>
-        <h3 className="text-xl font-black text-on-surface mb-4 flex items-center gap-2">
+        <h3 className="text-xl font-extrabold text-on-surface mb-4 flex items-center gap-2">
           <span className="material-symbols-outlined text-amber-500" style={{ fontVariationSettings: "'FILL' 1" }}>military_tech</span>
           Badge Showcase
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {badges.map(badge => (
-            <div key={badge.id} className={`glass-card rounded-2xl p-5 text-center transition-all duration-200 ${badge.earned ? 'hover:-translate-y-1' : 'opacity-50 grayscale'}`}>
+            <div key={badge.id} className={`card rounded-2xl p-5 text-center transition-all duration-200 ${badge.earned ? 'hover:-translate-y-1' : 'opacity-50 grayscale'}`}>
               <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-3" style={{ background: badge.color + '20' }}>
                 <span className="material-symbols-outlined text-2xl" style={{ color: badge.color, fontVariationSettings: "'FILL' 1" }}>{badge.icon}</span>
               </div>
@@ -574,11 +574,11 @@ export default function Community() {
     if (!showNewThread) return null;
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-        <div className="glass-card rounded-3xl p-8 w-full max-w-lg shadow-2xl relative">
+        <div className="card rounded-2xl p-8 w-full max-w-lg shadow-2xl relative">
           <button onClick={() => setShowNewThread(false)} className="absolute top-4 right-4 p-2 hover:bg-surface-container/50 rounded-xl transition-colors">
             <X className="w-5 h-5 text-on-surface-variant" />
           </button>
-          <h2 className="text-xl font-black text-on-surface mb-6 flex items-center gap-2">
+          <h2 className="text-xl font-extrabold text-on-surface mb-6 flex items-center gap-2">
             <span className="material-symbols-outlined text-indigo-500" style={{ fontVariationSettings: "'FILL' 0" }}>add_circle</span>
             New Discussion
           </h2>
@@ -624,11 +624,11 @@ export default function Community() {
     if (!showNewGroup) return null;
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-        <div className="glass-card rounded-3xl p-8 w-full max-w-lg shadow-2xl relative">
+        <div className="card rounded-2xl p-8 w-full max-w-lg shadow-2xl relative">
           <button onClick={() => setShowNewGroup(false)} className="absolute top-4 right-4 p-2 hover:bg-surface-container/50 rounded-xl transition-colors">
             <X className="w-5 h-5 text-on-surface-variant" />
           </button>
-          <h2 className="text-xl font-black text-on-surface mb-6 flex items-center gap-2">
+          <h2 className="text-xl font-extrabold text-on-surface mb-6 flex items-center gap-2">
             <span className="material-symbols-outlined text-indigo-500" style={{ fontVariationSettings: "'FILL' 0" }}>group_add</span>
             Create Study Group
           </h2>
@@ -675,10 +675,10 @@ export default function Community() {
   // ─────────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="w-full max-w-7xl mx-auto py-16 px-4 sm:px-6">
+    <div className="page-container">
       {/* Header */}
       <div className="mb-12">
-        <h1 className="text-4xl font-black text-on-surface font-headline mb-3 flex items-center gap-4">
+        <h1 className="text-4xl font-extrabold text-on-surface font-headline mb-3 flex items-center gap-4">
           <span className="material-symbols-outlined text-indigo-500 text-4xl" style={{ fontVariationSettings: "'FILL' 0" }}>diversity_3</span>
           Community Hub
         </h1>

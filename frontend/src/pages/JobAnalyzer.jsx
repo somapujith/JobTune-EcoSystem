@@ -84,12 +84,12 @@ Remote (US-based preferred, but global candidates considered)`;
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto py-16 px-4 sm:px-6">
+    <div className="page-container">
       <div className="text-center mb-16">
         <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-slate-900/5 mb-6">
           <span className="material-symbols-outlined text-slate-900 text-3xl" style={{ fontVariationSettings: "'FILL' 0" }}>work</span>
         </div>
-        <h1 className="text-4xl font-black text-on-surface font-headline mb-4">
+        <h1 className="text-4xl font-extrabold text-on-surface dark:text-white font-headline mb-4 page-title">
           Job Description Analyzer
         </h1>
         <p className="text-lg text-on-surface-variant font-medium max-w-2xl mx-auto">
@@ -98,7 +98,7 @@ Remote (US-based preferred, but global candidates considered)`;
       </div>
 
       {/* How It Works Guide */}
-      <div className="max-w-3xl mx-auto mb-12 glass-card border-purple-200/50 rounded-3xl p-8">
+      <div className="max-w-3xl mx-auto mb-12 card border-purple-200/50 rounded-2xl p-8">
         <h3 className="text-xl font-bold text-on-surface mb-4 flex items-center gap-2">
           <span className="material-symbols-outlined text-purple-600">info</span>
           How It Works
@@ -121,21 +121,21 @@ Remote (US-based preferred, but global candidates considered)`;
       </div>
 
       {error && (
-        <div className="max-w-3xl mx-auto mb-6 glass-card border-rose-200/50 p-4 rounded-2xl text-rose-600 text-sm font-medium flex items-center gap-3">
+        <div className="max-w-3xl mx-auto mb-6 error-banner p-4 rounded-2xl text-sm font-medium flex items-center gap-3">
           <AlertCircle className="w-5 h-5 flex-shrink-0" />
           {error}
         </div>
       )}
 
       <form onSubmit={handleAnalyze} className="max-w-3xl mx-auto mb-12">
-        <div className="glass-card rounded-3xl p-8">
-          <label className="block text-sm font-bold text-on-surface mb-3">Job Description</label>
+        <div className="card rounded-2xl p-8">
+          <label className="input-label block mb-3">Job Description</label>
           <textarea
             value={jobDescription}
             onChange={(e) => setJobDescription(e.target.value)}
             placeholder="Paste the complete job posting here..."
             rows={12}
-            className="w-full bg-surface-container border border-outline/20 rounded-xl px-4 py-3 text-on-surface placeholder:text-outline/50 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+            className="input-field w-full resize-none"
           />
           <p className="text-xs text-slate-400 mt-2">{jobDescription.length} characters</p>
         </div>
@@ -144,7 +144,7 @@ Remote (US-based preferred, but global candidates considered)`;
           <button
             type="submit"
             disabled={loading}
-            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 text-white rounded-2xl font-bold transition-all shadow-lg flex items-center justify-center gap-3"
+            className="btn-gradient px-8 py-3 disabled:opacity-50 text-white rounded-2xl font-bold transition-all shadow-lg flex items-center justify-center gap-3"
           >
             {loading ? (
               <>
@@ -161,7 +161,7 @@ Remote (US-based preferred, but global candidates considered)`;
           <button
             type="button"
             onClick={loadTestData}
-            className="px-8 py-3 glass-card hover:bg-white/40 text-on-surface rounded-2xl font-bold transition-all flex items-center justify-center gap-3"
+            className="px-8 py-3 card hover:bg-white/40 text-on-surface dark:text-white rounded-2xl font-bold transition-all flex items-center justify-center gap-3"
           >
             <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>dataset</span>
             Load Test Data
@@ -174,26 +174,26 @@ Remote (US-based preferred, but global candidates considered)`;
         <div className="max-w-3xl mx-auto space-y-8">
           {/* Seniority & Experience */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="glass-card border-blue-500/20 rounded-2xl p-6">
+            <div className="card border-blue-500/20 rounded-2xl p-6">
               <p className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase mb-2">Seniority Level</p>
-              <p className="text-2xl font-black text-blue-700 dark:text-blue-300">{result.seniority}</p>
+              <p className="text-2xl font-extrabold text-blue-700 dark:text-blue-300">{result.seniority}</p>
             </div>
-            <div className="glass-card border-purple-500/20 rounded-2xl p-6">
+            <div className="card border-purple-500/20 rounded-2xl p-6">
               <p className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase mb-2">Experience</p>
-              <p className="text-lg font-black text-purple-700 dark:text-purple-300">{result.experienceLevel}</p>
+              <p className="text-lg font-extrabold text-purple-700 dark:text-purple-300">{result.experienceLevel}</p>
             </div>
-            <div className="glass-card border-amber-500/20 rounded-2xl p-6">
+            <div className="card border-amber-500/20 rounded-2xl p-6">
               <p className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase mb-2">Salary Range</p>
-              <p className="text-lg font-black text-amber-700 dark:text-amber-300">{result.salaryRange}</p>
+              <p className="text-lg font-extrabold text-amber-700 dark:text-amber-300">{result.salaryRange}</p>
             </div>
           </div>
 
           {/* Required Skills */}
           {result.requiredSkills.length > 0 && (
-            <div className="glass-card rounded-3xl p-8">
+            <div className="card rounded-2xl p-8">
               <div className="flex items-center gap-3 mb-4">
                 <Code2 className="w-6 h-6 text-emerald-600" />
-                <h3 className="text-xl font-bold text-on-surface">Required Skills</h3>
+                <h3 className="text-xl font-bold text-on-surface dark:text-white">Required Skills</h3>
               </div>
               <div className="flex flex-wrap gap-2">
                 {result.requiredSkills.map(skill => (
@@ -207,10 +207,10 @@ Remote (US-based preferred, but global candidates considered)`;
 
           {/* Nice-to-Have Skills */}
           {result.niceToHaveSkills.length > 0 && (
-            <div className="glass-card rounded-3xl p-8">
+            <div className="card rounded-2xl p-8">
               <div className="flex items-center gap-3 mb-4">
                 <Code2 className="w-6 h-6 text-blue-600" />
-                <h3 className="text-xl font-bold text-on-surface">Nice-to-Have Skills</h3>
+                <h3 className="text-xl font-bold text-on-surface dark:text-white">Nice-to-Have Skills</h3>
               </div>
               <div className="flex flex-wrap gap-2">
                 {result.niceToHaveSkills.map(skill => (
@@ -224,10 +224,10 @@ Remote (US-based preferred, but global candidates considered)`;
 
           {/* Responsibilities */}
           {result.responsibilities.length > 0 && (
-            <div className="glass-card rounded-3xl p-8">
+            <div className="card rounded-2xl p-8">
               <div className="flex items-center gap-3 mb-4">
                 <Briefcase className="w-6 h-6 text-purple-600" />
-                <h3 className="text-xl font-bold text-on-surface">Key Responsibilities</h3>
+                <h3 className="text-xl font-bold text-on-surface dark:text-white">Key Responsibilities</h3>
               </div>
               <ul className="space-y-2">
                 {result.responsibilities.map((resp, i) => (
@@ -242,10 +242,10 @@ Remote (US-based preferred, but global candidates considered)`;
 
           {/* Keywords */}
           {result.keywords.length > 0 && (
-            <div className="glass-card rounded-3xl p-8">
+            <div className="card rounded-2xl p-8">
               <div className="flex items-center gap-3 mb-4">
                 <Users className="w-6 h-6 text-blue-600" />
-                <h3 className="text-xl font-bold text-on-surface">Key Concepts & Tools</h3>
+                <h3 className="text-xl font-bold text-on-surface dark:text-white">Key Concepts & Tools</h3>
               </div>
               <div className="flex flex-wrap gap-2">
                 {result.keywords.map(keyword => (

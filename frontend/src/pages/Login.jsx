@@ -69,15 +69,15 @@ export default function Login() {
             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center group-hover:rotate-12 transition-transform shadow-lg shadow-blue-500/30">
               <Briefcase className="w-6 h-6 text-white" />
             </div>
-            <span className="text-2xl font-black text-white tracking-tighter">JobTune</span>
+            <span className="text-2xl font-extrabold text-white tracking-tighter">JobTune</span>
           </Link>
 
           <div className="space-y-4">
             <h2 className="text-5xl font-extrabold text-white leading-tight">
               Your journey to <br />
-              <span className="text-[#8bb4f7]">FAANG</span> begins here.
+              <span className="text-blue-300">FAANG</span> begins here.
             </h2>
-            <p className="text-xl text-slate-400 font-light max-w-md">
+            <p className="text-xl text-slate-300 font-light max-w-md leading-relaxed">
               One account, one active device — built to keep your preparation personal and secure.
             </p>
           </div>
@@ -88,7 +88,7 @@ export default function Login() {
               { title: 'ATS-Grade Resume Optimization', icon: LayoutIcon },
               { title: 'Curated Industry Learning Paths', icon: Sparkles },
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-4 bg-white/5 border border-white/10 p-4 rounded-xl backdrop-blur-sm">
+              <div key={i} className="flex items-center gap-4 bg-white/5 border border-slate-200 dark:border-white/10 p-4 rounded-xl backdrop-blur-sm">
                 <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
                   <item.icon className="w-5 h-5" />
                 </div>
@@ -107,7 +107,7 @@ export default function Login() {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-24 relative bg-white dark:bg-slate-900">
         <div className="max-w-md w-full space-y-8 animate-in fade-in slide-in-from-right duration-500">
           <div className="text-center lg:text-left space-y-2">
-            <h3 className="text-4xl font-black text-slate-900 dark:text-white font-headline tracking-tight">
+            <h3 className="text-4xl font-extrabold text-slate-900 dark:text-white font-headline tracking-tight">
               {isLogin ? 'Welcome Back!' : 'Create your Account'}
             </h3>
             <p className="text-slate-500 dark:text-slate-400 font-medium">
@@ -173,7 +173,7 @@ export default function Login() {
                   type="email"
                   required
                   placeholder="Email Address"
-                  className="w-full pl-12 pr-4 py-4 bg-[#f4f7fc] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-[#4255f4]/50 focus:border-[#4255f4] transition-all text-slate-900 dark:text-white placeholder:text-slate-400 font-medium"
+                  className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:focus:border-blue-400 hover:border-slate-300 dark:hover:border-slate-600 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 font-medium"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 />
@@ -184,7 +184,7 @@ export default function Login() {
                   type="password"
                   required
                   placeholder="Password"
-                  className="w-full pl-12 pr-4 py-4 bg-[#f4f7fc] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-[#4255f4]/50 focus:border-[#4255f4] transition-all text-slate-900 dark:text-white placeholder:text-slate-400 font-medium"
+                  className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:focus:border-blue-400 hover:border-slate-300 dark:hover:border-slate-600 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 font-medium"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
@@ -195,7 +195,7 @@ export default function Login() {
                   <input
                     type="text"
                     placeholder="GitHub Username"
-                    className="w-full pl-12 pr-4 py-4 bg-[#f4f7fc] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-[#4255f4]/50 focus:border-[#4255f4] transition-all text-slate-900 dark:text-white placeholder:text-slate-400 font-medium"
+                    className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:focus:border-blue-400 hover:border-slate-300 dark:hover:border-slate-600 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 font-medium"
                     value={formData.github_username}
                     onChange={(e) => setFormData({ ...formData, github_username: e.target.value })}
                   />
@@ -206,7 +206,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={isLoading || !!accountInUse}
-              className="w-full bg-[#4255f4] hover:bg-[#3244d6] text-white font-black py-4 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2.5 active:scale-[0.98] disabled:opacity-50"
             >
               {isLoading ? 'Authenticating...' : isLogin ? 'Sign In' : 'Create Account'}
               <ArrowRight className="w-5 h-5" />
@@ -215,7 +215,7 @@ export default function Login() {
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-outline/10" />
+              <div className="w-full border-t border-slate-200 dark:border-slate-700" />
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-4 py-1 bg-white dark:bg-slate-900 rounded-full text-slate-400 dark:text-slate-500 text-xs font-bold">
@@ -226,7 +226,7 @@ export default function Login() {
 
           <button
             onClick={() => setIsLogin(!isLogin)}
-            className="w-full py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 transition-all active:scale-95 shadow-sm"
+            className="w-full py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 transition-all active:scale-[0.98] shadow-sm"
           >
             {isLogin ? 'Create an Account' : 'Return to Login'}
           </button>

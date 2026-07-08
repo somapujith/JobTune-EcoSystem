@@ -103,7 +103,7 @@ function ProblemList({ problems, loading, filters, onFilterChange, onSelectProbl
       {/* Main problem list */}
       <div className="flex-1 flex flex-col gap-4">
         {/* Search & Filters */}
-        <div className="glass-card rounded-2xl p-4 border border-outline/20 bg-surface-container/50">
+        <div className="card rounded-2xl p-4 border border-outline/20 bg-surface-container/50">
           <form onSubmit={handleSearch} className="flex gap-3 mb-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant" />
@@ -205,7 +205,7 @@ function ProblemList({ problems, loading, filters, onFilterChange, onSelectProbl
 
       {/* Stats sidebar */}
       <div className="w-72 shrink-0 flex flex-col gap-4">
-        <div className="glass-card rounded-2xl p-5 border border-outline/20 bg-surface-container/50">
+        <div className="card rounded-2xl p-5 border border-outline/20 bg-surface-container/50">
           <h3 className="text-on-surface font-bold text-sm mb-4 flex items-center gap-2">
             <Trophy className="w-4 h-4 text-amber-400" />
             Your Progress
@@ -224,18 +224,18 @@ function ProblemList({ problems, loading, filters, onFilterChange, onSelectProbl
           </div>
         </div>
 
-        <div className="glass-card rounded-2xl p-5 border border-outline/20 bg-surface-container/50">
+        <div className="card rounded-2xl p-5 border border-outline/20 bg-surface-container/50">
           <h3 className="text-on-surface font-bold text-sm mb-4 flex items-center gap-2">
             <Flame className="w-4 h-4 text-orange-400" />
             Streak
           </h3>
           <div className="text-center">
-            <span className="text-3xl font-black text-on-surface">{stats.streak || 0}</span>
+            <span className="text-3xl font-extrabold text-on-surface">{stats.streak || 0}</span>
             <span className="text-sm text-on-surface-variant block mt-1">day{stats.streak !== 1 ? 's' : ''}</span>
           </div>
         </div>
 
-        <div className="glass-card rounded-2xl p-5 border border-outline/20 bg-surface-container/50">
+        <div className="card rounded-2xl p-5 border border-outline/20 bg-surface-container/50">
           <h3 className="text-on-surface font-bold text-sm mb-4">Difficulty Breakdown</h3>
           <div className="space-y-2">
             <div className="flex justify-between items-center">
@@ -254,7 +254,7 @@ function ProblemList({ problems, loading, filters, onFilterChange, onSelectProbl
         </div>
 
         {stats.recentSubmissions?.length > 0 && (
-          <div className="glass-card rounded-2xl p-5 border border-outline/20 bg-surface-container/50">
+          <div className="card rounded-2xl p-5 border border-outline/20 bg-surface-container/50">
             <h3 className="text-on-surface font-bold text-sm mb-3">Recent Activity</h3>
             <div className="space-y-2">
               {stats.recentSubmissions.slice(0, 5).map((sub, i) => (
@@ -416,7 +416,7 @@ function ProblemDetail({ problemId, onBack }) {
       {/* Two-panel layout */}
       <div className="flex gap-4 flex-1 min-h-0">
         {/* Left: Problem description */}
-        <div className="w-1/2 flex flex-col glass-card rounded-2xl border border-outline/20 bg-surface-container/50 overflow-hidden">
+        <div className="w-1/2 flex flex-col card rounded-2xl border border-outline/20 bg-surface-container/50 overflow-hidden">
           {/* Tabs */}
           <div className="flex border-b border-outline/10">
             {['description', 'hints', 'submissions'].map(tab => (
@@ -558,7 +558,7 @@ function ProblemDetail({ problemId, onBack }) {
           </div>
 
           {/* Test results panel */}
-          <div className="glass-card rounded-2xl border border-outline/20 bg-surface-container/50 overflow-hidden" style={{ maxHeight: 280 }}>
+          <div className="card rounded-2xl border border-outline/20 bg-surface-container/50 overflow-hidden" style={{ maxHeight: 280 }}>
             <div className="flex border-b border-outline/10">
               {['testcases', 'results'].map(tab => (
                 <button
@@ -738,14 +738,14 @@ export default function CodingPractice() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8" style={{ minHeight: 'calc(100vh - 120px)' }}>
+    <div className="page-container" style={{ minHeight: 'calc(100vh - 120px)' }}>
       {/* Page Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
           <span className="material-symbols-outlined text-sky-400 text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>
             code
           </span>
-          <h1 className="font-headline text-on-surface text-2xl font-black">Coding Practice</h1>
+          <h1 className="font-headline text-on-surface text-2xl font-extrabold">Coding Practice</h1>
         </div>
         <p className="text-on-surface-variant text-sm">
           Sharpen your coding skills with problems across categories and difficulty levels

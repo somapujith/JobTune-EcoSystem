@@ -169,7 +169,8 @@ router.get('/forums/:category', authenticateToken, requirePlan(1), async (req, r
   const limit = 20;
   const offset = (page - 1) * limit;
 
-  const orderBy = sort === 'popular' ? 'votes DESC' : sort === 'active' ? 'reply_count DESC' : 'created_at DESC';
+  const SORT_MAP = { popular: 'votes DESC', active: 'reply_count DESC', newest: 'created_at DESC' };
+  const orderBy = SORT_MAP[sort] || SORT_MAP.newest;
 
   try {
     const result = await pool.query(
@@ -218,19 +219,22 @@ router.get('/forums/thread/:id', authenticateToken, requirePlan(1), async (req, 
 // POST /forums/thread — create new thread
 router.post('/forums/thread', authenticateToken, requirePlan(1), async (req, res) => {
   const { title, body, category, tags } = req.body;
-  if (!title || !body) {
+  if (!title || !body || typeof title !== 'string' || typeof body !== 'string') {
     return res.status(400).json({ error: 'Title and body are required' });
   }
 
+  const VALID_CATEGORIES = ['general', 'frontend', 'backend', 'dsa', 'placements', 'projects', 'career-advice'];
+  const safeCategory = VALID_CATEGORIES.includes(category) ? category : 'general';
+  const safeTags = Array.isArray(tags) ? tags.filter(t => typeof t === 'string').map(t => t.slice(0, 50)).slice(0, 10) : [];
+
   try {
-    // Look up user name
     const userResult = await pool.query('SELECT full_name FROM users WHERE id = $1', [req.user.id]);
     const authorName = userResult.rows[0]?.full_name || 'Anonymous';
 
     const result = await pool.query(
       `INSERT INTO community_threads (user_id, author_name, title, body, category, tags)
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [req.user.id, authorName, title.slice(0, 500), body.slice(0, 5000), category || 'general', JSON.stringify(tags || [])]
+      [req.user.id, authorName, title.slice(0, 500), body.slice(0, 5000), safeCategory, JSON.stringify(safeTags)]
     );
     res.json({ thread: result.rows[0] });
   } catch (err) {
@@ -243,7 +247,7 @@ router.post('/forums/thread', authenticateToken, requirePlan(1), async (req, res
 router.post('/forums/thread/:id/reply', authenticateToken, requirePlan(1), async (req, res) => {
   const { id } = req.params;
   const { body } = req.body;
-  if (!body) return res.status(400).json({ error: 'Reply body is required' });
+  if (!body || typeof body !== 'string') return res.status(400).json({ error: 'Reply body is required' });
 
   try {
     const userResult = await pool.query('SELECT full_name FROM users WHERE id = $1', [req.user.id]);

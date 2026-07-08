@@ -54,12 +54,12 @@ export default function AchievementEnhancer() {
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto py-16 px-4 sm:px-6">
+    <div className="page-container">
       <div className="text-center mb-16">
         <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-slate-900/5 mb-6">
           <span className="material-symbols-outlined text-slate-900 text-3xl" style={{ fontVariationSettings: "'FILL' 0" }}>auto_awesome</span>
         </div>
-        <h1 className="text-4xl font-black text-on-surface font-headline mb-4">
+        <h1 className="text-4xl font-extrabold text-on-surface font-headline mb-4">
           Achievement Enhancer
         </h1>
         <p className="text-lg text-on-surface-variant font-medium max-w-2xl mx-auto">
@@ -68,7 +68,7 @@ export default function AchievementEnhancer() {
       </div>
 
       {/* How It Works Guide */}
-      <div className="max-w-5xl mx-auto mb-12 glass-card border-emerald-200/50 rounded-3xl p-8">
+      <div className="max-w-5xl mx-auto mb-12 glass-card border-emerald-200/50 rounded-2xl p-8">
         <h3 className="text-xl font-bold text-on-surface mb-4 flex items-center gap-2">
           <span className="material-symbols-outlined text-emerald-600">info</span>
           How It Works
@@ -144,7 +144,7 @@ export default function AchievementEnhancer() {
         {/* Results Display */}
         <div className="h-full">
           {result ? (
-            <div className="glass-card rounded-3xl p-8 h-full flex flex-col">
+            <div className="card rounded-2xl p-8 h-full flex flex-col">
               <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200 dark:border-slate-700">
                 <h3 className="text-lg font-bold text-on-surface">
                   Enhanced Bullets <span className="text-sm font-normal text-slate-400">({result.count})</span>
@@ -193,7 +193,7 @@ export default function AchievementEnhancer() {
               </div>
             </div>
           ) : (
-            <div className="glass-card bg-surface-container/30 rounded-3xl p-8 h-full flex items-center justify-center border-2 border-dashed border-outline/20">
+            <div className="glass-card bg-surface-container/30 rounded-2xl p-8 h-full flex items-center justify-center border-2 border-dashed border-outline/20">
               <p className="text-center text-slate-500 dark:text-slate-400">
                 Enter your achievements and click "Enhance Achievements" to see polished resume bullets here.
               </p>

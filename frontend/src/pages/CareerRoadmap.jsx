@@ -87,8 +87,8 @@ export default function CareerRoadmap() {
   if (step === 'form') {
     return (
       <div className="w-full py-12 px-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="glass-card rounded-3xl p-8">
+        <div className="page-container">
+          <div className="card rounded-2xl p-8">
             <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Career Roadmap</h1>
             <p className="text-slate-600 dark:text-slate-400 mb-8">
               Get a personalized 3-12 month plan to reach your career goals
@@ -197,7 +197,7 @@ export default function CareerRoadmap() {
 
   return (
     <div className="w-full py-12 px-4">
-      <div className="max-w-4xl mx-auto">
+      <div className="page-container">
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-3">
@@ -207,15 +207,15 @@ export default function CareerRoadmap() {
             {roadmap.summary}
           </p>
           <div className="grid grid-cols-3 gap-4">
-            <div className="glass-card rounded-2xl p-4">
+            <div className="card rounded-2xl p-4">
               <div className="text-sm text-slate-600 dark:text-slate-400">Estimated Hours</div>
               <div className="text-2xl font-bold text-blue-600">{roadmap.estimatedHours || 200}</div>
             </div>
-            <div className="glass-card rounded-2xl p-4">
+            <div className="card rounded-2xl p-4">
               <div className="text-sm text-slate-600 dark:text-slate-400">Phases</div>
               <div className="text-2xl font-bold text-blue-600">{roadmap.phases?.length || 3}</div>
             </div>
-            <div className="glass-card rounded-2xl p-4">
+            <div className="card rounded-2xl p-4">
               <div className="text-sm text-slate-600 dark:text-slate-400">Key Milestones</div>
               <div className="text-2xl font-bold text-blue-600">{roadmap.keyMetrics?.length || 4}</div>
             </div>
@@ -227,7 +227,7 @@ export default function CareerRoadmap() {
           {roadmap.phases?.map((phase, idx) => (
             <div
               key={idx}
-              className="glass-card rounded-3xl overflow-hidden"
+              className="card rounded-2xl overflow-hidden"
             >
               <button
                 onClick={() => togglePhase(idx)}
@@ -331,7 +331,7 @@ export default function CareerRoadmap() {
         {/* Tips & Metrics */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           {roadmap.tips && roadmap.tips.length > 0 && (
-            <div className="glass-card rounded-3xl p-6">
+            <div className="card rounded-2xl p-6">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">💡 Tips for Success</h3>
               <ul className="space-y-2">
                 {roadmap.tips.map((tip, i) => (
@@ -345,7 +345,7 @@ export default function CareerRoadmap() {
           )}
 
           {roadmap.keyMetrics && roadmap.keyMetrics.length > 0 && (
-            <div className="glass-card rounded-3xl p-6">
+            <div className="card rounded-2xl p-6">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">📊 Track Progress</h3>
               <ul className="space-y-2">
                 {roadmap.keyMetrics.map((metric, i) => (

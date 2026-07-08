@@ -13,12 +13,12 @@ export default function SessionBlocked() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950 p-6">
-      <div className="max-w-md w-full text-center glass-card rounded-3xl p-10 border border-rose-200/50 dark:border-rose-900/40">
+      <div className="max-w-md w-full text-center card rounded-2xl p-10 border border-rose-200/50 dark:border-rose-900/40">
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-rose-100 dark:bg-rose-900/30 mb-6">
           <MonitorOff className="w-10 h-10 text-rose-600 dark:text-rose-400" />
         </div>
 
-        <h1 className="text-2xl font-black text-slate-900 dark:text-white mb-3">
+        <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-3">
           Session ended
         </h1>
 

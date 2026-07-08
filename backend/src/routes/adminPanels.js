@@ -1,6 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
+const { pool } = require('../config/database');
+
+const requireRole = (...roles) => {
+  return async (req, res, next) => {
+    try {
+      const result = await pool.query('SELECT role FROM users WHERE id = $1', [req.user.id]);
+      if (result.rows.length === 0 || !roles.includes(result.rows[0].role)) {
+        return res.status(403).json({ error: 'Insufficient permissions' });
+      }
+      next();
+    } catch (err) {
+      res.status(500).json({ error: 'Authorization check failed' });
+    }
+  };
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Demo / Fallback Data
@@ -95,7 +110,7 @@ function getUserShortlist(userId) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // GET /university/overview - Dashboard KPIs and charts data
-router.get('/university/overview', authenticateToken, async (req, res) => {
+router.get('/university/overview', authenticateToken, requireRole('admin', 'university'), async (req, res) => {
   try {
     const { range } = req.query;
 
@@ -163,7 +178,7 @@ router.get('/university/overview', authenticateToken, async (req, res) => {
 });
 
 // GET /university/students - List students with filters
-router.get('/university/students', authenticateToken, async (req, res) => {
+router.get('/university/students', authenticateToken, requireRole('admin', 'university'), async (req, res) => {
   try {
     const { department, status, search, page = 1 } = req.query;
     let students = [...DEMO_STUDENTS];
@@ -202,7 +217,7 @@ router.get('/university/students', authenticateToken, async (req, res) => {
 });
 
 // GET /university/departments - Department breakdown
-router.get('/university/departments', authenticateToken, async (req, res) => {
+router.get('/university/departments', authenticateToken, requireRole('admin', 'university'), async (req, res) => {
   try {
     res.json({ departments: DEMO_DEPARTMENTS });
   } catch (err) {
@@ -216,7 +231,7 @@ router.get('/university/departments', authenticateToken, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // GET /faculty/courses - Faculty's assigned courses
-router.get('/faculty/courses', authenticateToken, async (req, res) => {
+router.get('/faculty/courses', authenticateToken, requireRole('admin', 'faculty'), async (req, res) => {
   try {
     res.json({ courses: DEMO_COURSES });
   } catch (err) {
@@ -226,7 +241,7 @@ router.get('/faculty/courses', authenticateToken, async (req, res) => {
 });
 
 // GET /faculty/assignments - List assignments
-router.get('/faculty/assignments', authenticateToken, async (req, res) => {
+router.get('/faculty/assignments', authenticateToken, requireRole('admin', 'faculty'), async (req, res) => {
   try {
     res.json({ assignments: DEMO_ASSIGNMENTS });
   } catch (err) {
@@ -236,7 +251,7 @@ router.get('/faculty/assignments', authenticateToken, async (req, res) => {
 });
 
 // POST /faculty/assignments - Create assignment
-router.post('/faculty/assignments', authenticateToken, async (req, res) => {
+router.post('/faculty/assignments', authenticateToken, requireRole('admin', 'faculty'), async (req, res) => {
   try {
     const { title, description, dueDate, courseId, maxMarks } = req.body;
 
@@ -267,7 +282,7 @@ router.post('/faculty/assignments', authenticateToken, async (req, res) => {
 });
 
 // GET /faculty/students - Student performance data
-router.get('/faculty/students', authenticateToken, async (req, res) => {
+router.get('/faculty/students', authenticateToken, requireRole('admin', 'faculty'), async (req, res) => {
   try {
     const { course, gradeMin, gradeMax } = req.query;
     let students = [...DEMO_FACULTY_STUDENTS];
@@ -288,7 +303,7 @@ router.get('/faculty/students', authenticateToken, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // GET /recruiter/search - Search students
-router.get('/recruiter/search', authenticateToken, async (req, res) => {
+router.get('/recruiter/search', authenticateToken, requireRole('admin', 'recruiter'), async (req, res) => {
   try {
     const { skills, department, minScore, year, search, page = 1 } = req.query;
     let students = [...DEMO_STUDENTS];
@@ -335,7 +350,7 @@ router.get('/recruiter/search', authenticateToken, async (req, res) => {
 });
 
 // GET /recruiter/shortlist - Get shortlisted candidates
-router.get('/recruiter/shortlist', authenticateToken, async (req, res) => {
+router.get('/recruiter/shortlist', authenticateToken, requireRole('admin', 'recruiter'), async (req, res) => {
   try {
     const userId = req.user.id;
     const pipeline = getUserShortlist(userId);
@@ -347,7 +362,7 @@ router.get('/recruiter/shortlist', authenticateToken, async (req, res) => {
 });
 
 // POST /recruiter/shortlist - Add to shortlist
-router.post('/recruiter/shortlist', authenticateToken, async (req, res) => {
+router.post('/recruiter/shortlist', authenticateToken, requireRole('admin', 'recruiter'), async (req, res) => {
   try {
     const userId = req.user.id;
     const { studentId, status } = req.body;
@@ -376,7 +391,7 @@ router.post('/recruiter/shortlist', authenticateToken, async (req, res) => {
 });
 
 // POST /recruiter/jobs - Post a job
-router.post('/recruiter/jobs', authenticateToken, async (req, res) => {
+router.post('/recruiter/jobs', authenticateToken, requireRole('admin', 'recruiter'), async (req, res) => {
   try {
     const { title, company, description, requirements, location, salaryRange } = req.body;
 
@@ -407,7 +422,7 @@ router.post('/recruiter/jobs', authenticateToken, async (req, res) => {
 });
 
 // GET /recruiter/jobs - List posted jobs
-router.get('/recruiter/jobs', authenticateToken, async (req, res) => {
+router.get('/recruiter/jobs', authenticateToken, requireRole('admin', 'recruiter'), async (req, res) => {
   try {
     res.json({ jobs: DEMO_JOBS });
   } catch (err) {

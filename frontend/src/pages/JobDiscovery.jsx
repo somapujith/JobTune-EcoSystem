@@ -12,13 +12,13 @@ function JobCard({ job, onAddToTracker, addedIds }) {
   const isAdded = addedIds.has(job.externalId);
 
   return (
-    <div className="glass-card p-5 rounded-2xl flex flex-col gap-3 hover:-translate-y-1 transition-all duration-300">
+    <div className="card p-5 rounded-2xl flex flex-col gap-3 hover:-translate-y-1 transition-all duration-300">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-slate-900 text-base leading-snug truncate">
+          <h3 className="font-bold text-slate-900 dark:text-white text-base leading-snug truncate">
             {job.title}
           </h3>
-          <p className="text-sm text-slate-600 mt-0.5">{job.company}</p>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mt-0.5">{job.company}</p>
         </div>
         <span className="shrink-0 text-xs font-medium bg-indigo-50 text-indigo-700 px-2 py-1 rounded-full">
           {job.source}
@@ -33,7 +33,7 @@ function JobCard({ job, onAddToTracker, addedIds }) {
       )}
 
       {job.description && (
-        <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed">
+        <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3 leading-relaxed">
           {job.description.replace(/<[^>]*>/g, '')}
         </p>
       )}
@@ -43,7 +43,7 @@ function JobCard({ job, onAddToTracker, addedIds }) {
           {job.tags.slice(0, 5).map(tag => (
             <span
               key={tag}
-              className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full"
+              className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded-full"
             >
               {tag}
             </span>
@@ -143,7 +143,7 @@ export default function JobDiscovery() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+    <div className="page-container space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
@@ -156,7 +156,7 @@ export default function JobDiscovery() {
       </div>
 
       {/* Search Form */}
-      <form onSubmit={handleSearch} className="glass-card p-6 rounded-3xl space-y-4">
+      <form onSubmit={handleSearch} className="card p-6 rounded-2xl space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-1">
             <label htmlFor="query" className="block text-sm font-medium text-slate-700 mb-1">

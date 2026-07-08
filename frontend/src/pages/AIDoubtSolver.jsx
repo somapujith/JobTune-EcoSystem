@@ -42,8 +42,8 @@ function CodeBlock({ content }) {
   const lang = langMatch ? langMatch[1] : '';
 
   return (
-    <div className="relative rounded-xl overflow-hidden border border-white/10 my-3">
-      <div className="flex items-center justify-between px-4 py-2 bg-black/50 border-b border-white/10">
+    <div className="relative rounded-xl overflow-hidden border border-slate-200 dark:border-white/10 my-3">
+      <div className="flex items-center justify-between px-4 py-2 bg-black/50 border-b border-slate-200 dark:border-white/10">
         <span className="text-xs text-sky-400 font-bold uppercase tracking-wide">{lang || 'code'}</span>
         <button
           onClick={handleCopy}
@@ -147,10 +147,10 @@ function ResolutionCard({ result, onRelatedClick }) {
   return (
     <div className="space-y-4">
       {sections.map(section => (
-        <div key={section.key} className="glass-card rounded-2xl overflow-hidden">
+        <div key={section.key} className="card rounded-2xl overflow-hidden">
           <button
             onClick={() => toggleSection(section.key)}
-            className="w-full flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors"
+            className="w-full flex items-center justify-between px-6 py-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
           >
             <div className="flex items-center gap-3">
               <span className={`material-symbols-outlined text-lg ${section.iconColor}`} style={{ fontVariationSettings: "'FILL' 0" }}>
@@ -175,7 +175,7 @@ function ResolutionCard({ result, onRelatedClick }) {
 
       {/* Related Topics */}
       {result.relatedTopics?.length > 0 && (
-        <div className="glass-card rounded-2xl p-6">
+        <div className="card rounded-2xl p-6">
           <h3 className="text-sm font-bold text-on-surface-variant uppercase tracking-wider mb-3 flex items-center gap-2">
             <span className="material-symbols-outlined text-lg text-sky-400" style={{ fontVariationSettings: "'FILL' 0" }}>
               explore
@@ -187,7 +187,7 @@ function ResolutionCard({ result, onRelatedClick }) {
               <button
                 key={i}
                 onClick={() => onRelatedClick(topic)}
-                className="px-4 py-2 rounded-full border border-outline/20 text-sm text-on-surface-variant hover:text-on-surface hover:bg-white/10 transition-colors flex items-center gap-1.5"
+                className="px-4 py-2 rounded-full border border-outline/20 text-sm text-on-surface-variant hover:text-on-surface hover:bg-slate-100 dark:hover:bg-white/10 transition-colors flex items-center gap-1.5"
               >
                 <ChevronRight size={14} />
                 {topic}
@@ -290,7 +290,7 @@ export default function AIDoubtSolver() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="page-container">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
@@ -299,7 +299,7 @@ export default function AIDoubtSolver() {
               help
             </span>
           </div>
-          <h1 className="text-3xl font-black text-on-surface font-headline">Doubt Solver</h1>
+          <h1 className="text-3xl font-extrabold text-on-surface dark:text-white font-headline page-title">Doubt Solver</h1>
         </div>
         <p className="text-on-surface-variant text-sm ml-[52px]">
           Paste code or describe a concept -- get a structured explanation with examples
@@ -327,7 +327,7 @@ export default function AIDoubtSolver() {
             </div>
 
             {history.length === 0 ? (
-              <div className="glass-card rounded-2xl p-4 text-center">
+              <div className="card rounded-2xl p-4 text-center">
                 <span className="material-symbols-outlined text-3xl text-on-surface-variant mb-2 block" style={{ fontVariationSettings: "'FILL' 0" }}>
                   history
                 </span>
@@ -339,7 +339,7 @@ export default function AIDoubtSolver() {
                   <button
                     key={item.id}
                     onClick={() => handleHistoryClick(item)}
-                    className="w-full text-left glass-card rounded-xl px-3 py-2.5 hover:bg-white/10 transition-colors group"
+                    className="w-full text-left card rounded-xl px-3 py-2.5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors group"
                   >
                     <div className="text-xs font-medium text-on-surface truncate group-hover:text-sky-400 transition-colors">
                       {item.doubt}
@@ -366,7 +366,7 @@ export default function AIDoubtSolver() {
                 className={`flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
                   selectedCategory?.id === cat.id
                     ? `${cat.bg} ${cat.color} ring-1 ring-current/30`
-                    : 'glass-card text-on-surface-variant hover:bg-white/10'
+                    : 'card text-on-surface-variant dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'
                 }`}
               >
                 <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>
@@ -378,7 +378,7 @@ export default function AIDoubtSolver() {
           </div>
 
           {/* Doubt Input */}
-          <div className="glass-card rounded-2xl p-5 mb-4">
+          <div className="card rounded-2xl p-5 mb-4">
             <div className="flex items-center gap-2 mb-3">
               <HelpCircle size={16} className="text-on-surface-variant" />
               <label className="text-sm font-bold text-on-surface">Describe your doubt</label>
@@ -451,7 +451,7 @@ export default function AIDoubtSolver() {
 
           {/* Loading State */}
           {isLoading && (
-            <div className="glass-card rounded-2xl p-10 text-center mb-4">
+            <div className="card rounded-2xl p-10 text-center mb-4">
               <div className="inline-block w-10 h-10 rounded-full border-2 border-sky-500 border-t-transparent animate-spin mb-4" />
               <p className="text-on-surface font-bold text-sm">Analyzing your doubt...</p>
               <p className="text-on-surface-variant text-xs mt-1">Breaking it down into structured concepts</p>
@@ -477,7 +477,7 @@ export default function AIDoubtSolver() {
                     <button
                       key={i}
                       onClick={() => handleExampleClick(example)}
-                      className="glass-card rounded-2xl p-4 text-left hover:bg-white/10 transition-all group"
+                      className="card rounded-2xl p-4 text-left hover:bg-slate-100 dark:hover:bg-white/10 transition-all group"
                     >
                       <div className="flex items-start gap-3">
                         <span className={`material-symbols-outlined text-lg ${cat?.color || 'text-sky-400'} flex-shrink-0 mt-0.5`} style={{ fontVariationSettings: "'FILL' 0" }}>

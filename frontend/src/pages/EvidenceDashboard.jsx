@@ -84,8 +84,8 @@ export default function EvidenceDashboard() {
 
   if (loading) {
     return (
-      <div className="w-full max-w-6xl mx-auto py-16 px-4 sm:px-6 flex items-center justify-center">
-        <div className="glass-card p-12 flex items-center gap-3 text-on-surface-variant rounded-3xl">
+      <div className="page-container flex items-center justify-center">
+        <div className="card rounded-2xl p-12 flex items-center gap-3 text-on-surface-variant">
           <RefreshCw className="w-5 h-5 animate-spin" />
           <span>Analyzing bullet evidence...</span>
         </div>
@@ -95,11 +95,11 @@ export default function EvidenceDashboard() {
 
   if (error) {
     return (
-      <div className="w-full max-w-6xl mx-auto py-16 px-4 sm:px-6 flex items-center justify-center">
-        <div className="glass-card p-12 text-center rounded-3xl max-w-md">
+      <div className="page-container flex items-center justify-center">
+        <div className="card rounded-2xl p-12 text-center max-w-md">
           <AlertTriangle className="w-10 h-10 text-rose-500 mx-auto mb-3" />
           <p className="text-rose-600 font-medium mb-6">{error}</p>
-          <button onClick={fetchData} className="px-6 py-2 glass-card hover:bg-white/40 text-on-surface rounded-xl text-sm transition-all font-bold">
+          <button onClick={fetchData} className="px-6 py-2 card hover:bg-white/40 text-on-surface rounded-xl text-sm transition-all font-bold">
             Retry
           </button>
         </div>
@@ -119,7 +119,7 @@ export default function EvidenceDashboard() {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <BarChart2 className="w-7 h-7 text-violet-400" />
-            <h1 className="text-4xl font-black font-headline">Evidence Audit</h1>
+            <h1 className="text-4xl font-extrabold font-headline">Evidence Audit</h1>
           </div>
           <p className="text-on-surface-variant font-medium text-lg">Track how your resume bullets are reused across applications.</p>
         </div>
@@ -134,7 +134,7 @@ export default function EvidenceDashboard() {
 
         {/* Diversity + Suggestions */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <div className="glass-card rounded-3xl p-8 flex flex-col items-center gap-4">
+          <div className="card rounded-2xl p-8 flex flex-col items-center gap-4">
             <h2 className="text-sm font-bold text-on-surface-variant uppercase tracking-wide self-start">Diversity Score</h2>
             <DiversityGauge score={report?.diversity ?? 0} />
             <p className="text-xs font-medium text-on-surface-variant text-center">
@@ -142,7 +142,7 @@ export default function EvidenceDashboard() {
             </p>
           </div>
 
-          <div className="glass-card rounded-3xl p-8">
+          <div className="card rounded-2xl p-8">
             <h2 className="text-sm font-bold text-on-surface-variant uppercase tracking-wide mb-4">Suggestions</h2>
             {report?.suggestions?.length === 0 ? (
               <p className="text-on-surface-variant text-sm font-medium">No suggestions — your bullet usage looks healthy!</p>
@@ -182,7 +182,7 @@ export default function EvidenceDashboard() {
         {activeTab === 'report' && (
           <div className="grid md:grid-cols-2 gap-6">
             {/* Over-used */}
-            <div className="glass-card rounded-3xl p-8">
+            <div className="card rounded-2xl p-8">
               <div className="flex items-center gap-2 mb-4">
                 <AlertTriangle className="w-4 h-4 text-rose-400" />
                 <h3 className="text-sm font-semibold text-rose-300">Over-used Bullets (&gt;2 uses)</h3>
@@ -203,7 +203,7 @@ export default function EvidenceDashboard() {
             </div>
 
             {/* Under-used */}
-            <div className="glass-card rounded-3xl p-8">
+            <div className="card rounded-2xl p-8">
               <div className="flex items-center gap-2 mb-4">
                 <TrendingDown className="w-4 h-4 text-sky-400" />
                 <h3 className="text-sm font-semibold text-sky-300">Under-used Bullets (0–1 uses)</h3>
@@ -231,7 +231,7 @@ export default function EvidenceDashboard() {
         )}
 
         {activeTab === 'bullets' && (
-          <div className="glass-card rounded-3xl p-8">
+          <div className="card rounded-2xl p-8">
             <h3 className="text-sm font-bold text-on-surface-variant uppercase tracking-wide mb-4">
               All Bullets ({bullets.length})
             </h3>
@@ -271,12 +271,12 @@ export default function EvidenceDashboard() {
 
 function StatCard({ label, value, icon: Icon, color }) {
   return (
-    <div className="glass-card rounded-3xl p-6 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+    <div className="card rounded-2xl p-6 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
       <div className="w-12 h-12 rounded-2xl glass-card flex items-center justify-center flex-shrink-0">
         <Icon className={`w-6 h-6 ${color}`} />
       </div>
       <div>
-        <p className="text-2xl font-black text-on-surface">{value}</p>
+        <p className="text-2xl font-extrabold text-on-surface">{value}</p>
         <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">{label}</p>
       </div>
     </div>

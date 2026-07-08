@@ -109,7 +109,7 @@ function getPipelineHeaderColor(column) {
 function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="glass-card rounded-xl p-3 shadow-lg border border-outline/20">
+    <div className="card rounded-xl p-3 shadow-lg border border-outline/20">
       <p className="text-on-surface text-sm font-medium mb-1">{label}</p>
       {payload.map((entry, i) => (
         <p key={i} className="text-sm" style={{ color: entry.color }}>
@@ -255,21 +255,21 @@ export default function RecruiterPortal() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 w-full">
+    <div className="page-container">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="font-headline text-3xl text-on-surface flex items-center gap-3">
+          <h1 className="page-title font-headline text-3xl text-on-surface flex items-center gap-3">
             <span className="material-symbols-outlined text-4xl text-orange-500" style={{ fontVariationSettings: "'FILL' 1" }}>business_center</span>
             Recruiter Portal
           </h1>
           <p className="text-on-surface-variant mt-1">Find, shortlist, and hire top university talent</p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={handleExportShortlist} className="glass-card rounded-xl px-3 py-2 flex items-center gap-1.5 text-xs text-on-surface hover:bg-surface-container/50 transition-colors border border-outline/20">
+          <button onClick={handleExportShortlist} className="card rounded-xl px-3 py-2 flex items-center gap-1.5 text-xs text-on-surface hover:bg-surface-container/50 transition-colors border border-outline/20">
             <Download className="w-3.5 h-3.5" /> Export Shortlist
           </button>
-          <button className="glass-card rounded-xl px-3 py-2 flex items-center gap-1.5 text-xs text-on-surface hover:bg-surface-container/50 transition-colors border border-outline/20">
+          <button className="card rounded-xl px-3 py-2 flex items-center gap-1.5 text-xs text-on-surface hover:bg-surface-container/50 transition-colors border border-outline/20">
             <Send className="w-3.5 h-3.5" /> Bulk Invite
           </button>
         </div>
@@ -312,12 +312,12 @@ export default function RecruiterPortal() {
                 placeholder="Search by name, department, or skill..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-surface-container/50 border border-outline/20 text-on-surface text-sm placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-orange-500/30"
+                className="w-full pl-9 input-field"
               />
             </div>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`glass-card rounded-xl px-4 py-2.5 flex items-center gap-2 text-sm transition-colors border border-outline/20 ${showFilters ? 'bg-orange-50 dark:bg-orange-950/30 text-orange-600' : 'text-on-surface hover:bg-surface-container/50'}`}
+              className={`card rounded-xl px-4 py-2.5 flex items-center gap-2 text-sm transition-colors border border-outline/20 ${showFilters ? 'bg-orange-50 dark:bg-orange-950/30 text-orange-600' : 'text-on-surface hover:bg-surface-container/50'}`}
             >
               <Filter className="w-4 h-4" />
               Filters
@@ -329,21 +329,21 @@ export default function RecruiterPortal() {
 
           {/* Expanded filters */}
           {showFilters && (
-            <div className="glass-card rounded-2xl p-5 border border-outline/20 mb-4">
+            <div className="card rounded-2xl p-5 border border-outline/20 mb-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
-                  <label className="block text-xs text-on-surface-variant mb-1">Department</label>
+                  <label className="input-label">Department</label>
                   <select
                     value={departmentFilter}
                     onChange={e => setDepartmentFilter(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-surface-container/50 border border-outline/20 text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/30"
+                    className="input-field"
                   >
                     <option value="">All Departments</option>
                     {ALL_DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-on-surface-variant mb-1">Min Skill Score</label>
+                  <label className="input-label">Min Skill Score</label>
                   <input
                     type="number"
                     min={0}
@@ -351,15 +351,15 @@ export default function RecruiterPortal() {
                     placeholder="e.g. 70"
                     value={minScore}
                     onChange={e => setMinScore(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-surface-container/50 border border-outline/20 text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/30"
+                    className="input-field"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-on-surface-variant mb-1">Graduation Year</label>
+                  <label className="input-label">Graduation Year</label>
                   <select
                     value={yearFilter}
                     onChange={e => setYearFilter(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-surface-container/50 border border-outline/20 text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/30"
+                    className="input-field"
                   >
                     <option value="">Any Year</option>
                     <option value="2025">2025</option>
@@ -368,7 +368,7 @@ export default function RecruiterPortal() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-on-surface-variant mb-1">Skills</label>
+                  <label className="input-label">Skills</label>
                   <div className="flex flex-wrap gap-1.5 max-h-20 overflow-y-auto">
                     {ALL_SKILLS.slice(0, 10).map(skill => (
                       <button
@@ -403,7 +403,7 @@ export default function RecruiterPortal() {
           {/* Student cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredStudents.map(student => (
-              <div key={student.id} className="glass-card rounded-2xl border border-outline/20 overflow-hidden">
+              <div key={student.id} className="card rounded-2xl border border-outline/20 overflow-hidden">
                 <div className="p-5">
                   <div className="flex items-start justify-between mb-3">
                     <div>
@@ -545,7 +545,7 @@ export default function RecruiterPortal() {
                         <p className="text-xs text-on-surface-variant pl-5">{student.department}</p>
                         <div className="flex flex-wrap gap-1 mt-1.5 pl-5">
                           {student.skills.slice(0, 3).map((s, i) => (
-                            <span key={i} className="px-1.5 py-0.5 rounded text-[10px] bg-white/80 dark:bg-gray-800/80 text-on-surface-variant">{s}</span>
+                            <span key={i} className="px-1.5 py-0.5 rounded text-xs bg-white/80 dark:bg-gray-800/80 text-on-surface-variant">{s}</span>
                           ))}
                         </div>
                       </div>
@@ -574,7 +574,7 @@ export default function RecruiterPortal() {
 
           {/* Job posting form */}
           {showJobForm && (
-            <div className="glass-card rounded-2xl p-6 border border-outline/20 mb-6">
+            <div className="card rounded-2xl p-6 border border-outline/20 mb-6">
               <h3 className="font-headline text-base text-on-surface mb-4">New Job Posting</h3>
               <form onSubmit={handlePostJob} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -622,7 +622,7 @@ export default function RecruiterPortal() {
           {/* Job listings */}
           <div className="space-y-3">
             {jobs.map(job => (
-              <div key={job.id} className="glass-card rounded-2xl p-5 border border-outline/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div key={job.id} className="card rounded-2xl p-5 border border-outline/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <Briefcase className="w-4 h-4 text-orange-500 flex-shrink-0" />
@@ -656,7 +656,7 @@ export default function RecruiterPortal() {
         <div className="space-y-6">
           {/* Funnel + Top Skills */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="glass-card rounded-2xl p-6 border border-outline/20">
+            <div className="card rounded-2xl p-6 border border-outline/20">
               <h2 className="font-headline text-lg text-on-surface mb-4 flex items-center gap-2">
                 <UserCheck className="w-5 h-5 text-orange-500" />
                 Applicant Funnel
@@ -672,7 +672,7 @@ export default function RecruiterPortal() {
               </ResponsiveContainer>
             </div>
 
-            <div className="glass-card rounded-2xl p-6 border border-outline/20">
+            <div className="card rounded-2xl p-6 border border-outline/20">
               <h2 className="font-headline text-lg text-on-surface mb-4 flex items-center gap-2">
                 <Award className="w-5 h-5 text-orange-500" />
                 Top Skills in Demand
@@ -694,7 +694,7 @@ export default function RecruiterPortal() {
           </div>
 
           {/* Hiring Trends */}
-          <div className="glass-card rounded-2xl p-6 border border-outline/20">
+          <div className="card rounded-2xl p-6 border border-outline/20">
             <h2 className="font-headline text-lg text-on-surface mb-4 flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-orange-500" />
               Hiring Trends

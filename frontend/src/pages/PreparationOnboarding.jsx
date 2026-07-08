@@ -155,7 +155,7 @@ export default function PreparationOnboarding({ onComplete }) {
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white mb-5 shadow-lg shadow-blue-200">
               <BrainCircuit className="w-7 h-7" />
             </div>
-            <h1 className="text-3xl font-black text-slate-900 dark:text-white">
+            <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">
               Let's find your path
             </h1>
             <p className="text-slate-500 dark:text-slate-400 mt-2">
@@ -178,7 +178,7 @@ export default function PreparationOnboarding({ onComplete }) {
           </div>
 
           {/* Question card */}
-          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl shadow-slate-200/60 dark:shadow-slate-900/60 p-8 mb-5">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl shadow-slate-200/60 dark:shadow-slate-900/60 p-8 mb-5">
             <p className="text-xs font-bold uppercase tracking-widest text-blue-500 mb-3">
               Question {qIndex + 1} of {QUESTIONS.length}
             </p>
@@ -264,7 +264,7 @@ export default function PreparationOnboarding({ onComplete }) {
             <div className="inline-flex items-center gap-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-sm font-bold px-4 py-1.5 rounded-full mb-5">
               <Sparkles className="w-4 h-4" /> Your personalized track is ready
             </div>
-            <h1 className="text-4xl font-black text-slate-900 dark:text-white mb-3">
+            <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white mb-3">
               We recommend <span className="text-blue-600">{rec.title}</span>
             </h1>
             <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
@@ -273,7 +273,7 @@ export default function PreparationOnboarding({ onComplete }) {
           </div>
 
           {/* Recommended track card — prominent */}
-          <div className={`relative rounded-3xl p-8 bg-gradient-to-br ${rec.color} text-white shadow-2xl mb-5 overflow-hidden`}>
+          <div className={`relative rounded-2xl p-8 bg-gradient-to-br ${rec.color} text-white shadow-2xl mb-5 overflow-hidden`}>
             <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/10 -mr-16 -mt-16 blur-2xl" />
             <div className="relative z-10">
               <div className="flex items-start justify-between mb-5">
@@ -282,7 +282,7 @@ export default function PreparationOnboarding({ onComplete }) {
                 </div>
                 <span className="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full">⭐ Recommended</span>
               </div>
-              <h2 className="text-3xl font-black mb-1">{rec.title}</h2>
+              <h2 className="text-3xl font-extrabold mb-1">{rec.title}</h2>
               <p className="text-white/80 text-sm font-medium mb-4">{rec.subtitle}</p>
               <p className="text-white/90 mb-6 leading-relaxed">{rec.description}</p>
               <div className="space-y-2 mb-8">

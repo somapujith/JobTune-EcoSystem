@@ -44,9 +44,9 @@ function getScoreColor(score) {
 }
 
 function getPriorityColor(priority) {
-  if (priority === 'High') return 'bg-rose-500/20 text-rose-400 border-rose-500/30';
-  if (priority === 'Medium') return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
-  return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+  if (priority === 'High') return 'bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/30';
+  if (priority === 'Medium') return 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/30';
+  return 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30';
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -56,16 +56,16 @@ function getPriorityColor(priority) {
 function Accordion({ title, icon, defaultOpen = false, children }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="glass-card rounded-2xl border border-outline/20 overflow-hidden">
+    <div className="card rounded-2xl overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-surface-container/30 transition-colors"
+        className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
       >
-        <span className="material-symbols-outlined text-on-surface-variant">{icon}</span>
-        <span className="font-bold text-on-surface flex-1">{title}</span>
-        {open ? <ChevronDown className="w-5 h-5 text-on-surface-variant" /> : <ChevronRight className="w-5 h-5 text-on-surface-variant" />}
+        <span className="material-symbols-outlined text-slate-500 dark:text-slate-400">{icon}</span>
+        <span className="font-bold text-slate-900 dark:text-white flex-1">{title}</span>
+        {open ? <ChevronDown className="w-5 h-5 text-slate-500 dark:text-slate-400" /> : <ChevronRight className="w-5 h-5 text-slate-500 dark:text-slate-400" />}
       </button>
-      {open && <div className="px-5 pb-5 border-t border-outline/10">{children}</div>}
+      {open && <div className="px-5 pb-5 border-t border-slate-200 dark:border-slate-800">{children}</div>}
     </div>
   );
 }
@@ -223,26 +223,28 @@ export default function AICareerCoach() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950/30 to-slate-950 px-4 py-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="page-container">
+      <div className="space-y-6">
 
         {/* ── Header ──────────────────────────────────────────────────────── */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="font-headline text-3xl font-black text-on-surface flex items-center gap-3">
-              <Sparkles className="w-8 h-8 text-indigo-400" />
-              AI Career Coach
-            </h1>
-            <p className="text-on-surface-variant mt-1">
-              Personalized career guidance powered by AI
-            </p>
+          <div className="flex items-center gap-4">
+            <div className="page-header-icon bg-indigo-100 dark:bg-indigo-500/20">
+              <Sparkles className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <div>
+              <h1 className="page-title">AI Career Coach</h1>
+              <p className="page-subtitle !mt-1">
+                Personalized career guidance powered by AI
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
             <select
               value={targetRole}
               onChange={(e) => setTargetRole(e.target.value)}
-              className="bg-surface-container/50 border border-outline/20 rounded-xl px-4 py-2.5 text-on-surface text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+              className="input-field !w-auto"
             >
               {TARGET_ROLES.map((role) => (
                 <option key={role} value={role}>{role}</option>
@@ -252,7 +254,7 @@ export default function AICareerCoach() {
             <button
               onClick={generateFullAnalysis}
               disabled={generating}
-              className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl font-bold text-sm transition-colors"
+              className="btn-primary !bg-indigo-600 hover:!bg-indigo-500"
             >
               <RefreshCw className={`w-4 h-4 ${generating ? 'animate-spin' : ''}`} />
               {generating ? 'Analyzing...' : 'Generate Analysis'}
@@ -261,7 +263,7 @@ export default function AICareerCoach() {
         </div>
 
         {/* ── Tab Navigation ──────────────────────────────────────────────── */}
-        <div className="flex gap-1 bg-surface-container/30 rounded-2xl p-1 overflow-x-auto">
+        <div className="tab-bar !w-full overflow-x-auto">
           {TABS.map((tab) => (
             <button
               key={tab.id}
@@ -271,10 +273,8 @@ export default function AICareerCoach() {
                 if (tab.id === 'skills' && skillGaps.length === 0) fetchSkillGaps();
                 if (tab.id === 'timeline' && !careerPlan) fetchCareerPlan();
               }}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
-                activeTab === tab.id
-                  ? 'bg-indigo-600 text-white shadow-lg'
-                  : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container/50'
+              className={`flex items-center gap-2 whitespace-nowrap ${
+                activeTab === tab.id ? 'tab-active' : 'tab-inactive'
               }`}
             >
               <span className="material-symbols-outlined text-lg">{tab.icon}</span>
@@ -287,11 +287,11 @@ export default function AICareerCoach() {
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Career Readiness Score */}
-            <div className="lg:col-span-1 glass-card rounded-3xl border border-outline/20 p-6 flex flex-col items-center">
-              <h2 className="font-bold text-on-surface text-lg mb-4">Career Readiness Score</h2>
+            <div className="lg:col-span-1 card rounded-2xl p-6 flex flex-col items-center">
+              <h2 className="font-bold text-slate-900 dark:text-white text-lg mb-4">Career Readiness Score</h2>
               {loadingScore ? (
                 <div className="flex items-center justify-center h-48">
-                  <span className="material-symbols-outlined text-indigo-400 text-4xl animate-spin">sync</span>
+                  <span className="material-symbols-outlined text-indigo-500 dark:text-indigo-400 text-4xl animate-spin">sync</span>
                 </div>
               ) : (
                 <>
@@ -316,28 +316,28 @@ export default function AICareerCoach() {
                     </ResponsiveContainer>
                   </div>
                   <div className="text-center -mt-28 mb-16">
-                    <span className="text-5xl font-black text-on-surface">{score?.overall || 0}</span>
-                    <span className="text-on-surface-variant text-sm block mt-1">/ 100</span>
+                    <span className="text-5xl font-extrabold text-slate-900 dark:text-white">{score?.overall || 0}</span>
+                    <span className="text-slate-500 dark:text-slate-400 text-sm block mt-1">/ 100</span>
                   </div>
                 </>
               )}
             </div>
 
             {/* Score Breakdown */}
-            <div className="lg:col-span-2 glass-card rounded-3xl border border-outline/20 p-6">
-              <h2 className="font-bold text-on-surface text-lg mb-4">Score Breakdown</h2>
+            <div className="lg:col-span-2 card rounded-2xl p-6">
+              <h2 className="font-bold text-slate-900 dark:text-white text-lg mb-4">Score Breakdown</h2>
               {loadingScore ? (
                 <div className="flex items-center justify-center h-48">
-                  <span className="material-symbols-outlined text-indigo-400 text-4xl animate-spin">sync</span>
+                  <span className="material-symbols-outlined text-indigo-500 dark:text-indigo-400 text-4xl animate-spin">sync</span>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {breakdownData.map((item, i) => (
                     <div key={item.name} className="flex items-center gap-4">
-                      <div className="w-40 text-sm text-on-surface-variant font-medium truncate">
+                      <div className="w-40 text-sm text-slate-500 dark:text-slate-400 font-medium truncate">
                         {item.name}
                       </div>
-                      <div className="flex-1 bg-slate-800/60 rounded-full h-3 overflow-hidden">
+                      <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-full h-3 overflow-hidden">
                         <div
                           className="h-full rounded-full transition-all duration-700"
                           style={{ width: `${item.score}%`, backgroundColor: item.fill }}
@@ -346,7 +346,7 @@ export default function AICareerCoach() {
                       <div className="w-12 text-right text-sm font-bold" style={{ color: item.fill }}>
                         {item.score}
                       </div>
-                      <div className="w-14 text-right text-xs text-on-surface-variant">
+                      <div className="w-14 text-right text-xs text-slate-500 dark:text-slate-400">
                         {item.weight}% wt
                       </div>
                     </div>
@@ -361,14 +361,14 @@ export default function AICareerCoach() {
         {activeTab === 'recommendations' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="font-bold text-on-surface text-xl flex items-center gap-2">
-                <Target className="w-5 h-5 text-indigo-400" />
+              <h2 className="section-title">
+                <Target className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
                 Weekly Recommendations
               </h2>
               <button
                 onClick={fetchRecommendations}
                 disabled={loadingRecs}
-                className="flex items-center gap-2 px-4 py-2 bg-surface-container/50 border border-outline/20 rounded-xl text-on-surface text-sm font-bold hover:bg-surface-container/80 transition-colors"
+                className="btn-secondary !px-4 !py-2 text-sm"
               >
                 <RefreshCw className={`w-4 h-4 ${loadingRecs ? 'animate-spin' : ''}`} />
                 Refresh
@@ -376,21 +376,21 @@ export default function AICareerCoach() {
             </div>
 
             {loadingRecs ? (
-              <div className="glass-card rounded-2xl border border-outline/20 p-12 flex items-center justify-center">
-                <span className="material-symbols-outlined text-indigo-400 text-4xl animate-spin">sync</span>
-                <span className="ml-3 text-on-surface-variant font-medium">Generating recommendations...</span>
+              <div className="card rounded-2xl p-12 flex items-center justify-center">
+                <span className="material-symbols-outlined text-indigo-500 dark:text-indigo-400 text-4xl animate-spin">sync</span>
+                <span className="ml-3 text-slate-500 dark:text-slate-400 font-medium">Generating recommendations...</span>
               </div>
             ) : recommendations.length === 0 ? (
-              <div className="glass-card rounded-2xl border border-outline/20 p-12 text-center">
-                <span className="material-symbols-outlined text-on-surface-variant text-5xl mb-3">lightbulb</span>
-                <p className="text-on-surface-variant">Click "Generate Analysis" to get personalized recommendations.</p>
+              <div className="card rounded-2xl p-12 text-center">
+                <span className="material-symbols-outlined text-slate-400 dark:text-slate-500 text-5xl mb-3">lightbulb</span>
+                <p className="text-slate-500 dark:text-slate-400">Click "Generate Analysis" to get personalized recommendations.</p>
               </div>
             ) : (
               <div className="grid gap-3">
                 {recommendations.map((rec) => (
                   <div
                     key={rec.id}
-                    className={`glass-card rounded-2xl border border-outline/20 p-5 flex items-start gap-4 transition-all ${
+                    className={`card rounded-2xl p-5 flex items-start gap-4 transition-all ${
                       rec.done ? 'opacity-60' : ''
                     }`}
                   >
@@ -399,23 +399,23 @@ export default function AICareerCoach() {
                       className="mt-0.5 flex-shrink-0"
                     >
                       {rec.done ? (
-                        <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+                        <CheckCircle2 className="w-6 h-6 text-emerald-500 dark:text-emerald-400" />
                       ) : (
-                        <div className="w-6 h-6 rounded-full border-2 border-outline/40 hover:border-indigo-400 transition-colors" />
+                        <div className="w-6 h-6 rounded-full border-2 border-slate-300 dark:border-slate-600 hover:border-indigo-400 transition-colors" />
                       )}
                     </button>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <h3 className={`font-bold text-on-surface ${rec.done ? 'line-through' : ''}`}>
+                        <h3 className={`font-bold text-slate-900 dark:text-white ${rec.done ? 'line-through' : ''}`}>
                           {rec.title}
                         </h3>
                         <span className={`text-xs font-bold px-2 py-0.5 rounded-lg border ${getPriorityColor(rec.priority)}`}>
                           {rec.priority}
                         </span>
                       </div>
-                      <p className="text-on-surface-variant text-sm mb-2">{rec.description}</p>
-                      <div className="flex items-center gap-4 text-xs text-on-surface-variant">
+                      <p className="text-slate-500 dark:text-slate-400 text-sm mb-2">{rec.description}</p>
+                      <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
                         <span className="flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5" />
                           {rec.estimatedTime}
@@ -437,15 +437,15 @@ export default function AICareerCoach() {
         {activeTab === 'skills' && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="font-bold text-on-surface text-xl flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-indigo-400" />
+              <h2 className="section-title">
+                <TrendingUp className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
                 Skill Gap Analysis
               </h2>
               <div className="flex items-center gap-3">
                 <select
                   value={targetRole}
                   onChange={(e) => setTargetRole(e.target.value)}
-                  className="bg-surface-container/50 border border-outline/20 rounded-xl px-3 py-2 text-on-surface text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  className="input-field !w-auto"
                 >
                   {TARGET_ROLES.map((role) => (
                     <option key={role} value={role}>{role}</option>
@@ -454,7 +454,7 @@ export default function AICareerCoach() {
                 <button
                   onClick={fetchSkillGaps}
                   disabled={loadingGaps}
-                  className="flex items-center gap-2 px-4 py-2 bg-surface-container/50 border border-outline/20 rounded-xl text-on-surface text-sm font-bold hover:bg-surface-container/80 transition-colors"
+                  className="btn-secondary !px-4 !py-2 text-sm"
                 >
                   <RefreshCw className={`w-4 h-4 ${loadingGaps ? 'animate-spin' : ''}`} />
                   Analyze
@@ -463,27 +463,27 @@ export default function AICareerCoach() {
             </div>
 
             {loadingGaps ? (
-              <div className="glass-card rounded-2xl border border-outline/20 p-12 flex items-center justify-center">
-                <span className="material-symbols-outlined text-indigo-400 text-4xl animate-spin">sync</span>
-                <span className="ml-3 text-on-surface-variant font-medium">Analyzing skill gaps...</span>
+              <div className="card rounded-2xl p-12 flex items-center justify-center">
+                <span className="material-symbols-outlined text-indigo-500 dark:text-indigo-400 text-4xl animate-spin">sync</span>
+                <span className="ml-3 text-slate-500 dark:text-slate-400 font-medium">Analyzing skill gaps...</span>
               </div>
             ) : skillGaps.length === 0 ? (
-              <div className="glass-card rounded-2xl border border-outline/20 p-12 text-center">
-                <span className="material-symbols-outlined text-on-surface-variant text-5xl mb-3">equalizer</span>
-                <p className="text-on-surface-variant">Select a target role and click "Analyze" to see your skill gaps.</p>
+              <div className="card rounded-2xl p-12 text-center">
+                <span className="material-symbols-outlined text-slate-400 dark:text-slate-500 text-5xl mb-3">equalizer</span>
+                <p className="text-slate-500 dark:text-slate-400">Select a target role and click "Analyze" to see your skill gaps.</p>
               </div>
             ) : (
               <>
                 {/* Horizontal bar chart */}
-                <div className="glass-card rounded-2xl border border-outline/20 p-6">
+                <div className="card rounded-2xl p-6">
                   <div className="flex items-center gap-6 mb-4 text-sm">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-indigo-500" />
-                      <span className="text-on-surface-variant">Your Skills</span>
+                      <span className="text-slate-500 dark:text-slate-400">Your Skills</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-rose-400" />
-                      <span className="text-on-surface-variant">Target Requirements</span>
+                      <span className="text-slate-500 dark:text-slate-400">Target Requirements</span>
                     </div>
                   </div>
                   <div className="h-72">
@@ -508,26 +508,26 @@ export default function AICareerCoach() {
                     const diff = gap.requiredLevel - gap.currentLevel;
                     const urgent = diff > 40;
                     return (
-                      <div key={i} className="glass-card rounded-2xl border border-outline/20 p-5">
+                      <div key={i} className="card rounded-2xl p-5">
                         <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-bold text-on-surface">{gap.skill}</h3>
+                          <h3 className="font-bold text-slate-900 dark:text-white">{gap.skill}</h3>
                           <span className={`text-xs font-bold px-2 py-0.5 rounded-lg ${
-                            urgent ? 'bg-rose-500/20 text-rose-400' : 'bg-amber-500/20 text-amber-400'
+                            urgent ? 'bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400' : 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400'
                           }`}>
                             Gap: {diff > 0 ? `+${diff}` : diff}
                           </span>
                         </div>
                         <div className="flex gap-4 mb-3 text-sm">
                           <div>
-                            <span className="text-on-surface-variant">Current: </span>
-                            <span className="font-bold text-indigo-400">{gap.currentLevel}</span>
+                            <span className="text-slate-500 dark:text-slate-400">Current: </span>
+                            <span className="font-bold text-indigo-600 dark:text-indigo-400">{gap.currentLevel}</span>
                           </div>
                           <div>
-                            <span className="text-on-surface-variant">Required: </span>
-                            <span className="font-bold text-rose-400">{gap.requiredLevel}</span>
+                            <span className="text-slate-500 dark:text-slate-400">Required: </span>
+                            <span className="font-bold text-rose-600 dark:text-rose-400">{gap.requiredLevel}</span>
                           </div>
                         </div>
-                        <p className="text-on-surface-variant text-sm">{gap.recommendation}</p>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm">{gap.recommendation}</p>
                       </div>
                     );
                   })}
@@ -541,15 +541,15 @@ export default function AICareerCoach() {
         {activeTab === 'timeline' && (
           <div className="space-y-6">
             <div className="flex items-center justify-between flex-wrap gap-3">
-              <h2 className="font-bold text-on-surface text-xl flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-indigo-400" />
+              <h2 className="section-title">
+                <Calendar className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
                 Career Timeline & Action Plan
               </h2>
               <div className="flex items-center gap-3">
                 <select
                   value={currentLevel}
                   onChange={(e) => setCurrentLevel(e.target.value)}
-                  className="bg-surface-container/50 border border-outline/20 rounded-xl px-3 py-2 text-on-surface text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  className="input-field !w-auto"
                 >
                   {CURRENT_LEVELS.map((l) => (
                     <option key={l.value} value={l.value}>{l.label}</option>
@@ -558,7 +558,7 @@ export default function AICareerCoach() {
                 <button
                   onClick={fetchCareerPlan}
                   disabled={loadingPlan}
-                  className="flex items-center gap-2 px-4 py-2 bg-surface-container/50 border border-outline/20 rounded-xl text-on-surface text-sm font-bold hover:bg-surface-container/80 transition-colors"
+                  className="btn-secondary !px-4 !py-2 text-sm"
                 >
                   <RefreshCw className={`w-4 h-4 ${loadingPlan ? 'animate-spin' : ''}`} />
                   Generate Plan
@@ -567,44 +567,44 @@ export default function AICareerCoach() {
             </div>
 
             {loadingPlan ? (
-              <div className="glass-card rounded-2xl border border-outline/20 p-12 flex items-center justify-center">
-                <span className="material-symbols-outlined text-indigo-400 text-4xl animate-spin">sync</span>
-                <span className="ml-3 text-on-surface-variant font-medium">Generating career plan...</span>
+              <div className="card rounded-2xl p-12 flex items-center justify-center">
+                <span className="material-symbols-outlined text-indigo-500 dark:text-indigo-400 text-4xl animate-spin">sync</span>
+                <span className="ml-3 text-slate-500 dark:text-slate-400 font-medium">Generating career plan...</span>
               </div>
             ) : !careerPlan ? (
-              <div className="glass-card rounded-2xl border border-outline/20 p-12 text-center">
-                <span className="material-symbols-outlined text-on-surface-variant text-5xl mb-3">timeline</span>
-                <p className="text-on-surface-variant">Click "Generate Plan" to create your personalized career timeline.</p>
+              <div className="card rounded-2xl p-12 text-center">
+                <span className="material-symbols-outlined text-slate-400 dark:text-slate-500 text-5xl mb-3">timeline</span>
+                <p className="text-slate-500 dark:text-slate-400">Click "Generate Plan" to create your personalized career timeline.</p>
               </div>
             ) : (
               <>
                 {/* Vertical Timeline */}
                 <div className="relative">
-                  <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-outline/20" />
+                  <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-700" />
                   <div className="space-y-6">
                     {(careerPlan.timeline || []).map((phase, i) => (
                       <div key={i} className="relative pl-16">
                         {/* Timeline dot */}
-                        <div className="absolute left-4 w-5 h-5 rounded-full border-2 border-indigo-500 bg-slate-900 flex items-center justify-center">
+                        <div className="absolute left-4 w-5 h-5 rounded-full border-2 border-indigo-500 bg-white dark:bg-slate-900 flex items-center justify-center">
                           <div className="w-2 h-2 rounded-full bg-indigo-400" />
                         </div>
 
-                        <div className="glass-card rounded-2xl border border-outline/20 p-5">
+                        <div className="card rounded-2xl p-5">
                           <div className="flex items-center gap-3 mb-2">
-                            <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+                            <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30">
                               Month {phase.month}
                             </span>
-                            <h3 className="font-bold text-on-surface">{phase.title}</h3>
+                            <h3 className="font-bold text-slate-900 dark:text-white">{phase.title}</h3>
                           </div>
-                          <p className="text-on-surface-variant text-sm mb-3">{phase.description}</p>
+                          <p className="text-slate-500 dark:text-slate-400 text-sm mb-3">{phase.description}</p>
                           <div className="flex flex-wrap gap-2 mb-2">
                             {(phase.tasks || []).map((task, j) => (
-                              <span key={j} className="text-xs bg-surface-container/50 text-on-surface-variant px-2.5 py-1 rounded-lg border border-outline/10">
+                              <span key={j} className="text-xs bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700">
                                 {task}
                               </span>
                             ))}
                           </div>
-                          <div className="flex items-center gap-2 text-xs text-emerald-400 font-bold">
+                          <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 font-bold">
                             <CheckCircle2 className="w-3.5 h-3.5" />
                             Milestone: {phase.milestone}
                           </div>
@@ -619,8 +619,8 @@ export default function AICareerCoach() {
                   <Accordion title="Short-term Goals (This Week)" icon="sprint" defaultOpen={true}>
                     <ul className="space-y-2 mt-3">
                       {(careerPlan.shortTerm || []).map((goal, i) => (
-                        <li key={i} className="flex items-start gap-2 text-on-surface-variant text-sm">
-                          <ChevronRight className="w-4 h-4 text-indigo-400 mt-0.5 flex-shrink-0" />
+                        <li key={i} className="flex items-start gap-2 text-slate-600 dark:text-slate-400 text-sm">
+                          <ChevronRight className="w-4 h-4 text-indigo-500 dark:text-indigo-400 mt-0.5 flex-shrink-0" />
                           {goal}
                         </li>
                       ))}
@@ -630,8 +630,8 @@ export default function AICareerCoach() {
                   <Accordion title="Medium-term Goals (This Month)" icon="calendar_month">
                     <ul className="space-y-2 mt-3">
                       {(careerPlan.mediumTerm || []).map((goal, i) => (
-                        <li key={i} className="flex items-start gap-2 text-on-surface-variant text-sm">
-                          <ChevronRight className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+                        <li key={i} className="flex items-start gap-2 text-slate-600 dark:text-slate-400 text-sm">
+                          <ChevronRight className="w-4 h-4 text-amber-500 dark:text-amber-400 mt-0.5 flex-shrink-0" />
                           {goal}
                         </li>
                       ))}
@@ -641,8 +641,8 @@ export default function AICareerCoach() {
                   <Accordion title="Long-term Goals (This Quarter)" icon="event_note">
                     <ul className="space-y-2 mt-3">
                       {(careerPlan.longTerm || []).map((goal, i) => (
-                        <li key={i} className="flex items-start gap-2 text-on-surface-variant text-sm">
-                          <ChevronRight className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                        <li key={i} className="flex items-start gap-2 text-slate-600 dark:text-slate-400 text-sm">
+                          <ChevronRight className="w-4 h-4 text-emerald-500 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
                           {goal}
                         </li>
                       ))}
@@ -658,25 +658,25 @@ export default function AICareerCoach() {
         {activeTab === 'compare' && (
           <div className="space-y-6">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <h2 className="font-bold text-on-surface text-xl flex items-center gap-2">
-                <GitCompare className="w-5 h-5 text-indigo-400" />
+              <h2 className="section-title">
+                <GitCompare className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
                 Compare Career Paths
               </h2>
               <div className="flex items-center gap-3 flex-wrap">
                 <select
                   value={compareRole1}
                   onChange={(e) => setCompareRole1(e.target.value)}
-                  className="bg-surface-container/50 border border-outline/20 rounded-xl px-3 py-2 text-on-surface text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  className="input-field !w-auto"
                 >
                   {TARGET_ROLES.map((role) => (
                     <option key={role} value={role}>{role}</option>
                   ))}
                 </select>
-                <span className="text-on-surface-variant font-bold">vs</span>
+                <span className="text-slate-500 dark:text-slate-400 font-bold">vs</span>
                 <select
                   value={compareRole2}
                   onChange={(e) => setCompareRole2(e.target.value)}
-                  className="bg-surface-container/50 border border-outline/20 rounded-xl px-3 py-2 text-on-surface text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  className="input-field !w-auto"
                 >
                   {TARGET_ROLES.map((role) => (
                     <option key={role} value={role}>{role}</option>
@@ -685,7 +685,7 @@ export default function AICareerCoach() {
                 <button
                   onClick={fetchComparison}
                   disabled={loadingCompare || compareRole1 === compareRole2}
-                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl font-bold text-sm transition-colors"
+                  className="btn-primary !bg-indigo-600 hover:!bg-indigo-500"
                 >
                   <RefreshCw className={`w-4 h-4 ${loadingCompare ? 'animate-spin' : ''}`} />
                   Compare
@@ -694,22 +694,22 @@ export default function AICareerCoach() {
             </div>
 
             {compareRole1 === compareRole2 && (
-              <div className="glass-card rounded-2xl border border-amber-500/30 p-4 text-amber-400 text-sm font-medium">
+              <div className="card rounded-2xl border-amber-200 dark:border-amber-500/30 p-4 text-amber-700 dark:text-amber-400 text-sm font-medium">
                 Please select two different roles to compare.
               </div>
             )}
 
             {loadingCompare ? (
-              <div className="glass-card rounded-2xl border border-outline/20 p-12 flex items-center justify-center">
-                <span className="material-symbols-outlined text-indigo-400 text-4xl animate-spin">sync</span>
-                <span className="ml-3 text-on-surface-variant font-medium">Comparing roles...</span>
+              <div className="card rounded-2xl p-12 flex items-center justify-center">
+                <span className="material-symbols-outlined text-indigo-500 dark:text-indigo-400 text-4xl animate-spin">sync</span>
+                <span className="ml-3 text-slate-500 dark:text-slate-400 font-medium">Comparing roles...</span>
               </div>
             ) : comparison ? (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {[comparison.role1, comparison.role2].map((role, idx) => (
-                    <div key={idx} className="glass-card rounded-2xl border border-outline/20 p-6">
-                      <h3 className="font-bold text-on-surface text-lg mb-4 flex items-center gap-2">
+                    <div key={idx} className="card rounded-2xl p-6">
+                      <h3 className="font-bold text-slate-900 dark:text-white text-lg mb-4 flex items-center gap-2">
                         <span className={`w-3 h-3 rounded-full ${idx === 0 ? 'bg-indigo-500' : 'bg-emerald-500'}`} />
                         {role.name}
                       </h3>
@@ -722,18 +722,18 @@ export default function AICareerCoach() {
                           { label: 'Remote Work', value: role.remoteOpportunities, icon: 'home_work' },
                         ].map((item) => (
                           <div key={item.label} className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-on-surface-variant text-sm">
+                            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm">
                               <span className="material-symbols-outlined text-lg">{item.icon}</span>
                               {item.label}
                             </div>
-                            <span className="font-bold text-on-surface text-sm">{item.value}</span>
+                            <span className="font-bold text-slate-900 dark:text-white text-sm">{item.value}</span>
                           </div>
                         ))}
-                        <div className="pt-2 border-t border-outline/10">
-                          <span className="text-xs text-on-surface-variant font-medium">Key Skills</span>
+                        <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
+                          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Key Skills</span>
                           <div className="flex flex-wrap gap-1.5 mt-1.5">
                             {(role.keySkills || []).map((skill, j) => (
-                              <span key={j} className="text-xs bg-surface-container/50 text-on-surface-variant px-2 py-0.5 rounded-lg border border-outline/10">
+                              <span key={j} className="text-xs bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
                                 {skill}
                               </span>
                             ))}
@@ -745,21 +745,21 @@ export default function AICareerCoach() {
                 </div>
 
                 {comparison.recommendation && (
-                  <div className="glass-card rounded-2xl border border-indigo-500/20 p-5">
+                  <div className="card rounded-2xl border-indigo-200 dark:border-indigo-500/20 p-5">
                     <div className="flex items-start gap-3">
-                      <Sparkles className="w-5 h-5 text-indigo-400 mt-0.5 flex-shrink-0" />
+                      <Sparkles className="w-5 h-5 text-indigo-500 dark:text-indigo-400 mt-0.5 flex-shrink-0" />
                       <div>
-                        <h3 className="font-bold text-on-surface text-sm mb-1">AI Recommendation</h3>
-                        <p className="text-on-surface-variant text-sm">{comparison.recommendation}</p>
+                        <h3 className="font-bold text-slate-900 dark:text-white text-sm mb-1">AI Recommendation</h3>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm">{comparison.recommendation}</p>
                       </div>
                     </div>
                   </div>
                 )}
               </>
             ) : (
-              <div className="glass-card rounded-2xl border border-outline/20 p-12 text-center">
-                <span className="material-symbols-outlined text-on-surface-variant text-5xl mb-3">compare_arrows</span>
-                <p className="text-on-surface-variant">Select two roles and click "Compare" to see a side-by-side analysis.</p>
+              <div className="card rounded-2xl p-12 text-center">
+                <span className="material-symbols-outlined text-slate-400 dark:text-slate-500 text-5xl mb-3">compare_arrows</span>
+                <p className="text-slate-500 dark:text-slate-400">Select two roles and click "Compare" to see a side-by-side analysis.</p>
               </div>
             )}
           </div>

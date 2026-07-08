@@ -114,12 +114,12 @@ export default function ResumeConsistency() {
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto py-16 px-4 sm:px-6">
+    <div className="page-container">
       <div className="text-center mb-16">
         <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-slate-900/5 mb-6">
           <span className="material-symbols-outlined text-slate-900 text-3xl" style={{ fontVariationSettings: "'FILL' 0" }}>fact_check</span>
         </div>
-        <h1 className="text-4xl font-black text-on-surface font-headline mb-4">
+        <h1 className="text-4xl font-extrabold text-on-surface font-headline mb-4">
           Resume Consistency Checker
         </h1>
         <p className="text-lg text-on-surface-variant font-medium max-w-2xl mx-auto">
@@ -128,7 +128,7 @@ export default function ResumeConsistency() {
       </div>
 
       {/* How It Works Guide */}
-      <div className="max-w-5xl mx-auto mb-12 glass-card border-emerald-200/50 rounded-3xl p-8">
+      <div className="max-w-5xl mx-auto mb-12 glass-card border-emerald-200/50 rounded-2xl p-8">
         <h3 className="text-xl font-bold text-on-surface mb-4 flex items-center gap-2">
           <span className="material-symbols-outlined text-emerald-600">info</span>
           How It Works
@@ -227,10 +227,10 @@ export default function ResumeConsistency() {
       {report && !loading && (
         <div className="max-w-3xl mx-auto space-y-8">
           {/* Score */}
-          <div className="glass-card rounded-3xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="card rounded-2xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
             <div>
               <p className="text-xs font-bold text-slate-500 uppercase mb-1">Consistency Score</p>
-              <p className={`text-6xl font-black ${scoreColor(report.consistencyScore)}`}>
+              <p className={`text-6xl font-extrabold ${scoreColor(report.consistencyScore)}`}>
                 {report.consistencyScore == null ? 'N/A' : report.consistencyScore}
                 {report.consistencyScore != null && <span className="text-2xl text-slate-400">/100</span>}
               </p>
@@ -250,7 +250,7 @@ export default function ResumeConsistency() {
 
           {/* No mismatches */}
           {(!report.mismatches || report.mismatches.length === 0) && (
-            <div className="glass-card border-emerald-200/50 rounded-3xl p-8 flex items-center gap-3 text-emerald-700 dark:text-emerald-300">
+            <div className="glass-card border-emerald-200/50 rounded-2xl p-8 flex items-center gap-3 text-emerald-700 dark:text-emerald-300">
               <CheckCircle className="w-6 h-6 flex-shrink-0" />
               <p className="font-semibold">No mismatches detected across the provided profiles.</p>
             </div>
@@ -258,7 +258,7 @@ export default function ResumeConsistency() {
 
           {/* Categorized mismatches */}
           {report.mismatches?.map((m, i) => (
-            <div key={i} className={`glass-card rounded-3xl p-6 border ${SEVERITY_STYLES[m.severity] || ''}`}>
+            <div key={i} className={`card rounded-2xl p-6 border ${SEVERITY_STYLES[m.severity] || ''}`}>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-lg font-bold text-on-surface">{m.category}</h3>
                 <span className="text-xs font-bold uppercase px-3 py-1 rounded-full bg-white/50 dark:bg-black/20">

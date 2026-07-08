@@ -55,7 +55,7 @@ export default function Onboarding() {
         <div className="w-full h-screen bg-gradient-to-br from-green-50 to-emerald-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-6">
           <div className="text-center">
             <div className="text-6xl mb-4">🎉</div>
-            <h1 className="text-4xl font-black text-slate-900 dark:text-white mb-3">All Set!</h1>
+            <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white mb-3">All Set!</h1>
             <p className="text-lg text-slate-600 dark:text-slate-400 mb-6">Redirecting to your dashboard...</p>
             <div className="w-64 h-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full mx-auto animate-pulse"></div>
           </div>

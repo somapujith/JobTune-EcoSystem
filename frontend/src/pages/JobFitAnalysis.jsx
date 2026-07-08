@@ -99,12 +99,12 @@ export default function JobFitAnalysis() {
   ] : [];
 
   return (
-    <div className="w-full max-w-5xl mx-auto py-16 px-4 sm:px-6">
+    <div className="page-container">
       <div className="text-center mb-12">
         <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-blue-500/5 mb-6">
           <span className="material-symbols-outlined text-blue-600 text-3xl" style={{ fontVariationSettings: "'FILL' 0" }}>radar</span>
         </div>
-        <h1 className="text-4xl font-black text-on-surface font-headline mb-4">
+        <h1 className="text-4xl font-extrabold text-on-surface font-headline mb-4">
           Job Fit Analyzer
         </h1>
         <p className="text-lg text-on-surface-variant font-medium max-w-2xl mx-auto">
@@ -121,7 +121,7 @@ export default function JobFitAnalysis() {
 
       <form onSubmit={handleAnalyze} className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-12">
         {/* Resume Input Area */}
-        <div className="glass-card p-6 rounded-3xl flex flex-col">
+        <div className="card p-6 rounded-2xl flex flex-col">
           <div className="flex justify-between items-center mb-4">
             <label className="block text-sm font-bold text-on-surface">Your Resume</label>
             <button
@@ -188,7 +188,7 @@ export default function JobFitAnalysis() {
         </div>
 
         {/* Job Description Input Area */}
-        <div className="glass-card p-6 rounded-3xl flex flex-col justify-between">
+        <div className="card p-6 rounded-2xl flex flex-col justify-between">
           <div className="flex-1 flex flex-col mb-4">
             <label className="block text-sm font-bold text-on-surface mb-2">Job Description</label>
             <textarea
@@ -226,7 +226,7 @@ export default function JobFitAnalysis() {
         <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           
           {/* Main Score Board */}
-          <div className={`glass-card rounded-3xl p-8 flex flex-col md:flex-row items-center gap-8 ${getScoreBg(report.score)}`}>
+          <div className={`card rounded-2xl p-8 flex flex-col md:flex-row items-center gap-8 ${getScoreBg(report.score)}`}>
             
             {/* Score Ring Display */}
             <div className="relative shrink-0">
@@ -242,7 +242,7 @@ export default function JobFitAnalysis() {
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-4xl font-black text-slate-800 dark:text-slate-100">{report.score}</span>
+                <span className="text-4xl font-extrabold text-slate-800 dark:text-slate-100">{report.score}</span>
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">/ 100</span>
               </div>
             </div>
@@ -278,7 +278,7 @@ export default function JobFitAnalysis() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             
             {/* Recharts Radar Chart */}
-            <div className="glass-card p-6 rounded-3xl md:col-span-5 flex flex-col items-center justify-center min-h-[300px]">
+            <div className="card p-6 rounded-2xl md:col-span-5 flex flex-col items-center justify-center min-h-[300px]">
               <h3 className="text-base font-bold text-on-surface mb-4 self-start font-headline">Match Profile</h3>
               <ResponsiveContainer width="100%" height={240}>
                 <RadarChart cx="50%" cy="50%" outerRadius="75%" data={radarData}>
@@ -302,7 +302,7 @@ export default function JobFitAnalysis() {
                 <div className="flex-1 space-y-1">
                   <div className="flex justify-between items-center">
                     <h4 className="font-bold text-on-surface">Domain Fit</h4>
-                    <span className="text-sm font-black text-blue-600 dark:text-blue-400">{report.breakdown?.domain || 0}%</span>
+                    <span className="text-sm font-extrabold text-blue-600 dark:text-blue-400">{report.breakdown?.domain || 0}%</span>
                   </div>
                   <p className="text-sm text-slate-500 dark:text-slate-400">
                     Measures industry compatibility using ONET occupational codes. If matching, you possess crucial industry-specific contextual knowledge.
@@ -318,7 +318,7 @@ export default function JobFitAnalysis() {
                 <div className="flex-1 space-y-1">
                   <div className="flex justify-between items-center">
                     <h4 className="font-bold text-on-surface">Seniority Equivalence</h4>
-                    <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">{report.breakdown?.seniority || 0}%</span>
+                    <span className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400">{report.breakdown?.seniority || 0}%</span>
                   </div>
                   <p className="text-sm text-slate-500 dark:text-slate-400">
                     Assesses years-of-experience matches or explicit title seniority levels. Avoids under-qualification (skill gaps) or over-qualification.
@@ -334,7 +334,7 @@ export default function JobFitAnalysis() {
                 <div className="flex-1 space-y-1">
                   <div className="flex justify-between items-center">
                     <h4 className="font-bold text-on-surface">Skill Overlap</h4>
-                    <span className="text-sm font-black text-amber-600 dark:text-amber-400">{report.breakdown?.skills || 0}%</span>
+                    <span className="text-sm font-extrabold text-amber-600 dark:text-amber-400">{report.breakdown?.skills || 0}%</span>
                   </div>
                   <p className="text-sm text-slate-500 dark:text-slate-400">
                     Jaccard index calculation on technical skill keyword intersections. Indicates coverage of the technical tooling specified in the posting.

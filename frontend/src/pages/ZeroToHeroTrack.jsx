@@ -1,582 +1,928 @@
-import { useState, useEffect, useRef } from 'react';
-import { Rocket, Loader2, CheckCircle, ChevronDown, ChevronUp, Bot, Send, Info, User, Play, Briefcase, GraduationCap } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { api } from '../store/useAuthStore';
 import { useUserProgress } from '../hooks/useUserProgress';
+import { useActivityTracker } from '../hooks/useActivityTracker';
 
-const DEFAULT_TUTOR_MESSAGE = {
-  role: 'assistant',
-  content: "Hi! I'm your AI Tutor. Ask me to explain any concept from your roadmap!",
-};
-
-const ZERO_TO_HERO_DEFAULTS = {
-  step: 'intro',
-  collectedData: {},
-  wizardCurrentQIndex: 0,
-  wizardMessages: [],
-  expandedPhases: {},
-  messages: [DEFAULT_TUTOR_MESSAGE],
-  targetRole: '',
-};
-
-// --- Chat Wizard Configuration ---
-const WIZARD_QUESTIONS = [
-  { 
-    id: 'role', 
-    text: "What specific IT area or role would you like to focus on?", 
-    type: "options",
-    options: [
-      "AI & ML", "Data Science", "Software Development", 
-      "Cloud & DevOps", "Cybersecurity", "Product Management", 
-      "UI/UX Design", "Business Analysis", "Internships", 
-      "Freshers Jobs", "Remote Jobs"
-    ]
-  },
-  { 
-    id: 'interests', 
-    text: "What best describes your interests within this area?",
-    type: "options",
-    options: ["Building Products", "Research & Analysis", "Problem Solving", "Design & Creativity", "Teaching & Mentoring", "Automation & Optimization"]
-  },
-  { 
-    id: 'experience', 
-    text: "How much prior experience do you have in this field?",
-    type: "options",
-    options: ["None at all", "Less than 6 months", "6 months – 1 year", "1–2 years", "2+ years"]
-  },
-  { id: 'projects', text: "Have you built any projects previously? Briefly describe them (or say \"None\" if you haven't).", type: "text" },
-  { 
-    id: 'knowledge', 
-    text: "How would you honestly rate your current knowledge level?",
-    type: "options", 
-    options: ["🌱 Complete Beginner", "📚 Intermediate", "🚀 Advanced / Professional"] 
-  },
-  { 
-    id: 'timePerDay', 
-    text: "How much time can you realistically dedicate to preparation each day?",
-    type: "options",
-    options: ["Less than 1 hour", "1–2 hours", "3–4 hours", "5+ hours"]
-  },
-  { 
-    id: 'monthsToPrepare', 
-    text: "How many months do you have to prepare before you want to be interview-ready?",
-    type: "options",
-    options: ["1 month", "2–3 months", "4–6 months", "6–12 months", "More than a year"]
-  }
+const TRACKS = [
+  { id: 'frontend', label: 'Frontend Development', icon: 'web', desc: 'HTML, CSS, JavaScript, React' },
+  { id: 'backend', label: 'Backend Development', icon: 'dns', desc: 'Node.js, Python, Databases, APIs' },
+  { id: 'javascript', label: 'JavaScript', icon: 'code', desc: 'Deep dive into JS fundamentals' },
+  { id: 'react', label: 'React', icon: 'widgets', desc: 'Components, Hooks, State Management' },
+  { id: 'python', label: 'Python', icon: 'terminal', desc: 'Syntax, OOP, Data Science basics' },
+  { id: 'nodejs', label: 'Node.js', icon: 'memory', desc: 'Express, APIs, Server-side JS' },
+  { id: 'datastructures-and-algorithms', label: 'DSA', icon: 'account_tree', desc: 'Arrays, Trees, Graphs, DP' },
+  { id: 'computer-science', label: 'Computer Science', icon: 'school', desc: 'OS, Networking, Databases' },
 ];
 
+const DEFAULT_PROGRESS = {
+  step: 'intro',
+  track: null,
+  interviewData: {},
+  knowledgeCheck: {},
+  modules: {},
+  currentModuleId: null,
+};
 
-export default function ZeroToHeroTrack() {
-  const { data: progress, updateProgress, isLoading: progressLoading, isSaving } = useUserProgress(
-    'zero-to-hero',
-    ZERO_TO_HERO_DEFAULTS
+function Icon({ name, fill = 0, className = '' }) {
+  return (
+    <span className={`material-symbols-outlined ${className}`} style={{ fontVariationSettings: `'FILL' ${fill}` }}>
+      {name}
+    </span>
   );
+}
 
-  const step = progress.step;
-  const collectedData = progress.collectedData;
-  const wizardCurrentQIndex = progress.wizardCurrentQIndex;
-  const wizardMessages = progress.wizardMessages;
-  const expandedPhases = progress.expandedPhases;
-  const messages = progress.messages;
-  const targetRole = progress.targetRole;
+// ─── Intro Screen ──────────────────────────────────────────────────────────
 
-  const [roadmap, setRoadmap] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [wizardInput, setWizardInput] = useState('');
-  const [isBotTyping, setIsBotTyping] = useState(false);
-  const chatEndRef = useRef(null);
-  const [chatInput, setChatInput] = useState('');
-  const [chatLoading, setChatLoading] = useState(false);
+function IntroScreen({ onStart, hasProgress }) {
+  return (
+    <div className="text-center max-w-2xl mx-auto py-16 fade-up">
+      <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mx-auto mb-8 shadow-lg">
+        <Icon name="rocket_launch" fill={1} className="text-white text-4xl" />
+      </div>
+      <h1 className="page-title mb-4">Zero to Hero</h1>
+      <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed mb-10 max-w-lg mx-auto">
+        Start from scratch and master software development through structured learning modules, hands-on practice, and AI-powered assessments.
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+        {[
+          { icon: 'school', title: 'Learn', desc: 'Structured modules with real content' },
+          { icon: 'quiz', title: 'Assess', desc: 'Tests scoped to what you learned' },
+          { icon: 'trending_up', title: 'Progress', desc: 'Unlock modules as you grow' },
+        ].map((f, i) => (
+          <div key={i} className="card p-5 text-center">
+            <Icon name={f.icon} className="text-blue-500 text-2xl mb-2" />
+            <p className="font-bold text-slate-900 dark:text-white text-sm">{f.title}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{f.desc}</p>
+          </div>
+        ))}
+      </div>
+      <button onClick={onStart} className="btn-primary-lg">
+        {hasProgress ? 'Continue Your Journey' : 'Start Your Journey'}
+        <Icon name="arrow_forward" className="text-lg" />
+      </button>
+    </div>
+  );
+}
 
-  useEffect(() => {
-    loadSavedRoadmap();
+// ─── Interview Wizard ──────────────────────────────────────────────────────
+
+const INTERVIEW_STEPS = [
+  { id: 'track', question: 'What area of development interests you most?', type: 'track-select' },
+  { id: 'experience', question: 'Have you written code before?', type: 'single', options: [
+    { value: 'none', label: 'No, I am completely new', icon: 'spa' },
+    { value: 'some', label: 'Yes, I have some experience', icon: 'code' },
+  ]},
+  { id: 'skills', question: 'Which of these have you worked with?', type: 'multi-select', conditional: 'some' },
+  { id: 'knowledge-check', question: 'Quick check — let us verify your knowledge', type: 'knowledge-check', conditional: 'has-skills' },
+  { id: 'time', question: 'How much time can you dedicate daily?', type: 'single', options: [
+    { value: '1hr', label: 'Less than 1 hour' },
+    { value: '2-3hrs', label: '2-3 hours' },
+    { value: '4-5hrs', label: '4-5 hours' },
+    { value: '5+hrs', label: '5+ hours' },
+  ]},
+  { id: 'timeline', question: 'What is your preparation timeline?', type: 'single', options: [
+    { value: '1month', label: '1 month' },
+    { value: '3months', label: '2-3 months' },
+    { value: '6months', label: '4-6 months' },
+    { value: '1year', label: '6-12 months' },
+  ]},
+];
+
+function InterviewWizard({ onComplete, initialData }) {
+  const [stepIndex, setStepIndex] = useState(0);
+  const [data, setData] = useState(initialData || {});
+  const [trackSkills, setTrackSkills] = useState([]);
+  const [knowledgeQuestions, setKnowledgeQuestions] = useState(null);
+  const [kcAnswers, setKcAnswers] = useState({});
+  const [kcLoading, setKcLoading] = useState(false);
+
+  const visibleSteps = INTERVIEW_STEPS.filter(step => {
+    if (step.conditional === 'some') return data.experience === 'some';
+    if (step.conditional === 'has-skills') return data.skills && data.skills.length > 0;
+    return true;
+  });
+
+  const currentStep = visibleSteps[stepIndex];
+
+  const loadTrackSkills = useCallback(async (trackId) => {
+    try {
+      const { data: trackData } = await api.get(`/learning-modules/${trackId}`);
+      setTrackSkills(trackData.skills || []);
+    } catch { setTrackSkills([]); }
   }, []);
 
-  useEffect(() => {
-    if (step === 'chat-wizard' && chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [wizardMessages, isBotTyping, step]);
+  const loadKnowledgeCheck = useCallback(async (skills) => {
+    setKcLoading(true);
+    try {
+      const { data: kcData } = await api.post('/learning-modules/knowledge-check', { skills });
+      setKnowledgeQuestions(kcData.checks);
+    } catch { setKnowledgeQuestions([]); }
+    finally { setKcLoading(false); }
+  }, []);
 
-  if (progressLoading) {
+  const handleNext = () => {
+    if (stepIndex < visibleSteps.length - 1) {
+      const nextStep = visibleSteps[stepIndex + 1];
+      if (nextStep?.id === 'skills' && data.track) loadTrackSkills(data.track);
+      if (nextStep?.id === 'knowledge-check' && data.skills?.length > 0) loadKnowledgeCheck(data.skills);
+      setStepIndex(stepIndex + 1);
+    } else {
+      const knowledgeCheck = {};
+      if (knowledgeQuestions) {
+        for (const check of knowledgeQuestions) {
+          let correct = 0;
+          for (const q of check.questions) {
+            if (parseInt(kcAnswers[q.id]) === q.correct) correct++;
+          }
+          knowledgeCheck[check.skill.toLowerCase()] = correct >= 2 ? 'verified' : 'beginner';
+        }
+      }
+      onComplete({ ...data, knowledgeCheck });
+    }
+  };
+
+  const canProceed = () => {
+    if (!currentStep) return false;
+    if (currentStep.id === 'track') return !!data.track;
+    if (currentStep.id === 'experience') return !!data.experience;
+    if (currentStep.id === 'skills') return true;
+    if (currentStep.id === 'knowledge-check') {
+      if (!knowledgeQuestions || knowledgeQuestions.length === 0) return true;
+      const totalQs = knowledgeQuestions.reduce((sum, c) => sum + c.questions.length, 0);
+      return Object.keys(kcAnswers).length >= totalQs;
+    }
+    if (currentStep.id === 'time') return !!data.time;
+    if (currentStep.id === 'timeline') return !!data.timeline;
+    return true;
+  };
+
+  const progress = visibleSteps.length > 0 ? ((stepIndex + 1) / visibleSteps.length) * 100 : 0;
+
+  return (
+    <div className="max-w-2xl mx-auto py-10 fade-up">
+      <div className="progress-track mb-8">
+        <div className="progress-fill bg-gradient-to-r from-blue-500 to-indigo-500" style={{ width: `${progress}%` }} />
+      </div>
+      <div className="card p-8 rounded-2xl">
+        <p className="text-xs font-bold text-blue-500 uppercase tracking-wider mb-2">Step {stepIndex + 1} of {visibleSteps.length}</p>
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6">{currentStep?.question}</h2>
+
+        {currentStep?.type === 'track-select' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {TRACKS.map(t => (
+              <button key={t.id} onClick={() => setData(d => ({ ...d, track: t.id }))}
+                className={`flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all ${data.track === t.id ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'}`}>
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${data.track === t.id ? 'bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>
+                  <Icon name={t.icon} className="text-xl" />
+                </div>
+                <div>
+                  <p className="font-bold text-sm text-slate-900 dark:text-white">{t.label}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{t.desc}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {currentStep?.type === 'single' && (
+          <div className="space-y-3">
+            {currentStep.options.map(opt => (
+              <button key={opt.value} onClick={() => setData(d => ({ ...d, [currentStep.id]: opt.value }))}
+                className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all ${data[currentStep.id] === opt.value ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'}`}>
+                {opt.icon && <Icon name={opt.icon} className={`text-xl ${data[currentStep.id] === opt.value ? 'text-blue-500' : 'text-slate-400'}`} />}
+                <span className="font-semibold text-sm text-slate-800 dark:text-slate-200">{opt.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {currentStep?.type === 'multi-select' && (
+          <div>
+            <div className="flex flex-wrap gap-2">
+              {(trackSkills.length > 0 ? trackSkills : ['HTML', 'CSS', 'JavaScript', 'Python', 'SQL', 'Git', 'React', 'Node.js']).map(skill => {
+                const selected = (data.skills || []).includes(skill);
+                return (
+                  <button key={skill} onClick={() => setData(d => { const cur = d.skills || []; return { ...d, skills: selected ? cur.filter(s => s !== skill) : [...cur, skill] }; })}
+                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all ${selected ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300'}`}>
+                    <Icon name={selected ? 'check_circle' : 'radio_button_unchecked'} fill={selected ? 1 : 0} className={`text-base ${selected ? 'text-blue-500' : 'text-slate-400'}`} />
+                    {skill}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-slate-400 mt-3">Select all that apply, or skip if none.</p>
+          </div>
+        )}
+
+        {currentStep?.type === 'knowledge-check' && (
+          <div className="space-y-6">
+            {kcLoading && (
+              <div className="flex items-center justify-center py-8 gap-3">
+                <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                <span className="text-slate-500 text-sm">Loading verification questions...</span>
+              </div>
+            )}
+            {!kcLoading && knowledgeQuestions?.map((check, ci) => (
+              <div key={ci} className="space-y-3">
+                <p className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <Icon name="verified" className="text-base text-blue-500" /> {check.skill}
+                </p>
+                {check.questions.map((q) => (
+                  <div key={q.id} className="pl-4 border-l-2 border-slate-200 dark:border-slate-700">
+                    <p className="text-sm text-slate-800 dark:text-slate-200 mb-2">{q.question}</p>
+                    <div className="space-y-1.5">
+                      {q.options.map((opt, oi) => (
+                        <label key={oi}
+                          className={`flex items-start gap-2 p-2.5 rounded-lg cursor-pointer text-sm transition-colors ${parseInt(kcAnswers[q.id]) === oi ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-800 dark:text-blue-200' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400'}`}>
+                          <input type="radio" name={q.id} value={oi} checked={parseInt(kcAnswers[q.id]) === oi}
+                            onChange={() => setKcAnswers(a => ({ ...a, [q.id]: oi }))} className="mt-0.5 accent-blue-500" />
+                          <span className="leading-snug">{typeof opt === 'string' ? opt.substring(0, 150) : String(opt)}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
+            {!kcLoading && (!knowledgeQuestions || knowledgeQuestions.length === 0) && (
+              <p className="text-sm text-slate-500 text-center py-4">No verification needed. Continue to the next step.</p>
+            )}
+          </div>
+        )}
+
+        <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-200 dark:border-slate-800">
+          <button onClick={() => stepIndex > 0 && setStepIndex(stepIndex - 1)} disabled={stepIndex === 0} className="btn-ghost disabled:opacity-30">
+            <Icon name="arrow_back" className="text-lg" /> Back
+          </button>
+          <button onClick={handleNext} disabled={!canProceed()} className="btn-primary-lg disabled:opacity-40">
+            {stepIndex === visibleSteps.length - 1 ? 'Generate My Plan' : 'Continue'}
+            <Icon name={stepIndex === visibleSteps.length - 1 ? 'auto_awesome' : 'arrow_forward'} className="text-lg" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Flashcard Review ─────────────────────────────────────────────────────
+
+function FlashcardReview({ cards, onClose }) {
+  const [idx, setIdx] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const [known, setKnown] = useState([]);
+  const [again, setAgain] = useState([]);
+
+  if (!cards || cards.length === 0) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-24 flex justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+      <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl" onClick={e => e.stopPropagation()}>
+          <Icon name="check_circle" fill={1} className="text-4xl text-emerald-500 mb-3" />
+          <p className="font-bold text-slate-900 dark:text-white">No review cards yet</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Complete module assessments to generate flashcards from questions you missed.</p>
+          <button onClick={onClose} className="btn-primary mt-4">Got it</button>
+        </div>
       </div>
     );
   }
 
-  async function loadSavedRoadmap() {
-    try {
-      const { data } = await api.get('/career/roadmap');
-      if (data && (data.roadmap || data.phases)) {
-        setRoadmap(data.roadmap || data);
-        // We do NOT set step to 'display' here automatically anymore,
-        // so the user always sees the intro and can choose to continue or restart.
-      }
-    } catch (err) {
-      // It's okay if they don't have one
-    }
-  }
+  const card = cards[idx];
+  const remaining = cards.length - known.length;
 
-  // --- Intro Handlers ---
-  const startWizard = () => {
-    updateProgress({
-      step: 'chat-wizard',
-      wizardCurrentQIndex: 0,
-      collectedData: {},
-      wizardMessages: [],
-      targetRole: '',
+  const handleKnow = () => {
+    setKnown(prev => [...prev, card.id]);
+    setFlipped(false);
+    if (idx < cards.length - 1) setIdx(idx + 1);
+  };
+
+  const handleAgain = () => {
+    setAgain(prev => [...prev, card.id]);
+    setFlipped(false);
+    if (idx < cards.length - 1) setIdx(idx + 1);
+  };
+
+  const isDone = idx >= cards.length - 1 && flipped;
+
+  return (
+    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800">
+          <div>
+            <h3 className="font-bold text-slate-900 dark:text-white">Flashcard Review</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{idx + 1} of {cards.length} · {known.length} known · {again.length} to retry</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+            <Icon name="close" className="text-lg text-slate-500" />
+          </button>
+        </div>
+
+        <div className="p-6">
+          <div
+            className="min-h-[180px] p-5 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 cursor-pointer flex items-center justify-center text-center transition-all hover:border-blue-300 dark:hover:border-blue-700"
+            onClick={() => setFlipped(!flipped)}
+          >
+            {!flipped ? (
+              <div>
+                <p className="text-xs font-bold text-blue-500 uppercase tracking-wider mb-3">{card.topic}</p>
+                <p className="text-slate-800 dark:text-slate-200 font-semibold">{card.question}</p>
+                <p className="text-xs text-slate-400 mt-4">Tap to reveal answer</p>
+              </div>
+            ) : (
+              <div>
+                <p className="text-xs font-bold text-emerald-500 uppercase tracking-wider mb-3">Answer</p>
+                <p className="text-slate-800 dark:text-slate-200">{card.answer}</p>
+                {card.explanation && <p className="text-xs text-slate-500 dark:text-slate-400 mt-3 italic">{card.explanation}</p>}
+              </div>
+            )}
+          </div>
+
+          {flipped && !isDone && (
+            <div className="flex gap-3 mt-4">
+              <button onClick={handleAgain} className="flex-1 py-3 rounded-xl border-2 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 font-bold text-sm hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors">
+                <Icon name="refresh" className="text-base mr-1" /> Again
+              </button>
+              <button onClick={handleKnow} className="flex-1 py-3 rounded-xl border-2 border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 font-bold text-sm hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors">
+                <Icon name="check" className="text-base mr-1" /> Know it
+              </button>
+            </div>
+          )}
+
+          {!flipped && (
+            <div className="flex justify-center mt-4">
+              <button onClick={() => setFlipped(true)} className="btn-primary">
+                Show Answer <Icon name="flip" className="text-lg" />
+              </button>
+            </div>
+          )}
+
+          {isDone && (
+            <div className="text-center mt-4">
+              <p className="font-bold text-slate-900 dark:text-white mb-1">Session complete!</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{known.length} known · {again.length} still need review</p>
+              <button onClick={onClose} className="btn-primary mt-3">Done</button>
+            </div>
+          )}
+        </div>
+
+        <div className="flex gap-1 justify-center pb-4">
+          {cards.map((_, i) => (
+            <div key={i} className={`w-2 h-2 rounded-full transition-all ${i === idx ? 'bg-blue-500 scale-125' : known.includes(cards[i]?.id) ? 'bg-emerald-400' : again.includes(cards[i]?.id) ? 'bg-red-400' : 'bg-slate-200 dark:bg-slate-700'}`} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Learning Plan ─────────────────────────────────────────────────────────
+
+function LearningPlan({ modules, moduleProgress, knowledgeCheck, onStartModule }) {
+  const [showFlashcards, setShowFlashcards] = useState(false);
+  const completedCount = Object.values(moduleProgress || {}).filter(m => m.status === 'completed').length;
+  const totalModules = modules.length;
+
+  const flashcards = modules
+    .filter(m => moduleProgress?.[m.id]?.failedQuestions?.length > 0)
+    .flatMap(m => moduleProgress[m.id].failedQuestions.map(q => ({ ...q, moduleTopic: m.topic })));
+
+  const completedWithLowScore = Object.entries(moduleProgress || {})
+    .filter(([, mp]) => mp.status === 'completed' && mp.score != null && mp.score < 80)
+    .length;
+
+  const getStatus = (mod) => {
+    const mp = moduleProgress?.[mod.id];
+    if (mp?.status === 'completed') return 'completed';
+    if (mp?.status === 'in-progress') return 'in-progress';
+    const skill = mod.topic.toLowerCase();
+    if (knowledgeCheck?.[skill] === 'verified') return 'verified';
+    const prereqsMet = mod.prerequisites.every(p => {
+      const pp = moduleProgress?.[p];
+      if (pp?.status === 'completed') return true;
+      const prereqMod = modules.find(m => m.id === p);
+      return prereqMod && knowledgeCheck?.[prereqMod.topic?.toLowerCase()] === 'verified';
     });
-    setIsBotTyping(true);
-    setTimeout(() => {
-      setIsBotTyping(false);
-      updateProgress((p) => ({
-        ...p,
-        wizardMessages: [{ role: 'bot', text: "Welcome to your personal career prep journey! Let's build a roadmap tailored just for you." }],
-      }));
-
-      setIsBotTyping(true);
-      setTimeout(() => {
-        setIsBotTyping(false);
-        updateProgress((p) => ({
-          ...p,
-          wizardMessages: [...p.wizardMessages, { role: 'bot', text: WIZARD_QUESTIONS[0].text }],
-        }));
-      }, 1000);
-    }, 1500);
+    if (mod.order === 1 || prereqsMet) return 'available';
+    return 'locked';
   };
 
-  // --- Chat Wizard Handlers ---
-  const handleWizardSubmit = (e, val = null) => {
-    if (e) e.preventDefault();
-    const answer = val !== null ? val : wizardInput;
-    if (!answer.trim()) return;
-
-    updateProgress((p) => ({
-      ...p,
-      wizardMessages: [...p.wizardMessages, { role: 'user', text: answer }],
-    }));
-    setWizardInput('');
-
-    const currentQ = WIZARD_QUESTIONS[wizardCurrentQIndex];
-    const newData = { ...collectedData, [currentQ.id]: answer };
-    const roleUpdate = currentQ.id === 'role' ? { targetRole: answer } : {};
-
-    const nextIndex = wizardCurrentQIndex + 1;
-    if (nextIndex < WIZARD_QUESTIONS.length) {
-      updateProgress((p) => ({
-        ...p,
-        collectedData: newData,
-        wizardCurrentQIndex: nextIndex,
-        ...roleUpdate,
-      }));
-      setIsBotTyping(true);
-      setTimeout(() => {
-        setIsBotTyping(false);
-        updateProgress((p) => ({
-          ...p,
-          wizardMessages: [...p.wizardMessages, { role: 'bot', text: WIZARD_QUESTIONS[nextIndex].text }],
-        }));
-      }, 1000);
-    } else {
-      updateProgress((p) => ({
-        ...p,
-        collectedData: newData,
-        ...roleUpdate,
-      }));
-      setIsBotTyping(true);
-      setTimeout(() => {
-        setIsBotTyping(false);
-        updateProgress((p) => ({
-          ...p,
-          wizardMessages: [...p.wizardMessages, { role: 'bot', text: "Perfect! I have all the details I need. Generating your custom roadmap..." }],
-        }));
-
-        setTimeout(() => {
-          generateRoadmap(newData);
-        }, 1500);
-      }, 1000);
-    }
-  };
-
-  const generateRoadmap = async (data) => {
-    setLoading(true);
-    updateProgress({ step: 'generating' });
-
-    try {
-      const res = await api.post('/career/roadmap', {
-        currentRole: data.knowledge || 'Beginner',
-        targetRole: data.role || 'IT Professional',
-        currentSkills: [],
-        timeframe: data.monthsToPrepare ? `${data.monthsToPrepare} months` : '6 months',
-      });
-      setRoadmap(res.data);
-      updateProgress({ step: 'display', expandedPhases: {} });
-    } catch (err) {
-      console.error(err);
-      updateProgress({ step: 'intro' });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSendTutorMessage = async (e) => {
-    e.preventDefault();
-    if (!chatInput.trim()) return;
-
-    const userMsg = { role: 'user', content: chatInput };
-    const historyWithUser = [...messages, userMsg];
-    updateProgress({ messages: historyWithUser });
-    setChatInput('');
-    setChatLoading(true);
-
-    try {
-      const res = await api.post('/job-prep/tutor', {
-        message: userMsg.content,
-        history: messages,
-      });
-      updateProgress({
-        messages: [...historyWithUser, { role: 'assistant', content: res.data.data.reply }],
-      });
-    } catch (err) {
-      updateProgress({
-        messages: [...historyWithUser, { role: 'assistant', content: "Sorry, I couldn't process that right now." }],
-      });
-    } finally {
-      setChatLoading(false);
-    }
-  };
-
-  const togglePhase = (idx) => {
-    updateProgress({
-      expandedPhases: { ...expandedPhases, [idx]: !expandedPhases[idx] },
-    });
+  const statusConfig = {
+    completed: { icon: 'check_circle', fill: 1, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-950/30', border: 'border-emerald-200 dark:border-emerald-800', label: 'Completed', badge: 'badge-success' },
+    verified: { icon: 'verified', fill: 1, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-950/30', border: 'border-blue-200 dark:border-blue-800', label: 'Verified', badge: 'badge-info' },
+    'in-progress': { icon: 'play_circle', fill: 1, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-950/30', border: 'border-amber-200 dark:border-amber-800', label: 'In Progress', badge: 'badge-warning' },
+    available: { icon: 'lock_open', fill: 0, color: 'text-slate-500', bg: 'bg-white dark:bg-slate-900', border: 'border-slate-200 dark:border-slate-700', label: 'Available', badge: 'badge-neutral' },
+    locked: { icon: 'lock', fill: 0, color: 'text-slate-300 dark:text-slate-600', bg: 'bg-slate-50 dark:bg-slate-900/40', border: 'border-slate-100 dark:border-slate-800', label: 'Locked', badge: 'badge-neutral' },
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
-        <div className="p-4 bg-emerald-100 text-emerald-600 rounded-2xl shadow-inner shadow-emerald-200/50">
-          <Rocket className="w-8 h-8" />
+    <>
+    {showFlashcards && (
+      <FlashcardReview cards={flashcards} onClose={() => setShowFlashcards(false)} />
+    )}
+    <div className="max-w-3xl mx-auto py-10 fade-up">
+      <div className="text-center mb-8">
+        <h2 className="page-title mb-2">Your Learning Plan</h2>
+        <p className="text-slate-500 dark:text-slate-400">{completedCount}/{totalModules} modules completed</p>
+        <div className="progress-track max-w-xs mx-auto mt-3">
+          <div className="progress-fill bg-gradient-to-r from-emerald-400 to-emerald-600" style={{ width: `${totalModules > 0 ? (completedCount / totalModules) * 100 : 0}%` }} />
         </div>
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Zero to Hero Track</h1>
-          <p className="text-slate-500 mt-1 text-lg">
-            Your complete guided journey from beginner to hired.
-            {isSaving && <span className="ml-2 text-emerald-600 text-sm">Saving…</span>}
-          </p>
+        {completedWithLowScore > 0 && (
+          <button onClick={() => setShowFlashcards(true)} className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 text-sm font-semibold hover:bg-amber-200 dark:hover:bg-amber-950/50 transition-colors">
+            <Icon name="style" fill={1} className="text-base" />
+            Review Flashcards ({completedWithLowScore} module{completedWithLowScore > 1 ? 's' : ''} below 80%)
+          </button>
+        )}
+        {completedCount > 0 && completedWithLowScore === 0 && (
+          <button onClick={() => setShowFlashcards(true)} className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 text-sm font-semibold hover:bg-blue-100 dark:hover:bg-blue-950/50 transition-colors">
+            <Icon name="style" fill={0} className="text-base" />
+            Flashcard Review
+          </button>
+        )}
+      </div>
+      <div className="space-y-3">
+        {modules.map((mod) => {
+          const status = getStatus(mod);
+          const cfg = statusConfig[status];
+          const score = moduleProgress?.[mod.id]?.score;
+          const clickable = status === 'available' || status === 'in-progress';
+          return (
+            <div key={mod.id}
+              className={`flex items-center gap-4 p-4 rounded-2xl border ${cfg.border} ${cfg.bg} transition-all ${clickable ? 'cursor-pointer hover:shadow-md' : ''} ${status === 'locked' ? 'opacity-60' : ''}`}
+              onClick={() => clickable && onStartModule(mod.id)}>
+              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0">
+                <Icon name={cfg.icon} fill={cfg.fill} className={`text-xl ${cfg.color}`} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-bold text-sm text-slate-900 dark:text-white">{mod.topic}</span>
+                  <span className={`badge text-[10px] ${cfg.badge}`}>{cfg.label}</span>
+                  {score != null && <span className="text-xs font-bold text-emerald-600">{score}%</span>}
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  {mod.subtopicCount || 0} subtopics · ~{mod.estimatedHours}h
+                </p>
+              </div>
+              {clickable && <Icon name="arrow_forward" className="text-lg text-slate-400 shrink-0" />}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+    </>
+  );
+}
+
+// ─── Module Learning ───────────────────────────────────────────────────────
+
+function ModuleLearning({ moduleData, completedSubtopics, onSubtopicComplete, onTakeAssessment, onBack }) {
+  const [activeSubtopic, setActiveSubtopic] = useState(0);
+  const [tutorOpen, setTutorOpen] = useState(false);
+  const [tutorMessages, setTutorMessages] = useState([]);
+  const [tutorInput, setTutorInput] = useState('');
+  const [tutorLoading, setTutorLoading] = useState(false);
+  const chatEndRef = useRef(null);
+
+  if (!moduleData) return null;
+  const done = completedSubtopics || [];
+  const allDone = moduleData.subtopics.every(s => done.includes(s.id));
+  const currentSub = moduleData.subtopics[activeSubtopic];
+
+  const handleAskTutor = async () => {
+    if (!tutorInput.trim() || tutorLoading) return;
+    const userMsg = tutorInput.trim();
+    setTutorInput('');
+    setTutorMessages(prev => [...prev, { role: 'user', content: userMsg }]);
+    setTutorLoading(true);
+    try {
+      const history = tutorMessages.map(m => ({ role: m.role, content: m.content }));
+      const { data } = await api.post('/ai-tutor/chat', { topic: moduleData.topic, message: userMsg, history });
+      setTutorMessages(prev => [...prev, { role: 'assistant', content: data.reply || data.response || 'I could not generate a response.' }]);
+    } catch {
+      setTutorMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, the AI tutor is currently unavailable.' }]);
+    } finally {
+      setTutorLoading(false);
+      setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    }
+  };
+
+  return (
+    <div className="max-w-5xl mx-auto py-8 fade-up">
+      <button onClick={onBack} className="btn-ghost mb-6"><Icon name="arrow_back" className="text-lg" /> Back to Plan</button>
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex-1 min-w-0">
+          {/* Module header */}
+          <div className="card p-6 rounded-2xl mb-4">
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">{moduleData.topic}</h2>
+              <span className="text-xs font-bold text-slate-400">{done.length}/{moduleData.subtopics.length} done</span>
+            </div>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">{moduleData.description}</p>
+            <div className="progress-track">
+              <div className="progress-fill bg-gradient-to-r from-blue-400 to-blue-600"
+                style={{ width: `${moduleData.subtopics.length > 0 ? (done.length / moduleData.subtopics.length) * 100 : 0}%` }} />
+            </div>
+          </div>
+
+          {/* Subtopic tabs */}
+          <div className="flex gap-1 flex-wrap mb-4">
+            {moduleData.subtopics.map((sub, i) => {
+              const isDone = done.includes(sub.id);
+              return (
+                <button key={sub.id} onClick={() => setActiveSubtopic(i)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    i === activeSubtopic ? 'bg-blue-600 text-white' :
+                    isDone ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400' :
+                    'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
+                  {isDone && <Icon name="check" fill={0} className="text-xs" />}
+                  {sub.title}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Subtopic content */}
+          {currentSub && (
+            <div className="card p-6 rounded-2xl">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">{currentSub.title}</h3>
+              <div className="mb-6">
+                <p className="text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap text-sm">{currentSub.description}</p>
+              </div>
+              {currentSub.resources?.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Learning Resources</h4>
+                  <div className="space-y-2">
+                    {currentSub.resources.map((r, ri) => (
+                      <a key={ri} href={r.url} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-blue-50 dark:hover:bg-blue-950/20 border border-slate-200 dark:border-slate-700 transition-colors group">
+                        <Icon name={r.type === 'video' ? 'play_circle' : r.type === 'course' ? 'school' : 'article'}
+                          className="text-lg text-slate-400 group-hover:text-blue-500" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400">{r.title}</p>
+                          <p className="text-xs text-slate-400 capitalize">{r.type}</p>
+                        </div>
+                        <Icon name="open_in_new" className="text-sm text-slate-300 group-hover:text-blue-400" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-800">
+                <button onClick={() => onSubtopicComplete(currentSub.id)} disabled={done.includes(currentSub.id)}
+                  className={`btn-primary ${done.includes(currentSub.id) ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                  {done.includes(currentSub.id) ? <><Icon name="check_circle" fill={1} className="text-lg" /> Completed</> : <><Icon name="check" className="text-lg" /> Mark Complete</>}
+                </button>
+                {activeSubtopic < moduleData.subtopics.length - 1 && (
+                  <button onClick={() => setActiveSubtopic(activeSubtopic + 1)} className="btn-ghost">Next <Icon name="arrow_forward" className="text-lg" /></button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Assessment CTA */}
+          {allDone && (
+            <div className="card p-6 rounded-2xl mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-200 dark:border-blue-800">
+              <div className="flex items-center gap-4 flex-wrap">
+                <div className="w-12 h-12 rounded-2xl bg-blue-500 flex items-center justify-center shrink-0">
+                  <Icon name="quiz" fill={1} className="text-white text-2xl" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-slate-900 dark:text-white">Ready for the assessment!</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Test your understanding of {moduleData.topic}.</p>
+                </div>
+                <button onClick={onTakeAssessment} className="btn-primary-lg shrink-0">
+                  Take Assessment <Icon name="arrow_forward" className="text-lg" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* AI Tutor Sidebar */}
+        <div className="lg:w-80 shrink-0">
+          <div className="card rounded-2xl overflow-hidden sticky top-20">
+            <button onClick={() => setTutorOpen(!tutorOpen)}
+              className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+              <div className="flex items-center gap-2">
+                <Icon name="smart_toy" fill={1} className="text-lg text-blue-500" />
+                <span className="font-bold text-sm text-slate-900 dark:text-white">AI Tutor</span>
+              </div>
+              <Icon name={tutorOpen ? 'expand_less' : 'expand_more'} className="text-lg text-slate-400" />
+            </button>
+            {tutorOpen && (
+              <div className="border-t border-slate-200 dark:border-slate-800">
+                <div className="h-64 overflow-y-auto p-4 space-y-3">
+                  {tutorMessages.length === 0 && <p className="text-xs text-slate-400 text-center py-8">Ask me anything about {moduleData.topic}!</p>}
+                  {tutorMessages.map((msg, i) => (
+                    <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-[85%] px-3 py-2 rounded-xl text-sm ${msg.role === 'user' ? 'bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200'}`}>
+                        <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                      </div>
+                    </div>
+                  ))}
+                  {tutorLoading && (
+                    <div className="flex justify-start"><div className="bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl"><div className="flex gap-1">
+                      <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div></div></div>
+                  )}
+                  <div ref={chatEndRef} />
+                </div>
+                <div className="p-3 border-t border-slate-200 dark:border-slate-800">
+                  <div className="flex gap-2">
+                    <input type="text" value={tutorInput} onChange={e => setTutorInput(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleAskTutor()} placeholder={`Ask about ${moduleData.topic}...`}
+                      className="input-field text-xs py-2" />
+                    <button onClick={handleAskTutor} disabled={tutorLoading || !tutorInput.trim()} className="btn-primary px-3 py-2">
+                      <Icon name="send" className="text-sm" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Module Assessment ─────────────────────────────────────────────────────
+
+function ModuleAssessment({ moduleId, moduleTopic, topics, onComplete, onBack }) {
+  const [questions, setQuestions] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [currentQ, setCurrentQ] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [result, setResult] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [assessmentId, setAssessmentId] = useState(null);
+
+  const fetchAssessment = useCallback(() => {
+    setLoading(true);
+    setResult(null);
+    setAnswers({});
+    setCurrentQ(0);
+    api.post('/learning-modules/module-assessment', { moduleId, topics, difficulty: 'beginner' })
+      .then(({ data }) => { setQuestions(data.questions); setAssessmentId(data.assessmentId); })
+      .catch(() => setQuestions([]))
+      .finally(() => setLoading(false));
+  }, [moduleId, topics]);
+
+  useEffect(() => { fetchAssessment(); }, [fetchAssessment]);
+
+  const handleSubmit = async () => {
+    if (submitting || !questions) return;
+    setSubmitting(true);
+    try {
+      const { data } = await api.post('/learning-modules/module-assessment/submit', { assessmentId, moduleId, answers, questions });
+      setResult(data);
+    } catch { setResult({ score: 0, passed: false, message: 'Failed to submit. Please try again.' }); }
+    finally { setSubmitting(false); }
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-2xl mx-auto py-16 text-center">
+        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-slate-500">Generating assessment for {moduleTopic}...</p>
+      </div>
+    );
+  }
+
+  if (result) {
+    return (
+      <div className="max-w-2xl mx-auto py-10 fade-up">
+        <div className="card p-8 rounded-2xl text-center">
+          <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${result.passed ? 'bg-emerald-100 dark:bg-emerald-950/30' : 'bg-amber-100 dark:bg-amber-950/30'}`}>
+            <Icon name={result.passed ? 'celebration' : 'refresh'} fill={result.passed ? 1 : 0}
+              className={`text-4xl ${result.passed ? 'text-emerald-500' : 'text-amber-500'}`} />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{result.passed ? 'You passed!' : 'Not quite yet'}</h2>
+          <p className="text-lg font-extrabold text-blue-600 mb-2">{result.score}%</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">{result.message}</p>
+
+          {result.results && (
+            <div className="text-left mb-6 space-y-3">
+              {result.results.map((r, i) => (
+                <div key={i} className={`p-3 rounded-xl border ${r.isCorrect ? 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/20' : 'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/20'}`}>
+                  <div className="flex items-start gap-2">
+                    <Icon name={r.isCorrect ? 'check_circle' : 'cancel'} fill={1} className={`text-base mt-0.5 ${r.isCorrect ? 'text-emerald-500' : 'text-red-500'}`} />
+                    <div>
+                      <p className="text-xs font-bold text-slate-500 uppercase">{r.type} · {r.topic}</p>
+                      {r.explanation && <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">{r.explanation}</p>}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="flex items-center justify-center gap-4">
+            {result.passed ? (
+              <button onClick={() => {
+                const failedQs = (result.results || []).filter(r => !r.isCorrect).map(r => {
+                  const q = questions.find(q2 => q2.id === r.questionId);
+                  return q ? { id: q.id, question: q.text, answer: q.explanation || '', topic: q.topic || '', type: q.type } : null;
+                }).filter(Boolean);
+                onComplete(result.score, failedQs);
+              }} className="btn-primary-lg">
+                Continue to Next Module <Icon name="arrow_forward" className="text-lg" />
+              </button>
+            ) : (
+              <>
+                <button onClick={onBack} className="btn-secondary-lg">Review Material</button>
+                <button onClick={fetchAssessment} className="btn-primary-lg">Try Again <Icon name="refresh" className="text-lg" /></button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!questions || questions.length === 0) {
+    return (
+      <div className="max-w-2xl mx-auto py-16 text-center">
+        <p className="text-slate-500">No questions available.</p>
+        <button onClick={onBack} className="btn-secondary mt-4">Go Back</button>
+      </div>
+    );
+  }
+
+  const q = questions[currentQ];
+  const totalQ = questions.length;
+  const answeredCount = Object.keys(answers).length;
+
+  return (
+    <div className="max-w-2xl mx-auto py-10 fade-up">
+      <button onClick={onBack} className="btn-ghost mb-4"><Icon name="arrow_back" className="text-lg" /> Back</button>
+      <div className="card p-6 rounded-2xl mb-4">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-xs font-bold text-blue-500 uppercase tracking-wider">{moduleTopic} Assessment</span>
+          <span className="text-xs font-bold text-slate-400">{currentQ + 1} / {totalQ}</span>
+        </div>
+        <div className="progress-track mt-2">
+          <div className="progress-fill bg-blue-500" style={{ width: `${((currentQ + 1) / totalQ) * 100}%` }} />
         </div>
       </div>
 
-      {/* --- INTRO STATE --- */}
-      {step === 'intro' && (
-        <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          
-          <div className="glass-card rounded-3xl p-10 border border-white/50 relative overflow-hidden group bg-white shadow-xl shadow-slate-200/50">
-            {/* Background decoration */}
-            <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 opacity-10 blur-3xl group-hover:opacity-20 transition-opacity duration-700" />
-            
-            <div className="relative z-10 flex flex-col md:flex-row gap-10 items-center">
-              <div className="flex-1 space-y-6">
-                <div className="inline-flex items-center px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full font-bold text-sm tracking-wide">
-                  <Info className="w-4 h-4 mr-2" />
-                  Currently Optimized for IT Sector
-                </div>
-                
-                <h2 className="text-4xl font-black text-slate-900 leading-tight">
-                  Start Building Your Career <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600">From Scratch</span>
-                </h2>
-                
-                <p className="text-slate-600 text-lg leading-relaxed">
-                  The Zero to Hero page is designed to guide you step-by-step. We will help you identify your interests, build a hyper-targeted project roadmap, and provide you with an interactive AI tutor to answer all your technical questions along the way.
-                </p>
-
-                <div className="space-y-4">
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 bg-emerald-100 text-emerald-600 rounded-xl mt-1">
-                      <Briefcase className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-slate-900">Create Impactful Projects</h4>
-                      <p className="text-slate-500 text-sm">Build real-world applications that recruiters actually want to see.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 bg-blue-100 text-blue-600 rounded-xl mt-1">
-                      <GraduationCap className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-slate-900">Explore Components</h4>
-                      <p className="text-slate-500 text-sm">Learn the 'why' and 'how' of modern tech stacks with our integrated AI tutor.</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-4 mt-6">
-                  {roadmap && (
-                    <button 
-                      onClick={() => updateProgress({ step: 'display' })}
-                      className="flex items-center justify-center gap-2 px-8 py-4 bg-emerald-600 text-white rounded-2xl font-bold text-lg hover:bg-emerald-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-emerald-900/20"
-                    >
-                      <Play className="w-5 h-5 fill-current" />
-                      Continue Saved Journey
-                    </button>
-                  )}
-                  <button 
-                    onClick={startWizard}
-                    className={`flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-bold text-lg hover:scale-[1.02] active:scale-[0.98] transition-all ${
-                      roadmap 
-                        ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200' 
-                        : 'bg-slate-900 text-white hover:bg-slate-800 shadow-xl shadow-slate-900/20'
-                    }`}
-                  >
-                    {!roadmap && <Play className="w-5 h-5 fill-current" />}
-                    {roadmap ? 'Start A New Path' : 'Start My Journey'}
-                  </button>
-                </div>
-              </div>
-              
-              <div className="flex-1 w-full flex justify-center">
-                {/* Mock illustration / aesthetic block */}
-                <div className="relative w-full max-w-sm aspect-square bg-gradient-to-br from-slate-50 to-slate-100 rounded-full border-8 border-white shadow-2xl flex items-center justify-center">
-                  <div className="absolute inset-0 bg-emerald-500/10 rounded-full animate-pulse" />
-                  <Rocket className="w-32 h-32 text-emerald-500 drop-shadow-2xl" />
-                </div>
-              </div>
-            </div>
-          </div>
+      <div className="card p-6 rounded-2xl">
+        <div className="flex items-center gap-2 mb-4">
+          <span className={`badge ${q.type === 'mcq' ? 'badge-info' : q.type === 'coding' ? 'badge-warning' : q.type === 'system-design' ? 'badge-danger' : 'badge-neutral'}`}>
+            {q.type === 'mcq' ? 'Multiple Choice' : q.type === 'short-answer' ? 'Short Answer' : q.type === 'system-design' ? 'System Design' : 'Coding'}
+          </span>
+          {q.topic && <span className="text-xs text-slate-400">{q.topic}</span>}
         </div>
-      )}
+        <p className="text-slate-900 dark:text-white font-semibold mb-5 leading-relaxed">{q.text}</p>
 
-      {/* --- CHAT WIZARD STATE --- */}
-      {step === 'chat-wizard' && (
-        <div className="max-w-3xl mx-auto h-[600px] flex flex-col bg-slate-50 rounded-3xl shadow-2xl shadow-indigo-100 border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-500">
-          {/* Header */}
-          <div className="px-6 py-4 bg-white border-b border-slate-200 flex items-center gap-4">
-            <div className="relative">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg">
-                <Bot className="w-6 h-6 text-white" />
-              </div>
-              <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-slate-900">Career Architect AI</h2>
-              <p className="text-sm text-slate-500">Online • Helping you build your path</p>
-            </div>
-          </div>
-
-          {/* Chat Messages */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            {wizardMessages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-4 fade-in duration-300`}>
-                <div className="flex items-end gap-2 max-w-[80%]">
-                  {msg.role === 'bot' && (
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mb-1">
-                      <Bot className="w-4 h-4 text-emerald-600" />
-                    </div>
-                  )}
-                  <div className={`px-5 py-3.5 rounded-2xl text-[15px] leading-relaxed shadow-sm ${
-                    msg.role === 'user' 
-                      ? 'bg-slate-900 text-white rounded-br-sm' 
-                      : 'bg-white text-slate-800 border border-slate-200 rounded-bl-sm'
-                  }`}>
-                    {msg.text}
-                  </div>
-                  {msg.role === 'user' && (
-                    <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0 mb-1">
-                      <User className="w-4 h-4 text-slate-600" />
-                    </div>
-                  )}
-                </div>
-              </div>
+        {q.type === 'mcq' && q.options && (
+          <div className="space-y-2">
+            {q.options.map((opt, oi) => (
+              <button key={oi} onClick={() => setAnswers(a => ({ ...a, [q.id]: oi }))}
+                className={`w-full text-left p-3.5 rounded-xl border-2 text-sm font-medium transition-all ${parseInt(answers[q.id]) === oi ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30 text-blue-800 dark:text-blue-200' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'}`}>
+                <span className="font-bold text-slate-400 mr-2">{String.fromCharCode(65 + oi)}.</span>{opt}
+              </button>
             ))}
-
-            {/* Typing Indicator */}
-            {isBotTyping && (
-              <div className="flex justify-start animate-in fade-in duration-300">
-                <div className="flex items-end gap-2 max-w-[80%]">
-                  <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mb-1">
-                    <Bot className="w-4 h-4 text-emerald-600" />
-                  </div>
-                  <div className="px-5 py-4 bg-white border border-slate-200 rounded-2xl rounded-bl-sm shadow-sm flex gap-1">
-                    <div className="w-2 h-2 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <div className="w-2 h-2 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <div className="w-2 h-2 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </div>
-                </div>
-              </div>
-            )}
-            <div ref={chatEndRef} />
           </div>
+        )}
 
-          {/* Chat Input / Quick Replies */}
-          <div className="bg-white border-t border-slate-200 p-4">
-            {!isBotTyping && WIZARD_QUESTIONS[wizardCurrentQIndex]?.type === 'options' ? (
-              <div className="flex flex-wrap gap-2 justify-center">
-                {WIZARD_QUESTIONS[wizardCurrentQIndex].options.map((opt, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handleWizardSubmit(null, opt)}
-                    className="px-6 py-3 bg-emerald-50 text-emerald-700 font-bold rounded-xl border border-emerald-200 hover:bg-emerald-500 hover:text-white transition-colors"
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <form onSubmit={handleWizardSubmit} className="relative flex items-center">
-                <input
-                  type="text"
-                  value={wizardInput}
-                  onChange={(e) => setWizardInput(e.target.value)}
-                  disabled={isBotTyping || wizardCurrentQIndex >= WIZARD_QUESTIONS.length}
-                  placeholder={isBotTyping ? "AI is typing..." : "Type your answer..."}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-6 pr-14 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 text-[15px]"
-                />
-                <button
-                  type="submit"
-                  disabled={isBotTyping || !wizardInput.trim() || wizardCurrentQIndex >= WIZARD_QUESTIONS.length}
-                  className="absolute right-2 p-2.5 bg-slate-900 text-white rounded-xl hover:bg-slate-800 disabled:opacity-50 disabled:hover:bg-slate-900 transition-colors"
-                >
-                  <Send className="w-5 h-5" />
-                </button>
-              </form>
-            )}
+        {(q.type === 'short-answer' || q.type === 'system-design') && (
+          <textarea value={answers[q.id] || ''} onChange={e => setAnswers(a => ({ ...a, [q.id]: e.target.value }))}
+            placeholder="Type your answer here..." rows={4} className="textarea-field" />
+        )}
+
+        {q.type === 'coding' && (
+          <div>
+            {q.starterCode && <pre className="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl text-sm font-mono text-slate-800 dark:text-slate-200 mb-3 overflow-x-auto">{q.starterCode}</pre>}
+            <textarea value={answers[q.id] || q.starterCode || ''} onChange={e => setAnswers(a => ({ ...a, [q.id]: e.target.value }))}
+              placeholder="Write your code here..." rows={8} className="textarea-field font-mono text-sm" />
           </div>
+        )}
+
+        <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-200 dark:border-slate-800">
+          <button onClick={() => currentQ > 0 && setCurrentQ(currentQ - 1)} disabled={currentQ === 0} className="btn-ghost disabled:opacity-30">
+            <Icon name="arrow_back" className="text-lg" /> Previous
+          </button>
+          {currentQ < totalQ - 1 ? (
+            <button onClick={() => setCurrentQ(currentQ + 1)} className="btn-primary">Next <Icon name="arrow_forward" className="text-lg" /></button>
+          ) : (
+            <button onClick={handleSubmit} disabled={submitting || answeredCount < totalQ} className="btn-primary-lg disabled:opacity-40">
+              {submitting ? 'Evaluating...' : 'Submit Assessment'}
+              <Icon name={submitting ? 'sync' : 'check'} className={`text-lg ${submitting ? 'animate-spin' : ''}`} />
+            </button>
+          )}
         </div>
+      </div>
+
+      <div className="flex justify-center gap-1.5 mt-4">
+        {questions.map((_, i) => (
+          <button key={i} onClick={() => setCurrentQ(i)}
+            className={`w-2.5 h-2.5 rounded-full transition-all ${i === currentQ ? 'bg-blue-500 scale-125' : answers[questions[i].id] != null ? 'bg-emerald-400' : 'bg-slate-200 dark:bg-slate-700'}`} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Component ────────────────────────────────────────────────────────
+
+export default function ZeroToHeroTrack() {
+  useActivityTracker('Zero to Hero');
+  const { data: progress, updateProgress, isLoading, isReady } = useUserProgress('zero-to-hero', DEFAULT_PROGRESS);
+  const [trackData, setTrackData] = useState(null);
+  const [currentModule, setCurrentModule] = useState(null);
+  const [viewState, setViewState] = useState(null);
+
+  const step = progress?.step || 'intro';
+
+  useEffect(() => {
+    if (progress?.track && !trackData) {
+      api.get(`/learning-modules/${progress.track}`).then(({ data }) => setTrackData(data)).catch(() => {});
+    }
+  }, [progress?.track]);
+
+  useEffect(() => {
+    if (progress?.currentModuleId && progress?.track && !currentModule) {
+      api.get(`/learning-modules/${progress.track}/${progress.currentModuleId}`).then(({ data }) => setCurrentModule(data)).catch(() => {});
+    }
+  }, [progress?.currentModuleId, progress?.track]);
+
+  if (isLoading || !isReady) {
+    return (
+      <div className="page-container">
+        <div className="flex flex-col items-center justify-center py-32 gap-4">
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-slate-400 font-medium">Loading your journey...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const handleStartInterview = () => updateProgress({ step: 'interview' });
+
+  const handleInterviewComplete = async (interviewData) => {
+    updateProgress({ step: 'plan', interviewData, track: interviewData.track || progress.track, knowledgeCheck: interviewData.knowledgeCheck || {} });
+    try {
+      const { data } = await api.get(`/learning-modules/${interviewData.track || progress.track}`);
+      setTrackData(data);
+    } catch {}
+  };
+
+  const handleStartModule = async (moduleId) => {
+    try {
+      const { data: modData } = await api.get(`/learning-modules/${progress.track}/${moduleId}`);
+      setCurrentModule(modData);
+      setViewState('learning');
+      updateProgress(prev => ({
+        ...prev, currentModuleId: moduleId,
+        modules: { ...(prev.modules || {}), [moduleId]: prev.modules?.[moduleId] || { status: 'in-progress', subtopicsCompleted: [] } },
+      }));
+    } catch {}
+  };
+
+  const handleSubtopicComplete = (subtopicId) => {
+    const moduleId = progress.currentModuleId;
+    updateProgress(prev => {
+      const mp = prev.modules?.[moduleId] || { status: 'in-progress', subtopicsCompleted: [] };
+      const completed = [...new Set([...(mp.subtopicsCompleted || []), subtopicId])];
+      return { ...prev, modules: { ...(prev.modules || {}), [moduleId]: { ...mp, status: 'in-progress', subtopicsCompleted: completed } } };
+    });
+  };
+
+  const handleAssessmentComplete = (score, failedQuestions = []) => {
+    const moduleId = progress.currentModuleId;
+    updateProgress(prev => ({
+      ...prev,
+      modules: {
+        ...(prev.modules || {}),
+        [moduleId]: {
+          status: 'completed',
+          score,
+          completedAt: new Date().toISOString(),
+          failedQuestions: failedQuestions.length > 0 ? failedQuestions : undefined,
+        },
+      },
+      currentModuleId: null,
+    }));
+    setViewState(null);
+    setCurrentModule(null);
+  };
+
+  const handleBackToPlan = () => { setViewState(null); setCurrentModule(null); };
+
+  return (
+    <div className="page-container">
+      {step === 'intro' && <IntroScreen onStart={handleStartInterview} hasProgress={progress.track != null} />}
+      {step === 'interview' && <InterviewWizard onComplete={handleInterviewComplete} initialData={progress.interviewData} />}
+      {step === 'plan' && !viewState && trackData && (
+        <LearningPlan modules={trackData.modules} moduleProgress={progress.modules} knowledgeCheck={progress.knowledgeCheck} onStartModule={handleStartModule} />
       )}
-
-      {/* --- GENERATING STATE --- */}
-      {step === 'generating' && (
-        <div className="glass-card rounded-3xl p-12 text-center max-w-xl mx-auto border border-white/50 mt-10 animate-in fade-in zoom-in-95 duration-500">
-          <div className="relative w-20 h-20 mx-auto mb-8">
-            <div className="absolute inset-0 border-4 border-emerald-100 rounded-full" />
-            <div className="absolute inset-0 border-4 border-emerald-500 rounded-full border-t-transparent animate-spin" />
-            <Bot className="w-8 h-8 text-emerald-600 absolute inset-0 m-auto" />
-          </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Architecting Your Blueprint</h2>
-          <p className="text-slate-600">Analyzing your {targetRole} goals and constructing a hyper-targeted 6-month plan...</p>
-        </div>
+      {step === 'plan' && viewState === 'learning' && currentModule && (
+        <ModuleLearning moduleData={currentModule} completedSubtopics={progress.modules?.[progress.currentModuleId]?.subtopicsCompleted || []}
+          onSubtopicComplete={handleSubtopicComplete} onTakeAssessment={() => setViewState('assessment')} onBack={handleBackToPlan} />
       )}
-
-      {/* --- DISPLAY STATE --- */}
-      {step === 'display' && roadmap && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          
-          {/* Main Roadmap Area */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="glass-card rounded-3xl p-8 border border-white/50">
-              <h2 className="text-3xl font-bold text-slate-900 mb-2">{roadmap.title}</h2>
-              <p className="text-slate-600 mb-6">{roadmap.summary}</p>
-              
-              <div className="space-y-4">
-                {roadmap.phases?.map((phase, idx) => (
-                  <div key={idx} className="bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden">
-                    <button
-                      onClick={() => togglePhase(idx)}
-                      className="w-full px-6 py-4 flex items-center justify-between hover:bg-slate-100 transition-colors"
-                    >
-                      <div className="flex items-center gap-4 text-left">
-                        <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 font-bold flex items-center justify-center shrink-0">
-                          {idx + 1}
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-slate-900">{phase.title}</h3>
-                          <p className="text-sm text-slate-500">{phase.duration}</p>
-                        </div>
-                      </div>
-                      {expandedPhases[idx] ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
-                    </button>
-
-                    {expandedPhases[idx] && (
-                      <div className="px-6 py-4 border-t border-slate-200 bg-white">
-                        <p className="text-slate-700 mb-4">{phase.description}</p>
-                        
-                        {phase.skills && (
-                          <div className="mb-4">
-                            <h4 className="font-bold text-slate-900 text-sm mb-2 uppercase tracking-wider">Skills</h4>
-                            <div className="flex flex-wrap gap-2">
-                              {phase.skills.map((s, i) => (
-                                <span key={i} className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-semibold">{s}</span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        
-                        {phase.goals && (
-                          <div>
-                            <h4 className="font-bold text-slate-900 text-sm mb-2 uppercase tracking-wider">Milestones</h4>
-                            <ul className="space-y-2">
-                              {phase.goals.map((g, i) => (
-                                <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                                  <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                                  {g}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* AI Tutor Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="glass-card rounded-3xl border border-white/50 flex flex-col h-[600px] sticky top-24">
-              <div className="p-4 border-b border-slate-200 bg-emerald-50/50 rounded-t-3xl flex items-center gap-3">
-                <div className="p-2 bg-emerald-200 text-emerald-700 rounded-xl">
-                  <Bot className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-900">AI Tutor</h3>
-                  <p className="text-xs text-slate-500">Ask any technical questions</p>
-                </div>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.map((msg, i) => (
-                  <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[85%] rounded-2xl p-3 text-sm ${
-                      msg.role === 'user' ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-slate-100 text-slate-800 rounded-bl-none'
-                    }`}>
-                      {msg.content}
-                    </div>
-                  </div>
-                ))}
-                {chatLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-slate-100 rounded-2xl rounded-bl-none p-3">
-                      <Loader2 className="w-4 h-4 animate-spin text-slate-500" />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <form onSubmit={handleSendTutorMessage} className="p-3 border-t border-slate-200 bg-white rounded-b-3xl flex gap-2">
-                <input
-                  type="text"
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  placeholder="Ask a question..."
-                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
-                <button
-                  type="submit"
-                  disabled={chatLoading || !chatInput.trim()}
-                  className="p-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:opacity-50"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
-              </form>
-            </div>
-          </div>
-
-        </div>
+      {step === 'plan' && viewState === 'assessment' && currentModule && (
+        <ModuleAssessment moduleId={progress.currentModuleId} moduleTopic={currentModule.topic}
+          topics={currentModule.subtopics.map(s => s.title)} onComplete={handleAssessmentComplete} onBack={() => setViewState('learning')} />
       )}
     </div>
   );

@@ -121,7 +121,7 @@ function getActivityColor(type) {
 function KPICard({ title, value, change, trend, icon: Icon, color }) {
   const isPositive = trend === 'up';
   return (
-    <div className="glass-card rounded-2xl p-6 flex flex-col gap-2">
+    <div className="card rounded-2xl p-6 flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <span className="text-on-surface-variant text-sm font-medium">{title}</span>
         <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center`}>
@@ -147,7 +147,7 @@ function KPICard({ title, value, change, trend, icon: Icon, color }) {
 function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="glass-card rounded-xl p-3 shadow-lg border border-outline/20">
+    <div className="card rounded-xl p-3 shadow-lg border border-outline/20">
       <p className="text-on-surface text-sm font-medium mb-1">{label}</p>
       {payload.map((entry, i) => (
         <p key={i} className="text-sm" style={{ color: entry.color }}>
@@ -256,11 +256,11 @@ export default function UniversityDashboard() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 w-full">
+    <div className="page-container">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="font-headline text-3xl text-on-surface flex items-center gap-3">
+          <h1 className="page-title font-headline text-3xl text-on-surface flex items-center gap-3">
             <span className="material-symbols-outlined text-4xl text-indigo-500" style={{ fontVariationSettings: "'FILL' 1" }}>school</span>
             University Dashboard
           </h1>
@@ -271,14 +271,14 @@ export default function UniversityDashboard() {
           <div className="relative">
             <button
               onClick={() => setShowDateDropdown(!showDateDropdown)}
-              className="glass-card rounded-xl px-4 py-2.5 flex items-center gap-2 text-sm text-on-surface hover:bg-surface-container/50 transition-colors border border-outline/20"
+              className="card rounded-xl px-4 py-2.5 flex items-center gap-2 text-sm text-on-surface hover:bg-surface-container/50 transition-colors border border-outline/20"
             >
               <Calendar className="w-4 h-4 text-on-surface-variant" />
               {dateRange}
               <ChevronDown className="w-4 h-4 text-on-surface-variant" />
             </button>
             {showDateDropdown && (
-              <div className="absolute right-0 top-full mt-1 z-20 glass-card rounded-xl border border-outline/20 shadow-xl py-1 min-w-[160px]">
+              <div className="absolute right-0 top-full mt-1 z-20 card rounded-xl border border-outline/20 shadow-xl py-1 min-w-[160px]">
                 {DATE_RANGES.map(range => (
                   <button
                     key={range}
@@ -294,7 +294,7 @@ export default function UniversityDashboard() {
           {/* Export */}
           <button
             onClick={handleExport}
-            className="glass-card rounded-xl px-4 py-2.5 flex items-center gap-2 text-sm text-on-surface hover:bg-surface-container/50 transition-colors border border-outline/20"
+            className="card rounded-xl px-4 py-2.5 flex items-center gap-2 text-sm text-on-surface hover:bg-surface-container/50 transition-colors border border-outline/20"
           >
             <Download className="w-4 h-4" />
             Export
@@ -320,7 +320,7 @@ export default function UniversityDashboard() {
       {/* Charts Row 1: Activity + Course Completion */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Student Progress Line Chart */}
-        <div className="glass-card rounded-2xl p-6 border border-outline/20">
+        <div className="card rounded-2xl p-6 border border-outline/20">
           <h2 className="font-headline text-lg text-on-surface mb-4 flex items-center gap-2">
             <span className="material-symbols-outlined text-blue-500">trending_up</span>
             Student Progress
@@ -339,7 +339,7 @@ export default function UniversityDashboard() {
         </div>
 
         {/* Course Completion Bar Chart */}
-        <div className="glass-card rounded-2xl p-6 border border-outline/20">
+        <div className="card rounded-2xl p-6 border border-outline/20">
           <h2 className="font-headline text-lg text-on-surface mb-4 flex items-center gap-2">
             <span className="material-symbols-outlined text-emerald-500">bar_chart</span>
             Course Completion by Department
@@ -359,7 +359,7 @@ export default function UniversityDashboard() {
       {/* Charts Row 2: Skill Distribution + Placement Readiness */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Skill Distribution Pie Chart */}
-        <div className="glass-card rounded-2xl p-6 border border-outline/20">
+        <div className="card rounded-2xl p-6 border border-outline/20">
           <h2 className="font-headline text-lg text-on-surface mb-4 flex items-center gap-2">
             <span className="material-symbols-outlined text-amber-500">pie_chart</span>
             Skill Distribution
@@ -397,7 +397,7 @@ export default function UniversityDashboard() {
         </div>
 
         {/* Placement Readiness Donut */}
-        <div className="glass-card rounded-2xl p-6 border border-outline/20">
+        <div className="card rounded-2xl p-6 border border-outline/20">
           <h2 className="font-headline text-lg text-on-surface mb-4 flex items-center gap-2">
             <span className="material-symbols-outlined text-purple-500">target</span>
             Placement Readiness
@@ -440,7 +440,7 @@ export default function UniversityDashboard() {
       </div>
 
       {/* At-Risk Students Table */}
-      <div className="glass-card rounded-2xl p-6 border border-outline/20 mb-8">
+      <div className="card rounded-2xl p-6 border border-outline/20 mb-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
           <h2 className="font-headline text-lg text-on-surface flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-rose-500" />
@@ -453,7 +453,7 @@ export default function UniversityDashboard() {
               placeholder="Search students..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-surface-container/50 border border-outline/20 text-on-surface text-sm placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+              className="w-full pl-9 input-field"
             />
           </div>
         </div>
@@ -514,7 +514,7 @@ export default function UniversityDashboard() {
       </div>
 
       {/* Department Breakdown */}
-      <div className="glass-card rounded-2xl p-6 border border-outline/20 mb-8">
+      <div className="card rounded-2xl p-6 border border-outline/20 mb-8">
         <h2 className="font-headline text-lg text-on-surface mb-4 flex items-center gap-2">
           <GraduationCap className="w-5 h-5 text-indigo-500" />
           Department Breakdown
@@ -566,7 +566,7 @@ export default function UniversityDashboard() {
       </div>
 
       {/* Recent Activity Feed */}
-      <div className="glass-card rounded-2xl p-6 border border-outline/20">
+      <div className="card rounded-2xl p-6 border border-outline/20">
         <h2 className="font-headline text-lg text-on-surface mb-4 flex items-center gap-2">
           <Clock className="w-5 h-5 text-blue-500" />
           Recent Activity

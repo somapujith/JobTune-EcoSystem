@@ -104,7 +104,7 @@ const Navbar = () => {
   return (
     <header className="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60">
       <div className="flex items-center px-5 lg:px-8 h-16 w-full max-w-[1400px] mx-auto gap-4">
-        <Link to="/" className="text-xl font-extrabold tracking-tight text-blue-700 dark:text-blue-400 font-headline flex-shrink-0 mr-1">
+        <Link to="/" className="text-xl font-extrabold tracking-tight text-blue-700 dark:text-blue-400 font-headline flex-shrink-0 mr-1 leading-none">
           JobTune
         </Link>
 
@@ -179,9 +179,9 @@ const Navbar = () => {
           <button
             onClick={() => setIsDark(!isDark)}
             title={isDark ? 'Light mode' : 'Dark mode'}
-            className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
-            {isDark ? <Sun className="w-4.5 h-4.5" /> : <Moon className="w-4.5 h-4.5" />}
+            {isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
           </button>
 
           <div className="hidden md:flex items-center gap-1.5 border-l pl-3 ml-1 border-slate-200 dark:border-slate-700">
@@ -202,8 +202,8 @@ const Navbar = () => {
                   title="Logout"
                   className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 font-medium transition-colors px-2.5 py-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20"
                 >
-                  <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 0" }}>logout</span>
-                  <span className="hidden lg:inline text-xs font-semibold">Sign Out</span>
+                  <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 0" }}>logout</span>
+                  <span className="hidden lg:inline text-xs font-semibold leading-none">Sign Out</span>
                 </button>
                 <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/40 overflow-hidden border-2 border-blue-200 dark:border-blue-800 shrink-0">
                   <img alt="User avatar" className="w-full h-full object-cover" src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id || '42'}`} />

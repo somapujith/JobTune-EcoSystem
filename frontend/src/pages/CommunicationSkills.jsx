@@ -174,7 +174,7 @@ export default function CommunicationSkills() {
     const color = score >= 80 ? '#10b981' : score >= 60 ? '#f59e0b' : '#ef4444';
     return (
       <div className="flex flex-col items-center">
-        <div className="w-16 h-16 rounded-full border-4 flex items-center justify-center font-black text-lg" style={{ borderColor: color, color }}>
+        <div className="w-16 h-16 rounded-full border-4 flex items-center justify-center font-extrabold text-lg" style={{ borderColor: color, color }}>
           {score}
         </div>
         <span className="text-xs text-on-surface-variant font-semibold mt-1">{label}</span>
@@ -190,7 +190,7 @@ export default function CommunicationSkills() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2 space-y-6">
         {/* Scenario selection */}
-        <div className="glass-card rounded-3xl p-6">
+        <div className="card rounded-2xl p-6">
           <h3 className="font-bold text-on-surface text-lg mb-4 flex items-center gap-2">
             <span className="material-symbols-outlined text-indigo-500" style={{ fontVariationSettings: "'FILL' 0" }}>theater_comedy</span>
             Select Scenario
@@ -214,7 +214,7 @@ export default function CommunicationSkills() {
         </div>
 
         {/* Input area */}
-        <div className="glass-card rounded-3xl p-6">
+        <div className="card rounded-2xl p-6">
           <h3 className="font-bold text-on-surface text-lg mb-4">Your Presentation</h3>
           <textarea
             value={presentationText}
@@ -233,7 +233,7 @@ export default function CommunicationSkills() {
 
         {/* Feedback */}
         {presentationFeedback && (
-          <div className="glass-card rounded-3xl p-6 space-y-6">
+          <div className="card rounded-2xl p-6 space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-on-surface text-lg flex items-center gap-2">
                 <span className="material-symbols-outlined text-emerald-500" style={{ fontVariationSettings: "'FILL' 1" }}>rate_review</span>
@@ -273,7 +273,7 @@ export default function CommunicationSkills() {
 
       {/* Tips sidebar */}
       <div className="space-y-6">
-        <div className="glass-card rounded-3xl p-6 sticky top-24">
+        <div className="card rounded-2xl p-6 sticky top-24">
           <h3 className="font-bold text-on-surface text-lg mb-4 flex items-center gap-2">
             <span className="material-symbols-outlined text-amber-500" style={{ fontVariationSettings: "'FILL' 1" }}>tips_and_updates</span>
             Communication Tips
@@ -315,7 +315,7 @@ export default function CommunicationSkills() {
           ))}
         </div>
 
-        <div className="glass-card rounded-3xl p-6 space-y-4">
+        <div className="card rounded-2xl p-6 space-y-4">
           <div className="p-3 bg-surface-container/50 rounded-xl border border-outline/10">
             <p className="text-on-surface-variant text-sm">
               <span className="font-bold text-on-surface">{selectedTemplate.name}: </span>{selectedTemplate.description}
@@ -345,7 +345,7 @@ export default function CommunicationSkills() {
         {/* Analysis Results */}
         {emailAnalysis && (
           <div className="space-y-6">
-            <div className="glass-card rounded-3xl p-6">
+            <div className="card rounded-2xl p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-on-surface text-lg flex items-center gap-2">
                   <span className="material-symbols-outlined text-emerald-500" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
@@ -373,7 +373,7 @@ export default function CommunicationSkills() {
             {/* Improved version side-by-side */}
             {emailAnalysis.improvedVersion && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="glass-card rounded-2xl p-5">
+                <div className="card rounded-2xl p-5">
                   <h4 className="font-bold text-on-surface text-sm mb-3 flex items-center gap-2">
                     <span className="material-symbols-outlined text-rose-400 text-base" style={{ fontVariationSettings: "'FILL' 0" }}>edit_note</span>
                     Your Version
@@ -382,7 +382,7 @@ export default function CommunicationSkills() {
                     <p className="text-on-surface-variant text-sm whitespace-pre-wrap leading-relaxed">{emailBody}</p>
                   </div>
                 </div>
-                <div className="glass-card rounded-2xl p-5">
+                <div className="card rounded-2xl p-5">
                   <h4 className="font-bold text-on-surface text-sm mb-3 flex items-center gap-2">
                     <span className="material-symbols-outlined text-emerald-500 text-base" style={{ fontVariationSettings: "'FILL' 1" }}>auto_fix_high</span>
                     Improved Version
@@ -399,7 +399,7 @@ export default function CommunicationSkills() {
 
       {/* Tips sidebar */}
       <div className="space-y-6">
-        <div className="glass-card rounded-3xl p-6 sticky top-24">
+        <div className="card rounded-2xl p-6 sticky top-24">
           <h3 className="font-bold text-on-surface text-lg mb-4 flex items-center gap-2">
             <span className="material-symbols-outlined text-amber-500" style={{ fontVariationSettings: "'FILL' 1" }}>tips_and_updates</span>
             Email Best Practices
@@ -446,7 +446,7 @@ export default function CommunicationSkills() {
         </div>
 
         {/* Message input */}
-        <div className="glass-card rounded-3xl p-6">
+        <div className="card rounded-2xl p-6">
           <h3 className="font-bold text-on-surface text-lg mb-2">{selectedHRScenario.name}</h3>
           <p className="text-on-surface-variant text-sm mb-4">{selectedHRScenario.description}. Write your professional message below.</p>
           <textarea
@@ -466,7 +466,7 @@ export default function CommunicationSkills() {
 
         {/* Feedback */}
         {hrFeedback && (
-          <div className="glass-card rounded-3xl p-6 space-y-6">
+          <div className="card rounded-2xl p-6 space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-on-surface text-lg flex items-center gap-2">
                 <span className="material-symbols-outlined text-emerald-500" style={{ fontVariationSettings: "'FILL' 1" }}>rate_review</span>
@@ -518,7 +518,7 @@ export default function CommunicationSkills() {
 
       {/* Tips sidebar */}
       <div className="space-y-6">
-        <div className="glass-card rounded-3xl p-6 sticky top-24">
+        <div className="card rounded-2xl p-6 sticky top-24">
           <h3 className="font-bold text-on-surface text-lg mb-4 flex items-center gap-2">
             <span className="material-symbols-outlined text-amber-500" style={{ fontVariationSettings: "'FILL' 1" }}>tips_and_updates</span>
             HR Communication Tips
@@ -541,11 +541,11 @@ export default function CommunicationSkills() {
   // ─────────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="w-full max-w-7xl mx-auto py-16 px-4 sm:px-6">
+    <div className="page-container">
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12 gap-8">
         <div>
-          <h1 className="text-4xl font-black text-on-surface font-headline mb-3 flex items-center gap-4">
+          <h1 className="text-4xl font-extrabold text-on-surface font-headline mb-3 flex items-center gap-4">
             <span className="material-symbols-outlined text-indigo-500 text-4xl" style={{ fontVariationSettings: "'FILL' 0" }}>record_voice_over</span>
             Communication Skills
           </h1>
@@ -555,7 +555,7 @@ export default function CommunicationSkills() {
         </div>
 
         {/* Communication Score */}
-        <div className="glass-card rounded-2xl p-5 flex items-center gap-4 shrink-0">
+        <div className="card rounded-2xl p-5 flex items-center gap-4 shrink-0">
           <div className="relative w-16 h-16">
             <svg className="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
               <circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" className="text-surface-container/50" strokeWidth="4" />
@@ -566,7 +566,7 @@ export default function CommunicationSkills() {
                 strokeDasharray={`${(communicationScore / 100) * 176} 176`}
               />
             </svg>
-            <span className="absolute inset-0 flex items-center justify-center font-black text-on-surface text-sm">{communicationScore}</span>
+            <span className="absolute inset-0 flex items-center justify-center font-extrabold text-on-surface text-sm">{communicationScore}</span>
           </div>
           <div>
             <p className="font-bold text-on-surface text-sm">Communication Score</p>

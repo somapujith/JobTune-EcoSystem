@@ -157,7 +157,7 @@ export default function ProjectWorkspace() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-24 flex justify-center">
+      <div className="page-container flex justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
       </div>
     );
@@ -193,7 +193,7 @@ export default function ProjectWorkspace() {
           </button>
 
           {/* Overview Card */}
-          <div className="glass-card rounded-3xl p-6 mb-6">
+          <div className="card rounded-2xl p-6 mb-6">
             <div className="flex items-start justify-between flex-wrap gap-4">
               <div className="flex-1">
                 <h2 className="text-2xl font-bold text-on-surface">{proj.name}</h2>
@@ -235,7 +235,7 @@ export default function ProjectWorkspace() {
           </div>
 
           {/* Tasks / Checklist */}
-          <div className="glass-card rounded-3xl p-6 mb-6">
+          <div className="card rounded-2xl p-6 mb-6">
             <h3 className="text-lg font-bold text-on-surface mb-4 flex items-center gap-2">
               <span className="material-symbols-outlined text-emerald-500">checklist</span>
               Tasks
@@ -319,7 +319,7 @@ export default function ProjectWorkspace() {
           </div>
 
           {/* Notes */}
-          <div className="glass-card rounded-3xl p-6 mb-6">
+          <div className="card rounded-2xl p-6 mb-6">
             <h3 className="text-lg font-bold text-on-surface mb-3 flex items-center gap-2">
               <span className="material-symbols-outlined text-amber-500">sticky_note_2</span>
               Notes
@@ -341,7 +341,7 @@ export default function ProjectWorkspace() {
           </div>
 
           {/* Team Members (Placeholder) */}
-          <div className="glass-card rounded-3xl p-6 mb-6">
+          <div className="card rounded-2xl p-6 mb-6">
             <h3 className="text-lg font-bold text-on-surface mb-3 flex items-center gap-2">
               <span className="material-symbols-outlined text-sky-500">group</span>
               Team Members
@@ -362,7 +362,7 @@ export default function ProjectWorkspace() {
 
           {/* Timeline / Milestones */}
           {steps.length > 0 && (
-            <div className="glass-card rounded-3xl p-6">
+            <div className="card rounded-2xl p-6">
               <h3 className="text-lg font-bold text-on-surface mb-4 flex items-center gap-2">
                 <span className="material-symbols-outlined text-purple-500">timeline</span>
                 Milestones
@@ -431,7 +431,7 @@ export default function ProjectWorkspace() {
             { label: 'In Progress', value: stats.inProgress, icon: 'pending', color: 'amber' },
             { label: 'Completed', value: stats.completed, icon: 'check_circle', color: 'emerald' },
           ].map((s) => (
-            <div key={s.label} className="glass-card rounded-2xl p-4 text-center">
+            <div key={s.label} className="card rounded-2xl p-4 text-center">
               <span className={`material-symbols-outlined text-${s.color}-500 text-2xl`}>{s.icon}</span>
               <p className="text-2xl font-bold text-on-surface mt-1">{s.value}</p>
               <p className="text-xs text-on-surface-variant">{s.label}</p>
@@ -440,7 +440,7 @@ export default function ProjectWorkspace() {
         </div>
 
         {/* Search & Filters */}
-        <div className="glass-card rounded-2xl p-4 mb-6">
+        <div className="card rounded-2xl p-4 mb-6">
           <div className="flex items-center gap-3">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant" />
@@ -506,7 +506,7 @@ export default function ProjectWorkspace() {
 
         {/* Project List */}
         {filtered.length === 0 ? (
-          <div className="glass-card rounded-3xl p-12 text-center">
+          <div className="card rounded-2xl p-12 text-center">
             <span className="material-symbols-outlined text-5xl text-on-surface-variant/30 mb-4">inventory_2</span>
             <h3 className="text-lg font-bold text-on-surface mb-1">
               {projects.length === 0 ? 'No projects yet' : 'No matching projects'}
@@ -527,7 +527,7 @@ export default function ProjectWorkspace() {
                 <button
                   key={proj.id}
                   onClick={() => setSelectedProject(proj)}
-                  className="w-full text-left glass-card rounded-2xl p-5 hover:ring-1 hover:ring-blue-500/30 transition-all group"
+                  className="w-full text-left card rounded-2xl p-5 hover:ring-1 hover:ring-blue-500/30 transition-all group"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
@@ -595,7 +595,7 @@ export default function ProjectWorkspace() {
                     <div
                       key={proj.id}
                       onClick={() => setSelectedProject(proj)}
-                      className="glass-card rounded-2xl p-5 cursor-pointer hover:ring-1 hover:ring-purple-500/30 transition-all"
+                      className="card rounded-2xl p-5 cursor-pointer hover:ring-1 hover:ring-purple-500/30 transition-all"
                     >
                       <div className="flex items-center gap-2 mb-2">
                         <span className="material-symbols-outlined text-purple-500" style={{ fontSize: '20px' }}>
