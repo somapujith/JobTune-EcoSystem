@@ -31,7 +31,8 @@ export const useRotationRef = (baseSpeedDegreesPerSecond, activeMultiplier, isAc
   }, [isActive, baseSpeedDegreesPerSecond, activeMultiplier, ref]);
 };
 
-export const SmoothTypewriter = ({ text, speed = 15, delay = 0, start = true, onStart, onComplete, className }) => {
+export const SmoothTypewriter = ({ text = "", speed = 15, delay = 0, start = true, onStart, onComplete, className }) => {
+  const safeText = text || "";
   const [visibleChars, setVisibleChars] = useState(0);
   const [started, setStarted] = useState(false);
   const completedFired = useRef(false);
@@ -61,7 +62,7 @@ export const SmoothTypewriter = ({ text, speed = 15, delay = 0, start = true, on
   useEffect(() => {
     if (!started) return;
     
-    if (visibleChars < text.length) {
+    if (visibleChars < safeText.length) {
       const timer = setTimeout(() => {
         setVisibleChars(prev => prev + 1);
       }, speed);
@@ -72,13 +73,13 @@ export const SmoothTypewriter = ({ text, speed = 15, delay = 0, start = true, on
         setTimeout(() => onComplete(), 100);
       }
     }
-  }, [started, visibleChars, text.length, speed, onComplete]);
+  }, [started, visibleChars, safeText.length, speed, onComplete]);
 
   let charIndex = 0;
 
   return (
     <div className={className}>
-      {text.split('\n').map((lineText, lineIdx) => (
+      {safeText.split('\n').map((lineText, lineIdx) => (
         <div key={lineIdx} className="whitespace-pre-wrap">
           {lineText.split(/(\s+)/).map((word, wIdx) => (
             <span key={wIdx} className="inline-block whitespace-pre">

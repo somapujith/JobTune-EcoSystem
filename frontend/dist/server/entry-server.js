@@ -8,7 +8,7 @@ import React__default, { useState, useEffect, useRef, Component, useMemo, useCal
 import { stripBasename, UNSAFE_warning, UNSAFE_invariant, matchPath, joinPaths, Action } from "@remix-run/router";
 import { UNSAFE_NavigationContext, useHref, useNavigate, useLocation, useResolvedPath, createPath, UNSAFE_DataRouterStateContext, UNSAFE_useRouteId, UNSAFE_RouteContext, UNSAFE_DataRouterContext, parsePath, Router, Outlet, Navigate, Routes, Route } from "react-router";
 import "react-dom";
-import { ChevronDown, Sun, Moon, Crown, X, Menu, AlertTriangle, RotateCcw, TrendingUp, Zap, Lock, ArrowRight, Sparkles, Star, Activity, FileText, Linkedin, Github, Layout as Layout$1, BookOpen, Lightbulb, CheckCircle2, Users, ChevronRight, MessageCircle, Check, Rocket, Loader, Plus, Minus, ArrowLeft, BadgeCheck, Code2, Compass, GraduationCap, Flame, Footprints, Target, UserCheck, Calendar, Wrench, Clock, Briefcase, ShieldCheck, Monitor, Mail, User, XCircle, Trash2, Edit2, Search, MapPin, Loader2, AlertCircle, ExternalLink, CheckCircle, ChevronLeft, Copy, Download, ChevronUp, UploadCloud, ShieldAlert, ListChecks, RefreshCw, BarChart2, TrendingDown, HelpCircle, Award as Award$1, Code, BrainCircuit, Play, FileCode2, Mic, Send, Info, Bot, Terminal, Tags, Eye, GitCompare, MessageSquare, History, Filter, Trophy, PlayCircle, Brain, BarChart3, Save, ArrowUp, ArrowDown, BookmarkIcon, Flag, SplitSquareHorizontal, Megaphone, PenLine, Upload, ClipboardList, GripVertical, DollarSign, MonitorOff, LogIn } from "lucide-react";
+import { ChevronDown, Sun, Moon, Crown, X, Menu, AlertTriangle, RotateCcw, TrendingUp, Zap, Lock, ArrowRight, Sparkles, Star, Activity, FileText, Linkedin, Github, Layout as Layout$1, BookOpen, Lightbulb, CheckCircle2, Users, ChevronRight, MessageCircle, Check, Rocket, Loader, Plus, Minus, ArrowLeft, BadgeCheck, Code2, Compass, GraduationCap, Flame, Footprints, Target, UserCheck, Loader2, Wrench, Calendar, Clock, Briefcase, ShieldCheck, Monitor, Mail, User, XCircle, Trash2, Edit2, Search, MapPin, AlertCircle, ExternalLink, CheckCircle, ChevronLeft, Copy, Download, ChevronUp, UploadCloud, ShieldAlert, ListChecks, RefreshCw, BarChart2, TrendingDown, HelpCircle, Award as Award$1, Code, BrainCircuit, Play, Mic, Circle, FileCode2, Brain, MessageSquare, Trophy, Send, Layers, Terminal, Tags, Eye, GitCompare, Bot, History, Filter, PlayCircle, BarChart3, Save, ArrowUp, ArrowDown, BookmarkIcon, Flag, SplitSquareHorizontal, Info, Megaphone, PenLine, Upload, ClipboardList, GripVertical, DollarSign, MonitorOff, LogIn } from "lucide-react";
 import { create } from "zustand";
 import axios from "axios";
 import { ResponsiveContainer, BarChart, XAxis, YAxis, Tooltip, Bar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, RadialBarChart, RadialBar, LineChart, CartesianGrid, Legend, Line, PieChart, Pie, Cell } from "recharts";
@@ -985,7 +985,7 @@ const Navbar = () => {
   const isGroupActive = (group) => group.items.some((item) => location.pathname.startsWith(item.path));
   return /* @__PURE__ */ jsxs("header", { className: "fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60", children: [
     /* @__PURE__ */ jsxs("div", { className: "flex items-center px-5 lg:px-8 h-16 w-full max-w-[1400px] mx-auto gap-4", children: [
-      /* @__PURE__ */ jsx(Link, { to: "/", className: "text-xl font-extrabold tracking-tight text-blue-700 dark:text-blue-400 font-headline flex-shrink-0 mr-1", children: "JobTune" }),
+      /* @__PURE__ */ jsx(Link, { to: "/", className: "text-xl font-extrabold tracking-tight text-blue-700 dark:text-blue-400 font-headline flex-shrink-0 mr-1 leading-none", children: "JobTune" }),
       /* @__PURE__ */ jsxs("nav", { className: "hidden lg:flex items-center gap-1 flex-1 justify-center min-w-0", ref: dropdownRef, children: [
         [
           { label: "Dashboard", path: "/dashboard", exact: true },
@@ -1039,8 +1039,8 @@ const Navbar = () => {
           {
             onClick: () => setIsDark(!isDark),
             title: isDark ? "Light mode" : "Dark mode",
-            className: "p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors",
-            children: isDark ? /* @__PURE__ */ jsx(Sun, { className: "w-4.5 h-4.5" }) : /* @__PURE__ */ jsx(Moon, { className: "w-4.5 h-4.5" })
+            className: "w-9 h-9 flex items-center justify-center rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors",
+            children: isDark ? /* @__PURE__ */ jsx(Sun, { className: "w-[18px] h-[18px]" }) : /* @__PURE__ */ jsx(Moon, { className: "w-[18px] h-[18px]" })
           }
         ),
         /* @__PURE__ */ jsx("div", { className: "hidden md:flex items-center gap-1.5 border-l pl-3 ml-1 border-slate-200 dark:border-slate-700", children: isAuthenticated ? /* @__PURE__ */ jsxs(Fragment, { children: [
@@ -1063,8 +1063,8 @@ const Navbar = () => {
               title: "Logout",
               className: "flex items-center gap-1.5 text-sm text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 font-medium transition-colors px-2.5 py-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20",
               children: [
-                /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-base", style: { fontVariationSettings: "'FILL' 0" }, children: "logout" }),
-                /* @__PURE__ */ jsx("span", { className: "hidden lg:inline text-xs font-semibold", children: "Sign Out" })
+                /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-[16px]", style: { fontVariationSettings: "'FILL' 0" }, children: "logout" }),
+                /* @__PURE__ */ jsx("span", { className: "hidden lg:inline text-xs font-semibold leading-none", children: "Sign Out" })
               ]
             }
           ),
@@ -1455,7 +1455,7 @@ function SectionBadge({ children }) {
   return /* @__PURE__ */ jsx("span", { className: "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold tracking-widest uppercase", children });
 }
 function DarkBadge({ children }) {
-  return /* @__PURE__ */ jsx("span", { className: "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/8 border border-white/10 text-blue-300 text-xs font-bold tracking-widest uppercase", children });
+  return /* @__PURE__ */ jsx("span", { className: "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/8 border border-slate-200 dark:border-white/10 text-blue-300 text-xs font-bold tracking-widest uppercase", children });
 }
 function useCounter(target, duration = 1500) {
   const [count, setCount] = useState(0);
@@ -1497,7 +1497,7 @@ function AssessmentVisual() {
     { label: "Databases", pct: 68, color: "#10b981" },
     { label: "Behavioral", pct: 91, color: "#8b5cf6" }
   ];
-  return /* @__PURE__ */ jsxs("div", { className: "bg-slate-900/80 rounded-2xl p-6 space-y-4 shadow-glass backdrop-blur-md border border-white/10", children: [
+  return /* @__PURE__ */ jsxs("div", { className: "bg-slate-900/80 rounded-2xl p-6 space-y-4 shadow-glass backdrop-blur-md border border-slate-200 dark:border-white/10", children: [
     /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
       /* @__PURE__ */ jsx("span", { className: "text-xs font-bold text-slate-500 uppercase tracking-widest", children: "Skill Radar" }),
       /* @__PURE__ */ jsx("span", { className: "text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2.5 py-1 rounded-full", children: "Score: 73 / 100" })
@@ -1520,16 +1520,16 @@ function AssessmentVisual() {
     ] }, s.label)),
     /* @__PURE__ */ jsxs("div", { className: "pt-3 border-t border-white/5 flex items-center gap-2", children: [
       /* @__PURE__ */ jsx("div", { className: "w-1.5 h-1.5 rounded-full bg-amber-400" }),
-      /* @__PURE__ */ jsxs("p", { className: "text-[11px] text-slate-500", children: [
+      /* @__PURE__ */ jsxs("p", { className: "text-xs text-slate-500", children: [
         "Gap detected: ",
         /* @__PURE__ */ jsx("span", { className: "text-amber-400 font-semibold", children: "System Design" })
       ] })
     ] }),
-    /* @__PURE__ */ jsx("div", { className: "bg-blue-500/8 rounded-xl p-3 border border-blue-500/15", children: /* @__PURE__ */ jsx("p", { className: "text-[11px] text-blue-300 font-medium", children: "✦ Suggested path: System Design for SDE-1" }) })
+    /* @__PURE__ */ jsx("div", { className: "bg-blue-500/8 rounded-xl p-3 border border-blue-500/15", children: /* @__PURE__ */ jsx("p", { className: "text-xs text-blue-300 font-medium", children: "✦ Suggested path: System Design for SDE-1" }) })
   ] });
 }
 function ResumeVisual() {
-  return /* @__PURE__ */ jsxs("div", { className: "bg-slate-900/80 rounded-2xl p-6 border border-white/10 shadow-glass backdrop-blur-md space-y-4", children: [
+  return /* @__PURE__ */ jsxs("div", { className: "bg-slate-900/80 rounded-2xl p-6 border border-slate-200 dark:border-white/10 shadow-glass backdrop-blur-md space-y-4", children: [
     /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4", children: [
       /* @__PURE__ */ jsxs("div", { className: "relative w-16 h-16 shrink-0", children: [
         /* @__PURE__ */ jsxs("svg", { viewBox: "0 0 36 36", className: "w-full h-full -rotate-90", children: [
@@ -1562,7 +1562,7 @@ function ResumeVisual() {
       { label: "Format check", status: "Pass", ok: true }
     ].map((r) => /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between py-2 border-b border-white/5", children: [
       /* @__PURE__ */ jsx("span", { className: "text-xs text-slate-400", children: r.label }),
-      /* @__PURE__ */ jsx("span", { className: `text-[11px] font-bold px-2 py-0.5 rounded-full ${r.ok ? "text-emerald-400 bg-emerald-400/10" : "text-rose-400 bg-rose-400/10"}`, children: r.status })
+      /* @__PURE__ */ jsx("span", { className: `text-xs font-bold px-2 py-0.5 rounded-full ${r.ok ? "text-emerald-400 bg-emerald-400/10" : "text-rose-400 bg-rose-400/10"}`, children: r.status })
     ] }, r.label)) })
   ] });
 }
@@ -1573,16 +1573,16 @@ function VaultVisual() {
     { title: "Advanced SQL & Indexing", type: "Interactive", dur: "2h", c: "#10b981" },
     { title: "Behavioral Interview Guide", type: "PDF", dur: "1h", c: "#f59e0b" }
   ];
-  return /* @__PURE__ */ jsxs("div", { className: "bg-slate-900/80 rounded-2xl p-6 border border-white/10 shadow-glass backdrop-blur-md space-y-2", children: [
+  return /* @__PURE__ */ jsxs("div", { className: "bg-slate-900/80 rounded-2xl p-6 border border-slate-200 dark:border-white/10 shadow-glass backdrop-blur-md space-y-2", children: [
     /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between mb-3", children: [
       /* @__PURE__ */ jsx("span", { className: "text-xs font-bold text-slate-500 uppercase tracking-widest", children: "For you" }),
-      /* @__PURE__ */ jsx("span", { className: "text-[11px] text-blue-400 font-semibold", children: "4 new" })
+      /* @__PURE__ */ jsx("span", { className: "text-xs text-blue-400 font-semibold", children: "4 new" })
     ] }),
     items.map((it) => /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 p-3 rounded-xl bg-white/3 hover:bg-white/6 transition-colors cursor-pointer group", children: [
       /* @__PURE__ */ jsx("div", { className: "w-9 h-9 rounded-lg flex items-center justify-center shrink-0", style: { background: it.c + "18" }, children: /* @__PURE__ */ jsx("div", { className: "w-3 h-3 rounded", style: { background: it.c } }) }),
       /* @__PURE__ */ jsxs("div", { className: "flex-grow min-w-0", children: [
         /* @__PURE__ */ jsx("p", { className: "text-sm font-semibold text-white truncate", children: it.title }),
-        /* @__PURE__ */ jsxs("p", { className: "text-[11px] text-slate-500", children: [
+        /* @__PURE__ */ jsxs("p", { className: "text-xs text-slate-500", children: [
           it.type,
           " · ",
           it.dur
@@ -1669,7 +1669,7 @@ function Home() {
                 "a",
                 {
                   href: "#how-it-works",
-                  className: "inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-white/5 border border-white/10 text-slate-300 rounded-xl font-bold text-base hover:bg-white/10 transition-all duration-200 backdrop-blur-sm",
+                  className: "inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-white/5 border border-slate-200 dark:border-white/10 text-slate-300 rounded-xl font-bold text-base hover:bg-slate-100 dark:hover:bg-white/10 transition-all duration-200 backdrop-blur-sm",
                   children: "See how it works"
                 }
               )
@@ -1700,7 +1700,7 @@ function Home() {
         ]
       }
     ),
-    /* @__PURE__ */ jsx("section", { className: "glass-panel border-t border-white/20 border-b border-white/20 dark:border-white/5 relative z-10", children: /* @__PURE__ */ jsxs("div", { className: "max-w-5xl mx-auto px-4 py-16 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0 md:divide-x md:divide-slate-300 dark:md:divide-white/10", children: [
+    /* @__PURE__ */ jsx("section", { className: "glass-panel border-t border-white/20 border-b border-white/20 dark:border-white/5 relative z-10", children: /* @__PURE__ */ jsxs("div", { className: "max-w-5xl mx-auto px-4 py-16 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0 md:divide-x md:divide-slate-300 dark:md:divide-slate-200 dark:divide-white/10", children: [
       /* @__PURE__ */ jsx(StatCounter, { value: 5e4, suffix: "+", label: "Students enrolled" }),
       /* @__PURE__ */ jsx(StatCounter, { value: 87, suffix: "%", label: "Reported better interviews" }),
       /* @__PURE__ */ jsx(StatCounter, { value: 7, suffix: "", label: "Interconnected tools" }),
@@ -1725,7 +1725,7 @@ function Home() {
             }
           )
         ] }),
-        /* @__PURE__ */ jsx("div", { className: `${!isEven ? "lg:col-start-1 lg:row-start-1" : ""}`, children: /* @__PURE__ */ jsxs("div", { className: "rounded-2xl overflow-hidden glass-card border border-white/30 dark:border-white/10", children: [
+        /* @__PURE__ */ jsx("div", { className: `${!isEven ? "lg:col-start-1 lg:row-start-1" : ""}`, children: /* @__PURE__ */ jsxs("div", { className: "rounded-2xl overflow-hidden glass-card border border-white/30 dark:border-slate-200 dark:border-white/10", children: [
           /* @__PURE__ */ jsxs("div", { className: "bg-slate-200/50 dark:bg-slate-800/50 px-4 py-3 flex items-center gap-2 border-b border-white/20 dark:border-white/5", children: [
             /* @__PURE__ */ jsxs("div", { className: "flex gap-1.5", children: [
               /* @__PURE__ */ jsx("div", { className: "w-3 h-3 rounded-full bg-rose-400/80" }),
@@ -1761,7 +1761,7 @@ function Home() {
               /* @__PURE__ */ jsx("p", { className: "text-slate-500 text-lg max-w-xl mx-auto", children: "Each tool feeds into the next. Your skill gaps inform your resume. Your resume score shapes your LinkedIn. It all connects." })
             ] }),
             /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4", children: TOOLS.map((tool, i) => {
-              const Icon = tool.icon;
+              const Icon2 = tool.icon;
               const isFeatured = i === 0 || i === 5;
               return tool.locked ? /* @__PURE__ */ jsxs(
                 "div",
@@ -1770,7 +1770,7 @@ function Home() {
                   children: [
                     /* @__PURE__ */ jsxs("div", { className: "relative z-10 flex items-start justify-between", children: [
                       /* @__PURE__ */ jsx("div", { className: "w-11 h-11 rounded-xl flex items-center justify-center bg-slate-800", children: /* @__PURE__ */ jsx(Lock, { className: "w-5 h-5 text-slate-600" }) }),
-                      /* @__PURE__ */ jsxs("span", { className: "text-[10px] font-black uppercase tracking-widest text-slate-600 border border-white/8 px-2 py-0.5 rounded-full flex items-center gap-1", children: [
+                      /* @__PURE__ */ jsxs("span", { className: "text-xs font-black uppercase tracking-widest text-slate-600 border border-white/8 px-2 py-0.5 rounded-full flex items-center gap-1", children: [
                         tool.tag,
                         " ",
                         /* @__PURE__ */ jsx(Lock, { className: "w-2.5 h-2.5" })
@@ -1802,10 +1802,10 @@ function Home() {
                         {
                           className: "w-11 h-11 rounded-xl flex items-center justify-center",
                           style: { background: tool.accent + "18" },
-                          children: /* @__PURE__ */ jsx(Icon, { className: "w-5 h-5", style: { color: tool.accent } })
+                          children: /* @__PURE__ */ jsx(Icon2, { className: "w-5 h-5", style: { color: tool.accent } })
                         }
                       ),
-                      /* @__PURE__ */ jsx("span", { className: "text-[10px] font-black uppercase tracking-widest text-slate-600 border border-white/8 px-2 py-0.5 rounded-full", children: tool.tag })
+                      /* @__PURE__ */ jsx("span", { className: "text-xs font-black uppercase tracking-widest text-slate-600 border border-white/8 px-2 py-0.5 rounded-full", children: tool.tag })
                     ] }),
                     /* @__PURE__ */ jsxs("div", { className: "relative z-10", children: [
                       /* @__PURE__ */ jsx("h3", { className: "text-base font-bold text-slate-900 dark:text-white mb-1", children: tool.name }),
@@ -1890,7 +1890,7 @@ function Home() {
                 Link,
                 {
                   to: "/skills",
-                  className: "inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-white/5 border border-white/10 text-slate-300 rounded-xl font-bold text-base hover:bg-white/10 transition-all duration-200",
+                  className: "inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-white/5 border border-slate-200 dark:border-white/10 text-slate-300 rounded-xl font-bold text-base hover:bg-slate-100 dark:hover:bg-white/10 transition-all duration-200",
                   children: [
                     /* @__PURE__ */ jsx(Zap, { className: "w-4 h-4 text-blue-400" }),
                     "Take the assessment first"
@@ -2545,7 +2545,7 @@ function PlanSettings() {
               plan.price > 0 && /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500", children: "per month" })
             ] }),
             meta.bestFor && /* @__PURE__ */ jsxs("div", { className: "mb-5 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700", children: [
-              /* @__PURE__ */ jsx("p", { className: "text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-0.5", children: "Best for" }),
+              /* @__PURE__ */ jsx("p", { className: "text-xs font-bold uppercase tracking-wider text-slate-400 mb-0.5", children: "Best for" }),
               /* @__PURE__ */ jsx("p", { className: "text-sm font-semibold text-slate-700 dark:text-slate-300", children: meta.bestFor })
             ] }),
             /* @__PURE__ */ jsx("div", { className: "flex-1 space-y-2.5 mb-6", children: (plan.features || []).map((feature) => /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-2.5", children: [
@@ -3359,7 +3359,7 @@ function RecentUploads({ resumes, onResumeClick, onDeleteClick }) {
                   /* @__PURE__ */ jsx("div", { className: `w-10 h-12 ${isPdf ? "bg-red-50 dark:bg-red-950/30" : "bg-blue-50 dark:bg-blue-950/30"} rounded-md flex items-center justify-center shrink-0`, children: /* @__PURE__ */ jsx("span", { className: `material-symbols-outlined ${isPdf ? "text-red-500" : "text-blue-500"}`, style: { fontVariationSettings: "'FILL' 0" }, children: isPdf ? "picture_as_pdf" : "description" }) }),
                   /* @__PURE__ */ jsxs("div", { children: [
                     /* @__PURE__ */ jsx("h5", { className: "font-bold text-sm truncate w-32 text-slate-900 dark:text-white", children: r.file_name }),
-                    /* @__PURE__ */ jsx("p", { className: "text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider", children: formatDate2(r.created_at) })
+                    /* @__PURE__ */ jsx("p", { className: "text-xs uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider", children: formatDate2(r.created_at) })
                   ] })
                 ] }),
                 /* @__PURE__ */ jsxs("span", { className: `text-xs font-bold px-2 py-1 rounded ${c.bg} ${c.text}`, children: [
@@ -4439,7 +4439,7 @@ function StepItem({ step, state, index }) {
     /* @__PURE__ */ jsxs("div", { className: "min-w-0", children: [
       /* @__PURE__ */ jsx("p", { className: `text-sm font-semibold leading-tight ${state === "locked" ? "text-slate-400 dark:text-slate-500" : "text-slate-800 dark:text-white"}`, children: step.title }),
       /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-400 dark:text-slate-500 mt-0.5 leading-snug", children: step.description }),
-      state === "locked" && step.plan && /* @__PURE__ */ jsxs("p", { className: "text-[10px] text-slate-400 dark:text-slate-600 mt-1", children: [
+      state === "locked" && step.plan && /* @__PURE__ */ jsxs("p", { className: "text-xs text-slate-400 dark:text-slate-600 mt-1", children: [
         "Requires ",
         step.plan
       ] })
@@ -4535,7 +4535,7 @@ function UnlockedBadge({ definition, unlockedAt }) {
     /* @__PURE__ */ jsxs("div", { className: "min-w-0", children: [
       /* @__PURE__ */ jsx("p", { className: "text-sm font-bold text-slate-900 dark:text-white", children: definition.title }),
       /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 mt-0.5", children: definition.description }),
-      /* @__PURE__ */ jsxs("p", { className: "text-[10px] text-emerald-500 dark:text-emerald-400 mt-1 font-medium", children: [
+      /* @__PURE__ */ jsxs("p", { className: "text-xs text-emerald-500 dark:text-emerald-400 mt-1 font-medium", children: [
         "Unlocked ",
         formatDate$4(unlockedAt)
       ] })
@@ -4667,10 +4667,10 @@ function ProgressRing$1({ value, size = 80, stroke = 6 }) {
 function CardWrapper({ children }) {
   return /* @__PURE__ */ jsx("div", { className: "glass-card p-6 rounded-2xl", children });
 }
-function CardHeader({ icon: Icon, iconBg, iconColor, title }) {
+function CardHeader({ icon: Icon2, iconBg, iconColor, title }) {
   return /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 mb-4", children: [
-    /* @__PURE__ */ jsx("div", { className: `w-10 h-10 rounded-xl flex items-center justify-center ${iconBg}`, children: /* @__PURE__ */ jsx(Icon, { size: 20, className: iconColor }) }),
-    /* @__PURE__ */ jsx("span", { className: "text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500", children: title })
+    /* @__PURE__ */ jsx("div", { className: `w-10 h-10 rounded-xl flex items-center justify-center ${iconBg}`, children: /* @__PURE__ */ jsx(Icon2, { size: 20, className: iconColor }) }),
+    /* @__PURE__ */ jsx("span", { className: "text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 leading-none", children: title })
   ] });
 }
 function LearningProgressCard({ overview }) {
@@ -4689,7 +4689,7 @@ function LearningProgressCard({ overview }) {
     /* @__PURE__ */ jsx("p", { className: "text-3xl font-extrabold text-slate-900 dark:text-white", children: coursesEnrolled }),
     /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-400 dark:text-slate-500 mb-3", children: "Courses enrolled" }),
     /* @__PURE__ */ jsx(ProgressBar$3, { value: learningProgress }),
-    /* @__PURE__ */ jsxs("p", { className: "text-[10px] text-slate-400 dark:text-slate-500 mt-1", children: [
+    /* @__PURE__ */ jsxs("p", { className: "text-xs text-slate-400 dark:text-slate-500 mt-1", children: [
       learningProgress,
       "% complete"
     ] })
@@ -4707,7 +4707,7 @@ function SkillsGrowthCard({ overview }) {
         title: "Skills Growth"
       }
     ),
-    /* @__PURE__ */ jsx("div", { className: "flex justify-center", children: /* @__PURE__ */ jsx(ResponsiveContainer, { width: 150, height: 150, children: /* @__PURE__ */ jsxs(RadarChart, { data: skillScores, cx: "50%", cy: "50%", outerRadius: "70%", children: [
+    /* @__PURE__ */ jsx("div", { className: "flex justify-center", children: /* @__PURE__ */ jsx("div", { style: { width: 150, height: 150 }, children: /* @__PURE__ */ jsxs(RadarChart, { width: 150, height: 150, data: skillScores, cx: "50%", cy: "50%", outerRadius: "70%", children: [
       /* @__PURE__ */ jsx(PolarGrid, { stroke: "#e2e8f0", className: "dark:stroke-slate-700" }),
       /* @__PURE__ */ jsx(
         PolarAngleAxis,
@@ -4773,7 +4773,7 @@ function ProfileCompletionCard({ overview }) {
             className: `w-full h-2 rounded-full transition-colors duration-300 ${done ? "bg-gradient-to-r from-amber-400 to-amber-500" : "bg-slate-200 dark:bg-slate-700"}`
           }
         ),
-        /* @__PURE__ */ jsx("span", { className: `text-[9px] font-medium ${done ? "text-amber-600 dark:text-amber-400" : "text-slate-400 dark:text-slate-500"}`, children: seg.label })
+        /* @__PURE__ */ jsx("span", { className: `text-[10px] font-medium ${done ? "text-amber-600 dark:text-amber-400" : "text-slate-400 dark:text-slate-500"}`, children: seg.label })
       ] }, seg.key);
     }) })
   ] });
@@ -4784,6 +4784,139 @@ function ProgressOverviewCards({ overview = {} }) {
     /* @__PURE__ */ jsx(SkillsGrowthCard, { overview }),
     /* @__PURE__ */ jsx(CareerReadinessCard, { overview }),
     /* @__PURE__ */ jsx(ProfileCompletionCard, { overview })
+  ] });
+}
+const TRACK_META = {
+  "learn-and-build": {
+    label: "Learn & Build",
+    icon: Wrench,
+    color: "text-orange-600",
+    bg: "bg-orange-50 dark:bg-orange-950/30",
+    border: "border-orange-200 dark:border-orange-800/50",
+    link: "/preparation/learn-and-build",
+    minPlan: "Learn & Build"
+  },
+  "tune-and-polish": {
+    label: "Tune & Polish",
+    icon: Target,
+    color: "text-blue-600",
+    bg: "bg-blue-50 dark:bg-blue-950/30",
+    border: "border-blue-200 dark:border-blue-800/50",
+    link: "/preparation/tune-and-polish",
+    minPlan: "Tune & Polish"
+  },
+  "zero-to-hero": {
+    label: "Zero to Hero",
+    icon: Zap,
+    color: "text-purple-600",
+    bg: "bg-purple-50 dark:bg-purple-950/30",
+    border: "border-purple-200 dark:border-purple-800/50",
+    link: "/preparation/zero-to-hero",
+    minPlan: "Zero to Hero"
+  }
+};
+const PLAN_TIER$1 = {
+  "Learn & Build": 1,
+  "Tune & Polish": 2,
+  "Zero to Hero": 3
+};
+function computeProgress(key, data) {
+  if (!data) return { pct: 0, detail: "Not started" };
+  if (key === "learn-and-build") {
+    const checked = Object.values(data.skillsChecked || {}).filter(Boolean).length;
+    const total = 28;
+    const pct = Math.round(checked / total * 100);
+    return { pct, detail: `${checked} skills learned` };
+  }
+  if (key === "tune-and-polish") {
+    const checked = Object.values(data.checkedItems || {}).filter(Boolean).length;
+    const total = 16;
+    const pct = Math.round(checked / total * 100);
+    return { pct, detail: `${checked}/16 readiness items done` };
+  }
+  if (key === "zero-to-hero") {
+    const modules = data.modules || {};
+    const total = Object.keys(modules).length;
+    const completed = Object.values(modules).filter((m) => m.status === "completed").length;
+    const step = data.step || "intro";
+    if (total === 0) {
+      if (step === "plan" || step === "learning" || step === "assessment") {
+        return { pct: 10, detail: "Interview done, plan created" };
+      }
+      if (step === "interview") return { pct: 5, detail: "Interview in progress" };
+      return { pct: 0, detail: "Not started" };
+    }
+    const pct = Math.round(completed / total * 100);
+    return { pct, detail: `${completed}/${total} modules complete` };
+  }
+  return { pct: 0, detail: "Not started" };
+}
+function TrackProgressPanel() {
+  const { userPlan } = useSubscriptionStore();
+  const [progress, setProgress] = useState({});
+  const [loading, setLoading] = useState(true);
+  const planTier = PLAN_TIER$1[userPlan == null ? void 0 : userPlan.name] || 0;
+  useEffect(() => {
+    const keys = ["learn-and-build", "tune-and-polish", "zero-to-hero"];
+    Promise.allSettled(keys.map((k) => api.get(`/progress/${k}`))).then((results) => {
+      const map = {};
+      results.forEach((r, i) => {
+        var _a;
+        map[keys[i]] = r.status === "fulfilled" ? (_a = r.value.data) == null ? void 0 : _a.data : null;
+      });
+      setProgress(map);
+      setLoading(false);
+    });
+  }, []);
+  return /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-6", children: [
+    /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between mb-5", children: [
+      /* @__PURE__ */ jsx("h3", { className: "text-lg font-extrabold text-slate-900 dark:text-white tracking-tight", children: "Track Progress" }),
+      loading && /* @__PURE__ */ jsx(Loader2, { className: "w-4 h-4 animate-spin text-slate-400" })
+    ] }),
+    /* @__PURE__ */ jsx("div", { className: "space-y-4", children: Object.entries(TRACK_META).map(([key, meta]) => {
+      const { pct, detail } = computeProgress(key, progress[key]);
+      const tier = PLAN_TIER$1[meta.minPlan];
+      const hasAccess = planTier >= tier;
+      return /* @__PURE__ */ jsxs(
+        "div",
+        {
+          className: `flex items-center gap-4 p-4 rounded-xl border ${meta.border} ${hasAccess ? "" : "opacity-50"}`,
+          children: [
+            /* @__PURE__ */ jsx("div", { className: `p-2.5 rounded-xl ${meta.bg} shrink-0`, children: /* @__PURE__ */ jsx(meta.icon, { className: `w-5 h-5 ${meta.color}` }) }),
+            /* @__PURE__ */ jsxs("div", { className: "flex-1 min-w-0", children: [
+              /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between mb-1", children: [
+                /* @__PURE__ */ jsx("p", { className: "font-bold text-sm text-slate-900 dark:text-white", children: meta.label }),
+                /* @__PURE__ */ jsxs("span", { className: `text-xs font-bold ${pct === 100 ? "text-emerald-600" : meta.color}`, children: [
+                  pct,
+                  "%"
+                ] })
+              ] }),
+              /* @__PURE__ */ jsx("div", { className: "h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mb-1", children: /* @__PURE__ */ jsx(
+                "div",
+                {
+                  className: `h-full rounded-full transition-all duration-500 ${pct === 100 ? "bg-emerald-500" : key === "learn-and-build" ? "bg-orange-400" : key === "tune-and-polish" ? "bg-blue-500" : "bg-purple-500"}`,
+                  style: { width: `${pct}%` }
+                }
+              ) }),
+              /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400", children: detail })
+            ] }),
+            hasAccess ? /* @__PURE__ */ jsx(Link, { to: meta.link, className: "shrink-0", children: /* @__PURE__ */ jsx(ArrowRight, { className: `w-4 h-4 ${meta.color}` }) }) : /* @__PURE__ */ jsx("span", { className: "text-xs font-semibold text-slate-400 shrink-0", children: "Locked" })
+          ]
+        },
+        key
+      );
+    }) }),
+    /* @__PURE__ */ jsx("div", { className: "mt-4 pt-4 border-t border-slate-100 dark:border-slate-800", children: /* @__PURE__ */ jsxs(
+      Link,
+      {
+        to: "/preparation",
+        className: "text-sm font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1",
+        children: [
+          "View all tracks ",
+          /* @__PURE__ */ jsx(ArrowRight, { className: "w-3.5 h-3.5" })
+        ]
+      }
+    ) })
   ] });
 }
 function DailyGoalBar({ progress }) {
@@ -4802,11 +4935,11 @@ function DailyGoalBar({ progress }) {
     ] })
   ] });
 }
-function QuickStatCard({ icon: Icon, label, value, color, bg }) {
+function QuickStatCard({ icon: Icon2, label, value, color, bg }) {
   return /* @__PURE__ */ jsxs("div", { className: "stat-card", children: [
-    /* @__PURE__ */ jsx("div", { className: `stat-icon ${bg} ${color}`, children: /* @__PURE__ */ jsx(Icon, { className: "w-5 h-5" }) }),
+    /* @__PURE__ */ jsx("div", { className: `stat-icon ${bg} ${color}`, children: /* @__PURE__ */ jsx(Icon2, { className: "w-5 h-5" }) }),
     /* @__PURE__ */ jsxs("div", { children: [
-      /* @__PURE__ */ jsx("p", { className: "text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider", children: label }),
+      /* @__PURE__ */ jsx("p", { className: "text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider leading-none", children: label }),
       /* @__PURE__ */ jsx("p", { className: "text-lg font-extrabold text-slate-900 dark:text-white", children: value })
     ] })
   ] });
@@ -4824,7 +4957,7 @@ function RecentActivityFeed({ activities }) {
       /* @__PURE__ */ jsx("div", { className: "w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 shrink-0" }),
       /* @__PURE__ */ jsxs("div", { children: [
         /* @__PURE__ */ jsx("p", { className: "text-sm font-bold text-slate-800 dark:text-slate-200 leading-snug", children: act.action }),
-        /* @__PURE__ */ jsx("p", { className: "text-[10px] text-slate-400 mt-0.5 font-bold uppercase tracking-tighter", children: act.date })
+        /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-400 mt-0.5 font-medium", children: act.date })
       ] })
     ] }, act.id ?? i)) })
   ] });
@@ -4873,7 +5006,7 @@ function Dashboard() {
         /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 card px-5 py-3 rounded-2xl", children: [
           /* @__PURE__ */ jsx(Flame, { className: "w-6 h-6 text-orange-500" }),
           /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx("p", { className: "text-[10px] font-bold text-slate-400 uppercase tracking-wider", children: "Streak" }),
+            /* @__PURE__ */ jsx("p", { className: "text-xs font-bold text-slate-400 uppercase tracking-wider leading-none", children: "Streak" }),
             /* @__PURE__ */ jsxs("p", { className: "text-xl font-extrabold text-slate-900 dark:text-white leading-none", children: [
               stats.currentStreak,
               " ",
@@ -4882,7 +5015,7 @@ function Dashboard() {
           ] })
         ] }),
         /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-1", children: [
-          /* @__PURE__ */ jsx("p", { className: "text-[10px] font-bold text-slate-400 uppercase tracking-wider", children: "Daily Goal" }),
+          /* @__PURE__ */ jsx("p", { className: "text-xs font-bold text-slate-400 uppercase tracking-wider leading-none", children: "Daily Goal" }),
           /* @__PURE__ */ jsx(DailyGoalBar, { progress: stats.dailyGoalProgress || 0 })
         ] }),
         userPlan && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 card px-4 py-3 rounded-2xl", children: [
@@ -4921,9 +5054,10 @@ function Dashboard() {
         }
       )
     ] }),
-    /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-6", children: [
-      /* @__PURE__ */ jsx(WeeklyActivityChart, { data: weeklyData }),
-      /* @__PURE__ */ jsx(RecentActivityFeed, { activities: overview == null ? void 0 : overview.recentActivity })
+    /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 lg:grid-cols-3 gap-6", children: [
+      /* @__PURE__ */ jsx("div", { className: "lg:col-span-1", children: /* @__PURE__ */ jsx(TrackProgressPanel, {}) }),
+      /* @__PURE__ */ jsx("div", { className: "lg:col-span-1", children: /* @__PURE__ */ jsx(WeeklyActivityChart, { data: weeklyData }) }),
+      /* @__PURE__ */ jsx("div", { className: "lg:col-span-1", children: /* @__PURE__ */ jsx(RecentActivityFeed, { activities: overview == null ? void 0 : overview.recentActivity }) })
     ] }),
     /* @__PURE__ */ jsx(
       AchievementBadges,
@@ -5007,16 +5141,16 @@ function Login() {
           /* @__PURE__ */ jsxs("h2", { className: "text-5xl font-extrabold text-white leading-tight", children: [
             "Your journey to ",
             /* @__PURE__ */ jsx("br", {}),
-            /* @__PURE__ */ jsx("span", { className: "text-[#8bb4f7]", children: "FAANG" }),
+            /* @__PURE__ */ jsx("span", { className: "text-blue-300", children: "FAANG" }),
             " begins here."
           ] }),
-          /* @__PURE__ */ jsx("p", { className: "text-xl text-slate-400 font-light max-w-md", children: "One account, one active device — built to keep your preparation personal and secure." })
+          /* @__PURE__ */ jsx("p", { className: "text-xl text-slate-300 font-light max-w-md leading-relaxed", children: "One account, one active device — built to keep your preparation personal and secure." })
         ] }),
         /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 gap-6 pt-8", children: [
           { title: "Personalized Skill Gap Analysis", icon: Activity },
           { title: "ATS-Grade Resume Optimization", icon: Layout$1 },
           { title: "Curated Industry Learning Paths", icon: Sparkles }
-        ].map((item, i) => /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 bg-white/5 border border-white/10 p-4 rounded-xl backdrop-blur-sm", children: [
+        ].map((item, i) => /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 bg-white/5 border border-slate-200 dark:border-white/10 p-4 rounded-xl backdrop-blur-sm", children: [
           /* @__PURE__ */ jsx("div", { className: "w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400", children: /* @__PURE__ */ jsx(item.icon, { className: "w-5 h-5" }) }),
           /* @__PURE__ */ jsx("p", { className: "text-slate-300 font-medium", children: item.title })
         ] }, i)) })
@@ -5084,7 +5218,7 @@ function Login() {
                 type: "email",
                 required: true,
                 placeholder: "Email Address",
-                className: "w-full pl-12 pr-4 py-4 bg-[#f4f7fc] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-[#4255f4]/50 focus:border-[#4255f4] transition-all text-slate-900 dark:text-white placeholder:text-slate-400 font-medium",
+                className: "w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:focus:border-blue-400 hover:border-slate-300 dark:hover:border-slate-600 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 font-medium",
                 value: formData.email,
                 onChange: (e) => setFormData({ ...formData, email: e.target.value })
               }
@@ -5098,7 +5232,7 @@ function Login() {
                 type: "password",
                 required: true,
                 placeholder: "Password",
-                className: "w-full pl-12 pr-4 py-4 bg-[#f4f7fc] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-[#4255f4]/50 focus:border-[#4255f4] transition-all text-slate-900 dark:text-white placeholder:text-slate-400 font-medium",
+                className: "w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:focus:border-blue-400 hover:border-slate-300 dark:hover:border-slate-600 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 font-medium",
                 value: formData.password,
                 onChange: (e) => setFormData({ ...formData, password: e.target.value })
               }
@@ -5111,7 +5245,7 @@ function Login() {
               {
                 type: "text",
                 placeholder: "GitHub Username",
-                className: "w-full pl-12 pr-4 py-4 bg-[#f4f7fc] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-[#4255f4]/50 focus:border-[#4255f4] transition-all text-slate-900 dark:text-white placeholder:text-slate-400 font-medium",
+                className: "w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:focus:border-blue-400 hover:border-slate-300 dark:hover:border-slate-600 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 font-medium",
                 value: formData.github_username,
                 onChange: (e) => setFormData({ ...formData, github_username: e.target.value })
               }
@@ -5123,7 +5257,7 @@ function Login() {
           {
             type: "submit",
             disabled: isLoading || !!accountInUse,
-            className: "w-full bg-[#4255f4] hover:bg-[#3244d6] text-white font-bold py-4 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50",
+            className: "w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2.5 active:scale-[0.98] disabled:opacity-50",
             children: [
               isLoading ? "Authenticating..." : isLogin ? "Sign In" : "Create Account",
               /* @__PURE__ */ jsx(ArrowRight, { className: "w-5 h-5" })
@@ -5132,14 +5266,14 @@ function Login() {
         )
       ] }),
       /* @__PURE__ */ jsxs("div", { className: "relative", children: [
-        /* @__PURE__ */ jsx("div", { className: "absolute inset-0 flex items-center", children: /* @__PURE__ */ jsx("div", { className: "w-full border-t border-outline/10" }) }),
+        /* @__PURE__ */ jsx("div", { className: "absolute inset-0 flex items-center", children: /* @__PURE__ */ jsx("div", { className: "w-full border-t border-slate-200 dark:border-slate-700" }) }),
         /* @__PURE__ */ jsx("div", { className: "relative flex justify-center text-sm", children: /* @__PURE__ */ jsx("span", { className: "px-4 py-1 bg-white dark:bg-slate-900 rounded-full text-slate-400 dark:text-slate-500 text-xs font-bold", children: "New to the Ecosystem?" }) })
       ] }),
       /* @__PURE__ */ jsx(
         "button",
         {
           onClick: () => setIsLogin(!isLogin),
-          className: "w-full py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 transition-all active:scale-95 shadow-sm",
+          className: "w-full py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 transition-all active:scale-[0.98] shadow-sm",
           children: isLogin ? "Create an Account" : "Return to Login"
         }
       ),
@@ -6164,7 +6298,7 @@ function ScoreGauge({ score, size = 120 }) {
   const dashArray = `${score / 100 * 100} 100`;
   return /* @__PURE__ */ jsxs("div", { className: "relative", style: { width: size, height: size }, children: [
     /* @__PURE__ */ jsxs("svg", { viewBox: "0 0 36 36", className: "-rotate-90", style: { width: size, height: size }, children: [
-      /* @__PURE__ */ jsx("circle", { cx: "18", cy: "18", r, fill: "none", stroke: "#e5eeff", strokeWidth: "3.2" }),
+      /* @__PURE__ */ jsx("circle", { cx: "18", cy: "18", r, fill: "none", className: "stroke-slate-200 dark:stroke-slate-700", strokeWidth: "3.2" }),
       /* @__PURE__ */ jsx(
         "circle",
         {
@@ -6203,15 +6337,15 @@ function ReadmePanel({ content, filename = "README.md", badge = null }) {
     a.click();
     URL.revokeObjectURL(url);
   };
-  return /* @__PURE__ */ jsxs("div", { className: "glass-card border-slate-600/50 rounded-2xl bg-slate-900/80 overflow-hidden flex flex-col", children: [
-    /* @__PURE__ */ jsxs("div", { className: "glass-panel border-b border-white/10 bg-slate-950/80 px-6 py-4 flex justify-between items-center", children: [
+  return /* @__PURE__ */ jsxs("div", { className: "rounded-2xl bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700/50 overflow-hidden flex flex-col", children: [
+    /* @__PURE__ */ jsxs("div", { className: "border-b border-slate-200 dark:border-white/10 bg-slate-200/80 dark:bg-slate-950/80 px-6 py-4 flex justify-between items-center", children: [
       /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
-        /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-slate-200 text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "description" }),
-        /* @__PURE__ */ jsx("span", { className: "text-white font-bold text-base", children: filename }),
+        /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-slate-600 dark:text-slate-200 text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "description" }),
+        /* @__PURE__ */ jsx("span", { className: "text-slate-900 dark:text-white font-bold text-base", children: filename }),
         badge && /* @__PURE__ */ jsx(
           "span",
           {
-            className: `px-2 py-0.5 rounded-lg text-xs font-bold ${badge === "AI-generated" ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-600/60 text-slate-300"}`,
+            className: `px-2 py-0.5 rounded-lg text-xs font-bold ${badge === "AI-generated" ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" : "bg-slate-200 dark:bg-slate-600/60 text-slate-600 dark:text-slate-300"}`,
             children: badge
           }
         )
@@ -6221,7 +6355,7 @@ function ReadmePanel({ content, filename = "README.md", badge = null }) {
           "button",
           {
             onClick: handleCopy,
-            className: "flex items-center gap-1.5 px-3 py-1.5 glass-card hover:bg-slate-700/50 text-white rounded-xl text-xs font-bold border border-slate-500/70 transition-colors",
+            className: "flex items-center gap-1.5 px-3 py-1.5 hover:bg-slate-300/50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-white rounded-xl text-xs font-bold border border-slate-300 dark:border-slate-500/70 transition-colors",
             children: [
               /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-sm", style: { fontVariationSettings: "'FILL' 0" }, children: copied ? "check" : "content_copy" }),
               copied ? "Copied!" : "Copy"
@@ -6232,7 +6366,7 @@ function ReadmePanel({ content, filename = "README.md", badge = null }) {
           "button",
           {
             onClick: handleDownload,
-            className: "flex items-center gap-1.5 px-3 py-1.5 glass-card hover:bg-slate-700/50 text-white rounded-xl text-xs font-bold border border-slate-500/70 transition-colors",
+            className: "flex items-center gap-1.5 px-3 py-1.5 hover:bg-slate-300/50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-white rounded-xl text-xs font-bold border border-slate-300 dark:border-slate-500/70 transition-colors",
             children: [
               /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-sm", style: { fontVariationSettings: "'FILL' 0" }, children: "download" }),
               ".md"
@@ -6241,7 +6375,7 @@ function ReadmePanel({ content, filename = "README.md", badge = null }) {
         )
       ] })
     ] }),
-    /* @__PURE__ */ jsx("div", { className: "p-6 overflow-y-auto max-h-96 bg-slate-950/80", children: /* @__PURE__ */ jsx("pre", { className: "text-white font-mono text-sm whitespace-pre-wrap leading-relaxed font-semibold", children: content || "— No content —" }) })
+    /* @__PURE__ */ jsx("div", { className: "p-6 overflow-y-auto max-h-96 bg-slate-100 dark:bg-slate-950/80", children: /* @__PURE__ */ jsx("pre", { className: "text-slate-800 dark:text-white font-mono text-sm whitespace-pre-wrap leading-relaxed font-semibold", children: content || "— No content —" }) })
   ] });
 }
 function Collapsible({ title, icon, iconColor = "text-on-surface-variant", defaultOpen = false, children }) {
@@ -6251,7 +6385,7 @@ function Collapsible({ title, icon, iconColor = "text-on-surface-variant", defau
       "button",
       {
         onClick: () => setOpen((o) => !o),
-        className: "w-full px-8 py-6 flex items-center justify-between hover:bg-white/5 transition-colors",
+        className: "w-full px-8 py-6 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-white/5 transition-colors",
         children: [
           /* @__PURE__ */ jsxs("h3", { className: "text-xl font-bold text-on-surface font-headline flex items-center gap-3", children: [
             /* @__PURE__ */ jsx("span", { className: `material-symbols-outlined text-xl ${iconColor}`, style: { fontVariationSettings: "'FILL' 0" }, children: icon }),
@@ -6268,7 +6402,7 @@ function Collapsible({ title, icon, iconColor = "text-on-surface-variant", defau
         ]
       }
     ),
-    open && /* @__PURE__ */ jsx("div", { className: "px-8 pb-8 border-t border-white/10", children: /* @__PURE__ */ jsx("div", { className: "pt-6", children }) })
+    open && /* @__PURE__ */ jsx("div", { className: "px-8 pb-8 border-t border-slate-200 dark:border-white/10", children: /* @__PURE__ */ jsx("div", { className: "pt-6", children }) })
   ] });
 }
 function RepoReadmeModal({ modal, onClose }) {
@@ -6276,7 +6410,7 @@ function RepoReadmeModal({ modal, onClose }) {
   return /* @__PURE__ */ jsxs("div", { className: "fixed inset-0 z-50 flex items-center justify-center p-4", children: [
     /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-black/60 backdrop-blur-sm", onClick: onClose }),
     /* @__PURE__ */ jsxs("div", { className: "relative card rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl", children: [
-      /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between px-8 py-6 border-b border-white/10", children: [
+      /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between px-8 py-6 border-b border-slate-200 dark:border-white/10", children: [
         /* @__PURE__ */ jsxs("div", { children: [
           /* @__PURE__ */ jsx("h3", { className: "text-xl font-bold text-on-surface font-headline", children: "Repository README" }),
           modal.repo && /* @__PURE__ */ jsx("p", { className: "text-sm text-on-surface-variant font-medium mt-0.5", children: modal.repo })
@@ -6285,7 +6419,7 @@ function RepoReadmeModal({ modal, onClose }) {
           "button",
           {
             onClick: onClose,
-            className: "w-10 h-10 flex items-center justify-center glass-card rounded-2xl hover:bg-white/10 transition-colors",
+            className: "w-10 h-10 flex items-center justify-center glass-card rounded-2xl hover:bg-slate-100 dark:hover:bg-white/10 transition-colors",
             children: /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-on-surface-variant text-xl", style: { fontVariationSettings: "'FILL' 0" }, children: "close" })
           }
         )
@@ -6437,16 +6571,16 @@ function Stage2RepoAudit({ data, onGenerateReadme }) {
       }) })
     ] }),
     repos.length > 0 && /* @__PURE__ */ jsx("div", { className: "overflow-x-auto", children: /* @__PURE__ */ jsxs("table", { className: "w-full text-sm", children: [
-      /* @__PURE__ */ jsx("thead", { children: /* @__PURE__ */ jsxs("tr", { className: "border-b border-white/10", children: [
+      /* @__PURE__ */ jsx("thead", { children: /* @__PURE__ */ jsxs("tr", { className: "border-b border-slate-200 dark:border-white/10", children: [
         /* @__PURE__ */ jsx("th", { className: "text-left text-xs font-bold text-outline uppercase tracking-wider pb-3 pr-4", children: "Repo" }),
         /* @__PURE__ */ jsx("th", { className: "text-left text-xs font-bold text-outline uppercase tracking-wider pb-3 pr-4", children: "Lang" }),
         /* @__PURE__ */ jsx("th", { className: "text-left text-xs font-bold text-outline uppercase tracking-wider pb-3 pr-4", children: "Stars" }),
         /* @__PURE__ */ jsx("th", { className: "text-left text-xs font-bold text-outline uppercase tracking-wider pb-3 pr-4", children: "Status" }),
         /* @__PURE__ */ jsx("th", { className: "text-left text-xs font-bold text-outline uppercase tracking-wider pb-3" })
       ] }) }),
-      /* @__PURE__ */ jsx("tbody", { className: "divide-y divide-white/5", children: repos.map((repo, i) => {
+      /* @__PURE__ */ jsx("tbody", { className: "divide-y divide-slate-100 dark:divide-white/5", children: repos.map((repo, i) => {
         const st = statusIcon(repo.status);
-        return /* @__PURE__ */ jsxs("tr", { className: "hover:bg-white/3 transition-colors", children: [
+        return /* @__PURE__ */ jsxs("tr", { className: "hover:bg-slate-50 dark:hover:bg-white/5 transition-colors", children: [
           /* @__PURE__ */ jsxs("td", { className: "py-3 pr-4", children: [
             /* @__PURE__ */ jsx("div", { className: "font-bold text-on-surface text-sm", children: repo.name }),
             repo.description && /* @__PURE__ */ jsx("div", { className: "text-xs text-on-surface-variant mt-0.5 max-w-xs truncate", children: repo.description })
@@ -6471,7 +6605,7 @@ function Stage2RepoAudit({ data, onGenerateReadme }) {
             "button",
             {
               onClick: () => onGenerateReadme(repo),
-              className: "px-3 py-1.5 glass-card hover:bg-white/10 rounded-xl text-xs font-bold text-on-surface-variant border border-white/10 transition-colors flex items-center gap-1",
+              className: "px-3 py-1.5 glass-card hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl text-xs font-bold text-on-surface-variant border border-slate-200 dark:border-white/10 transition-colors flex items-center gap-1",
               children: [
                 /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-xs", style: { fontVariationSettings: "'FILL' 0" }, children: "auto_awesome" }),
                 "README"
@@ -6541,7 +6675,7 @@ function BioSuggestion({ current, suggested }) {
         "button",
         {
           onClick: handleCopy,
-          className: "mt-2 flex items-center gap-1.5 px-3 py-1.5 glass-card hover:bg-white/10 rounded-xl text-xs font-bold text-on-surface-variant border border-white/10 transition-colors",
+          className: "mt-2 flex items-center gap-1.5 px-3 py-1.5 glass-card hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl text-xs font-bold text-on-surface-variant border border-slate-200 dark:border-white/10 transition-colors",
           children: [
             /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-sm", style: { fontVariationSettings: "'FILL' 0" }, children: copied ? "check" : "content_copy" }),
             copied ? "Copied!" : "Copy suggestion"
@@ -6554,7 +6688,7 @@ function BioSuggestion({ current, suggested }) {
 function RepoSuggestionRow({ suggestion }) {
   const [copiedName, setCopiedName] = useState(false);
   const [copiedDesc, setCopiedDesc] = useState(false);
-  return /* @__PURE__ */ jsxs("tr", { className: "hover:bg-white/3 transition-colors", children: [
+  return /* @__PURE__ */ jsxs("tr", { className: "hover:bg-slate-50 dark:hover:bg-white/5 transition-colors", children: [
     /* @__PURE__ */ jsx("td", { className: "py-3 pr-4 font-mono text-xs text-on-surface-variant", children: suggestion.current ?? suggestion.currentName }),
     /* @__PURE__ */ jsx("td", { className: "py-3 pr-4", children: /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
       /* @__PURE__ */ jsx("span", { className: "font-mono text-xs text-emerald-600 dark:text-emerald-400", children: suggestion.suggested ?? suggestion.suggestedName }),
@@ -6566,7 +6700,7 @@ function RepoSuggestionRow({ suggestion }) {
             setCopiedName(true);
             setTimeout(() => setCopiedName(false), 1500);
           },
-          className: "w-6 h-6 flex items-center justify-center glass-card hover:bg-white/10 rounded-lg text-outline border border-white/10 transition-colors",
+          className: "w-6 h-6 flex items-center justify-center glass-card hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg text-outline border border-slate-200 dark:border-white/10 transition-colors",
           children: /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-xs", style: { fontVariationSettings: "'FILL' 0" }, children: copiedName ? "check" : "content_copy" })
         }
       )
@@ -6581,7 +6715,7 @@ function RepoSuggestionRow({ suggestion }) {
             setCopiedDesc(true);
             setTimeout(() => setCopiedDesc(false), 1500);
           },
-          className: "w-6 h-6 flex-shrink-0 flex items-center justify-center glass-card hover:bg-white/10 rounded-lg text-outline border border-white/10 transition-colors",
+          className: "w-6 h-6 flex-shrink-0 flex items-center justify-center glass-card hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg text-outline border border-slate-200 dark:border-white/10 transition-colors",
           children: /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-xs", style: { fontVariationSettings: "'FILL' 0" }, children: copiedDesc ? "check" : "content_copy" })
         }
       )
@@ -6629,12 +6763,12 @@ function Stage4AIRecommendations({ data }) {
         iconColor: "text-amber-500",
         defaultOpen: false,
         children: /* @__PURE__ */ jsx("div", { className: "overflow-x-auto", children: /* @__PURE__ */ jsxs("table", { className: "w-full text-sm", children: [
-          /* @__PURE__ */ jsx("thead", { children: /* @__PURE__ */ jsxs("tr", { className: "border-b border-white/10", children: [
+          /* @__PURE__ */ jsx("thead", { children: /* @__PURE__ */ jsxs("tr", { className: "border-b border-slate-200 dark:border-white/10", children: [
             /* @__PURE__ */ jsx("th", { className: "text-left text-xs font-bold text-outline uppercase tracking-wider pb-3 pr-4", children: "Current Name" }),
             /* @__PURE__ */ jsx("th", { className: "text-left text-xs font-bold text-outline uppercase tracking-wider pb-3 pr-4", children: "Suggested Name" }),
             /* @__PURE__ */ jsx("th", { className: "text-left text-xs font-bold text-outline uppercase tracking-wider pb-3 pr-4", children: "Suggested Description" })
           ] }) }),
-          /* @__PURE__ */ jsx("tbody", { className: "divide-y divide-white/5", children: repoSuggestions.map((s, i) => /* @__PURE__ */ jsx(RepoSuggestionRow, { suggestion: s }, i)) })
+          /* @__PURE__ */ jsx("tbody", { className: "divide-y divide-slate-100 dark:divide-white/5", children: repoSuggestions.map((s, i) => /* @__PURE__ */ jsx(RepoSuggestionRow, { suggestion: s }, i)) })
         ] }) })
       }
     ),
@@ -6735,7 +6869,7 @@ function Stage5RecruiterReport({ data, onSave, savingAnalysis, analysisSaved, on
         ] }, i)) })
       ] })
     ] }),
-    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 flex-wrap pt-4 border-t border-white/10", children: [
+    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 flex-wrap pt-4 border-t border-slate-200 dark:border-white/10", children: [
       /* @__PURE__ */ jsx(
         "button",
         {
@@ -6758,7 +6892,7 @@ function Stage5RecruiterReport({ data, onSave, savingAnalysis, analysisSaved, on
         "button",
         {
           onClick: onStartOver,
-          className: "px-6 py-3 glass-card hover:bg-white/10 text-on-surface-variant font-bold rounded-2xl transition-all border border-white/10 flex items-center gap-2",
+          className: "px-6 py-3 glass-card hover:bg-slate-100 dark:hover:bg-white/10 text-on-surface-variant font-bold rounded-2xl transition-all border border-slate-200 dark:border-white/10 flex items-center gap-2",
           children: [
             /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "restart_alt" }),
             "Start Over"
@@ -7152,7 +7286,7 @@ function GitHubOptimizer() {
             "button",
             {
               onClick: handleStartOver,
-              className: "px-6 py-3 glass-card hover:bg-white/10 text-on-surface-variant font-bold rounded-2xl transition-all border border-white/10 flex items-center gap-2",
+              className: "px-6 py-3 glass-card hover:bg-slate-100 dark:hover:bg-white/10 text-on-surface-variant font-bold rounded-2xl transition-all border border-slate-200 dark:border-white/10 flex items-center gap-2",
               children: [
                 /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: "restart_alt" }),
                 "Start Over"
@@ -9729,9 +9863,9 @@ function EvidenceDashboard() {
     ] })
   ] }) });
 }
-function StatCard({ label, value, icon: Icon, color }) {
+function StatCard({ label, value, icon: Icon2, color }) {
   return /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-6 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow", children: [
-    /* @__PURE__ */ jsx("div", { className: "w-12 h-12 rounded-2xl glass-card flex items-center justify-center flex-shrink-0", children: /* @__PURE__ */ jsx(Icon, { className: `w-6 h-6 ${color}` }) }),
+    /* @__PURE__ */ jsx("div", { className: "w-12 h-12 rounded-2xl glass-card flex items-center justify-center flex-shrink-0", children: /* @__PURE__ */ jsx(Icon2, { className: `w-6 h-6 ${color}` }) }),
     /* @__PURE__ */ jsxs("div", { children: [
       /* @__PURE__ */ jsx("p", { className: "text-2xl font-extrabold text-on-surface", children: value }),
       /* @__PURE__ */ jsx("p", { className: "text-xs font-bold text-on-surface-variant uppercase tracking-wider", children: label })
@@ -10068,7 +10202,7 @@ const TRACK_RECOMMENDATIONS = {
   intermediate: "learn-and-build",
   advanced: "tune-and-polish"
 };
-const TRACKS$1 = {
+const TRACKS$2 = {
   "zero-to-hero": {
     id: "zero-to-hero",
     title: "Zero to Hero",
@@ -10142,7 +10276,7 @@ function PreparationOnboarding({ onComplete }) {
   const handleStartTrack = async (trackId) => {
     window.dispatchEvent(new Event("prep-onboarding-complete"));
     onComplete({ recommendedTrack: trackId });
-    navigate(TRACKS$1[trackId].path);
+    navigate(TRACKS$2[trackId].path);
   };
   const handleGoToDashboard = () => {
     window.dispatchEvent(new Event("prep-onboarding-complete"));
@@ -10227,9 +10361,9 @@ function PreparationOnboarding({ onComplete }) {
     ] }) });
   }
   if (step === STEPS.REVEAL) {
-    const rec = TRACKS$1[recommended];
+    const rec = TRACKS$2[recommended];
     const RecIcon = rec.icon;
-    const others = Object.values(TRACKS$1).filter((t) => t.id !== recommended);
+    const others = Object.values(TRACKS$2).filter((t) => t.id !== recommended);
     return /* @__PURE__ */ jsx("div", { className: "w-full min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 py-12 px-6 flex items-start justify-center", children: /* @__PURE__ */ jsxs("div", { className: "w-full max-w-3xl", children: [
       /* @__PURE__ */ jsxs("div", { className: "text-center mb-10", children: [
         /* @__PURE__ */ jsxs("div", { className: "inline-flex items-center gap-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-sm font-bold px-4 py-1.5 rounded-full mb-5", children: [
@@ -10272,14 +10406,14 @@ function PreparationOnboarding({ onComplete }) {
       ] }),
       /* @__PURE__ */ jsx("p", { className: "text-xs font-bold uppercase tracking-widest text-slate-400 mb-3", children: "Or choose a different track" }),
       /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6", children: others.map((track) => {
-        const Icon = track.icon;
+        const Icon2 = track.icon;
         return /* @__PURE__ */ jsxs(
           "button",
           {
             onClick: () => handleStartTrack(track.id),
             className: "text-left bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all group",
             children: [
-              /* @__PURE__ */ jsx("div", { className: `inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br ${track.color} text-white mb-3`, children: /* @__PURE__ */ jsx(Icon, { className: "w-5 h-5" }) }),
+              /* @__PURE__ */ jsx("div", { className: `inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br ${track.color} text-white mb-3`, children: /* @__PURE__ */ jsx(Icon2, { className: "w-5 h-5" }) }),
               /* @__PURE__ */ jsx("p", { className: "font-bold text-slate-900 dark:text-white text-sm group-hover:text-blue-600 transition-colors", children: track.title }),
               /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 mt-1", children: track.subtitle }),
               /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-1 text-xs text-blue-600 mt-3 font-semibold", children: [
@@ -10303,41 +10437,50 @@ function PreparationOnboarding({ onComplete }) {
   }
   return null;
 }
-const TRACKS = [
+const PLAN_TIER = { "Learn & Build": 1, "Tune & Polish": 2, "Zero to Hero": 3 };
+const TRACKS$1 = [
   {
-    id: "zero-to-hero",
-    title: "Zero to Hero",
-    subtitle: "For Complete Beginners",
-    description: "Start from scratch with an AI-generated roadmap tailored to your role. Your personal AI Tutor explains every concept along the way.",
-    icon: Rocket,
-    color: "from-emerald-400 to-teal-600",
-    bgAccent: "bg-emerald-50 dark:bg-emerald-900/10",
-    path: "/preparation/zero-to-hero"
+    id: "learn-and-build",
+    title: "Learn & Build",
+    subtitle: "For Intermediate Builders",
+    description: "Structured learning paths, skill checklists, and AI-generated portfolio projects to fill skill gaps and impress employers.",
+    icon: Wrench,
+    color: "from-orange-400 to-rose-500",
+    bgAccent: "bg-orange-50 dark:bg-orange-900/10",
+    path: "/preparation/learn-and-build",
+    minPlan: "Learn & Build",
+    features: ["Curated learning paths", "Skill checklists", "AI project ideas", "Portfolio Kanban"]
   },
   {
     id: "tune-and-polish",
     title: "Tune & Polish",
     subtitle: "For Experienced Professionals",
-    description: "Generate STAR interview stories, run your resume through ATS, and sharpen everything before the big leap.",
+    description: "Job readiness checklist, STAR story generator, resume & LinkedIn optimization — everything to sharpen your application.",
     icon: Target,
     color: "from-blue-500 to-indigo-600",
     bgAccent: "bg-blue-50 dark:bg-blue-900/10",
-    path: "/preparation/tune-and-polish"
+    path: "/preparation/tune-and-polish",
+    minPlan: "Tune & Polish",
+    features: ["Job readiness tracker", "STAR story generator", "Resume & ATS tools", "Mock interviews"]
   },
   {
-    id: "learn-and-build",
-    title: "Learn & Build",
-    subtitle: "For Intermediate Builders",
-    description: "Generate hyper-targeted portfolio projects to fill skill gaps and track everything on a visual Kanban board.",
-    icon: Wrench,
-    color: "from-orange-400 to-rose-500",
-    bgAccent: "bg-orange-50 dark:bg-orange-900/10",
-    path: "/preparation/learn-and-build"
+    id: "zero-to-hero",
+    title: "Zero to Hero",
+    subtitle: "Complete Beginner Roadmap",
+    description: "Start from scratch with roadmap.sh content, an AI Tutor, and module assessments (MCQ, coding, system design).",
+    icon: Rocket,
+    color: "from-emerald-400 to-teal-600",
+    bgAccent: "bg-emerald-50 dark:bg-emerald-900/10",
+    path: "/preparation/zero-to-hero",
+    minPlan: "Zero to Hero",
+    features: ["163 learning modules", "AI Tutor sidebar", "Mixed assessments", "Flashcard review"]
   }
 ];
 function JobPreparation() {
   const [status, setStatus] = useState("loading");
   const [recommendedTrack, setRecommendedTrack] = useState(null);
+  const { userPlan } = useSubscriptionStore();
+  const planTier = PLAN_TIER[userPlan == null ? void 0 : userPlan.name] || 0;
   useEffect(() => {
     let cancelled = false;
     api.get("/progress/preferences").then(({ data }) => {
@@ -10375,35 +10518,67 @@ function JobPreparation() {
       /* @__PURE__ */ jsx("h1", { className: "page-title text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight", children: "Preparation Dashboard" }),
       /* @__PURE__ */ jsx("p", { className: "text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed", children: "Your three AI-powered tracks are ready. Pick up where you left off or explore a new path." })
     ] }),
-    /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-6", children: TRACKS.map((track) => {
-      const Icon = track.icon;
+    /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-6", children: TRACKS$1.map((track) => {
+      const Icon2 = track.icon;
       const isRecommended = track.id === recommendedTrack;
-      return /* @__PURE__ */ jsxs(
+      const requiredTier = PLAN_TIER[track.minPlan] || 1;
+      const hasAccess = planTier >= requiredTier;
+      const CardInner = /* @__PURE__ */ jsxs(Fragment, { children: [
+        isRecommended && hasAccess && /* @__PURE__ */ jsxs("div", { className: "absolute top-4 right-4 flex items-center gap-1 bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full", children: [
+          /* @__PURE__ */ jsx(Star, { className: "w-3 h-3" }),
+          " Your Track"
+        ] }),
+        !hasAccess && /* @__PURE__ */ jsxs("div", { className: "absolute top-4 right-4 flex items-center gap-1 bg-slate-700 text-white text-xs font-bold px-2.5 py-1 rounded-full", children: [
+          /* @__PURE__ */ jsx(Lock, { className: "w-3 h-3" }),
+          " Locked"
+        ] }),
+        /* @__PURE__ */ jsx("div", { className: `absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-gradient-to-br ${track.color} opacity-10 blur-2xl group-hover:opacity-20 transition-opacity` }),
+        /* @__PURE__ */ jsx("div", { className: `inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${track.color} text-white mb-6 shadow-lg ${!hasAccess ? "opacity-50" : ""}`, children: hasAccess ? /* @__PURE__ */ jsx(Icon2, { className: "w-7 h-7" }) : /* @__PURE__ */ jsx(Lock, { className: "w-7 h-7" }) }),
+        /* @__PURE__ */ jsxs("div", { className: "flex-1", children: [
+          /* @__PURE__ */ jsx("p", { className: "text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-1 uppercase tracking-wider", children: track.subtitle }),
+          /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-slate-900 dark:text-white mb-3", children: track.title }),
+          /* @__PURE__ */ jsx("p", { className: "text-slate-600 dark:text-slate-400 leading-relaxed mb-4", children: track.description }),
+          /* @__PURE__ */ jsx("ul", { className: "space-y-1.5 mb-6", children: track.features.map((f) => /* @__PURE__ */ jsxs("li", { className: "flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400", children: [
+            /* @__PURE__ */ jsx("span", { className: `w-1.5 h-1.5 rounded-full shrink-0 ${hasAccess ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-600"}` }),
+            f
+          ] }, f)) })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: `flex items-center text-sm font-bold transition-colors mt-auto ${hasAccess ? "text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400" : "text-slate-400"}`, children: [
+          hasAccess ? isRecommended ? "Continue Track" : "Start Track" : `Upgrade to ${track.minPlan}`,
+          /* @__PURE__ */ jsx(ChevronRight, { className: "w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" })
+        ] })
+      ] });
+      return hasAccess ? /* @__PURE__ */ jsx(
         Link,
         {
           to: track.path,
-          className: `group relative flex flex-col rounded-2xl p-8 hover:-translate-y-2 transition-all duration-300 hover:shadow-xl overflow-hidden border ${isRecommended ? "border-blue-300 dark:border-blue-700 shadow-lg shadow-blue-100 dark:shadow-blue-900/20" : "border-white/50 dark:border-slate-700/50 card"} ${isRecommended ? track.bgAccent : ""}`,
-          children: [
-            isRecommended && /* @__PURE__ */ jsxs("div", { className: "absolute top-4 right-4 flex items-center gap-1 bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full", children: [
-              /* @__PURE__ */ jsx(Star, { className: "w-3 h-3" }),
-              " Your Track"
-            ] }),
-            /* @__PURE__ */ jsx("div", { className: `absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-gradient-to-br ${track.color} opacity-10 blur-2xl group-hover:opacity-20 transition-opacity` }),
-            /* @__PURE__ */ jsx("div", { className: `inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${track.color} text-white mb-6 shadow-lg`, children: /* @__PURE__ */ jsx(Icon, { className: "w-7 h-7" }) }),
-            /* @__PURE__ */ jsxs("div", { className: "flex-1", children: [
-              /* @__PURE__ */ jsx("p", { className: "text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-1 uppercase tracking-wider", children: track.subtitle }),
-              /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-slate-900 dark:text-white mb-3", children: track.title }),
-              /* @__PURE__ */ jsx("p", { className: "text-slate-600 dark:text-slate-400 leading-relaxed mb-8", children: track.description })
-            ] }),
-            /* @__PURE__ */ jsxs("div", { className: "flex items-center text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors mt-auto", children: [
-              isRecommended ? "Continue Track" : "Start Track",
-              /* @__PURE__ */ jsx(ChevronRight, { className: "w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" })
-            ] })
-          ]
+          className: `group relative flex flex-col rounded-2xl p-8 hover:-translate-y-2 transition-all duration-300 hover:shadow-xl overflow-hidden border ${isRecommended ? "border-blue-300 dark:border-blue-700 shadow-lg shadow-blue-100 dark:shadow-blue-900/20 " + track.bgAccent : "border-white/50 dark:border-slate-700/50 card"}`,
+          children: CardInner
+        },
+        track.id
+      ) : /* @__PURE__ */ jsx(
+        Link,
+        {
+          to: "/plan-settings",
+          className: "group relative flex flex-col rounded-2xl p-8 transition-all duration-300 hover:shadow-md overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 cursor-pointer",
+          children: CardInner
         },
         track.id
       );
     }) }),
+    planTier < 3 && /* @__PURE__ */ jsx("div", { className: "card rounded-2xl p-5 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200 dark:border-blue-800/50", children: /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between gap-4 flex-wrap", children: [
+      /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
+        /* @__PURE__ */ jsx("div", { className: "p-2.5 bg-blue-100 dark:bg-blue-950/50 rounded-xl", children: /* @__PURE__ */ jsx(Zap, { className: "w-5 h-5 text-blue-600" }) }),
+        /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsx("p", { className: "font-bold text-slate-900 dark:text-white", children: planTier === 0 ? "Unlock all three preparation tracks" : planTier === 1 ? "Upgrade to Tune & Polish or Zero to Hero" : "Upgrade to Zero to Hero for the full roadmap" }),
+          /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500 dark:text-slate-400", children: "Get access to advanced tracks, AI assessments, and structured learning paths." })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxs(Link, { to: "/plan-settings", className: "btn-primary shrink-0 flex items-center gap-2", children: [
+        "View Plans ",
+        /* @__PURE__ */ jsx(ArrowRight, { className: "w-4 h-4" })
+      ] })
+    ] }) }),
     /* @__PURE__ */ jsx("div", { className: "text-center", children: /* @__PURE__ */ jsx(
       "button",
       {
@@ -10420,134 +10595,6 @@ function JobPreparation() {
         children: "Not sure which track? Retake the questionnaire →"
       }
     ) })
-  ] });
-}
-function STARGenerator() {
-  const [topic, setTopic] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [stories, setStories] = useState([]);
-  const [error, setError] = useState("");
-  const handleGenerate = async (e) => {
-    var _a, _b;
-    e.preventDefault();
-    if (!topic.trim()) return;
-    setLoading(true);
-    setError("");
-    try {
-      const res = await api.post("/job-prep/star-stories", { topic });
-      setStories(res.data.data.stories);
-    } catch (err) {
-      setError(((_b = (_a = err == null ? void 0 : err.response) == null ? void 0 : _a.data) == null ? void 0 : _b.error) || "Failed to generate STAR stories.");
-    } finally {
-      setLoading(false);
-    }
-  };
-  return /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-8 border border-white/50 dark:border-slate-700/50 relative overflow-hidden", children: [
-    /* @__PURE__ */ jsx("div", { className: "absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" }),
-    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 mb-6", children: [
-      /* @__PURE__ */ jsx("div", { className: "p-3 bg-indigo-100 text-indigo-600 rounded-2xl", children: /* @__PURE__ */ jsx(Sparkles, { className: "w-6 h-6" }) }),
-      /* @__PURE__ */ jsxs("div", { children: [
-        /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-slate-900 dark:text-white", children: "Interview Copilot" }),
-        /* @__PURE__ */ jsx("p", { className: "text-slate-500 dark:text-slate-400", children: "Generate perfect STAR behavioral stories for your next interview" })
-      ] })
-    ] }),
-    /* @__PURE__ */ jsxs("form", { onSubmit: handleGenerate, className: "flex gap-3 mb-8", children: [
-      /* @__PURE__ */ jsx(
-        "input",
-        {
-          type: "text",
-          value: topic,
-          onChange: (e) => setTopic(e.target.value),
-          placeholder: "e.g. A time I faced a conflict, or Leadership experience",
-          className: "flex-1 input-field"
-        }
-      ),
-      /* @__PURE__ */ jsxs(
-        "button",
-        {
-          type: "submit",
-          disabled: loading || !topic.trim(),
-          className: "flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold rounded-xl hover:from-indigo-600 hover:to-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed shadow-[0_10px_20px_rgba(79,70,229,0.2)] transition-all",
-          children: [
-            loading ? /* @__PURE__ */ jsx(Loader2, { className: "w-5 h-5 animate-spin" }) : /* @__PURE__ */ jsx(Send, { className: "w-5 h-5" }),
-            "Generate"
-          ]
-        }
-      )
-    ] }),
-    error && /* @__PURE__ */ jsx("div", { className: "error-banner mb-6", children: error }),
-    stories.length > 0 ? /* @__PURE__ */ jsx("div", { className: "space-y-6 relative z-10", children: stories.map((story, i) => /* @__PURE__ */ jsxs("div", { className: "bg-white/60 backdrop-blur-md border border-slate-200/60 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow", children: [
-      /* @__PURE__ */ jsx("h3", { className: "font-bold text-lg text-slate-900 dark:text-white mb-4", children: story.title }),
-      /* @__PURE__ */ jsxs("div", { className: "space-y-4 text-sm", children: [
-        /* @__PURE__ */ jsxs("div", { children: [
-          /* @__PURE__ */ jsx("span", { className: "font-bold text-indigo-700", children: "Situation:" }),
-          " ",
-          /* @__PURE__ */ jsx("span", { className: "text-slate-700", children: story.situation })
-        ] }),
-        /* @__PURE__ */ jsxs("div", { children: [
-          /* @__PURE__ */ jsx("span", { className: "font-bold text-indigo-700", children: "Task:" }),
-          " ",
-          /* @__PURE__ */ jsx("span", { className: "text-slate-700", children: story.task })
-        ] }),
-        /* @__PURE__ */ jsxs("div", { children: [
-          /* @__PURE__ */ jsx("span", { className: "font-bold text-indigo-700", children: "Action:" }),
-          " ",
-          /* @__PURE__ */ jsx("span", { className: "text-slate-700", children: story.action })
-        ] }),
-        /* @__PURE__ */ jsxs("div", { children: [
-          /* @__PURE__ */ jsx("span", { className: "font-bold text-indigo-700", children: "Result:" }),
-          " ",
-          /* @__PURE__ */ jsx("span", { className: "text-slate-700", children: story.result })
-        ] })
-      ] })
-    ] }, i)) }) : /* @__PURE__ */ jsxs("div", { className: "text-center py-12 px-6 bg-slate-50/50 rounded-2xl border border-dashed border-slate-300", children: [
-      /* @__PURE__ */ jsx(Sparkles, { className: "w-8 h-8 text-slate-300 mx-auto mb-3" }),
-      /* @__PURE__ */ jsx("p", { className: "text-slate-500 font-medium", children: "Enter a topic above to generate professional STAR stories." })
-    ] })
-  ] });
-}
-function TuneAndPolishTrack() {
-  return /* @__PURE__ */ jsxs("div", { className: "page-container space-y-8", children: [
-    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 mb-10", children: [
-      /* @__PURE__ */ jsx("div", { className: "p-4 bg-blue-100 text-blue-600 rounded-2xl", children: /* @__PURE__ */ jsx(Target, { className: "w-8 h-8" }) }),
-      /* @__PURE__ */ jsxs("div", { children: [
-        /* @__PURE__ */ jsx("h1", { className: "text-3xl font-extrabold text-slate-900", children: "Tune & Polish" }),
-        /* @__PURE__ */ jsx("p", { className: "text-slate-500 mt-1 text-lg", children: "Fine-tune your application and crush your interviews." })
-      ] })
-    ] }),
-    /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 lg:grid-cols-3 gap-8", children: [
-      /* @__PURE__ */ jsxs("div", { className: "lg:col-span-1 space-y-6", children: [
-        /* @__PURE__ */ jsxs("h3", { className: "font-bold text-slate-900 text-lg flex items-center gap-2", children: [
-          /* @__PURE__ */ jsx(Zap, { className: "w-5 h-5 text-amber-500" }),
-          "Quick Actions"
-        ] }),
-        /* @__PURE__ */ jsxs(Link, { to: "/ats-checker", className: "block card p-6 rounded-2xl hover:-translate-y-1 transition-all border border-white/50 group", children: [
-          /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between mb-4", children: [
-            /* @__PURE__ */ jsx("div", { className: "p-3 bg-teal-50 text-teal-600 rounded-xl", children: /* @__PURE__ */ jsx(FileCode2, { className: "w-6 h-6" }) }),
-            /* @__PURE__ */ jsx(ChevronRight, { className: "w-5 h-5 text-slate-400 group-hover:text-teal-600 group-hover:translate-x-1 transition-all" })
-          ] }),
-          /* @__PURE__ */ jsx("h4", { className: "font-bold text-slate-900 mb-1", children: "ATS Scanner" }),
-          /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500", children: "Scan your resume against a job description to find missing keywords." })
-        ] }),
-        /* @__PURE__ */ jsxs(Link, { to: "/resume", className: "block card p-6 rounded-2xl hover:-translate-y-1 transition-all border border-white/50 group", children: [
-          /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between mb-4", children: [
-            /* @__PURE__ */ jsx("div", { className: "p-3 bg-blue-50 text-blue-600 rounded-xl", children: /* @__PURE__ */ jsx(FileText, { className: "w-6 h-6" }) }),
-            /* @__PURE__ */ jsx(ChevronRight, { className: "w-5 h-5 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" })
-          ] }),
-          /* @__PURE__ */ jsx("h4", { className: "font-bold text-slate-900 mb-1", children: "Resume Optimizer" }),
-          /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500", children: "Rewrite your bullet points to sound more impactful and results-driven." })
-        ] }),
-        /* @__PURE__ */ jsxs(Link, { to: "/interview", className: "block card p-6 rounded-2xl hover:-translate-y-1 transition-all border border-white/50 group", children: [
-          /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between mb-4", children: [
-            /* @__PURE__ */ jsx("div", { className: "p-3 bg-purple-50 text-purple-600 rounded-xl", children: /* @__PURE__ */ jsx(Mic, { className: "w-6 h-6" }) }),
-            /* @__PURE__ */ jsx(ChevronRight, { className: "w-5 h-5 text-slate-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" })
-          ] }),
-          /* @__PURE__ */ jsx("h4", { className: "font-bold text-slate-900 mb-1", children: "Mock Interviews" }),
-          /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500", children: "Practice live technical and behavioral questions with an AI interviewer." })
-        ] })
-      ] }),
-      /* @__PURE__ */ jsx("div", { className: "lg:col-span-2", children: /* @__PURE__ */ jsx(STARGenerator, {}) })
-    ] })
   ] });
 }
 function useUserProgress(contextKey, defaultData = {}) {
@@ -10634,472 +10681,1369 @@ function useUserProgress(contextKey, defaultData = {}) {
     isReady: !isLoading && isReady
   };
 }
-const DEFAULT_TUTOR_MESSAGE = {
-  role: "assistant",
-  content: "Hi! I'm your AI Tutor. Ask me to explain any concept from your roadmap!"
-};
-const ZERO_TO_HERO_DEFAULTS = {
-  step: "intro",
-  collectedData: {},
-  wizardCurrentQIndex: 0,
-  wizardMessages: [],
-  expandedPhases: {},
-  messages: [DEFAULT_TUTOR_MESSAGE],
-  targetRole: ""
-};
-const WIZARD_QUESTIONS = [
+const READINESS_CHECKLIST = [
   {
-    id: "role",
-    text: "What specific IT area or role would you like to focus on?",
-    type: "options",
-    options: [
-      "AI & ML",
-      "Data Science",
-      "Software Development",
-      "Cloud & DevOps",
-      "Cybersecurity",
-      "Product Management",
-      "UI/UX Design",
-      "Business Analysis",
-      "Internships",
-      "Freshers Jobs",
-      "Remote Jobs"
+    category: "Resume & Portfolio",
+    icon: FileText,
+    color: "text-blue-600",
+    bg: "bg-blue-50 dark:bg-blue-950/30",
+    items: [
+      { id: "resume-updated", label: "Resume updated and polished", link: "/resume" },
+      { id: "ats-scanned", label: "ATS score checked (≥80%)", link: "/ats-checker" },
+      { id: "resume-consistent", label: "Resume consistency verified", link: "/resume-consistency" },
+      { id: "achievements-enhanced", label: "Bullet points impact-enhanced", link: "/achievement-enhancer" }
     ]
   },
   {
-    id: "interests",
-    text: "What best describes your interests within this area?",
-    type: "options",
-    options: ["Building Products", "Research & Analysis", "Problem Solving", "Design & Creativity", "Teaching & Mentoring", "Automation & Optimization"]
+    category: "Online Presence",
+    icon: TrendingUp,
+    color: "text-purple-600",
+    bg: "bg-purple-50 dark:bg-purple-950/30",
+    items: [
+      { id: "linkedin-optimized", label: "LinkedIn profile optimized", link: "/linkedin" },
+      { id: "github-optimized", label: "GitHub profile optimized", link: "/github" },
+      { id: "portfolio-built", label: "Portfolio site published", link: "/portfolio" },
+      { id: "recruiter-visible", label: "Recruiter visibility checked", link: "/recruiter-visibility" }
+    ]
   },
   {
-    id: "experience",
-    text: "How much prior experience do you have in this field?",
-    type: "options",
-    options: ["None at all", "Less than 6 months", "6 months – 1 year", "1–2 years", "2+ years"]
-  },
-  { id: "projects", text: `Have you built any projects previously? Briefly describe them (or say "None" if you haven't).`, type: "text" },
-  {
-    id: "knowledge",
-    text: "How would you honestly rate your current knowledge level?",
-    type: "options",
-    options: ["🌱 Complete Beginner", "📚 Intermediate", "🚀 Advanced / Professional"]
-  },
-  {
-    id: "timePerDay",
-    text: "How much time can you realistically dedicate to preparation each day?",
-    type: "options",
-    options: ["Less than 1 hour", "1–2 hours", "3–4 hours", "5+ hours"]
+    category: "Interview Preparation",
+    icon: Mic,
+    color: "text-teal-600",
+    bg: "bg-teal-50 dark:bg-teal-950/30",
+    items: [
+      { id: "mock-interview-done", label: "Completed 3+ mock interviews", link: "/interview" },
+      { id: "star-stories", label: "Prepared 5+ STAR stories", link: null },
+      { id: "cover-letter-ready", label: "Cover letter template ready", link: "/cover-letter" },
+      { id: "communication-trained", label: "Communication skills practiced", link: "/communication-skills" }
+    ]
   },
   {
-    id: "monthsToPrepare",
-    text: "How many months do you have to prepare before you want to be interview-ready?",
-    type: "options",
-    options: ["1 month", "2–3 months", "4–6 months", "6–12 months", "More than a year"]
+    category: "Applications",
+    icon: Briefcase,
+    color: "text-amber-600",
+    bg: "bg-amber-50 dark:bg-amber-950/30",
+    items: [
+      { id: "jobs-tracked", label: "Job applications tracked", link: "/jobs" },
+      { id: "job-analyzer-used", label: "Used Job Analyzer on target roles", link: "/job-analyzer" },
+      { id: "job-fit-checked", label: "Job fit analysis done", link: "/job-fit" },
+      { id: "applied-5-jobs", label: "Applied to 5+ relevant positions", link: null }
+    ]
   }
 ];
-function ZeroToHeroTrack() {
-  var _a, _b;
-  const { data: progress, updateProgress, isLoading: progressLoading, isSaving } = useUserProgress(
-    "zero-to-hero",
-    ZERO_TO_HERO_DEFAULTS
-  );
-  const step = progress.step;
-  const collectedData = progress.collectedData;
-  const wizardCurrentQIndex = progress.wizardCurrentQIndex;
-  const wizardMessages = progress.wizardMessages;
-  const expandedPhases = progress.expandedPhases;
-  const messages = progress.messages;
-  const targetRole = progress.targetRole;
-  const [roadmap, setRoadmap] = useState(null);
+const QUICK_TOOLS = [
+  { to: "/ats-checker", icon: FileCode2, label: "ATS Checker", desc: "Score your resume vs job descriptions", color: "text-teal-600", bg: "bg-teal-50 dark:bg-teal-950/30", tier: "Tune & Polish" },
+  { to: "/resume", icon: FileText, label: "Resume Optimizer", desc: "AI-powered bullet point rewriting", color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30", tier: "Tune & Polish" },
+  { to: "/interview", icon: Mic, label: "Mock Interview", desc: "AI interviewer with instant feedback", color: "text-purple-600", bg: "bg-purple-50 dark:bg-purple-950/30", tier: "Tune & Polish" },
+  { to: "/linkedin", icon: TrendingUp, label: "LinkedIn Optimizer", desc: "Profile scoring & improvement tips", color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-950/30", tier: "Tune & Polish" },
+  { to: "/github", icon: TrendingUp, label: "GitHub Optimizer", desc: "Showcase your coding contributions", color: "text-slate-600", bg: "bg-slate-100 dark:bg-slate-800", tier: "Tune & Polish" },
+  { to: "/achievement-enhancer", icon: Star, label: "Achievement Enhancer", desc: "Make resume bullets more impactful", color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/30", tier: "Tune & Polish" }
+];
+const DEFAULTS$1 = {
+  checkedItems: {},
+  starStories: []
+};
+function STARGenerator() {
+  const [topic, setTopic] = useState("");
   const [loading, setLoading] = useState(false);
-  const [wizardInput, setWizardInput] = useState("");
-  const [isBotTyping, setIsBotTyping] = useState(false);
-  const chatEndRef = useRef(null);
-  const [chatInput, setChatInput] = useState("");
-  const [chatLoading, setChatLoading] = useState(false);
-  useEffect(() => {
-    loadSavedRoadmap();
-  }, []);
-  useEffect(() => {
-    if (step === "chat-wizard" && chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [wizardMessages, isBotTyping, step]);
-  if (progressLoading) {
-    return /* @__PURE__ */ jsx("div", { className: "page-container py-24 flex justify-center", children: /* @__PURE__ */ jsx(Loader2, { className: "w-8 h-8 animate-spin text-emerald-600" }) });
-  }
-  async function loadSavedRoadmap() {
-    try {
-      const { data } = await api.get("/career/roadmap");
-      if (data && (data.roadmap || data.phases)) {
-        setRoadmap(data.roadmap || data);
-      }
-    } catch (err) {
-    }
-  }
-  const startWizard = () => {
-    updateProgress({
-      step: "chat-wizard",
-      wizardCurrentQIndex: 0,
-      collectedData: {},
-      wizardMessages: [],
-      targetRole: ""
-    });
-    setIsBotTyping(true);
-    setTimeout(() => {
-      setIsBotTyping(false);
-      updateProgress((p) => ({
-        ...p,
-        wizardMessages: [{ role: "bot", text: "Welcome to your personal career prep journey! Let's build a roadmap tailored just for you." }]
-      }));
-      setIsBotTyping(true);
-      setTimeout(() => {
-        setIsBotTyping(false);
-        updateProgress((p) => ({
-          ...p,
-          wizardMessages: [...p.wizardMessages, { role: "bot", text: WIZARD_QUESTIONS[0].text }]
-        }));
-      }, 1e3);
-    }, 1500);
-  };
-  const handleWizardSubmit = (e, val = null) => {
-    if (e) e.preventDefault();
-    const answer = val !== null ? val : wizardInput;
-    if (!answer.trim()) return;
-    updateProgress((p) => ({
-      ...p,
-      wizardMessages: [...p.wizardMessages, { role: "user", text: answer }]
-    }));
-    setWizardInput("");
-    const currentQ = WIZARD_QUESTIONS[wizardCurrentQIndex];
-    const newData = { ...collectedData, [currentQ.id]: answer };
-    const roleUpdate = currentQ.id === "role" ? { targetRole: answer } : {};
-    const nextIndex = wizardCurrentQIndex + 1;
-    if (nextIndex < WIZARD_QUESTIONS.length) {
-      updateProgress((p) => ({
-        ...p,
-        collectedData: newData,
-        wizardCurrentQIndex: nextIndex,
-        ...roleUpdate
-      }));
-      setIsBotTyping(true);
-      setTimeout(() => {
-        setIsBotTyping(false);
-        updateProgress((p) => ({
-          ...p,
-          wizardMessages: [...p.wizardMessages, { role: "bot", text: WIZARD_QUESTIONS[nextIndex].text }]
-        }));
-      }, 1e3);
-    } else {
-      updateProgress((p) => ({
-        ...p,
-        collectedData: newData,
-        ...roleUpdate
-      }));
-      setIsBotTyping(true);
-      setTimeout(() => {
-        setIsBotTyping(false);
-        updateProgress((p) => ({
-          ...p,
-          wizardMessages: [...p.wizardMessages, { role: "bot", text: "Perfect! I have all the details I need. Generating your custom roadmap..." }]
-        }));
-        setTimeout(() => {
-          generateRoadmap(newData);
-        }, 1500);
-      }, 1e3);
-    }
-  };
-  const generateRoadmap = async (data) => {
+  const [stories, setStories] = useState([]);
+  const [error, setError] = useState("");
+  const handleGenerate = async (e) => {
+    var _a, _b;
+    e.preventDefault();
+    if (!topic.trim()) return;
     setLoading(true);
-    updateProgress({ step: "generating" });
+    setError("");
     try {
-      const res = await api.post("/career/roadmap", {
-        currentRole: data.knowledge || "Beginner",
-        targetRole: data.role || "IT Professional",
-        currentSkills: [],
-        timeframe: data.monthsToPrepare ? `${data.monthsToPrepare} months` : "6 months"
-      });
-      setRoadmap(res.data);
-      updateProgress({ step: "display", expandedPhases: {} });
+      const res = await api.post("/job-prep/star-stories", { topic });
+      setStories(res.data.data.stories);
     } catch (err) {
-      console.error(err);
-      updateProgress({ step: "intro" });
+      setError(((_b = (_a = err == null ? void 0 : err.response) == null ? void 0 : _a.data) == null ? void 0 : _b.error) || "Failed to generate STAR stories. Please try again.");
     } finally {
       setLoading(false);
     }
   };
-  const handleSendTutorMessage = async (e) => {
-    e.preventDefault();
-    if (!chatInput.trim()) return;
-    const userMsg = { role: "user", content: chatInput };
-    const historyWithUser = [...messages, userMsg];
-    updateProgress({ messages: historyWithUser });
-    setChatInput("");
-    setChatLoading(true);
-    try {
-      const res = await api.post("/job-prep/tutor", {
-        message: userMsg.content,
-        history: messages
-      });
-      updateProgress({
-        messages: [...historyWithUser, { role: "assistant", content: res.data.data.reply }]
-      });
-    } catch (err) {
-      updateProgress({
-        messages: [...historyWithUser, { role: "assistant", content: "Sorry, I couldn't process that right now." }]
-      });
-    } finally {
-      setChatLoading(false);
-    }
-  };
-  const togglePhase = (idx) => {
-    updateProgress({
-      expandedPhases: { ...expandedPhases, [idx]: !expandedPhases[idx] }
-    });
-  };
-  return /* @__PURE__ */ jsxs("div", { className: "page-container", children: [
-    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 mb-8", children: [
-      /* @__PURE__ */ jsx("div", { className: "p-4 bg-emerald-100 text-emerald-600 rounded-2xl shadow-inner shadow-emerald-200/50", children: /* @__PURE__ */ jsx(Rocket, { className: "w-8 h-8" }) }),
+  return /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-6 border border-white/50 dark:border-slate-700/50", children: [
+    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 mb-4", children: [
+      /* @__PURE__ */ jsx("div", { className: "p-2.5 bg-indigo-100 dark:bg-indigo-950/50 text-indigo-600 rounded-xl", children: /* @__PURE__ */ jsx(Sparkles, { className: "w-5 h-5" }) }),
       /* @__PURE__ */ jsxs("div", { children: [
-        /* @__PURE__ */ jsx("h1", { className: "page-title text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight", children: "Zero to Hero Track" }),
-        /* @__PURE__ */ jsxs("p", { className: "text-slate-500 mt-1 text-lg", children: [
-          "Your complete guided journey from beginner to hired.",
-          isSaving && /* @__PURE__ */ jsx("span", { className: "ml-2 text-emerald-600 text-sm", children: "Saving…" })
-        ] })
+        /* @__PURE__ */ jsx("h3", { className: "font-bold text-slate-900 dark:text-white", children: "Interview Copilot" }),
+        /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400", children: "Generate STAR behavioral stories for any topic" })
       ] })
     ] }),
-    step === "intro" && /* @__PURE__ */ jsx("div", { className: "max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700", children: /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-10 border border-white/50 relative overflow-hidden group bg-white shadow-xl shadow-slate-200/50", children: [
-      /* @__PURE__ */ jsx("div", { className: "absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 opacity-10 blur-3xl group-hover:opacity-20 transition-opacity duration-700" }),
-      /* @__PURE__ */ jsxs("div", { className: "relative z-10 flex flex-col md:flex-row gap-10 items-center", children: [
-        /* @__PURE__ */ jsxs("div", { className: "flex-1 space-y-6", children: [
-          /* @__PURE__ */ jsxs("div", { className: "inline-flex items-center px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full font-bold text-sm tracking-wide", children: [
-            /* @__PURE__ */ jsx(Info, { className: "w-4 h-4 mr-2" }),
-            "Currently Optimized for IT Sector"
-          ] }),
-          /* @__PURE__ */ jsxs("h2", { className: "text-4xl font-extrabold text-slate-900 leading-tight", children: [
-            "Start Building Your Career ",
-            /* @__PURE__ */ jsx("span", { className: "text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600", children: "From Scratch" })
-          ] }),
-          /* @__PURE__ */ jsx("p", { className: "text-slate-600 text-lg leading-relaxed", children: "The Zero to Hero page is designed to guide you step-by-step. We will help you identify your interests, build a hyper-targeted project roadmap, and provide you with an interactive AI tutor to answer all your technical questions along the way." }),
-          /* @__PURE__ */ jsxs("div", { className: "space-y-4", children: [
-            /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-4", children: [
-              /* @__PURE__ */ jsx("div", { className: "p-2 bg-emerald-100 text-emerald-600 rounded-xl mt-1", children: /* @__PURE__ */ jsx(Briefcase, { className: "w-5 h-5" }) }),
-              /* @__PURE__ */ jsxs("div", { children: [
-                /* @__PURE__ */ jsx("h4", { className: "font-bold text-slate-900", children: "Create Impactful Projects" }),
-                /* @__PURE__ */ jsx("p", { className: "text-slate-500 text-sm", children: "Build real-world applications that recruiters actually want to see." })
-              ] })
-            ] }),
-            /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-4", children: [
-              /* @__PURE__ */ jsx("div", { className: "p-2 bg-blue-100 text-blue-600 rounded-xl mt-1", children: /* @__PURE__ */ jsx(GraduationCap, { className: "w-5 h-5" }) }),
-              /* @__PURE__ */ jsxs("div", { children: [
-                /* @__PURE__ */ jsx("h4", { className: "font-bold text-slate-900", children: "Explore Components" }),
-                /* @__PURE__ */ jsx("p", { className: "text-slate-500 text-sm", children: "Learn the 'why' and 'how' of modern tech stacks with our integrated AI tutor." })
-              ] })
-            ] })
-          ] }),
-          /* @__PURE__ */ jsxs("div", { className: "flex flex-wrap gap-4 mt-6", children: [
-            roadmap && /* @__PURE__ */ jsxs(
-              "button",
-              {
-                onClick: () => updateProgress({ step: "display" }),
-                className: "flex items-center justify-center gap-2 px-8 py-4 bg-emerald-600 text-white rounded-2xl font-bold text-lg hover:bg-emerald-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-emerald-900/20",
-                children: [
-                  /* @__PURE__ */ jsx(Play, { className: "w-5 h-5 fill-current" }),
-                  "Continue Saved Journey"
-                ]
-              }
-            ),
-            /* @__PURE__ */ jsxs(
-              "button",
-              {
-                onClick: startWizard,
-                className: `flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-bold text-lg hover:scale-[1.02] active:scale-[0.98] transition-all ${roadmap ? "bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200" : "bg-slate-900 text-white hover:bg-slate-800 shadow-xl shadow-slate-900/20"}`,
-                children: [
-                  !roadmap && /* @__PURE__ */ jsx(Play, { className: "w-5 h-5 fill-current" }),
-                  roadmap ? "Start A New Path" : "Start My Journey"
-                ]
-              }
-            )
-          ] })
-        ] }),
-        /* @__PURE__ */ jsx("div", { className: "flex-1 w-full flex justify-center", children: /* @__PURE__ */ jsxs("div", { className: "relative w-full max-w-sm aspect-square bg-gradient-to-br from-slate-50 to-slate-100 rounded-full border-8 border-white shadow-2xl flex items-center justify-center", children: [
-          /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-emerald-500/10 rounded-full animate-pulse" }),
-          /* @__PURE__ */ jsx(Rocket, { className: "w-32 h-32 text-emerald-500 drop-shadow-2xl" })
-        ] }) })
-      ] })
-    ] }) }),
-    step === "chat-wizard" && /* @__PURE__ */ jsxs("div", { className: "max-w-3xl mx-auto h-[600px] flex flex-col bg-slate-50 rounded-2xl shadow-2xl shadow-indigo-100 border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-500", children: [
-      /* @__PURE__ */ jsxs("div", { className: "px-6 py-4 bg-white border-b border-slate-200 flex items-center gap-4", children: [
-        /* @__PURE__ */ jsxs("div", { className: "relative", children: [
-          /* @__PURE__ */ jsx("div", { className: "w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg", children: /* @__PURE__ */ jsx(Bot, { className: "w-6 h-6 text-white" }) }),
-          /* @__PURE__ */ jsx("div", { className: "absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" })
-        ] }),
-        /* @__PURE__ */ jsxs("div", { children: [
-          /* @__PURE__ */ jsx("h2", { className: "text-lg font-bold text-slate-900", children: "Career Architect AI" }),
-          /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500", children: "Online • Helping you build your path" })
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxs("div", { className: "flex-1 overflow-y-auto p-6 space-y-6", children: [
-        wizardMessages.map((msg, i) => /* @__PURE__ */ jsx("div", { className: `flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-in slide-in-from-bottom-4 fade-in duration-300`, children: /* @__PURE__ */ jsxs("div", { className: "flex items-end gap-2 max-w-[80%]", children: [
-          msg.role === "bot" && /* @__PURE__ */ jsx("div", { className: "w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mb-1", children: /* @__PURE__ */ jsx(Bot, { className: "w-4 h-4 text-emerald-600" }) }),
-          /* @__PURE__ */ jsx("div", { className: `px-5 py-3.5 rounded-2xl text-[15px] leading-relaxed shadow-sm ${msg.role === "user" ? "bg-slate-900 text-white rounded-br-sm" : "bg-white text-slate-800 border border-slate-200 rounded-bl-sm"}`, children: msg.text }),
-          msg.role === "user" && /* @__PURE__ */ jsx("div", { className: "w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0 mb-1", children: /* @__PURE__ */ jsx(User, { className: "w-4 h-4 text-slate-600" }) })
-        ] }) }, i)),
-        isBotTyping && /* @__PURE__ */ jsx("div", { className: "flex justify-start animate-in fade-in duration-300", children: /* @__PURE__ */ jsxs("div", { className: "flex items-end gap-2 max-w-[80%]", children: [
-          /* @__PURE__ */ jsx("div", { className: "w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mb-1", children: /* @__PURE__ */ jsx(Bot, { className: "w-4 h-4 text-emerald-600" }) }),
-          /* @__PURE__ */ jsxs("div", { className: "px-5 py-4 bg-white border border-slate-200 rounded-2xl rounded-bl-sm shadow-sm flex gap-1", children: [
-            /* @__PURE__ */ jsx("div", { className: "w-2 h-2 rounded-full bg-slate-300 animate-bounce", style: { animationDelay: "0ms" } }),
-            /* @__PURE__ */ jsx("div", { className: "w-2 h-2 rounded-full bg-slate-300 animate-bounce", style: { animationDelay: "150ms" } }),
-            /* @__PURE__ */ jsx("div", { className: "w-2 h-2 rounded-full bg-slate-300 animate-bounce", style: { animationDelay: "300ms" } })
-          ] })
-        ] }) }),
-        /* @__PURE__ */ jsx("div", { ref: chatEndRef })
-      ] }),
-      /* @__PURE__ */ jsx("div", { className: "bg-white border-t border-slate-200 p-4", children: !isBotTyping && ((_a = WIZARD_QUESTIONS[wizardCurrentQIndex]) == null ? void 0 : _a.type) === "options" ? /* @__PURE__ */ jsx("div", { className: "flex flex-wrap gap-2 justify-center", children: WIZARD_QUESTIONS[wizardCurrentQIndex].options.map((opt, i) => /* @__PURE__ */ jsx(
+    /* @__PURE__ */ jsxs("form", { onSubmit: handleGenerate, className: "flex gap-2 mb-4", children: [
+      /* @__PURE__ */ jsx(
+        "input",
+        {
+          type: "text",
+          value: topic,
+          onChange: (e) => setTopic(e.target.value),
+          placeholder: "e.g. A time I led a team, or Conflict resolution",
+          className: "flex-1 input-field"
+        }
+      ),
+      /* @__PURE__ */ jsxs(
         "button",
         {
-          onClick: () => handleWizardSubmit(null, opt),
-          className: "px-6 py-3 bg-emerald-50 text-emerald-700 font-bold rounded-xl border border-emerald-200 hover:bg-emerald-500 hover:text-white transition-colors",
-          children: opt
-        },
-        i
-      )) }) : /* @__PURE__ */ jsxs("form", { onSubmit: handleWizardSubmit, className: "relative flex items-center", children: [
-        /* @__PURE__ */ jsx(
-          "input",
-          {
-            type: "text",
-            value: wizardInput,
-            onChange: (e) => setWizardInput(e.target.value),
-            disabled: isBotTyping || wizardCurrentQIndex >= WIZARD_QUESTIONS.length,
-            placeholder: isBotTyping ? "AI is typing..." : "Type your answer...",
-            className: "w-full bg-slate-50 border border-slate-200 rounded-2xl pl-6 pr-14 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 text-[15px]"
-          }
-        ),
-        /* @__PURE__ */ jsx(
-          "button",
-          {
-            type: "submit",
-            disabled: isBotTyping || !wizardInput.trim() || wizardCurrentQIndex >= WIZARD_QUESTIONS.length,
-            className: "absolute right-2 p-2.5 bg-slate-900 text-white rounded-xl hover:bg-slate-800 disabled:opacity-50 disabled:hover:bg-slate-900 transition-colors",
-            children: /* @__PURE__ */ jsx(Send, { className: "w-5 h-5" })
-          }
-        )
-      ] }) })
+          type: "submit",
+          disabled: loading || !topic.trim(),
+          className: "btn-primary flex items-center gap-2 whitespace-nowrap",
+          children: [
+            loading ? /* @__PURE__ */ jsx(Loader2, { className: "w-4 h-4 animate-spin" }) : /* @__PURE__ */ jsx(Send, { className: "w-4 h-4" }),
+            "Generate"
+          ]
+        }
+      )
     ] }),
-    step === "generating" && /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-12 text-center max-w-xl mx-auto border border-white/50 mt-10 animate-in fade-in zoom-in-95 duration-500", children: [
-      /* @__PURE__ */ jsxs("div", { className: "relative w-20 h-20 mx-auto mb-8", children: [
-        /* @__PURE__ */ jsx("div", { className: "absolute inset-0 border-4 border-emerald-100 rounded-full" }),
-        /* @__PURE__ */ jsx("div", { className: "absolute inset-0 border-4 border-emerald-500 rounded-full border-t-transparent animate-spin" }),
-        /* @__PURE__ */ jsx(Bot, { className: "w-8 h-8 text-emerald-600 absolute inset-0 m-auto" })
+    error && /* @__PURE__ */ jsx("div", { className: "text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 p-3 rounded-xl mb-4", children: error }),
+    stories.length > 0 ? /* @__PURE__ */ jsx("div", { className: "space-y-4 max-h-96 overflow-y-auto pr-1", children: stories.map((story, i) => /* @__PURE__ */ jsxs("div", { className: "bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 rounded-xl", children: [
+      /* @__PURE__ */ jsx("h4", { className: "font-bold text-sm text-slate-900 dark:text-white mb-3", children: story.title }),
+      /* @__PURE__ */ jsx("div", { className: "space-y-2 text-sm", children: ["situation", "task", "action", "result"].map((field) => /* @__PURE__ */ jsxs("div", { className: "flex gap-2", children: [
+        /* @__PURE__ */ jsxs("span", { className: "font-bold text-indigo-700 dark:text-indigo-400 capitalize shrink-0 min-w-[60px]", children: [
+          field,
+          ":"
+        ] }),
+        /* @__PURE__ */ jsx("span", { className: "text-slate-700 dark:text-slate-300", children: story[field] })
+      ] }, field)) })
+    ] }, i)) }) : /* @__PURE__ */ jsxs("div", { className: "text-center py-8 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-700", children: [
+      /* @__PURE__ */ jsx(Sparkles, { className: "w-7 h-7 text-slate-300 mx-auto mb-2" }),
+      /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500 dark:text-slate-400", children: "Enter a topic to generate structured STAR stories" })
+    ] })
+  ] });
+}
+function ReadinessScore({ total, done }) {
+  const pct = total > 0 ? Math.round(done / total * 100) : 0;
+  const color = pct >= 75 ? "text-emerald-600" : pct >= 50 ? "text-amber-600" : "text-rose-600";
+  const barColor2 = pct >= 75 ? "from-emerald-400 to-teal-500" : pct >= 50 ? "from-amber-400 to-orange-500" : "from-rose-400 to-pink-500";
+  const label = pct >= 75 ? "Job Ready!" : pct >= 50 ? "Getting There" : "Keep Going";
+  return /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-5", children: [
+    /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between mb-3", children: [
+      /* @__PURE__ */ jsxs("h3", { className: "font-bold text-slate-900 dark:text-white flex items-center gap-2", children: [
+        /* @__PURE__ */ jsx(BarChart2, { className: "w-4 h-4 text-indigo-500" }),
+        "Job Readiness Score"
       ] }),
-      /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-slate-900 mb-2", children: "Architecting Your Blueprint" }),
-      /* @__PURE__ */ jsxs("p", { className: "text-slate-600", children: [
-        "Analyzing your ",
-        targetRole,
-        " goals and constructing a hyper-targeted 6-month plan..."
+      /* @__PURE__ */ jsxs("span", { className: `text-2xl font-extrabold ${color}`, children: [
+        pct,
+        "%"
       ] })
     ] }),
-    step === "display" && roadmap && /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700", children: [
-      /* @__PURE__ */ jsx("div", { className: "lg:col-span-2 space-y-6", children: /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-8 border border-white/50", children: [
-        /* @__PURE__ */ jsx("h2", { className: "text-3xl font-bold text-slate-900 mb-2", children: roadmap.title }),
-        /* @__PURE__ */ jsx("p", { className: "text-slate-600 mb-6", children: roadmap.summary }),
-        /* @__PURE__ */ jsx("div", { className: "space-y-4", children: (_b = roadmap.phases) == null ? void 0 : _b.map((phase, idx) => /* @__PURE__ */ jsxs("div", { className: "bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden", children: [
-          /* @__PURE__ */ jsxs(
-            "button",
-            {
-              onClick: () => togglePhase(idx),
-              className: "w-full px-6 py-4 flex items-center justify-between hover:bg-slate-100 transition-colors",
-              children: [
-                /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 text-left", children: [
-                  /* @__PURE__ */ jsx("div", { className: "w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 font-bold flex items-center justify-center shrink-0", children: idx + 1 }),
-                  /* @__PURE__ */ jsxs("div", { children: [
-                    /* @__PURE__ */ jsx("h3", { className: "font-bold text-slate-900", children: phase.title }),
-                    /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500", children: phase.duration })
-                  ] })
-                ] }),
-                expandedPhases[idx] ? /* @__PURE__ */ jsx(ChevronUp, { className: "w-5 h-5 text-slate-400" }) : /* @__PURE__ */ jsx(ChevronDown, { className: "w-5 h-5 text-slate-400" })
-              ]
-            }
-          ),
-          expandedPhases[idx] && /* @__PURE__ */ jsxs("div", { className: "px-6 py-4 border-t border-slate-200 bg-white", children: [
-            /* @__PURE__ */ jsx("p", { className: "text-slate-700 mb-4", children: phase.description }),
-            phase.skills && /* @__PURE__ */ jsxs("div", { className: "mb-4", children: [
-              /* @__PURE__ */ jsx("h4", { className: "font-bold text-slate-900 text-sm mb-2 uppercase tracking-wider", children: "Skills" }),
-              /* @__PURE__ */ jsx("div", { className: "flex flex-wrap gap-2", children: phase.skills.map((s, i) => /* @__PURE__ */ jsx("span", { className: "px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-semibold", children: s }, i)) })
+    /* @__PURE__ */ jsx("div", { className: "h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mb-2", children: /* @__PURE__ */ jsx("div", { className: `h-full bg-gradient-to-r ${barColor2} rounded-full transition-all duration-700`, style: { width: `${pct}%` } }) }),
+    /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between text-xs text-slate-500 dark:text-slate-400", children: [
+      /* @__PURE__ */ jsxs("span", { children: [
+        done,
+        " of ",
+        total,
+        " items complete"
+      ] }),
+      /* @__PURE__ */ jsx("span", { className: `font-bold ${color}`, children: label })
+    ] }),
+    pct >= 75 && /* @__PURE__ */ jsxs("div", { className: "mt-3 flex items-center gap-2 text-sm text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 p-3 rounded-xl", children: [
+      /* @__PURE__ */ jsx(Trophy, { className: "w-4 h-4 shrink-0" }),
+      "You're ready to apply! Start sending out applications now."
+    ] })
+  ] });
+}
+function TuneAndPolishTrack() {
+  const { data: progress, updateProgress, isLoading: progressLoading, isSaving } = useUserProgress(
+    "tune-and-polish",
+    DEFAULTS$1
+  );
+  const checkedItems = progress.checkedItems || {};
+  const allItems = READINESS_CHECKLIST.flatMap((c) => c.items);
+  const totalItems = allItems.length;
+  const doneItems = allItems.filter((item) => checkedItems[item.id]).length;
+  const handleToggle = useCallback((id) => {
+    updateProgress({ checkedItems: { ...checkedItems, [id]: !checkedItems[id] } });
+  }, [checkedItems, updateProgress]);
+  if (progressLoading) {
+    return /* @__PURE__ */ jsx("div", { className: "page-container py-24 flex justify-center", children: /* @__PURE__ */ jsx(Loader2, { className: "w-8 h-8 animate-spin text-blue-600" }) });
+  }
+  return /* @__PURE__ */ jsxs("div", { className: "page-container space-y-8", children: [
+    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4", children: [
+      /* @__PURE__ */ jsx("div", { className: "p-4 bg-blue-100 text-blue-600 rounded-2xl", children: /* @__PURE__ */ jsx(Target, { className: "w-8 h-8" }) }),
+      /* @__PURE__ */ jsxs("div", { children: [
+        /* @__PURE__ */ jsxs("h1", { className: "text-3xl font-extrabold text-slate-900 dark:text-white", children: [
+          "Tune & Polish",
+          isSaving && /* @__PURE__ */ jsx("span", { className: "ml-3 text-blue-600 text-sm font-semibold", children: "Saving…" })
+        ] }),
+        /* @__PURE__ */ jsx("p", { className: "text-slate-500 dark:text-slate-400 mt-1", children: "Fine-tune everything and become job-application ready." })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 lg:grid-cols-3 gap-8", children: [
+      /* @__PURE__ */ jsxs("div", { className: "lg:col-span-1 space-y-4", children: [
+        /* @__PURE__ */ jsx(ReadinessScore, { total: totalItems, done: doneItems }),
+        READINESS_CHECKLIST.map((category) => {
+          const catDone = category.items.filter((item) => checkedItems[item.id]).length;
+          return /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-4", children: [
+            /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2.5 mb-3", children: [
+              /* @__PURE__ */ jsx("div", { className: `p-2 rounded-xl ${category.bg}`, children: /* @__PURE__ */ jsx(category.icon, { className: `w-4 h-4 ${category.color}` }) }),
+              /* @__PURE__ */ jsxs("div", { className: "flex-1", children: [
+                /* @__PURE__ */ jsx("p", { className: "font-bold text-sm text-slate-900 dark:text-white", children: category.category }),
+                /* @__PURE__ */ jsxs("p", { className: "text-xs text-slate-500 dark:text-slate-400", children: [
+                  catDone,
+                  "/",
+                  category.items.length,
+                  " done"
+                ] })
+              ] })
             ] }),
-            phase.goals && /* @__PURE__ */ jsxs("div", { children: [
-              /* @__PURE__ */ jsx("h4", { className: "font-bold text-slate-900 text-sm mb-2 uppercase tracking-wider", children: "Milestones" }),
-              /* @__PURE__ */ jsx("ul", { className: "space-y-2", children: phase.goals.map((g, i) => /* @__PURE__ */ jsxs("li", { className: "flex items-start gap-2 text-sm text-slate-700", children: [
-                /* @__PURE__ */ jsx(CheckCircle, { className: "w-4 h-4 text-emerald-500 shrink-0 mt-0.5" }),
-                g
-              ] }, i)) })
+            /* @__PURE__ */ jsx("div", { className: "space-y-1.5", children: category.items.map((item) => {
+              const done = !!checkedItems[item.id];
+              return /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
+                /* @__PURE__ */ jsxs(
+                  "button",
+                  {
+                    onClick: () => handleToggle(item.id),
+                    className: `flex-1 flex items-center gap-2 p-2 rounded-lg text-left transition-all text-xs ${done ? "bg-emerald-50 dark:bg-emerald-950/30 text-slate-400 dark:text-slate-500" : "hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"}`,
+                    children: [
+                      done ? /* @__PURE__ */ jsx(CheckCircle2, { className: "w-3.5 h-3.5 text-emerald-500 shrink-0" }) : /* @__PURE__ */ jsx(Circle, { className: "w-3.5 h-3.5 text-slate-300 shrink-0" }),
+                      /* @__PURE__ */ jsx("span", { className: done ? "line-through" : "", children: item.label })
+                    ]
+                  }
+                ),
+                item.link && /* @__PURE__ */ jsx(
+                  Link,
+                  {
+                    to: item.link,
+                    className: "p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors",
+                    children: /* @__PURE__ */ jsx(ArrowRight, { className: "w-3 h-3" })
+                  }
+                )
+              ] }, item.id);
+            }) })
+          ] }, category.category);
+        })
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "lg:col-span-2 space-y-6", children: [
+        /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsxs("h2", { className: "font-bold text-slate-900 dark:text-white text-lg mb-4 flex items-center gap-2", children: [
+            /* @__PURE__ */ jsx(Zap, { className: "w-5 h-5 text-amber-500" }),
+            "Your Toolkit"
+          ] }),
+          /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-3", children: QUICK_TOOLS.map(({ to, icon: Icon2, label, desc, color, bg }) => /* @__PURE__ */ jsxs(
+            Link,
+            {
+              to,
+              className: "card p-4 rounded-2xl flex items-center gap-3 hover:-translate-y-0.5 transition-all group border border-transparent hover:border-slate-200 dark:hover:border-slate-700",
+              children: [
+                /* @__PURE__ */ jsx("div", { className: `p-2.5 rounded-xl ${bg} shrink-0`, children: /* @__PURE__ */ jsx(Icon2, { className: `w-5 h-5 ${color}` }) }),
+                /* @__PURE__ */ jsxs("div", { className: "flex-1 min-w-0", children: [
+                  /* @__PURE__ */ jsx("p", { className: "font-bold text-sm text-slate-900 dark:text-white", children: label }),
+                  /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 truncate", children: desc })
+                ] }),
+                /* @__PURE__ */ jsx(ChevronRight, { className: "w-4 h-4 text-slate-300 group-hover:text-slate-500 dark:group-hover:text-slate-400 shrink-0 transition-all group-hover:translate-x-0.5" })
+              ]
+            },
+            to
+          )) })
+        ] }),
+        /* @__PURE__ */ jsx(STARGenerator, {}),
+        /* @__PURE__ */ jsx("div", { className: "card rounded-2xl p-5 border border-blue-100 dark:border-blue-900/50 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20", children: /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-4", children: [
+          /* @__PURE__ */ jsx("div", { className: "p-3 bg-blue-100 dark:bg-blue-950/50 text-blue-600 rounded-xl shrink-0", children: /* @__PURE__ */ jsx(Brain, { className: "w-6 h-6" }) }),
+          /* @__PURE__ */ jsxs("div", { children: [
+            /* @__PURE__ */ jsx("h3", { className: "font-bold text-slate-900 dark:text-white mb-1", children: "Interview Strategy Tips" }),
+            /* @__PURE__ */ jsxs("ul", { className: "space-y-1.5 text-sm text-slate-700 dark:text-slate-300", children: [
+              /* @__PURE__ */ jsxs("li", { className: "flex items-start gap-2", children: [
+                /* @__PURE__ */ jsx("span", { className: "text-blue-500 font-bold mt-0.5", children: "•" }),
+                "Research the company's recent news, products, and culture before each interview."
+              ] }),
+              /* @__PURE__ */ jsxs("li", { className: "flex items-start gap-2", children: [
+                /* @__PURE__ */ jsx("span", { className: "text-blue-500 font-bold mt-0.5", children: "•" }),
+                "Prepare 3 thoughtful questions to ask the interviewer at the end."
+              ] }),
+              /* @__PURE__ */ jsxs("li", { className: "flex items-start gap-2", children: [
+                /* @__PURE__ */ jsx("span", { className: "text-blue-500 font-bold mt-0.5", children: "•" }),
+                "Practice out loud — not just in your head. Use the Mock Interview tool regularly."
+              ] }),
+              /* @__PURE__ */ jsxs("li", { className: "flex items-start gap-2", children: [
+                /* @__PURE__ */ jsx("span", { className: "text-blue-500 font-bold mt-0.5", children: "•" }),
+                "Follow up with a thank-you email within 24 hours after every interview."
+              ] })
             ] })
           ] })
-        ] }, idx)) })
-      ] }) }),
-      /* @__PURE__ */ jsx("div", { className: "lg:col-span-1", children: /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl border border-white/50 flex flex-col h-[600px] sticky top-24", children: [
-        /* @__PURE__ */ jsxs("div", { className: "p-4 border-b border-slate-200 bg-emerald-50/50 rounded-t-3xl flex items-center gap-3", children: [
-          /* @__PURE__ */ jsx("div", { className: "p-2 bg-emerald-200 text-emerald-700 rounded-xl", children: /* @__PURE__ */ jsx(Bot, { className: "w-5 h-5" }) }),
-          /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx("h3", { className: "font-bold text-slate-900", children: "AI Tutor" }),
-            /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-500", children: "Ask any technical questions" })
+        ] }) }),
+        /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4", children: [
+          /* @__PURE__ */ jsxs(Link, { to: "/jobs", className: "card rounded-2xl p-5 hover:-translate-y-0.5 transition-all group", children: [
+            /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 mb-2", children: [
+              /* @__PURE__ */ jsx("div", { className: "p-2.5 bg-amber-50 dark:bg-amber-950/30 rounded-xl", children: /* @__PURE__ */ jsx(Briefcase, { className: "w-5 h-5 text-amber-600" }) }),
+              /* @__PURE__ */ jsx("h3", { className: "font-bold text-slate-900 dark:text-white", children: "Job Tracker" })
+            ] }),
+            /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500 dark:text-slate-400", children: "Track all your applications, follow-ups, and interview stages in one place." }),
+            /* @__PURE__ */ jsxs("div", { className: "mt-3 flex items-center gap-1 text-amber-600 text-xs font-semibold", children: [
+              "Open Tracker ",
+              /* @__PURE__ */ jsx(ArrowRight, { className: "w-3 h-3 group-hover:translate-x-0.5 transition-all" })
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxs(Link, { to: "/cover-letter", className: "card rounded-2xl p-5 hover:-translate-y-0.5 transition-all group", children: [
+            /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 mb-2", children: [
+              /* @__PURE__ */ jsx("div", { className: "p-2.5 bg-teal-50 dark:bg-teal-950/30 rounded-xl", children: /* @__PURE__ */ jsx(MessageSquare, { className: "w-5 h-5 text-teal-600" }) }),
+              /* @__PURE__ */ jsx("h3", { className: "font-bold text-slate-900 dark:text-white", children: "Cover Letter Generator" })
+            ] }),
+            /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500 dark:text-slate-400", children: "Generate compelling, tailored cover letters for each job application in seconds." }),
+            /* @__PURE__ */ jsxs("div", { className: "mt-3 flex items-center gap-1 text-teal-600 text-xs font-semibold", children: [
+              "Generate Now ",
+              /* @__PURE__ */ jsx(ArrowRight, { className: "w-3 h-3 group-hover:translate-x-0.5 transition-all" })
+            ] })
           ] })
-        ] }),
-        /* @__PURE__ */ jsxs("div", { className: "flex-1 overflow-y-auto p-4 space-y-4", children: [
-          messages.map((msg, i) => /* @__PURE__ */ jsx("div", { className: `flex ${msg.role === "user" ? "justify-end" : "justify-start"}`, children: /* @__PURE__ */ jsx("div", { className: `max-w-[85%] rounded-2xl p-3 text-sm ${msg.role === "user" ? "bg-indigo-600 text-white rounded-br-none" : "bg-slate-100 text-slate-800 rounded-bl-none"}`, children: msg.content }) }, i)),
-          chatLoading && /* @__PURE__ */ jsx("div", { className: "flex justify-start", children: /* @__PURE__ */ jsx("div", { className: "bg-slate-100 rounded-2xl rounded-bl-none p-3", children: /* @__PURE__ */ jsx(Loader2, { className: "w-4 h-4 animate-spin text-slate-500" }) }) })
-        ] }),
-        /* @__PURE__ */ jsxs("form", { onSubmit: handleSendTutorMessage, className: "p-3 border-t border-slate-200 bg-white rounded-b-3xl flex gap-2", children: [
-          /* @__PURE__ */ jsx(
-            "input",
-            {
-              type: "text",
-              value: chatInput,
-              onChange: (e) => setChatInput(e.target.value),
-              placeholder: "Ask a question...",
-              className: "flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            }
-          ),
-          /* @__PURE__ */ jsx(
+        ] })
+      ] })
+    ] })
+  ] });
+}
+const TRACKS = [
+  { id: "frontend", label: "Frontend Development", icon: "web", desc: "HTML, CSS, JavaScript, React" },
+  { id: "backend", label: "Backend Development", icon: "dns", desc: "Node.js, Python, Databases, APIs" },
+  { id: "javascript", label: "JavaScript", icon: "code", desc: "Deep dive into JS fundamentals" },
+  { id: "react", label: "React", icon: "widgets", desc: "Components, Hooks, State Management" },
+  { id: "python", label: "Python", icon: "terminal", desc: "Syntax, OOP, Data Science basics" },
+  { id: "nodejs", label: "Node.js", icon: "memory", desc: "Express, APIs, Server-side JS" },
+  { id: "datastructures-and-algorithms", label: "DSA", icon: "account_tree", desc: "Arrays, Trees, Graphs, DP" },
+  { id: "computer-science", label: "Computer Science", icon: "school", desc: "OS, Networking, Databases" }
+];
+const DEFAULT_PROGRESS = {
+  step: "intro",
+  track: null,
+  interviewData: {},
+  knowledgeCheck: {},
+  modules: {},
+  currentModuleId: null
+};
+function Icon({ name, fill = 0, className = "" }) {
+  return /* @__PURE__ */ jsx("span", { className: `material-symbols-outlined ${className}`, style: { fontVariationSettings: `'FILL' ${fill}` }, children: name });
+}
+function IntroScreen({ onStart, hasProgress }) {
+  return /* @__PURE__ */ jsxs("div", { className: "text-center max-w-2xl mx-auto py-16 fade-up", children: [
+    /* @__PURE__ */ jsx("div", { className: "w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mx-auto mb-8 shadow-lg", children: /* @__PURE__ */ jsx(Icon, { name: "rocket_launch", fill: 1, className: "text-white text-4xl" }) }),
+    /* @__PURE__ */ jsx("h1", { className: "page-title mb-4", children: "Zero to Hero" }),
+    /* @__PURE__ */ jsx("p", { className: "text-lg text-slate-500 dark:text-slate-400 leading-relaxed mb-10 max-w-lg mx-auto", children: "Start from scratch and master software development through structured learning modules, hands-on practice, and AI-powered assessments." }),
+    /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10", children: [
+      { icon: "school", title: "Learn", desc: "Structured modules with real content" },
+      { icon: "quiz", title: "Assess", desc: "Tests scoped to what you learned" },
+      { icon: "trending_up", title: "Progress", desc: "Unlock modules as you grow" }
+    ].map((f, i) => /* @__PURE__ */ jsxs("div", { className: "card p-5 text-center", children: [
+      /* @__PURE__ */ jsx(Icon, { name: f.icon, className: "text-blue-500 text-2xl mb-2" }),
+      /* @__PURE__ */ jsx("p", { className: "font-bold text-slate-900 dark:text-white text-sm", children: f.title }),
+      /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 mt-1", children: f.desc })
+    ] }, i)) }),
+    /* @__PURE__ */ jsxs("button", { onClick: onStart, className: "btn-primary-lg", children: [
+      hasProgress ? "Continue Your Journey" : "Start Your Journey",
+      /* @__PURE__ */ jsx(Icon, { name: "arrow_forward", className: "text-lg" })
+    ] })
+  ] });
+}
+const INTERVIEW_STEPS = [
+  { id: "track", question: "What area of development interests you most?", type: "track-select" },
+  { id: "experience", question: "Have you written code before?", type: "single", options: [
+    { value: "none", label: "No, I am completely new", icon: "spa" },
+    { value: "some", label: "Yes, I have some experience", icon: "code" }
+  ] },
+  { id: "skills", question: "Which of these have you worked with?", type: "multi-select", conditional: "some" },
+  { id: "knowledge-check", question: "Quick check — let us verify your knowledge", type: "knowledge-check", conditional: "has-skills" },
+  { id: "time", question: "How much time can you dedicate daily?", type: "single", options: [
+    { value: "1hr", label: "Less than 1 hour" },
+    { value: "2-3hrs", label: "2-3 hours" },
+    { value: "4-5hrs", label: "4-5 hours" },
+    { value: "5+hrs", label: "5+ hours" }
+  ] },
+  { id: "timeline", question: "What is your preparation timeline?", type: "single", options: [
+    { value: "1month", label: "1 month" },
+    { value: "3months", label: "2-3 months" },
+    { value: "6months", label: "4-6 months" },
+    { value: "1year", label: "6-12 months" }
+  ] }
+];
+function InterviewWizard({ onComplete, initialData }) {
+  const [stepIndex, setStepIndex] = useState(0);
+  const [data, setData] = useState(initialData || {});
+  const [trackSkills, setTrackSkills] = useState([]);
+  const [knowledgeQuestions, setKnowledgeQuestions] = useState(null);
+  const [kcAnswers, setKcAnswers] = useState({});
+  const [kcLoading, setKcLoading] = useState(false);
+  const visibleSteps = INTERVIEW_STEPS.filter((step) => {
+    if (step.conditional === "some") return data.experience === "some";
+    if (step.conditional === "has-skills") return data.skills && data.skills.length > 0;
+    return true;
+  });
+  const currentStep = visibleSteps[stepIndex];
+  const loadTrackSkills = useCallback(async (trackId) => {
+    try {
+      const { data: trackData } = await api.get(`/learning-modules/${trackId}`);
+      setTrackSkills(trackData.skills || []);
+    } catch {
+      setTrackSkills([]);
+    }
+  }, []);
+  const loadKnowledgeCheck = useCallback(async (skills) => {
+    setKcLoading(true);
+    try {
+      const { data: kcData } = await api.post("/learning-modules/knowledge-check", { skills });
+      setKnowledgeQuestions(kcData.checks);
+    } catch {
+      setKnowledgeQuestions([]);
+    } finally {
+      setKcLoading(false);
+    }
+  }, []);
+  const handleNext = () => {
+    var _a;
+    if (stepIndex < visibleSteps.length - 1) {
+      const nextStep = visibleSteps[stepIndex + 1];
+      if ((nextStep == null ? void 0 : nextStep.id) === "skills" && data.track) loadTrackSkills(data.track);
+      if ((nextStep == null ? void 0 : nextStep.id) === "knowledge-check" && ((_a = data.skills) == null ? void 0 : _a.length) > 0) loadKnowledgeCheck(data.skills);
+      setStepIndex(stepIndex + 1);
+    } else {
+      const knowledgeCheck = {};
+      if (knowledgeQuestions) {
+        for (const check of knowledgeQuestions) {
+          let correct = 0;
+          for (const q of check.questions) {
+            if (parseInt(kcAnswers[q.id]) === q.correct) correct++;
+          }
+          knowledgeCheck[check.skill.toLowerCase()] = correct >= 2 ? "verified" : "beginner";
+        }
+      }
+      onComplete({ ...data, knowledgeCheck });
+    }
+  };
+  const canProceed = () => {
+    if (!currentStep) return false;
+    if (currentStep.id === "track") return !!data.track;
+    if (currentStep.id === "experience") return !!data.experience;
+    if (currentStep.id === "skills") return true;
+    if (currentStep.id === "knowledge-check") {
+      if (!knowledgeQuestions || knowledgeQuestions.length === 0) return true;
+      const totalQs = knowledgeQuestions.reduce((sum, c) => sum + c.questions.length, 0);
+      return Object.keys(kcAnswers).length >= totalQs;
+    }
+    if (currentStep.id === "time") return !!data.time;
+    if (currentStep.id === "timeline") return !!data.timeline;
+    return true;
+  };
+  const progress = visibleSteps.length > 0 ? (stepIndex + 1) / visibleSteps.length * 100 : 0;
+  return /* @__PURE__ */ jsxs("div", { className: "max-w-2xl mx-auto py-10 fade-up", children: [
+    /* @__PURE__ */ jsx("div", { className: "progress-track mb-8", children: /* @__PURE__ */ jsx("div", { className: "progress-fill bg-gradient-to-r from-blue-500 to-indigo-500", style: { width: `${progress}%` } }) }),
+    /* @__PURE__ */ jsxs("div", { className: "card p-8 rounded-2xl", children: [
+      /* @__PURE__ */ jsxs("p", { className: "text-xs font-bold text-blue-500 uppercase tracking-wider mb-2", children: [
+        "Step ",
+        stepIndex + 1,
+        " of ",
+        visibleSteps.length
+      ] }),
+      /* @__PURE__ */ jsx("h2", { className: "text-xl font-bold text-slate-900 dark:text-white mb-6", children: currentStep == null ? void 0 : currentStep.question }),
+      (currentStep == null ? void 0 : currentStep.type) === "track-select" && /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-3", children: TRACKS.map((t) => /* @__PURE__ */ jsxs(
+        "button",
+        {
+          onClick: () => setData((d) => ({ ...d, track: t.id })),
+          className: `flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all ${data.track === t.id ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30" : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"}`,
+          children: [
+            /* @__PURE__ */ jsx("div", { className: `w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${data.track === t.id ? "bg-blue-500 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-500"}`, children: /* @__PURE__ */ jsx(Icon, { name: t.icon, className: "text-xl" }) }),
+            /* @__PURE__ */ jsxs("div", { children: [
+              /* @__PURE__ */ jsx("p", { className: "font-bold text-sm text-slate-900 dark:text-white", children: t.label }),
+              /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400", children: t.desc })
+            ] })
+          ]
+        },
+        t.id
+      )) }),
+      (currentStep == null ? void 0 : currentStep.type) === "single" && /* @__PURE__ */ jsx("div", { className: "space-y-3", children: currentStep.options.map((opt) => /* @__PURE__ */ jsxs(
+        "button",
+        {
+          onClick: () => setData((d) => ({ ...d, [currentStep.id]: opt.value })),
+          className: `w-full flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all ${data[currentStep.id] === opt.value ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30" : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"}`,
+          children: [
+            opt.icon && /* @__PURE__ */ jsx(Icon, { name: opt.icon, className: `text-xl ${data[currentStep.id] === opt.value ? "text-blue-500" : "text-slate-400"}` }),
+            /* @__PURE__ */ jsx("span", { className: "font-semibold text-sm text-slate-800 dark:text-slate-200", children: opt.label })
+          ]
+        },
+        opt.value
+      )) }),
+      (currentStep == null ? void 0 : currentStep.type) === "multi-select" && /* @__PURE__ */ jsxs("div", { children: [
+        /* @__PURE__ */ jsx("div", { className: "flex flex-wrap gap-2", children: (trackSkills.length > 0 ? trackSkills : ["HTML", "CSS", "JavaScript", "Python", "SQL", "Git", "React", "Node.js"]).map((skill) => {
+          const selected = (data.skills || []).includes(skill);
+          return /* @__PURE__ */ jsxs(
             "button",
             {
-              type: "submit",
-              disabled: chatLoading || !chatInput.trim(),
-              className: "p-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:opacity-50",
-              children: /* @__PURE__ */ jsx(Send, { className: "w-4 h-4" })
+              onClick: () => setData((d) => {
+                const cur = d.skills || [];
+                return { ...d, skills: selected ? cur.filter((s) => s !== skill) : [...cur, skill] };
+              }),
+              className: `inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all ${selected ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300" : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300"}`,
+              children: [
+                /* @__PURE__ */ jsx(Icon, { name: selected ? "check_circle" : "radio_button_unchecked", fill: selected ? 1 : 0, className: `text-base ${selected ? "text-blue-500" : "text-slate-400"}` }),
+                skill
+              ]
+            },
+            skill
+          );
+        }) }),
+        /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-400 mt-3", children: "Select all that apply, or skip if none." })
+      ] }),
+      (currentStep == null ? void 0 : currentStep.type) === "knowledge-check" && /* @__PURE__ */ jsxs("div", { className: "space-y-6", children: [
+        kcLoading && /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-center py-8 gap-3", children: [
+          /* @__PURE__ */ jsx("div", { className: "w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" }),
+          /* @__PURE__ */ jsx("span", { className: "text-slate-500 text-sm", children: "Loading verification questions..." })
+        ] }),
+        !kcLoading && (knowledgeQuestions == null ? void 0 : knowledgeQuestions.map((check, ci) => /* @__PURE__ */ jsxs("div", { className: "space-y-3", children: [
+          /* @__PURE__ */ jsxs("p", { className: "text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2", children: [
+            /* @__PURE__ */ jsx(Icon, { name: "verified", className: "text-base text-blue-500" }),
+            " ",
+            check.skill
+          ] }),
+          check.questions.map((q) => /* @__PURE__ */ jsxs("div", { className: "pl-4 border-l-2 border-slate-200 dark:border-slate-700", children: [
+            /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-800 dark:text-slate-200 mb-2", children: q.question }),
+            /* @__PURE__ */ jsx("div", { className: "space-y-1.5", children: q.options.map((opt, oi) => /* @__PURE__ */ jsxs(
+              "label",
+              {
+                className: `flex items-start gap-2 p-2.5 rounded-lg cursor-pointer text-sm transition-colors ${parseInt(kcAnswers[q.id]) === oi ? "bg-blue-50 dark:bg-blue-950/30 text-blue-800 dark:text-blue-200" : "hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400"}`,
+                children: [
+                  /* @__PURE__ */ jsx(
+                    "input",
+                    {
+                      type: "radio",
+                      name: q.id,
+                      value: oi,
+                      checked: parseInt(kcAnswers[q.id]) === oi,
+                      onChange: () => setKcAnswers((a) => ({ ...a, [q.id]: oi })),
+                      className: "mt-0.5 accent-blue-500"
+                    }
+                  ),
+                  /* @__PURE__ */ jsx("span", { className: "leading-snug", children: typeof opt === "string" ? opt.substring(0, 150) : String(opt) })
+                ]
+              },
+              oi
+            )) })
+          ] }, q.id))
+        ] }, ci))),
+        !kcLoading && (!knowledgeQuestions || knowledgeQuestions.length === 0) && /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500 text-center py-4", children: "No verification needed. Continue to the next step." })
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between mt-8 pt-6 border-t border-slate-200 dark:border-slate-800", children: [
+        /* @__PURE__ */ jsxs("button", { onClick: () => stepIndex > 0 && setStepIndex(stepIndex - 1), disabled: stepIndex === 0, className: "btn-ghost disabled:opacity-30", children: [
+          /* @__PURE__ */ jsx(Icon, { name: "arrow_back", className: "text-lg" }),
+          " Back"
+        ] }),
+        /* @__PURE__ */ jsxs("button", { onClick: handleNext, disabled: !canProceed(), className: "btn-primary-lg disabled:opacity-40", children: [
+          stepIndex === visibleSteps.length - 1 ? "Generate My Plan" : "Continue",
+          /* @__PURE__ */ jsx(Icon, { name: stepIndex === visibleSteps.length - 1 ? "auto_awesome" : "arrow_forward", className: "text-lg" })
+        ] })
+      ] })
+    ] })
+  ] });
+}
+function FlashcardReview({ cards, onClose }) {
+  const [idx, setIdx] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const [known, setKnown] = useState([]);
+  const [again, setAgain] = useState([]);
+  if (!cards || cards.length === 0) {
+    return /* @__PURE__ */ jsx("div", { className: "fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4", onClick: onClose, children: /* @__PURE__ */ jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl", onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ jsx(Icon, { name: "check_circle", fill: 1, className: "text-4xl text-emerald-500 mb-3" }),
+      /* @__PURE__ */ jsx("p", { className: "font-bold text-slate-900 dark:text-white", children: "No review cards yet" }),
+      /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500 dark:text-slate-400 mt-1", children: "Complete module assessments to generate flashcards from questions you missed." }),
+      /* @__PURE__ */ jsx("button", { onClick: onClose, className: "btn-primary mt-4", children: "Got it" })
+    ] }) });
+  }
+  const card = cards[idx];
+  cards.length - known.length;
+  const handleKnow = () => {
+    setKnown((prev) => [...prev, card.id]);
+    setFlipped(false);
+    if (idx < cards.length - 1) setIdx(idx + 1);
+  };
+  const handleAgain = () => {
+    setAgain((prev) => [...prev, card.id]);
+    setFlipped(false);
+    if (idx < cards.length - 1) setIdx(idx + 1);
+  };
+  const isDone = idx >= cards.length - 1 && flipped;
+  return /* @__PURE__ */ jsx("div", { className: "fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4", onClick: onClose, children: /* @__PURE__ */ jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden", onClick: (e) => e.stopPropagation(), children: [
+    /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800", children: [
+      /* @__PURE__ */ jsxs("div", { children: [
+        /* @__PURE__ */ jsx("h3", { className: "font-bold text-slate-900 dark:text-white", children: "Flashcard Review" }),
+        /* @__PURE__ */ jsxs("p", { className: "text-xs text-slate-500 dark:text-slate-400", children: [
+          idx + 1,
+          " of ",
+          cards.length,
+          " · ",
+          known.length,
+          " known · ",
+          again.length,
+          " to retry"
+        ] })
+      ] }),
+      /* @__PURE__ */ jsx("button", { onClick: onClose, className: "p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors", children: /* @__PURE__ */ jsx(Icon, { name: "close", className: "text-lg text-slate-500" }) })
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "p-6", children: [
+      /* @__PURE__ */ jsx(
+        "div",
+        {
+          className: "min-h-[180px] p-5 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 cursor-pointer flex items-center justify-center text-center transition-all hover:border-blue-300 dark:hover:border-blue-700",
+          onClick: () => setFlipped(!flipped),
+          children: !flipped ? /* @__PURE__ */ jsxs("div", { children: [
+            /* @__PURE__ */ jsx("p", { className: "text-xs font-bold text-blue-500 uppercase tracking-wider mb-3", children: card.topic }),
+            /* @__PURE__ */ jsx("p", { className: "text-slate-800 dark:text-slate-200 font-semibold", children: card.question }),
+            /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-400 mt-4", children: "Tap to reveal answer" })
+          ] }) : /* @__PURE__ */ jsxs("div", { children: [
+            /* @__PURE__ */ jsx("p", { className: "text-xs font-bold text-emerald-500 uppercase tracking-wider mb-3", children: "Answer" }),
+            /* @__PURE__ */ jsx("p", { className: "text-slate-800 dark:text-slate-200", children: card.answer }),
+            card.explanation && /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 mt-3 italic", children: card.explanation })
+          ] })
+        }
+      ),
+      flipped && !isDone && /* @__PURE__ */ jsxs("div", { className: "flex gap-3 mt-4", children: [
+        /* @__PURE__ */ jsxs("button", { onClick: handleAgain, className: "flex-1 py-3 rounded-xl border-2 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 font-bold text-sm hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors", children: [
+          /* @__PURE__ */ jsx(Icon, { name: "refresh", className: "text-base mr-1" }),
+          " Again"
+        ] }),
+        /* @__PURE__ */ jsxs("button", { onClick: handleKnow, className: "flex-1 py-3 rounded-xl border-2 border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 font-bold text-sm hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors", children: [
+          /* @__PURE__ */ jsx(Icon, { name: "check", className: "text-base mr-1" }),
+          " Know it"
+        ] })
+      ] }),
+      !flipped && /* @__PURE__ */ jsx("div", { className: "flex justify-center mt-4", children: /* @__PURE__ */ jsxs("button", { onClick: () => setFlipped(true), className: "btn-primary", children: [
+        "Show Answer ",
+        /* @__PURE__ */ jsx(Icon, { name: "flip", className: "text-lg" })
+      ] }) }),
+      isDone && /* @__PURE__ */ jsxs("div", { className: "text-center mt-4", children: [
+        /* @__PURE__ */ jsx("p", { className: "font-bold text-slate-900 dark:text-white mb-1", children: "Session complete!" }),
+        /* @__PURE__ */ jsxs("p", { className: "text-sm text-slate-500 dark:text-slate-400", children: [
+          known.length,
+          " known · ",
+          again.length,
+          " still need review"
+        ] }),
+        /* @__PURE__ */ jsx("button", { onClick: onClose, className: "btn-primary mt-3", children: "Done" })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsx("div", { className: "flex gap-1 justify-center pb-4", children: cards.map((_, i) => {
+      var _a, _b;
+      return /* @__PURE__ */ jsx("div", { className: `w-2 h-2 rounded-full transition-all ${i === idx ? "bg-blue-500 scale-125" : known.includes((_a = cards[i]) == null ? void 0 : _a.id) ? "bg-emerald-400" : again.includes((_b = cards[i]) == null ? void 0 : _b.id) ? "bg-red-400" : "bg-slate-200 dark:bg-slate-700"}` }, i);
+    }) })
+  ] }) });
+}
+function LearningPlan({ modules, moduleProgress, knowledgeCheck, onStartModule }) {
+  const [showFlashcards, setShowFlashcards] = useState(false);
+  const completedCount = Object.values(moduleProgress || {}).filter((m) => m.status === "completed").length;
+  const totalModules = modules.length;
+  const flashcards = modules.filter((m) => {
+    var _a, _b;
+    return ((_b = (_a = moduleProgress == null ? void 0 : moduleProgress[m.id]) == null ? void 0 : _a.failedQuestions) == null ? void 0 : _b.length) > 0;
+  }).flatMap((m) => moduleProgress[m.id].failedQuestions.map((q) => ({ ...q, moduleTopic: m.topic })));
+  const completedWithLowScore = Object.entries(moduleProgress || {}).filter(([, mp]) => mp.status === "completed" && mp.score != null && mp.score < 80).length;
+  const getStatus = (mod) => {
+    const mp = moduleProgress == null ? void 0 : moduleProgress[mod.id];
+    if ((mp == null ? void 0 : mp.status) === "completed") return "completed";
+    if ((mp == null ? void 0 : mp.status) === "in-progress") return "in-progress";
+    const skill = mod.topic.toLowerCase();
+    if ((knowledgeCheck == null ? void 0 : knowledgeCheck[skill]) === "verified") return "verified";
+    const prereqsMet = mod.prerequisites.every((p) => {
+      var _a;
+      const pp = moduleProgress == null ? void 0 : moduleProgress[p];
+      if ((pp == null ? void 0 : pp.status) === "completed") return true;
+      const prereqMod = modules.find((m) => m.id === p);
+      return prereqMod && (knowledgeCheck == null ? void 0 : knowledgeCheck[(_a = prereqMod.topic) == null ? void 0 : _a.toLowerCase()]) === "verified";
+    });
+    if (mod.order === 1 || prereqsMet) return "available";
+    return "locked";
+  };
+  const statusConfig = {
+    completed: { icon: "check_circle", fill: 1, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-950/30", border: "border-emerald-200 dark:border-emerald-800", label: "Completed", badge: "badge-success" },
+    verified: { icon: "verified", fill: 1, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-950/30", border: "border-blue-200 dark:border-blue-800", label: "Verified", badge: "badge-info" },
+    "in-progress": { icon: "play_circle", fill: 1, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-950/30", border: "border-amber-200 dark:border-amber-800", label: "In Progress", badge: "badge-warning" },
+    available: { icon: "lock_open", fill: 0, color: "text-slate-500", bg: "bg-white dark:bg-slate-900", border: "border-slate-200 dark:border-slate-700", label: "Available", badge: "badge-neutral" },
+    locked: { icon: "lock", fill: 0, color: "text-slate-300 dark:text-slate-600", bg: "bg-slate-50 dark:bg-slate-900/40", border: "border-slate-100 dark:border-slate-800", label: "Locked", badge: "badge-neutral" }
+  };
+  return /* @__PURE__ */ jsxs(Fragment, { children: [
+    showFlashcards && /* @__PURE__ */ jsx(FlashcardReview, { cards: flashcards, onClose: () => setShowFlashcards(false) }),
+    /* @__PURE__ */ jsxs("div", { className: "max-w-3xl mx-auto py-10 fade-up", children: [
+      /* @__PURE__ */ jsxs("div", { className: "text-center mb-8", children: [
+        /* @__PURE__ */ jsx("h2", { className: "page-title mb-2", children: "Your Learning Plan" }),
+        /* @__PURE__ */ jsxs("p", { className: "text-slate-500 dark:text-slate-400", children: [
+          completedCount,
+          "/",
+          totalModules,
+          " modules completed"
+        ] }),
+        /* @__PURE__ */ jsx("div", { className: "progress-track max-w-xs mx-auto mt-3", children: /* @__PURE__ */ jsx("div", { className: "progress-fill bg-gradient-to-r from-emerald-400 to-emerald-600", style: { width: `${totalModules > 0 ? completedCount / totalModules * 100 : 0}%` } }) }),
+        completedWithLowScore > 0 && /* @__PURE__ */ jsxs("button", { onClick: () => setShowFlashcards(true), className: "mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 text-sm font-semibold hover:bg-amber-200 dark:hover:bg-amber-950/50 transition-colors", children: [
+          /* @__PURE__ */ jsx(Icon, { name: "style", fill: 1, className: "text-base" }),
+          "Review Flashcards (",
+          completedWithLowScore,
+          " module",
+          completedWithLowScore > 1 ? "s" : "",
+          " below 80%)"
+        ] }),
+        completedCount > 0 && completedWithLowScore === 0 && /* @__PURE__ */ jsxs("button", { onClick: () => setShowFlashcards(true), className: "mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 text-sm font-semibold hover:bg-blue-100 dark:hover:bg-blue-950/50 transition-colors", children: [
+          /* @__PURE__ */ jsx(Icon, { name: "style", fill: 0, className: "text-base" }),
+          "Flashcard Review"
+        ] })
+      ] }),
+      /* @__PURE__ */ jsx("div", { className: "space-y-3", children: modules.map((mod) => {
+        var _a;
+        const status = getStatus(mod);
+        const cfg = statusConfig[status];
+        const score = (_a = moduleProgress == null ? void 0 : moduleProgress[mod.id]) == null ? void 0 : _a.score;
+        const clickable = status === "available" || status === "in-progress";
+        return /* @__PURE__ */ jsxs(
+          "div",
+          {
+            className: `flex items-center gap-4 p-4 rounded-2xl border ${cfg.border} ${cfg.bg} transition-all ${clickable ? "cursor-pointer hover:shadow-md" : ""} ${status === "locked" ? "opacity-60" : ""}`,
+            onClick: () => clickable && onStartModule(mod.id),
+            children: [
+              /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0", children: /* @__PURE__ */ jsx(Icon, { name: cfg.icon, fill: cfg.fill, className: `text-xl ${cfg.color}` }) }),
+              /* @__PURE__ */ jsxs("div", { className: "flex-1 min-w-0", children: [
+                /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 flex-wrap", children: [
+                  /* @__PURE__ */ jsx("span", { className: "font-bold text-sm text-slate-900 dark:text-white", children: mod.topic }),
+                  /* @__PURE__ */ jsx("span", { className: `badge text-[10px] ${cfg.badge}`, children: cfg.label }),
+                  score != null && /* @__PURE__ */ jsxs("span", { className: "text-xs font-bold text-emerald-600", children: [
+                    score,
+                    "%"
+                  ] })
+                ] }),
+                /* @__PURE__ */ jsxs("p", { className: "text-xs text-slate-500 dark:text-slate-400 mt-0.5", children: [
+                  mod.subtopicCount || 0,
+                  " subtopics · ~",
+                  mod.estimatedHours,
+                  "h"
+                ] })
+              ] }),
+              clickable && /* @__PURE__ */ jsx(Icon, { name: "arrow_forward", className: "text-lg text-slate-400 shrink-0" })
+            ]
+          },
+          mod.id
+        );
+      }) })
+    ] })
+  ] });
+}
+function ModuleLearning({ moduleData, completedSubtopics, onSubtopicComplete, onTakeAssessment, onBack }) {
+  var _a;
+  const [activeSubtopic, setActiveSubtopic] = useState(0);
+  const [tutorOpen, setTutorOpen] = useState(false);
+  const [tutorMessages, setTutorMessages] = useState([]);
+  const [tutorInput, setTutorInput] = useState("");
+  const [tutorLoading, setTutorLoading] = useState(false);
+  const chatEndRef = useRef(null);
+  if (!moduleData) return null;
+  const done = completedSubtopics || [];
+  const allDone = moduleData.subtopics.every((s) => done.includes(s.id));
+  const currentSub = moduleData.subtopics[activeSubtopic];
+  const handleAskTutor = async () => {
+    if (!tutorInput.trim() || tutorLoading) return;
+    const userMsg = tutorInput.trim();
+    setTutorInput("");
+    setTutorMessages((prev) => [...prev, { role: "user", content: userMsg }]);
+    setTutorLoading(true);
+    try {
+      const history = tutorMessages.map((m) => ({ role: m.role, content: m.content }));
+      const { data } = await api.post("/ai-tutor/chat", { topic: moduleData.topic, message: userMsg, history });
+      setTutorMessages((prev) => [...prev, { role: "assistant", content: data.reply || data.response || "I could not generate a response." }]);
+    } catch {
+      setTutorMessages((prev) => [...prev, { role: "assistant", content: "Sorry, the AI tutor is currently unavailable." }]);
+    } finally {
+      setTutorLoading(false);
+      setTimeout(() => {
+        var _a2;
+        return (_a2 = chatEndRef.current) == null ? void 0 : _a2.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  };
+  return /* @__PURE__ */ jsxs("div", { className: "max-w-5xl mx-auto py-8 fade-up", children: [
+    /* @__PURE__ */ jsxs("button", { onClick: onBack, className: "btn-ghost mb-6", children: [
+      /* @__PURE__ */ jsx(Icon, { name: "arrow_back", className: "text-lg" }),
+      " Back to Plan"
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "flex flex-col lg:flex-row gap-6", children: [
+      /* @__PURE__ */ jsxs("div", { className: "flex-1 min-w-0", children: [
+        /* @__PURE__ */ jsxs("div", { className: "card p-6 rounded-2xl mb-4", children: [
+          /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between mb-1", children: [
+            /* @__PURE__ */ jsx("h2", { className: "text-xl font-bold text-slate-900 dark:text-white", children: moduleData.topic }),
+            /* @__PURE__ */ jsxs("span", { className: "text-xs font-bold text-slate-400", children: [
+              done.length,
+              "/",
+              moduleData.subtopics.length,
+              " done"
+            ] })
+          ] }),
+          /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500 dark:text-slate-400 mb-4", children: moduleData.description }),
+          /* @__PURE__ */ jsx("div", { className: "progress-track", children: /* @__PURE__ */ jsx(
+            "div",
+            {
+              className: "progress-fill bg-gradient-to-r from-blue-400 to-blue-600",
+              style: { width: `${moduleData.subtopics.length > 0 ? done.length / moduleData.subtopics.length * 100 : 0}%` }
             }
-          )
+          ) })
+        ] }),
+        /* @__PURE__ */ jsx("div", { className: "flex gap-1 flex-wrap mb-4", children: moduleData.subtopics.map((sub, i) => {
+          const isDone = done.includes(sub.id);
+          return /* @__PURE__ */ jsxs(
+            "button",
+            {
+              onClick: () => setActiveSubtopic(i),
+              className: `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${i === activeSubtopic ? "bg-blue-600 text-white" : isDone ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"}`,
+              children: [
+                isDone && /* @__PURE__ */ jsx(Icon, { name: "check", fill: 0, className: "text-xs" }),
+                sub.title
+              ]
+            },
+            sub.id
+          );
+        }) }),
+        currentSub && /* @__PURE__ */ jsxs("div", { className: "card p-6 rounded-2xl", children: [
+          /* @__PURE__ */ jsx("h3", { className: "text-lg font-bold text-slate-900 dark:text-white mb-3", children: currentSub.title }),
+          /* @__PURE__ */ jsx("div", { className: "mb-6", children: /* @__PURE__ */ jsx("p", { className: "text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap text-sm", children: currentSub.description }) }),
+          ((_a = currentSub.resources) == null ? void 0 : _a.length) > 0 && /* @__PURE__ */ jsxs("div", { className: "mb-6", children: [
+            /* @__PURE__ */ jsx("h4", { className: "text-xs font-bold text-slate-400 uppercase tracking-wider mb-3", children: "Learning Resources" }),
+            /* @__PURE__ */ jsx("div", { className: "space-y-2", children: currentSub.resources.map((r, ri) => /* @__PURE__ */ jsxs(
+              "a",
+              {
+                href: r.url,
+                target: "_blank",
+                rel: "noopener noreferrer",
+                className: "flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-blue-50 dark:hover:bg-blue-950/20 border border-slate-200 dark:border-slate-700 transition-colors group",
+                children: [
+                  /* @__PURE__ */ jsx(
+                    Icon,
+                    {
+                      name: r.type === "video" ? "play_circle" : r.type === "course" ? "school" : "article",
+                      className: "text-lg text-slate-400 group-hover:text-blue-500"
+                    }
+                  ),
+                  /* @__PURE__ */ jsxs("div", { className: "flex-1 min-w-0", children: [
+                    /* @__PURE__ */ jsx("p", { className: "text-sm font-semibold text-slate-800 dark:text-slate-200 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400", children: r.title }),
+                    /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-400 capitalize", children: r.type })
+                  ] }),
+                  /* @__PURE__ */ jsx(Icon, { name: "open_in_new", className: "text-sm text-slate-300 group-hover:text-blue-400" })
+                ]
+              },
+              ri
+            )) })
+          ] }),
+          /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-800", children: [
+            /* @__PURE__ */ jsx(
+              "button",
+              {
+                onClick: () => onSubtopicComplete(currentSub.id),
+                disabled: done.includes(currentSub.id),
+                className: `btn-primary ${done.includes(currentSub.id) ? "opacity-50 cursor-not-allowed" : ""}`,
+                children: done.includes(currentSub.id) ? /* @__PURE__ */ jsxs(Fragment, { children: [
+                  /* @__PURE__ */ jsx(Icon, { name: "check_circle", fill: 1, className: "text-lg" }),
+                  " Completed"
+                ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
+                  /* @__PURE__ */ jsx(Icon, { name: "check", className: "text-lg" }),
+                  " Mark Complete"
+                ] })
+              }
+            ),
+            activeSubtopic < moduleData.subtopics.length - 1 && /* @__PURE__ */ jsxs("button", { onClick: () => setActiveSubtopic(activeSubtopic + 1), className: "btn-ghost", children: [
+              "Next ",
+              /* @__PURE__ */ jsx(Icon, { name: "arrow_forward", className: "text-lg" })
+            ] })
+          ] })
+        ] }),
+        allDone && /* @__PURE__ */ jsx("div", { className: "card p-6 rounded-2xl mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-200 dark:border-blue-800", children: /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 flex-wrap", children: [
+          /* @__PURE__ */ jsx("div", { className: "w-12 h-12 rounded-2xl bg-blue-500 flex items-center justify-center shrink-0", children: /* @__PURE__ */ jsx(Icon, { name: "quiz", fill: 1, className: "text-white text-2xl" }) }),
+          /* @__PURE__ */ jsxs("div", { className: "flex-1 min-w-0", children: [
+            /* @__PURE__ */ jsx("p", { className: "font-bold text-slate-900 dark:text-white", children: "Ready for the assessment!" }),
+            /* @__PURE__ */ jsxs("p", { className: "text-sm text-slate-500 dark:text-slate-400", children: [
+              "Test your understanding of ",
+              moduleData.topic,
+              "."
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxs("button", { onClick: onTakeAssessment, className: "btn-primary-lg shrink-0", children: [
+            "Take Assessment ",
+            /* @__PURE__ */ jsx(Icon, { name: "arrow_forward", className: "text-lg" })
+          ] })
+        ] }) })
+      ] }),
+      /* @__PURE__ */ jsx("div", { className: "lg:w-80 shrink-0", children: /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl overflow-hidden sticky top-20", children: [
+        /* @__PURE__ */ jsxs(
+          "button",
+          {
+            onClick: () => setTutorOpen(!tutorOpen),
+            className: "w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors",
+            children: [
+              /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
+                /* @__PURE__ */ jsx(Icon, { name: "smart_toy", fill: 1, className: "text-lg text-blue-500" }),
+                /* @__PURE__ */ jsx("span", { className: "font-bold text-sm text-slate-900 dark:text-white", children: "AI Tutor" })
+              ] }),
+              /* @__PURE__ */ jsx(Icon, { name: tutorOpen ? "expand_less" : "expand_more", className: "text-lg text-slate-400" })
+            ]
+          }
+        ),
+        tutorOpen && /* @__PURE__ */ jsxs("div", { className: "border-t border-slate-200 dark:border-slate-800", children: [
+          /* @__PURE__ */ jsxs("div", { className: "h-64 overflow-y-auto p-4 space-y-3", children: [
+            tutorMessages.length === 0 && /* @__PURE__ */ jsxs("p", { className: "text-xs text-slate-400 text-center py-8", children: [
+              "Ask me anything about ",
+              moduleData.topic,
+              "!"
+            ] }),
+            tutorMessages.map((msg, i) => /* @__PURE__ */ jsx("div", { className: `flex ${msg.role === "user" ? "justify-end" : "justify-start"}`, children: /* @__PURE__ */ jsx("div", { className: `max-w-[85%] px-3 py-2 rounded-xl text-sm ${msg.role === "user" ? "bg-blue-500 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200"}`, children: /* @__PURE__ */ jsx("p", { className: "whitespace-pre-wrap leading-relaxed", children: msg.content }) }) }, i)),
+            tutorLoading && /* @__PURE__ */ jsx("div", { className: "flex justify-start", children: /* @__PURE__ */ jsx("div", { className: "bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl", children: /* @__PURE__ */ jsxs("div", { className: "flex gap-1", children: [
+              /* @__PURE__ */ jsx("div", { className: "w-2 h-2 bg-slate-400 rounded-full animate-bounce", style: { animationDelay: "0ms" } }),
+              /* @__PURE__ */ jsx("div", { className: "w-2 h-2 bg-slate-400 rounded-full animate-bounce", style: { animationDelay: "150ms" } }),
+              /* @__PURE__ */ jsx("div", { className: "w-2 h-2 bg-slate-400 rounded-full animate-bounce", style: { animationDelay: "300ms" } })
+            ] }) }) }),
+            /* @__PURE__ */ jsx("div", { ref: chatEndRef })
+          ] }),
+          /* @__PURE__ */ jsx("div", { className: "p-3 border-t border-slate-200 dark:border-slate-800", children: /* @__PURE__ */ jsxs("div", { className: "flex gap-2", children: [
+            /* @__PURE__ */ jsx(
+              "input",
+              {
+                type: "text",
+                value: tutorInput,
+                onChange: (e) => setTutorInput(e.target.value),
+                onKeyDown: (e) => e.key === "Enter" && handleAskTutor(),
+                placeholder: `Ask about ${moduleData.topic}...`,
+                className: "input-field text-xs py-2"
+              }
+            ),
+            /* @__PURE__ */ jsx("button", { onClick: handleAskTutor, disabled: tutorLoading || !tutorInput.trim(), className: "btn-primary px-3 py-2", children: /* @__PURE__ */ jsx(Icon, { name: "send", className: "text-sm" }) })
+          ] }) })
         ] })
       ] }) })
     ] })
   ] });
 }
-const LEARN_BUILD_DEFAULTS = {
+function ModuleAssessment({ moduleId, moduleTopic, topics, onComplete, onBack }) {
+  const [questions, setQuestions] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [currentQ, setCurrentQ] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [result, setResult] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [assessmentId, setAssessmentId] = useState(null);
+  const fetchAssessment = useCallback(() => {
+    setLoading(true);
+    setResult(null);
+    setAnswers({});
+    setCurrentQ(0);
+    api.post("/learning-modules/module-assessment", { moduleId, topics, difficulty: "beginner" }).then(({ data }) => {
+      setQuestions(data.questions);
+      setAssessmentId(data.assessmentId);
+    }).catch(() => setQuestions([])).finally(() => setLoading(false));
+  }, [moduleId, topics]);
+  useEffect(() => {
+    fetchAssessment();
+  }, [fetchAssessment]);
+  const handleSubmit = async () => {
+    if (submitting || !questions) return;
+    setSubmitting(true);
+    try {
+      const { data } = await api.post("/learning-modules/module-assessment/submit", { assessmentId, moduleId, answers, questions });
+      setResult(data);
+    } catch {
+      setResult({ score: 0, passed: false, message: "Failed to submit. Please try again." });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+  if (loading) {
+    return /* @__PURE__ */ jsxs("div", { className: "max-w-2xl mx-auto py-16 text-center", children: [
+      /* @__PURE__ */ jsx("div", { className: "w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" }),
+      /* @__PURE__ */ jsxs("p", { className: "text-slate-500", children: [
+        "Generating assessment for ",
+        moduleTopic,
+        "..."
+      ] })
+    ] });
+  }
+  if (result) {
+    return /* @__PURE__ */ jsx("div", { className: "max-w-2xl mx-auto py-10 fade-up", children: /* @__PURE__ */ jsxs("div", { className: "card p-8 rounded-2xl text-center", children: [
+      /* @__PURE__ */ jsx("div", { className: `w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${result.passed ? "bg-emerald-100 dark:bg-emerald-950/30" : "bg-amber-100 dark:bg-amber-950/30"}`, children: /* @__PURE__ */ jsx(
+        Icon,
+        {
+          name: result.passed ? "celebration" : "refresh",
+          fill: result.passed ? 1 : 0,
+          className: `text-4xl ${result.passed ? "text-emerald-500" : "text-amber-500"}`
+        }
+      ) }),
+      /* @__PURE__ */ jsx("h2", { className: "text-2xl font-bold text-slate-900 dark:text-white mb-2", children: result.passed ? "You passed!" : "Not quite yet" }),
+      /* @__PURE__ */ jsxs("p", { className: "text-lg font-extrabold text-blue-600 mb-2", children: [
+        result.score,
+        "%"
+      ] }),
+      /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500 dark:text-slate-400 mb-6", children: result.message }),
+      result.results && /* @__PURE__ */ jsx("div", { className: "text-left mb-6 space-y-3", children: result.results.map((r, i) => /* @__PURE__ */ jsx("div", { className: `p-3 rounded-xl border ${r.isCorrect ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/20" : "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/20"}`, children: /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-2", children: [
+        /* @__PURE__ */ jsx(Icon, { name: r.isCorrect ? "check_circle" : "cancel", fill: 1, className: `text-base mt-0.5 ${r.isCorrect ? "text-emerald-500" : "text-red-500"}` }),
+        /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsxs("p", { className: "text-xs font-bold text-slate-500 uppercase", children: [
+            r.type,
+            " · ",
+            r.topic
+          ] }),
+          r.explanation && /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-600 dark:text-slate-400 mt-1", children: r.explanation })
+        ] })
+      ] }) }, i)) }),
+      /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center gap-4", children: result.passed ? /* @__PURE__ */ jsxs("button", { onClick: () => {
+        const failedQs = (result.results || []).filter((r) => !r.isCorrect).map((r) => {
+          const q2 = questions.find((q22) => q22.id === r.questionId);
+          return q2 ? { id: q2.id, question: q2.text, answer: q2.explanation || "", topic: q2.topic || "", type: q2.type } : null;
+        }).filter(Boolean);
+        onComplete(result.score, failedQs);
+      }, className: "btn-primary-lg", children: [
+        "Continue to Next Module ",
+        /* @__PURE__ */ jsx(Icon, { name: "arrow_forward", className: "text-lg" })
+      ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
+        /* @__PURE__ */ jsx("button", { onClick: onBack, className: "btn-secondary-lg", children: "Review Material" }),
+        /* @__PURE__ */ jsxs("button", { onClick: fetchAssessment, className: "btn-primary-lg", children: [
+          "Try Again ",
+          /* @__PURE__ */ jsx(Icon, { name: "refresh", className: "text-lg" })
+        ] })
+      ] }) })
+    ] }) });
+  }
+  if (!questions || questions.length === 0) {
+    return /* @__PURE__ */ jsxs("div", { className: "max-w-2xl mx-auto py-16 text-center", children: [
+      /* @__PURE__ */ jsx("p", { className: "text-slate-500", children: "No questions available." }),
+      /* @__PURE__ */ jsx("button", { onClick: onBack, className: "btn-secondary mt-4", children: "Go Back" })
+    ] });
+  }
+  const q = questions[currentQ];
+  const totalQ = questions.length;
+  const answeredCount = Object.keys(answers).length;
+  return /* @__PURE__ */ jsxs("div", { className: "max-w-2xl mx-auto py-10 fade-up", children: [
+    /* @__PURE__ */ jsxs("button", { onClick: onBack, className: "btn-ghost mb-4", children: [
+      /* @__PURE__ */ jsx(Icon, { name: "arrow_back", className: "text-lg" }),
+      " Back"
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "card p-6 rounded-2xl mb-4", children: [
+      /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between mb-1", children: [
+        /* @__PURE__ */ jsxs("span", { className: "text-xs font-bold text-blue-500 uppercase tracking-wider", children: [
+          moduleTopic,
+          " Assessment"
+        ] }),
+        /* @__PURE__ */ jsxs("span", { className: "text-xs font-bold text-slate-400", children: [
+          currentQ + 1,
+          " / ",
+          totalQ
+        ] })
+      ] }),
+      /* @__PURE__ */ jsx("div", { className: "progress-track mt-2", children: /* @__PURE__ */ jsx("div", { className: "progress-fill bg-blue-500", style: { width: `${(currentQ + 1) / totalQ * 100}%` } }) })
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "card p-6 rounded-2xl", children: [
+      /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 mb-4", children: [
+        /* @__PURE__ */ jsx("span", { className: `badge ${q.type === "mcq" ? "badge-info" : q.type === "coding" ? "badge-warning" : q.type === "system-design" ? "badge-danger" : "badge-neutral"}`, children: q.type === "mcq" ? "Multiple Choice" : q.type === "short-answer" ? "Short Answer" : q.type === "system-design" ? "System Design" : "Coding" }),
+        q.topic && /* @__PURE__ */ jsx("span", { className: "text-xs text-slate-400", children: q.topic })
+      ] }),
+      /* @__PURE__ */ jsx("p", { className: "text-slate-900 dark:text-white font-semibold mb-5 leading-relaxed", children: q.text }),
+      q.type === "mcq" && q.options && /* @__PURE__ */ jsx("div", { className: "space-y-2", children: q.options.map((opt, oi) => /* @__PURE__ */ jsxs(
+        "button",
+        {
+          onClick: () => setAnswers((a) => ({ ...a, [q.id]: oi })),
+          className: `w-full text-left p-3.5 rounded-xl border-2 text-sm font-medium transition-all ${parseInt(answers[q.id]) === oi ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30 text-blue-800 dark:text-blue-200" : "border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600"}`,
+          children: [
+            /* @__PURE__ */ jsxs("span", { className: "font-bold text-slate-400 mr-2", children: [
+              String.fromCharCode(65 + oi),
+              "."
+            ] }),
+            opt
+          ]
+        },
+        oi
+      )) }),
+      (q.type === "short-answer" || q.type === "system-design") && /* @__PURE__ */ jsx(
+        "textarea",
+        {
+          value: answers[q.id] || "",
+          onChange: (e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value })),
+          placeholder: "Type your answer here...",
+          rows: 4,
+          className: "textarea-field"
+        }
+      ),
+      q.type === "coding" && /* @__PURE__ */ jsxs("div", { children: [
+        q.starterCode && /* @__PURE__ */ jsx("pre", { className: "bg-slate-100 dark:bg-slate-800 p-4 rounded-xl text-sm font-mono text-slate-800 dark:text-slate-200 mb-3 overflow-x-auto", children: q.starterCode }),
+        /* @__PURE__ */ jsx(
+          "textarea",
+          {
+            value: answers[q.id] || q.starterCode || "",
+            onChange: (e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value })),
+            placeholder: "Write your code here...",
+            rows: 8,
+            className: "textarea-field font-mono text-sm"
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between mt-6 pt-4 border-t border-slate-200 dark:border-slate-800", children: [
+        /* @__PURE__ */ jsxs("button", { onClick: () => currentQ > 0 && setCurrentQ(currentQ - 1), disabled: currentQ === 0, className: "btn-ghost disabled:opacity-30", children: [
+          /* @__PURE__ */ jsx(Icon, { name: "arrow_back", className: "text-lg" }),
+          " Previous"
+        ] }),
+        currentQ < totalQ - 1 ? /* @__PURE__ */ jsxs("button", { onClick: () => setCurrentQ(currentQ + 1), className: "btn-primary", children: [
+          "Next ",
+          /* @__PURE__ */ jsx(Icon, { name: "arrow_forward", className: "text-lg" })
+        ] }) : /* @__PURE__ */ jsxs("button", { onClick: handleSubmit, disabled: submitting || answeredCount < totalQ, className: "btn-primary-lg disabled:opacity-40", children: [
+          submitting ? "Evaluating..." : "Submit Assessment",
+          /* @__PURE__ */ jsx(Icon, { name: submitting ? "sync" : "check", className: `text-lg ${submitting ? "animate-spin" : ""}` })
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsx("div", { className: "flex justify-center gap-1.5 mt-4", children: questions.map((_, i) => /* @__PURE__ */ jsx(
+      "button",
+      {
+        onClick: () => setCurrentQ(i),
+        className: `w-2.5 h-2.5 rounded-full transition-all ${i === currentQ ? "bg-blue-500 scale-125" : answers[questions[i].id] != null ? "bg-emerald-400" : "bg-slate-200 dark:bg-slate-700"}`
+      },
+      i
+    )) })
+  ] });
+}
+function ZeroToHeroTrack() {
+  var _a, _b;
+  useActivityTracker("Zero to Hero");
+  const { data: progress, updateProgress, isLoading, isReady } = useUserProgress("zero-to-hero", DEFAULT_PROGRESS);
+  const [trackData, setTrackData] = useState(null);
+  const [currentModule, setCurrentModule] = useState(null);
+  const [viewState, setViewState] = useState(null);
+  const step = (progress == null ? void 0 : progress.step) || "intro";
+  useEffect(() => {
+    if ((progress == null ? void 0 : progress.track) && !trackData) {
+      api.get(`/learning-modules/${progress.track}`).then(({ data }) => setTrackData(data)).catch(() => {
+      });
+    }
+  }, [progress == null ? void 0 : progress.track]);
+  useEffect(() => {
+    if ((progress == null ? void 0 : progress.currentModuleId) && (progress == null ? void 0 : progress.track) && !currentModule) {
+      api.get(`/learning-modules/${progress.track}/${progress.currentModuleId}`).then(({ data }) => setCurrentModule(data)).catch(() => {
+      });
+    }
+  }, [progress == null ? void 0 : progress.currentModuleId, progress == null ? void 0 : progress.track]);
+  if (isLoading || !isReady) {
+    return /* @__PURE__ */ jsx("div", { className: "page-container", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center justify-center py-32 gap-4", children: [
+      /* @__PURE__ */ jsx("div", { className: "w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" }),
+      /* @__PURE__ */ jsx("p", { className: "text-slate-400 font-medium", children: "Loading your journey..." })
+    ] }) });
+  }
+  const handleStartInterview = () => updateProgress({ step: "interview" });
+  const handleInterviewComplete = async (interviewData) => {
+    updateProgress({ step: "plan", interviewData, track: interviewData.track || progress.track, knowledgeCheck: interviewData.knowledgeCheck || {} });
+    try {
+      const { data } = await api.get(`/learning-modules/${interviewData.track || progress.track}`);
+      setTrackData(data);
+    } catch {
+    }
+  };
+  const handleStartModule = async (moduleId) => {
+    try {
+      const { data: modData } = await api.get(`/learning-modules/${progress.track}/${moduleId}`);
+      setCurrentModule(modData);
+      setViewState("learning");
+      updateProgress((prev) => {
+        var _a2;
+        return {
+          ...prev,
+          currentModuleId: moduleId,
+          modules: { ...prev.modules || {}, [moduleId]: ((_a2 = prev.modules) == null ? void 0 : _a2[moduleId]) || { status: "in-progress", subtopicsCompleted: [] } }
+        };
+      });
+    } catch {
+    }
+  };
+  const handleSubtopicComplete = (subtopicId) => {
+    const moduleId = progress.currentModuleId;
+    updateProgress((prev) => {
+      var _a2;
+      const mp = ((_a2 = prev.modules) == null ? void 0 : _a2[moduleId]) || { status: "in-progress", subtopicsCompleted: [] };
+      const completed = [.../* @__PURE__ */ new Set([...mp.subtopicsCompleted || [], subtopicId])];
+      return { ...prev, modules: { ...prev.modules || {}, [moduleId]: { ...mp, status: "in-progress", subtopicsCompleted: completed } } };
+    });
+  };
+  const handleAssessmentComplete = (score, failedQuestions = []) => {
+    const moduleId = progress.currentModuleId;
+    updateProgress((prev) => ({
+      ...prev,
+      modules: {
+        ...prev.modules || {},
+        [moduleId]: {
+          status: "completed",
+          score,
+          completedAt: (/* @__PURE__ */ new Date()).toISOString(),
+          failedQuestions: failedQuestions.length > 0 ? failedQuestions : void 0
+        }
+      },
+      currentModuleId: null
+    }));
+    setViewState(null);
+    setCurrentModule(null);
+  };
+  const handleBackToPlan = () => {
+    setViewState(null);
+    setCurrentModule(null);
+  };
+  return /* @__PURE__ */ jsxs("div", { className: "page-container", children: [
+    step === "intro" && /* @__PURE__ */ jsx(IntroScreen, { onStart: handleStartInterview, hasProgress: progress.track != null }),
+    step === "interview" && /* @__PURE__ */ jsx(InterviewWizard, { onComplete: handleInterviewComplete, initialData: progress.interviewData }),
+    step === "plan" && !viewState && trackData && /* @__PURE__ */ jsx(LearningPlan, { modules: trackData.modules, moduleProgress: progress.modules, knowledgeCheck: progress.knowledgeCheck, onStartModule: handleStartModule }),
+    step === "plan" && viewState === "learning" && currentModule && /* @__PURE__ */ jsx(
+      ModuleLearning,
+      {
+        moduleData: currentModule,
+        completedSubtopics: ((_b = (_a = progress.modules) == null ? void 0 : _a[progress.currentModuleId]) == null ? void 0 : _b.subtopicsCompleted) || [],
+        onSubtopicComplete: handleSubtopicComplete,
+        onTakeAssessment: () => setViewState("assessment"),
+        onBack: handleBackToPlan
+      }
+    ),
+    step === "plan" && viewState === "assessment" && currentModule && /* @__PURE__ */ jsx(
+      ModuleAssessment,
+      {
+        moduleId: progress.currentModuleId,
+        moduleTopic: currentModule.topic,
+        topics: currentModule.subtopics.map((s) => s.title),
+        onComplete: handleAssessmentComplete,
+        onBack: () => setViewState("learning")
+      }
+    )
+  ] });
+}
+const LEARNING_PATHS = [
+  {
+    id: "web-basics",
+    title: "Web Fundamentals",
+    description: "HTML, CSS, JavaScript — the building blocks of every website",
+    icon: "🌐",
+    color: "bg-orange-100 text-orange-700",
+    accentBg: "bg-orange-50",
+    accentBorder: "border-orange-200",
+    skills: ["HTML Structure & Semantics", "CSS Layouts & Flexbox", "CSS Grid", "JavaScript Basics", "DOM Manipulation", "Fetch API & AJAX", "Git & GitHub"],
+    resources: [
+      { label: "freeCodeCamp Web Dev", url: "https://www.freecodecamp.org/learn/responsive-web-design/" },
+      { label: "The Odin Project", url: "https://www.theodinproject.com/" },
+      { label: "MDN Web Docs", url: "https://developer.mozilla.org/en-US/" }
+    ],
+    estimatedWeeks: 8,
+    projects: ["Personal Portfolio", "Landing Page Clone", "Interactive Quiz App"]
+  },
+  {
+    id: "react-dev",
+    title: "React Developer",
+    description: "Build modern, component-based UIs with React & ecosystem",
+    icon: "⚛️",
+    color: "bg-cyan-100 text-cyan-700",
+    accentBg: "bg-cyan-50",
+    accentBorder: "border-cyan-200",
+    skills: ["React Components & JSX", "Props & State", "Hooks (useState, useEffect)", "React Router", "Context API", "API Integration", "Tailwind CSS"],
+    resources: [
+      { label: "React Official Docs", url: "https://react.dev/" },
+      { label: "Scrimba React Course", url: "https://scrimba.com/learn/learnreact" },
+      { label: "React Tutorial", url: "https://www.reacttutorial.dev/" }
+    ],
+    estimatedWeeks: 10,
+    projects: ["Task Manager App", "Weather Dashboard", "E-commerce UI"]
+  },
+  {
+    id: "python-backend",
+    title: "Python & Backend",
+    description: "Server-side programming with Python, APIs, and databases",
+    icon: "🐍",
+    color: "bg-yellow-100 text-yellow-700",
+    accentBg: "bg-yellow-50",
+    accentBorder: "border-yellow-200",
+    skills: ["Python Syntax & OOP", "File I/O", "Flask / FastAPI", "REST API Design", "SQL & PostgreSQL", "Authentication & JWT", "Docker Basics"],
+    resources: [
+      { label: "Python.org Tutorial", url: "https://docs.python.org/3/tutorial/" },
+      { label: "FastAPI Tutorial", url: "https://fastapi.tiangolo.com/tutorial/" },
+      { label: "SQLZoo", url: "https://sqlzoo.net/" }
+    ],
+    estimatedWeeks: 12,
+    projects: ["REST API Service", "Blog Backend", "URL Shortener"]
+  },
+  {
+    id: "dsa",
+    title: "Data Structures & Algorithms",
+    description: "Core CS concepts essential for technical interviews",
+    icon: "🧩",
+    color: "bg-purple-100 text-purple-700",
+    accentBg: "bg-purple-50",
+    accentBorder: "border-purple-200",
+    skills: ["Arrays & Strings", "Linked Lists", "Stacks & Queues", "Trees & Graphs", "Hash Maps", "Sorting Algorithms", "Dynamic Programming"],
+    resources: [
+      { label: "NeetCode 150", url: "https://neetcode.io/practice" },
+      { label: "LeetCode Patterns", url: "https://leetcode.com/" },
+      { label: "Visualgo", url: "https://visualgo.net/" }
+    ],
+    estimatedWeeks: 14,
+    projects: ["Implement a Graph traversal", "Build a LRU Cache", "Solve 50 LeetCode problems"]
+  }
+];
+const DEFAULTS = {
+  selectedPath: null,
+  skillsChecked: {},
   targetRole: "",
   currentSkills: "",
   projectIdeas: [],
-  tasks: [
-    { id: "t1", title: "Personal Portfolio", status: "done" },
-    { id: "t2", title: "React Weather App", status: "in-progress" }
-  ]
+  tasks: []
 };
+function SkillChecklist({ path, checked, onToggle }) {
+  return /* @__PURE__ */ jsx("div", { className: "space-y-2", children: path.skills.map((skill) => {
+    const done = !!checked[`${path.id}__${skill}`];
+    return /* @__PURE__ */ jsxs(
+      "button",
+      {
+        onClick: () => onToggle(`${path.id}__${skill}`),
+        className: `w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${done ? "bg-emerald-50 border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800" : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-orange-300"}`,
+        children: [
+          done ? /* @__PURE__ */ jsx(CheckCircle2, { className: "w-4 h-4 text-emerald-500 shrink-0" }) : /* @__PURE__ */ jsx(Circle, { className: "w-4 h-4 text-slate-300 shrink-0" }),
+          /* @__PURE__ */ jsx("span", { className: `text-sm font-medium ${done ? "line-through text-slate-400 dark:text-slate-500" : "text-slate-800 dark:text-slate-200"}`, children: skill })
+        ]
+      },
+      skill
+    );
+  }) });
+}
+function PathCard$1({ path, isSelected, progress, onSelect }) {
+  const total = path.skills.length;
+  const done = path.skills.filter((s) => progress[`${path.id}__${s}`]).length;
+  const pct = total > 0 ? Math.round(done / total * 100) : 0;
+  return /* @__PURE__ */ jsx(
+    "button",
+    {
+      onClick: () => onSelect(path.id),
+      className: `w-full text-left p-5 rounded-2xl border-2 transition-all hover:-translate-y-0.5 ${isSelected ? "border-orange-400 bg-orange-50 dark:bg-orange-950/20" : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-orange-200"}`,
+      children: /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-3", children: [
+        /* @__PURE__ */ jsx("span", { className: "text-2xl", children: path.icon }),
+        /* @__PURE__ */ jsxs("div", { className: "flex-1 min-w-0", children: [
+          /* @__PURE__ */ jsx("p", { className: "font-bold text-slate-900 dark:text-white text-sm", children: path.title }),
+          /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1", children: path.description }),
+          /* @__PURE__ */ jsxs("div", { className: "mt-2 flex items-center gap-2", children: [
+            /* @__PURE__ */ jsx("div", { className: "flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden", children: /* @__PURE__ */ jsx("div", { className: "h-full bg-orange-400 rounded-full transition-all duration-500", style: { width: `${pct}%` } }) }),
+            /* @__PURE__ */ jsxs("span", { className: "text-xs font-bold text-slate-500 dark:text-slate-400", children: [
+              done,
+              "/",
+              total
+            ] })
+          ] })
+        ] }),
+        pct === 100 && /* @__PURE__ */ jsx(Trophy, { className: "w-4 h-4 text-amber-500 shrink-0" })
+      ] })
+    }
+  );
+}
 function LearnAndBuildTrack() {
   var _a, _b, _c, _d, _e, _f;
   const { data: progress, updateProgress, isLoading: progressLoading, isSaving } = useUserProgress(
     "learn-and-build",
-    LEARN_BUILD_DEFAULTS
+    DEFAULTS
   );
-  const targetRole = progress.targetRole;
-  const currentSkills = progress.currentSkills;
-  const projectIdeas = progress.projectIdeas;
-  const tasks = progress.tasks;
+  const [expandedPath, setExpandedPath] = useState(null);
   const [loadingProjects, setLoadingProjects] = useState(false);
   const [activeBlueprint, setActiveBlueprint] = useState(null);
-  const [loadingBlueprint, setLoadingBlueprint] = useState(false);
-  if (progressLoading) {
-    return /* @__PURE__ */ jsx("div", { className: "page-container py-24 flex justify-center", children: /* @__PURE__ */ jsx(Loader2, { className: "w-8 h-8 animate-spin text-orange-600" }) });
-  }
+  const selectedPathId = progress.selectedPath;
+  const skillsChecked = progress.skillsChecked || {};
+  const projectIdeas = progress.projectIdeas || [];
+  const tasks = progress.tasks || [];
+  const targetRole = progress.targetRole || "";
+  const currentSkills = progress.currentSkills || "";
+  const activePath = LEARNING_PATHS.find((p) => p.id === selectedPathId);
+  const handleToggleSkill = useCallback((key) => {
+    const updated = { ...skillsChecked, [key]: !skillsChecked[key] };
+    updateProgress({ skillsChecked: updated });
+  }, [skillsChecked, updateProgress]);
+  const handleSelectPath = (pathId) => {
+    updateProgress({ selectedPath: pathId });
+    setExpandedPath(pathId);
+  };
   const handleGenerateProjects = async (e) => {
     e.preventDefault();
     if (!targetRole.trim()) return;
@@ -11114,246 +12058,330 @@ function LearnAndBuildTrack() {
     }
   };
   const handleGenerateBlueprint = async (project) => {
-    setLoadingBlueprint(true);
     setActiveBlueprint({ title: project.title, loading: true });
     try {
       const res = await api.post("/job-prep/project-blueprint", { projectTitle: project.title });
-      setActiveBlueprint({
-        title: project.title,
-        loading: false,
-        blueprint: res.data.data.blueprint
-      });
+      setActiveBlueprint({ title: project.title, loading: false, blueprint: res.data.data.blueprint });
       if (!tasks.find((t) => t.title === project.title)) {
-        updateProgress({
-          tasks: [...tasks, { id: Date.now().toString(), title: project.title, status: "todo" }]
-        });
+        updateProgress({ tasks: [...tasks, { id: Date.now().toString(), title: project.title, status: "todo" }] });
       }
-    } catch (err) {
+    } catch {
       setActiveBlueprint(null);
-    } finally {
-      setLoadingBlueprint(false);
     }
-  };
-  const handleDragStart = (e, id) => {
-    e.dataTransfer.setData("taskId", id);
   };
   const handleDrop = (e, status) => {
     const id = e.dataTransfer.getData("taskId");
-    updateProgress({
-      tasks: tasks.map((t) => t.id === id ? { ...t, status } : t)
-    });
+    updateProgress({ tasks: tasks.map((t) => t.id === id ? { ...t, status } : t) });
   };
-  const handleDragOver = (e) => {
-    e.preventDefault();
-  };
-  return /* @__PURE__ */ jsxs("div", { className: "page-container", children: [
-    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 mb-8", children: [
+  if (progressLoading) {
+    return /* @__PURE__ */ jsx("div", { className: "page-container py-24 flex justify-center", children: /* @__PURE__ */ jsx(Loader2, { className: "w-8 h-8 animate-spin text-orange-600" }) });
+  }
+  return /* @__PURE__ */ jsxs("div", { className: "page-container space-y-8", children: [
+    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4", children: [
       /* @__PURE__ */ jsx("div", { className: "p-4 bg-orange-100 text-orange-600 rounded-2xl", children: /* @__PURE__ */ jsx(Wrench, { className: "w-8 h-8" }) }),
       /* @__PURE__ */ jsxs("div", { children: [
-        /* @__PURE__ */ jsxs("h1", { className: "text-3xl font-extrabold text-slate-900 dark:text-white page-title", children: [
+        /* @__PURE__ */ jsxs("h1", { className: "text-3xl font-extrabold text-slate-900 dark:text-white", children: [
           "Learn & Build Track",
-          isSaving && /* @__PURE__ */ jsx("span", { className: "ml-2 text-orange-600 text-sm font-semibold", children: "Saving…" })
+          isSaving && /* @__PURE__ */ jsx("span", { className: "ml-3 text-orange-600 text-sm font-semibold", children: "Saving…" })
         ] }),
-        /* @__PURE__ */ jsx("p", { className: "text-slate-500 dark:text-slate-400 mt-1 text-lg", children: "Build hyper-targeted projects to fill your resume skill gaps." })
+        /* @__PURE__ */ jsx("p", { className: "text-slate-500 dark:text-slate-400 mt-1", children: "Choose a learning path, check off skills as you learn, and build projects for your portfolio." })
       ] })
     ] }),
+    /* @__PURE__ */ jsx("div", { className: "grid grid-cols-2 sm:grid-cols-4 gap-4", children: [
+      {
+        icon: BookOpen,
+        label: "Active Path",
+        value: (activePath == null ? void 0 : activePath.title) || "None selected",
+        color: "text-orange-600",
+        bg: "bg-orange-50 dark:bg-orange-950/30"
+      },
+      {
+        icon: CheckCircle2,
+        label: "Skills Checked",
+        value: Object.values(skillsChecked).filter(Boolean).length,
+        color: "text-emerald-600",
+        bg: "bg-emerald-50 dark:bg-emerald-950/30"
+      },
+      {
+        icon: Target,
+        label: "Projects",
+        value: projectIdeas.length,
+        color: "text-blue-600",
+        bg: "bg-blue-50 dark:bg-blue-950/30"
+      },
+      {
+        icon: Trophy,
+        label: "Paths Completed",
+        value: LEARNING_PATHS.filter(
+          (p) => p.skills.every((s) => skillsChecked[`${p.id}__${s}`])
+        ).length,
+        color: "text-amber-600",
+        bg: "bg-amber-50 dark:bg-amber-950/30"
+      }
+    ].map(({ icon: Icon2, label, value, color, bg }) => /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-4 flex items-center gap-3", children: [
+      /* @__PURE__ */ jsx("div", { className: `p-2.5 rounded-xl ${bg}`, children: /* @__PURE__ */ jsx(Icon2, { className: `w-5 h-5 ${color}` }) }),
+      /* @__PURE__ */ jsxs("div", { children: [
+        /* @__PURE__ */ jsx("p", { className: "text-xs font-bold text-slate-400 uppercase tracking-wider", children: label }),
+        /* @__PURE__ */ jsx("p", { className: "text-base font-extrabold text-slate-900 dark:text-white truncate max-w-[120px]", children: value })
+      ] })
+    ] }, label)) }),
     /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 lg:grid-cols-3 gap-8", children: [
-      /* @__PURE__ */ jsxs("div", { className: "lg:col-span-1 space-y-6", children: [
-        /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-6 border border-white/50 dark:border-slate-700/50", children: [
-          /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 mb-4", children: [
-            /* @__PURE__ */ jsx("div", { className: "p-2 bg-orange-50 text-orange-600 rounded-xl", children: /* @__PURE__ */ jsx(Code2, { className: "w-5 h-5" }) }),
-            /* @__PURE__ */ jsx("h2", { className: "font-bold text-lg text-slate-900", children: "Project Architect" })
+      /* @__PURE__ */ jsxs("div", { className: "lg:col-span-1 space-y-4", children: [
+        /* @__PURE__ */ jsxs("h2", { className: "font-bold text-slate-900 dark:text-white text-lg flex items-center gap-2", children: [
+          /* @__PURE__ */ jsx(Layers, { className: "w-5 h-5 text-orange-500" }),
+          "Learning Paths"
+        ] }),
+        LEARNING_PATHS.map((path) => /* @__PURE__ */ jsx(
+          PathCard$1,
+          {
+            path,
+            isSelected: selectedPathId === path.id,
+            progress: skillsChecked,
+            onSelect: handleSelectPath
+          },
+          path.id
+        ))
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "lg:col-span-2 space-y-6", children: [
+        activePath ? /* @__PURE__ */ jsxs(Fragment, { children: [
+          /* @__PURE__ */ jsxs("div", { className: `card rounded-2xl p-6 border ${activePath.accentBorder} ${activePath.accentBg} dark:bg-transparent`, children: [
+            /* @__PURE__ */ jsxs("div", { className: "flex items-start justify-between gap-4 mb-4", children: [
+              /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
+                /* @__PURE__ */ jsx("span", { className: "text-3xl", children: activePath.icon }),
+                /* @__PURE__ */ jsxs("div", { children: [
+                  /* @__PURE__ */ jsx("h2", { className: "text-xl font-extrabold text-slate-900 dark:text-white", children: activePath.title }),
+                  /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500 dark:text-slate-400", children: activePath.description })
+                ] })
+              ] }),
+              /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 shrink-0", children: [
+                /* @__PURE__ */ jsx(Clock, { className: "w-4 h-4 text-slate-400" }),
+                /* @__PURE__ */ jsxs("span", { className: "text-sm text-slate-500 font-medium", children: [
+                  "~",
+                  activePath.estimatedWeeks,
+                  " weeks"
+                ] })
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxs("div", { className: "mb-1 flex items-center justify-between text-xs text-slate-500 font-medium", children: [
+              /* @__PURE__ */ jsx("span", { children: "Skills Progress" }),
+              /* @__PURE__ */ jsxs("span", { children: [
+                activePath.skills.filter((s) => skillsChecked[`${activePath.id}__${s}`]).length,
+                " / ",
+                activePath.skills.length
+              ] })
+            ] }),
+            /* @__PURE__ */ jsx("div", { className: "h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mb-4", children: /* @__PURE__ */ jsx(
+              "div",
+              {
+                className: "h-full bg-gradient-to-r from-orange-400 to-amber-400 rounded-full transition-all duration-500",
+                style: {
+                  width: `${Math.round(
+                    activePath.skills.filter((s) => skillsChecked[`${activePath.id}__${s}`]).length / activePath.skills.length * 100
+                  )}%`
+                }
+              }
+            ) }),
+            /* @__PURE__ */ jsx("div", { className: "flex flex-wrap gap-2", children: activePath.resources.map((r) => /* @__PURE__ */ jsxs(
+              "a",
+              {
+                href: r.url,
+                target: "_blank",
+                rel: "noopener noreferrer",
+                className: "inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-slate-700 dark:text-slate-300 hover:border-orange-400 transition-colors",
+                children: [
+                  /* @__PURE__ */ jsx(ExternalLink, { className: "w-3 h-3" }),
+                  r.label
+                ]
+              },
+              r.label
+            )) })
           ] }),
-          /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500 mb-6", children: "Tell us your target role and current skills, and we'll suggest 3 perfect portfolio projects." }),
-          /* @__PURE__ */ jsxs("form", { onSubmit: handleGenerateProjects, className: "space-y-4", children: [
-            /* @__PURE__ */ jsxs("div", { children: [
-              /* @__PURE__ */ jsx("label", { className: "block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2", children: "Target Role" }),
-              /* @__PURE__ */ jsx(
-                "input",
-                {
-                  type: "text",
-                  value: targetRole,
-                  onChange: (e) => updateProgress({ targetRole: e.target.value }),
-                  placeholder: "e.g. React Developer",
-                  className: "w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-orange-500"
-                }
-              )
+          /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-6", children: [
+            /* @__PURE__ */ jsxs("h3", { className: "font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2", children: [
+              /* @__PURE__ */ jsx(CheckCircle2, { className: "w-5 h-5 text-emerald-500" }),
+              "Skill Checklist",
+              /* @__PURE__ */ jsx("span", { className: "text-xs font-normal text-slate-500 dark:text-slate-400 ml-1", children: "Check off topics as you learn them" })
             ] }),
-            /* @__PURE__ */ jsxs("div", { children: [
-              /* @__PURE__ */ jsx("label", { className: "block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2", children: "Current Skills (Optional)" }),
-              /* @__PURE__ */ jsx(
-                "input",
-                {
-                  type: "text",
-                  value: currentSkills,
-                  onChange: (e) => updateProgress({ currentSkills: e.target.value }),
-                  placeholder: "e.g. HTML, CSS, JS",
-                  className: "w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-orange-500"
-                }
-              )
+            /* @__PURE__ */ jsx(SkillChecklist, { path: activePath, checked: skillsChecked, onToggle: handleToggleSkill })
+          ] }),
+          /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-6", children: [
+            /* @__PURE__ */ jsxs("h3", { className: "font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2", children: [
+              /* @__PURE__ */ jsx(Star, { className: "w-5 h-5 text-amber-500" }),
+              "Project Ideas for This Path"
             ] }),
+            /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500 dark:text-slate-400 mb-4", children: "Build these to cement your skills and impress employers." }),
+            /* @__PURE__ */ jsx("div", { className: "space-y-2", children: activePath.projects.map((proj, i) => /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700", children: [
+              /* @__PURE__ */ jsx("div", { className: "w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-bold shrink-0", children: i + 1 }),
+              /* @__PURE__ */ jsx("span", { className: "text-sm font-medium text-slate-800 dark:text-slate-200", children: proj })
+            ] }, i)) })
+          ] })
+        ] }) : /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-12 text-center", children: [
+          /* @__PURE__ */ jsx(BookOpen, { className: "w-12 h-12 text-slate-300 mx-auto mb-4" }),
+          /* @__PURE__ */ jsx("h3", { className: "font-bold text-slate-700 dark:text-slate-300 mb-2", children: "Choose a Learning Path" }),
+          /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500 dark:text-slate-400", children: "Select a path from the left to see your skill checklist, resources, and project ideas." })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-6", children: [
+          /* @__PURE__ */ jsxs("h3", { className: "font-bold text-slate-900 dark:text-white mb-1 flex items-center gap-2", children: [
+            /* @__PURE__ */ jsx(Code2, { className: "w-5 h-5 text-orange-500" }),
+            "AI Project Generator"
+          ] }),
+          /* @__PURE__ */ jsx("p", { className: "text-sm text-slate-500 dark:text-slate-400 mb-4", children: "Get custom project ideas tailored to your target role and skills." }),
+          /* @__PURE__ */ jsxs("form", { onSubmit: handleGenerateProjects, className: "flex flex-col sm:flex-row gap-3 mb-4", children: [
+            /* @__PURE__ */ jsx(
+              "input",
+              {
+                type: "text",
+                value: targetRole,
+                onChange: (e) => updateProgress({ targetRole: e.target.value }),
+                placeholder: "Target role (e.g. React Developer)",
+                className: "input-field flex-1"
+              }
+            ),
+            /* @__PURE__ */ jsx(
+              "input",
+              {
+                type: "text",
+                value: currentSkills,
+                onChange: (e) => updateProgress({ currentSkills: e.target.value }),
+                placeholder: "Skills you know (optional)",
+                className: "input-field flex-1"
+              }
+            ),
             /* @__PURE__ */ jsxs(
               "button",
               {
                 type: "submit",
-                disabled: loadingProjects || !targetRole,
-                className: "w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition-colors flex justify-center items-center gap-2 disabled:opacity-50",
+                disabled: loadingProjects || !targetRole.trim(),
+                className: "btn-primary flex items-center gap-2 whitespace-nowrap",
                 children: [
-                  loadingProjects ? /* @__PURE__ */ jsx(Loader2, { className: "w-5 h-5 animate-spin" }) : /* @__PURE__ */ jsx(Plus, { className: "w-5 h-5" }),
-                  "Generate Ideas"
+                  loadingProjects ? /* @__PURE__ */ jsx(Loader2, { className: "w-4 h-4 animate-spin" }) : /* @__PURE__ */ jsx(Plus, { className: "w-4 h-4" }),
+                  "Generate"
                 ]
               }
             )
-          ] })
-        ] }),
-        projectIdeas.length > 0 && /* @__PURE__ */ jsxs("div", { className: "space-y-4", children: [
-          /* @__PURE__ */ jsx("h3", { className: "font-bold text-slate-900 text-sm uppercase tracking-wider", children: "Suggested Projects" }),
-          projectIdeas.map((proj, i) => {
+          ] }),
+          projectIdeas.length > 0 && /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 sm:grid-cols-3 gap-3", children: projectIdeas.map((proj, i) => {
             var _a2;
-            return /* @__PURE__ */ jsxs("div", { className: "bg-white rounded-2xl p-4 border border-slate-200 shadow-sm", children: [
-              /* @__PURE__ */ jsx("h4", { className: "font-bold text-slate-900 mb-1", children: proj.title }),
-              /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-500 mb-3", children: proj.description }),
-              /* @__PURE__ */ jsx("div", { className: "flex flex-wrap gap-1 mb-4", children: (_a2 = proj.skills_gained) == null ? void 0 : _a2.map((s, j) => /* @__PURE__ */ jsx("span", { className: "text-[10px] font-bold px-2 py-1 bg-slate-100 text-slate-600 rounded-md uppercase", children: s }, j)) }),
+            return /* @__PURE__ */ jsxs("div", { className: "bg-slate-50 dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700", children: [
+              /* @__PURE__ */ jsx("h4", { className: "font-bold text-slate-900 dark:text-white text-sm mb-1", children: proj.title }),
+              /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400 mb-3 line-clamp-2", children: proj.description }),
+              /* @__PURE__ */ jsx("div", { className: "flex flex-wrap gap-1 mb-3", children: (_a2 = proj.skills_gained) == null ? void 0 : _a2.slice(0, 3).map((s, j) => /* @__PURE__ */ jsx("span", { className: "text-xs font-bold px-2 py-0.5 bg-orange-100 dark:bg-orange-950/50 text-orange-700 dark:text-orange-400 rounded-md uppercase", children: s }, j)) }),
               /* @__PURE__ */ jsxs(
                 "button",
                 {
                   onClick: () => handleGenerateBlueprint(proj),
-                  className: "w-full py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg transition-colors flex justify-center items-center gap-1",
+                  className: "w-full py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5",
                   children: [
-                    "Generate Blueprint ",
+                    "Blueprint ",
                     /* @__PURE__ */ jsx(ArrowRight, { className: "w-3 h-3" })
                   ]
                 }
               )
             ] }, i);
-          })
-        ] })
-      ] }),
-      /* @__PURE__ */ jsx("div", { className: "lg:col-span-2", children: /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-6 border border-white/50 h-full", children: [
-        /* @__PURE__ */ jsxs("h2", { className: "font-bold text-xl text-slate-900 mb-6 flex items-center gap-2", children: [
-          "Portfolio Kanban",
-          /* @__PURE__ */ jsx("span", { className: "text-xs font-medium bg-slate-100 text-slate-500 px-2 py-1 rounded-full", children: "Drag & Drop" })
+          }) })
         ] }),
-        /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-3 gap-4 h-[500px]", children: [
-          /* @__PURE__ */ jsxs(
-            "div",
-            {
-              className: "bg-slate-50 rounded-2xl p-4 border border-slate-100 flex flex-col",
-              onDragOver: handleDragOver,
-              onDrop: (e) => handleDrop(e, "todo"),
-              children: [
-                /* @__PURE__ */ jsxs("h3", { className: "font-bold text-slate-700 mb-4 flex items-center justify-between", children: [
-                  "To Do",
-                  /* @__PURE__ */ jsx("span", { className: "bg-slate-200 text-slate-600 text-xs px-2 py-0.5 rounded-full", children: tasks.filter((t) => t.status === "todo").length })
-                ] }),
-                /* @__PURE__ */ jsx("div", { className: "flex-1 space-y-3 overflow-y-auto", children: tasks.filter((t) => t.status === "todo").map((task) => /* @__PURE__ */ jsx(
-                  "div",
-                  {
-                    draggable: true,
-                    onDragStart: (e) => handleDragStart(e, task.id),
-                    className: "bg-white p-3 rounded-xl border border-slate-200 shadow-sm cursor-grab active:cursor-grabbing hover:border-orange-300 transition-colors",
-                    children: /* @__PURE__ */ jsx("p", { className: "font-medium text-sm text-slate-900", children: task.title })
-                  },
-                  task.id
-                )) })
-              ]
-            }
-          ),
-          /* @__PURE__ */ jsxs(
-            "div",
-            {
-              className: "bg-orange-50/30 rounded-2xl p-4 border border-orange-100/50 flex flex-col",
-              onDragOver: handleDragOver,
-              onDrop: (e) => handleDrop(e, "in-progress"),
-              children: [
-                /* @__PURE__ */ jsxs("h3", { className: "font-bold text-orange-800 mb-4 flex items-center justify-between", children: [
-                  "In Progress",
-                  /* @__PURE__ */ jsx("span", { className: "bg-orange-200 text-orange-700 text-xs px-2 py-0.5 rounded-full", children: tasks.filter((t) => t.status === "in-progress").length })
-                ] }),
-                /* @__PURE__ */ jsx("div", { className: "flex-1 space-y-3 overflow-y-auto", children: tasks.filter((t) => t.status === "in-progress").map((task) => /* @__PURE__ */ jsx(
-                  "div",
-                  {
-                    draggable: true,
-                    onDragStart: (e) => handleDragStart(e, task.id),
-                    className: "bg-white p-3 rounded-xl border border-orange-200 shadow-sm cursor-grab active:cursor-grabbing hover:border-orange-400 transition-colors",
-                    children: /* @__PURE__ */ jsx("p", { className: "font-medium text-sm text-slate-900", children: task.title })
-                  },
-                  task.id
-                )) })
-              ]
-            }
-          ),
-          /* @__PURE__ */ jsxs(
-            "div",
-            {
-              className: "bg-emerald-50/30 rounded-2xl p-4 border border-emerald-100/50 flex flex-col",
-              onDragOver: handleDragOver,
-              onDrop: (e) => handleDrop(e, "done"),
-              children: [
-                /* @__PURE__ */ jsxs("h3", { className: "font-bold text-emerald-800 mb-4 flex items-center justify-between", children: [
-                  "Done",
-                  /* @__PURE__ */ jsx("span", { className: "bg-emerald-200 text-emerald-700 text-xs px-2 py-0.5 rounded-full", children: tasks.filter((t) => t.status === "done").length })
-                ] }),
-                /* @__PURE__ */ jsx("div", { className: "flex-1 space-y-3 overflow-y-auto", children: tasks.filter((t) => t.status === "done").map((task) => /* @__PURE__ */ jsx(
-                  "div",
-                  {
-                    draggable: true,
-                    onDragStart: (e) => handleDragStart(e, task.id),
-                    className: "bg-white p-3 rounded-xl border border-emerald-200 shadow-sm cursor-grab active:cursor-grabbing opacity-70 hover:opacity-100 transition-all",
-                    children: /* @__PURE__ */ jsx("p", { className: "font-medium text-sm text-slate-900 line-through decoration-slate-300", children: task.title })
-                  },
-                  task.id
-                )) })
-              ]
-            }
-          )
-        ] })
-      ] }) })
+        tasks.length > 0 && /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-6", children: [
+          /* @__PURE__ */ jsxs("h3", { className: "font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2", children: [
+            /* @__PURE__ */ jsx(BarChart2, { className: "w-5 h-5 text-orange-500" }),
+            "Project Board",
+            /* @__PURE__ */ jsx("span", { className: "text-xs font-normal text-slate-400 dark:text-slate-500", children: "Drag & drop to update status" })
+          ] }),
+          /* @__PURE__ */ jsx("div", { className: "grid grid-cols-3 gap-3", children: ["todo", "in-progress", "done"].map((col) => {
+            const labels = { "todo": "To Do", "in-progress": "In Progress", "done": "Done" };
+            const colTasks = tasks.filter((t) => t.status === col);
+            const colColors = {
+              "todo": "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700",
+              "in-progress": "bg-orange-50/50 dark:bg-orange-950/20 border-orange-100 dark:border-orange-900/50",
+              "done": "bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/50"
+            };
+            const labelColors = {
+              "todo": "text-slate-700 dark:text-slate-300",
+              "in-progress": "text-orange-800 dark:text-orange-400",
+              "done": "text-emerald-800 dark:text-emerald-400"
+            };
+            const badgeColors = {
+              "todo": "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400",
+              "in-progress": "bg-orange-200 dark:bg-orange-900/50 text-orange-700 dark:text-orange-400",
+              "done": "bg-emerald-200 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400"
+            };
+            return /* @__PURE__ */ jsxs(
+              "div",
+              {
+                className: `rounded-xl p-3 border min-h-[120px] ${colColors[col]}`,
+                onDragOver: (e) => e.preventDefault(),
+                onDrop: (e) => handleDrop(e, col),
+                children: [
+                  /* @__PURE__ */ jsxs("p", { className: `text-xs font-bold mb-3 flex items-center justify-between ${labelColors[col]}`, children: [
+                    labels[col],
+                    /* @__PURE__ */ jsx("span", { className: `text-xs px-2 py-0.5 rounded-full ${badgeColors[col]}`, children: colTasks.length })
+                  ] }),
+                  /* @__PURE__ */ jsx("div", { className: "space-y-2", children: colTasks.map((task) => /* @__PURE__ */ jsx(
+                    "div",
+                    {
+                      draggable: true,
+                      onDragStart: (e) => e.dataTransfer.setData("taskId", task.id),
+                      className: "bg-white dark:bg-slate-800 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm cursor-grab active:cursor-grabbing text-xs font-medium text-slate-800 dark:text-slate-200",
+                      children: task.title
+                    },
+                    task.id
+                  )) })
+                ]
+              },
+              col
+            );
+          }) })
+        ] }),
+        /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 sm:grid-cols-3 gap-4", children: [
+          { to: "/courses", icon: BookOpen, label: "Course Library", desc: "Browse structured courses", color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30" },
+          { to: "/coding-practice", icon: Code2, label: "Coding Practice", desc: "Sharpen your problem-solving", color: "text-purple-600", bg: "bg-purple-50 dark:bg-purple-950/30" },
+          { to: "/zero-to-hero", icon: Zap, label: "Zero to Hero", desc: "Full structured roadmap", color: "text-orange-600", bg: "bg-orange-50 dark:bg-orange-950/30" }
+        ].map(({ to, icon: Icon2, label, desc, color, bg }) => /* @__PURE__ */ jsxs(Link, { to, className: "card rounded-2xl p-4 flex items-center gap-3 hover:-translate-y-0.5 transition-all group", children: [
+          /* @__PURE__ */ jsx("div", { className: `p-2.5 rounded-xl ${bg}`, children: /* @__PURE__ */ jsx(Icon2, { className: `w-5 h-5 ${color}` }) }),
+          /* @__PURE__ */ jsxs("div", { children: [
+            /* @__PURE__ */ jsx("p", { className: "font-bold text-sm text-slate-900 dark:text-white", children: label }),
+            /* @__PURE__ */ jsx("p", { className: "text-xs text-slate-500 dark:text-slate-400", children: desc })
+          ] }),
+          /* @__PURE__ */ jsx(ArrowRight, { className: "w-4 h-4 text-slate-300 group-hover:text-slate-500 ml-auto" })
+        ] }, to)) })
+      ] })
     ] }),
-    activeBlueprint && /* @__PURE__ */ jsx("div", { className: "fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4", children: /* @__PURE__ */ jsxs("div", { className: "bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200", children: [
-      /* @__PURE__ */ jsxs("div", { className: "p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50", children: [
-        /* @__PURE__ */ jsxs("h2", { className: "text-xl font-bold text-slate-900 flex items-center gap-2", children: [
-          /* @__PURE__ */ jsx(FileCode2, { className: "w-6 h-6 text-orange-500" }),
+    activeBlueprint && /* @__PURE__ */ jsx("div", { className: "fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4", children: /* @__PURE__ */ jsxs("div", { className: "bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col", children: [
+      /* @__PURE__ */ jsxs("div", { className: "p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center", children: [
+        /* @__PURE__ */ jsxs("h2", { className: "text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2", children: [
+          /* @__PURE__ */ jsx(FileCode2, { className: "w-5 h-5 text-orange-500" }),
           "Blueprint: ",
           activeBlueprint.title
         ] }),
-        /* @__PURE__ */ jsx("button", { onClick: () => setActiveBlueprint(null), className: "p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-500", children: /* @__PURE__ */ jsx(X, { className: "w-5 h-5" }) })
+        /* @__PURE__ */ jsx("button", { onClick: () => setActiveBlueprint(null), className: "p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors", children: /* @__PURE__ */ jsx(X, { className: "w-5 h-5 text-slate-500" }) })
       ] }),
       /* @__PURE__ */ jsx("div", { className: "p-6 overflow-y-auto flex-1", children: activeBlueprint.loading ? /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center justify-center py-20 text-slate-500", children: [
-        /* @__PURE__ */ jsx(Loader2, { className: "w-12 h-12 animate-spin text-orange-500 mb-4" }),
-        /* @__PURE__ */ jsx("p", { children: "Architecting your solution..." })
-      ] }) : /* @__PURE__ */ jsxs("div", { className: "space-y-8", children: [
-        /* @__PURE__ */ jsxs("div", { children: [
-          /* @__PURE__ */ jsx("h3", { className: "text-sm font-bold text-slate-400 uppercase tracking-wider mb-3", children: "Architecture & Stack" }),
-          /* @__PURE__ */ jsx("p", { className: "text-slate-800 bg-orange-50 p-4 rounded-xl border border-orange-100", children: (_a = activeBlueprint.blueprint) == null ? void 0 : _a.architecture })
+        /* @__PURE__ */ jsx(Loader2, { className: "w-10 h-10 animate-spin text-orange-500 mb-4" }),
+        /* @__PURE__ */ jsx("p", { className: "text-sm", children: "Architecting your solution..." })
+      ] }) : /* @__PURE__ */ jsxs("div", { className: "space-y-6", children: [
+        ((_a = activeBlueprint.blueprint) == null ? void 0 : _a.architecture) && /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsx("h3", { className: "text-xs font-bold text-slate-400 uppercase tracking-wider mb-2", children: "Architecture & Stack" }),
+          /* @__PURE__ */ jsx("p", { className: "text-slate-800 dark:text-slate-200 bg-orange-50 dark:bg-orange-950/30 p-4 rounded-xl border border-orange-100 dark:border-orange-900/50 text-sm", children: activeBlueprint.blueprint.architecture })
         ] }),
-        /* @__PURE__ */ jsxs("div", { children: [
-          /* @__PURE__ */ jsx("h3", { className: "text-sm font-bold text-slate-400 uppercase tracking-wider mb-3", children: "Setup Commands" }),
-          /* @__PURE__ */ jsx("div", { className: "bg-slate-900 rounded-xl p-4 font-mono text-sm text-green-400 space-y-2 overflow-x-auto", children: (_c = (_b = activeBlueprint.blueprint) == null ? void 0 : _b.setup_commands) == null ? void 0 : _c.map((cmd, i) => /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
-            /* @__PURE__ */ jsx(Terminal, { className: "w-4 h-4 text-slate-600 shrink-0" }),
+        ((_c = (_b = activeBlueprint.blueprint) == null ? void 0 : _b.setup_commands) == null ? void 0 : _c.length) > 0 && /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsx("h3", { className: "text-xs font-bold text-slate-400 uppercase tracking-wider mb-2", children: "Setup Commands" }),
+          /* @__PURE__ */ jsx("div", { className: "bg-slate-900 rounded-xl p-4 font-mono text-sm text-green-400 space-y-1.5 overflow-x-auto", children: activeBlueprint.blueprint.setup_commands.map((cmd, i) => /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
+            /* @__PURE__ */ jsx(Terminal, { className: "w-3.5 h-3.5 text-slate-600 shrink-0" }),
             /* @__PURE__ */ jsx("span", { children: cmd })
           ] }, i)) })
         ] }),
-        /* @__PURE__ */ jsxs("div", { children: [
-          /* @__PURE__ */ jsx("h3", { className: "text-sm font-bold text-slate-400 uppercase tracking-wider mb-3", children: "Implementation Steps" }),
-          /* @__PURE__ */ jsx("ul", { className: "space-y-3", children: (_e = (_d = activeBlueprint.blueprint) == null ? void 0 : _d.steps) == null ? void 0 : _e.map((step, i) => /* @__PURE__ */ jsxs("li", { className: "flex items-start gap-3 text-slate-700 bg-white border border-slate-200 p-3 rounded-xl shadow-sm", children: [
-            /* @__PURE__ */ jsx("div", { className: "w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center shrink-0 text-xs font-bold", children: i + 1 }),
-            /* @__PURE__ */ jsx("span", { className: "mt-0.5", children: step })
+        ((_e = (_d = activeBlueprint.blueprint) == null ? void 0 : _d.steps) == null ? void 0 : _e.length) > 0 && /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsx("h3", { className: "text-xs font-bold text-slate-400 uppercase tracking-wider mb-2", children: "Implementation Steps" }),
+          /* @__PURE__ */ jsx("ul", { className: "space-y-2", children: activeBlueprint.blueprint.steps.map((step, i) => /* @__PURE__ */ jsxs("li", { className: "flex items-start gap-3 text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3 rounded-xl", children: [
+            /* @__PURE__ */ jsx("div", { className: "w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-950/50 text-orange-600 flex items-center justify-center shrink-0 text-xs font-bold mt-0.5", children: i + 1 }),
+            /* @__PURE__ */ jsx("span", { children: step })
           ] }, i)) })
         ] }),
-        /* @__PURE__ */ jsxs("div", { children: [
-          /* @__PURE__ */ jsx("h3", { className: "text-sm font-bold text-slate-400 uppercase tracking-wider mb-3", children: "README.md Draft" }),
-          /* @__PURE__ */ jsx("pre", { className: "bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm text-slate-700 whitespace-pre-wrap font-mono", children: (_f = activeBlueprint.blueprint) == null ? void 0 : _f.readme_draft })
+        ((_f = activeBlueprint.blueprint) == null ? void 0 : _f.readme_draft) && /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsx("h3", { className: "text-xs font-bold text-slate-400 uppercase tracking-wider mb-2", children: "README Draft" }),
+          /* @__PURE__ */ jsx("pre", { className: "bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-mono overflow-x-auto", children: activeBlueprint.blueprint.readme_draft })
         ] })
       ] }) }),
-      !activeBlueprint.loading && /* @__PURE__ */ jsx("div", { className: "p-6 border-t border-slate-100 bg-slate-50 flex justify-end", children: /* @__PURE__ */ jsx(
-        "button",
-        {
-          onClick: () => setActiveBlueprint(null),
-          className: "px-6 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-colors",
-          children: "Close & View Kanban"
-        }
-      ) })
+      !activeBlueprint.loading && /* @__PURE__ */ jsx("div", { className: "p-5 border-t border-slate-100 dark:border-slate-800 flex justify-end", children: /* @__PURE__ */ jsx("button", { onClick: () => setActiveBlueprint(null), className: "btn-primary", children: "Close" }) })
     ] }) })
   ] });
 }
@@ -11588,11 +12616,11 @@ function RecruiterVisibility() {
       ] }),
       /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4", children: Object.entries(result.subScores).map(([key, sub]) => {
         const meta = SUB_META[key] || { label: key, icon: Eye };
-        const Icon = meta.icon;
+        const Icon2 = meta.icon;
         return /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-6", children: [
           /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between mb-3", children: [
             /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
-              /* @__PURE__ */ jsx(Icon, { className: "w-5 h-5 text-slate-500" }),
+              /* @__PURE__ */ jsx(Icon2, { className: "w-5 h-5 text-slate-500" }),
               /* @__PURE__ */ jsx("span", { className: "font-bold text-on-surface", children: meta.label })
             ] }),
             sub.available ? /* @__PURE__ */ jsx("span", { className: `text-2xl font-extrabold ${scoreColor$1(sub.score)}`, children: sub.score }) : /* @__PURE__ */ jsx("span", { className: "text-xs font-semibold text-slate-400 uppercase", children: "Not provided" })
@@ -12120,7 +13148,7 @@ function MessageBubble({ message }) {
         const lines = part.slice(3, -3).split("\n");
         const lang = lines[0].trim();
         const code = lang ? lines.slice(1).join("\n") : lines.join("\n");
-        return /* @__PURE__ */ jsxs("pre", { className: "bg-black/40 rounded-xl p-4 my-3 overflow-x-auto border border-white/10", children: [
+        return /* @__PURE__ */ jsxs("pre", { className: "bg-black/40 rounded-xl p-4 my-3 overflow-x-auto border border-slate-200 dark:border-white/10", children: [
           lang && /* @__PURE__ */ jsx("div", { className: "text-xs text-sky-400 font-bold mb-2 uppercase tracking-wide", children: lang }),
           /* @__PURE__ */ jsx("code", { className: "text-sm text-emerald-300 font-mono leading-relaxed", children: code })
         ] }, i);
@@ -12368,7 +13396,7 @@ What would you like to learn about?`,
           "button",
           {
             onClick: startNewSession,
-            className: "w-full flex items-center gap-2 px-4 py-3 card rounded-2xl hover:bg-white/10 transition-colors text-on-surface dark:text-white font-bold text-sm",
+            className: "w-full flex items-center gap-2 px-4 py-3 card rounded-2xl hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-on-surface dark:text-white font-bold text-sm",
             children: [
               /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-sky-400 text-lg", children: "add" }),
               "New Conversation"
@@ -12381,7 +13409,7 @@ What would you like to learn about?`,
             "button",
             {
               onClick: () => selectTopic(topic),
-              className: `w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors text-left ${(selectedTopic == null ? void 0 : selectedTopic.id) === topic.id ? "bg-sky-500/15 text-sky-400 font-bold" : "text-on-surface-variant hover:bg-white/5 hover:text-on-surface"}`,
+              className: `w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors text-left ${(selectedTopic == null ? void 0 : selectedTopic.id) === topic.id ? "bg-sky-500/15 text-sky-400 font-bold" : "text-on-surface-variant hover:bg-slate-50 dark:hover:bg-white/5 hover:text-on-surface"}`,
               children: [
                 /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: TOPIC_ICONS[topic.id] || "category" }),
                 /* @__PURE__ */ jsx("span", { className: "truncate", children: topic.name })
@@ -12396,7 +13424,7 @@ What would you like to learn about?`,
             "div",
             {
               onClick: () => loadConversation(session),
-              className: `px-3 py-2.5 rounded-xl text-sm text-on-surface-variant hover:bg-white/5 transition-colors cursor-pointer group ${activeSessionId === session.id ? "bg-sky-500/10 border border-sky-500/20" : ""}`,
+              className: `px-3 py-2.5 rounded-xl text-sm text-on-surface-variant hover:bg-slate-50 dark:hover:bg-white/5 transition-colors cursor-pointer group ${activeSessionId === session.id ? "bg-sky-500/10 border border-sky-500/20" : ""}`,
               children: [
                 /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
                   /* @__PURE__ */ jsx(MessageSquare, { size: 14, className: "text-on-surface-variant flex-shrink-0" }),
@@ -12435,7 +13463,7 @@ What would you like to learn about?`,
                 "button",
                 {
                   onClick: () => selectTopic(topic),
-                  className: "card rounded-2xl p-4 hover:bg-white/10 transition-all group text-left",
+                  className: "card rounded-2xl p-4 hover:bg-slate-100 dark:hover:bg-white/10 transition-all group text-left",
                   children: [
                     /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-2xl text-sky-400 group-hover:text-sky-300 mb-2 block", style: { fontVariationSettings: "'FILL' 0" }, children: TOPIC_ICONS[topic.id] || "category" }),
                     /* @__PURE__ */ jsx("span", { className: "text-sm font-bold text-on-surface block truncate", children: topic.name }),
@@ -12458,7 +13486,7 @@ What would you like to learn about?`,
                     if (topic) setSelectedTopic(topic);
                     handleSend(qt.label);
                   },
-                  className: "px-4 py-2 card rounded-full text-sm text-on-surface-variant dark:text-slate-400 hover:text-on-surface hover:bg-white/10 transition-colors flex items-center gap-1.5",
+                  className: "px-4 py-2 card rounded-full text-sm text-on-surface-variant dark:text-slate-400 hover:text-on-surface hover:bg-slate-100 dark:hover:bg-white/10 transition-colors flex items-center gap-1.5",
                   children: [
                     /* @__PURE__ */ jsx(BookOpen, { size: 14 }),
                     qt.label
@@ -12494,7 +13522,7 @@ What would you like to learn about?`,
           "button",
           {
             onClick: () => handleSend(st),
-            className: "px-3 py-1.5 text-xs font-bold rounded-full border border-outline/20 text-on-surface-variant hover:text-on-surface hover:bg-white/10 transition-colors flex items-center gap-1.5",
+            className: "px-3 py-1.5 text-xs font-bold rounded-full border border-outline/20 text-on-surface-variant hover:text-on-surface hover:bg-slate-100 dark:hover:bg-white/10 transition-colors flex items-center gap-1.5",
             children: [
               /* @__PURE__ */ jsx(ChevronRight, { size: 12 }),
               st
@@ -12571,8 +13599,8 @@ function CodeBlock({ content }) {
   const lines = content.replace(/^```\w*\n?/, "").replace(/\n?```$/, "");
   const langMatch = content.match(/^```(\w+)/);
   const lang = langMatch ? langMatch[1] : "";
-  return /* @__PURE__ */ jsxs("div", { className: "relative rounded-xl overflow-hidden border border-white/10 my-3", children: [
-    /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between px-4 py-2 bg-black/50 border-b border-white/10", children: [
+  return /* @__PURE__ */ jsxs("div", { className: "relative rounded-xl overflow-hidden border border-slate-200 dark:border-white/10 my-3", children: [
+    /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between px-4 py-2 bg-black/50 border-b border-slate-200 dark:border-white/10", children: [
       /* @__PURE__ */ jsx("span", { className: "text-xs text-sky-400 font-bold uppercase tracking-wide", children: lang || "code" }),
       /* @__PURE__ */ jsxs(
         "button",
@@ -12653,7 +13681,7 @@ function ResolutionCard({ result, onRelatedClick }) {
         "button",
         {
           onClick: () => toggleSection(section.key),
-          className: "w-full flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors",
+          className: "w-full flex items-center justify-between px-6 py-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors",
           children: [
             /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
               /* @__PURE__ */ jsx("span", { className: `material-symbols-outlined text-lg ${section.iconColor}`, style: { fontVariationSettings: "'FILL' 0" }, children: section.icon }),
@@ -12681,7 +13709,7 @@ function ResolutionCard({ result, onRelatedClick }) {
         "button",
         {
           onClick: () => onRelatedClick(topic),
-          className: "px-4 py-2 rounded-full border border-outline/20 text-sm text-on-surface-variant hover:text-on-surface hover:bg-white/10 transition-colors flex items-center gap-1.5",
+          className: "px-4 py-2 rounded-full border border-outline/20 text-sm text-on-surface-variant hover:text-on-surface hover:bg-slate-100 dark:hover:bg-white/10 transition-colors flex items-center gap-1.5",
           children: [
             /* @__PURE__ */ jsx(ChevronRight, { size: 14 }),
             topic
@@ -12791,7 +13819,7 @@ function AIDoubtSolver() {
           "button",
           {
             onClick: () => handleHistoryClick(item),
-            className: "w-full text-left card rounded-xl px-3 py-2.5 hover:bg-white/10 transition-colors group",
+            className: "w-full text-left card rounded-xl px-3 py-2.5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors group",
             children: [
               /* @__PURE__ */ jsx("div", { className: "text-xs font-medium text-on-surface truncate group-hover:text-sky-400 transition-colors", children: item.doubt }),
               /* @__PURE__ */ jsxs("div", { className: "text-xs text-on-surface-variant mt-0.5 flex items-center gap-1", children: [
@@ -12808,7 +13836,7 @@ function AIDoubtSolver() {
           "button",
           {
             onClick: () => setSelectedCategory((selectedCategory == null ? void 0 : selectedCategory.id) === cat.id ? null : cat),
-            className: `flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${(selectedCategory == null ? void 0 : selectedCategory.id) === cat.id ? `${cat.bg} ${cat.color} ring-1 ring-current/30` : "card text-on-surface-variant dark:text-slate-400 hover:bg-white/10"}`,
+            className: `flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${(selectedCategory == null ? void 0 : selectedCategory.id) === cat.id ? `${cat.bg} ${cat.color} ring-1 ring-current/30` : "card text-on-surface-variant dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10"}`,
             children: [
               /* @__PURE__ */ jsx("span", { className: "material-symbols-outlined text-lg", style: { fontVariationSettings: "'FILL' 0" }, children: cat.icon }),
               /* @__PURE__ */ jsx("span", { className: "truncate", children: cat.label })
@@ -12900,7 +13928,7 @@ function AIDoubtSolver() {
               "button",
               {
                 onClick: () => handleExampleClick(example),
-                className: "card rounded-2xl p-4 text-left hover:bg-white/10 transition-all group",
+                className: "card rounded-2xl p-4 text-left hover:bg-slate-100 dark:hover:bg-white/10 transition-all group",
                 children: /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-3", children: [
                   /* @__PURE__ */ jsx("span", { className: `material-symbols-outlined text-lg ${(cat == null ? void 0 : cat.color) || "text-sky-400"} flex-shrink-0 mt-0.5`, style: { fontVariationSettings: "'FILL' 0" }, children: (cat == null ? void 0 : cat.icon) || "help" }),
                   /* @__PURE__ */ jsxs("div", { children: [
@@ -12989,10 +14017,10 @@ function CourseCard({ course, onSelect, isEnrolled, progress }) {
         /* @__PURE__ */ jsxs("div", { className: "p-5 space-y-3", children: [
           /* @__PURE__ */ jsxs("div", { className: "flex items-start justify-between gap-2", children: [
             /* @__PURE__ */ jsx("h3", { className: "text-sm font-bold text-on-surface leading-tight line-clamp-2 group-hover:text-amber-600 transition-colors", children: course.title }),
-            /* @__PURE__ */ jsx("span", { className: `shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${DIFFICULTY_COLORS$2[course.difficulty] || ""}`, children: course.difficulty })
+            /* @__PURE__ */ jsx("span", { className: `shrink-0 text-xs font-bold px-2 py-0.5 rounded-full ${DIFFICULTY_COLORS$2[course.difficulty] || ""}`, children: course.difficulty })
           ] }),
           /* @__PURE__ */ jsx("p", { className: "text-xs text-on-surface-variant font-medium", children: course.instructor }),
-          /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 text-[11px] text-on-surface-variant", children: [
+          /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 text-xs text-on-surface-variant", children: [
             /* @__PURE__ */ jsxs("span", { className: "inline-flex items-center gap-1", children: [
               /* @__PURE__ */ jsx(Clock, { className: "w-3 h-3" }),
               course.duration_hrs,
@@ -13010,7 +14038,7 @@ function CourseCard({ course, onSelect, isEnrolled, progress }) {
           ] }),
           /* @__PURE__ */ jsx(StarRating, { rating: course.rating }),
           isEnrolled && /* @__PURE__ */ jsxs("div", { className: "pt-1", children: [
-            /* @__PURE__ */ jsx("div", { className: "flex items-center justify-between mb-1", children: /* @__PURE__ */ jsxs("span", { className: "text-[10px] font-bold text-amber-600", children: [
+            /* @__PURE__ */ jsx("div", { className: "flex items-center justify-between mb-1", children: /* @__PURE__ */ jsxs("span", { className: "text-xs font-bold text-amber-600", children: [
               progress,
               "% complete"
             ] }) }),
@@ -13034,7 +14062,7 @@ function ContinueLearningCard({ course, onSelect }) {
           /* @__PURE__ */ jsx("p", { className: "text-xs text-on-surface-variant mt-0.5", children: course.instructor }),
           /* @__PURE__ */ jsxs("div", { className: "mt-2", children: [
             /* @__PURE__ */ jsx(ProgressBar$1, { value: course.progress }),
-            /* @__PURE__ */ jsxs("span", { className: "text-[10px] font-semibold text-amber-600 mt-1 block", children: [
+            /* @__PURE__ */ jsxs("span", { className: "text-xs font-semibold text-amber-600 mt-1 block", children: [
               course.progress,
               "% complete"
             ] })
@@ -13055,7 +14083,7 @@ function CourseDetailPanel({ course, onClose, onEnroll, isEnrolled, completedLes
         /* @__PURE__ */ jsx("button", { onClick: onClose, className: "absolute top-4 right-4 p-2 rounded-full bg-black/20 hover:bg-black/40 text-white transition-colors", children: /* @__PURE__ */ jsx(X, { className: "w-5 h-5" }) }),
         /* @__PURE__ */ jsx("div", { className: "absolute inset-0 opacity-10", children: /* @__PURE__ */ jsx("div", { className: "absolute top-4 right-8 w-32 h-32 rounded-full border-2 border-white/30" }) }),
         /* @__PURE__ */ jsxs("div", { children: [
-          /* @__PURE__ */ jsx("span", { className: `text-[11px] font-bold px-3 py-1 rounded-full bg-white/20 text-white`, children: course.difficulty }),
+          /* @__PURE__ */ jsx("span", { className: `text-xs font-bold px-3 py-1 rounded-full bg-white/20 text-white`, children: course.difficulty }),
           /* @__PURE__ */ jsx("h2", { className: "text-2xl font-extrabold text-white mt-3 leading-tight", children: course.title }),
           /* @__PURE__ */ jsx("p", { className: "text-white/80 text-sm mt-1", children: course.instructor })
         ] })
@@ -13121,7 +14149,7 @@ function CourseDetailPanel({ course, onClose, onEnroll, isEnrolled, completedLes
                 children: [
                   /* @__PURE__ */ jsx("span", { className: `w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${done ? "bg-emerald-500 text-white" : "bg-surface-container/50 border border-outline/20 text-on-surface-variant"}`, children: done ? /* @__PURE__ */ jsx(CheckCircle, { className: "w-4 h-4" }) : i + 1 }),
                   /* @__PURE__ */ jsx("div", { className: "flex-1 min-w-0", children: /* @__PURE__ */ jsx("p", { className: `text-sm font-medium ${done ? "line-through text-on-surface-variant" : "text-on-surface"}`, children: lesson.title }) }),
-                  /* @__PURE__ */ jsx("span", { className: "text-[11px] text-on-surface-variant shrink-0", children: lesson.duration }),
+                  /* @__PURE__ */ jsx("span", { className: "text-xs text-on-surface-variant shrink-0", children: lesson.duration }),
                   isEnrolled && /* @__PURE__ */ jsx(Play, { className: `w-4 h-4 shrink-0 ${done ? "text-emerald-500" : "text-on-surface-variant"}` })
                 ]
               },
@@ -13431,7 +14459,7 @@ function PathCard({ path, onSelect }) {
         /* @__PURE__ */ jsxs("div", { className: "p-5 space-y-3", children: [
           /* @__PURE__ */ jsx("h3", { className: "text-base font-bold text-on-surface group-hover:text-amber-600 transition-colors", children: path.title }),
           /* @__PURE__ */ jsx("p", { className: "text-xs text-on-surface-variant leading-relaxed line-clamp-2", children: path.description }),
-          /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 text-[11px] text-on-surface-variant", children: [
+          /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 text-xs text-on-surface-variant", children: [
             /* @__PURE__ */ jsxs("span", { className: "inline-flex items-center gap-1", children: [
               /* @__PURE__ */ jsx(BookOpen, { className: "w-3 h-3" }),
               path.total_courses,
@@ -13449,15 +14477,15 @@ function PathCard({ path, onSelect }) {
             ] })
           ] }),
           /* @__PURE__ */ jsxs("div", { className: "flex flex-wrap gap-1.5", children: [
-            (path.skill_tags || []).slice(0, 4).map((tag, i) => /* @__PURE__ */ jsx("span", { className: "px-2 py-0.5 rounded-full bg-surface-container/50 border border-outline/10 text-[10px] font-semibold text-on-surface-variant", children: tag }, i)),
-            (path.skill_tags || []).length > 4 && /* @__PURE__ */ jsxs("span", { className: "px-2 py-0.5 text-[10px] font-semibold text-on-surface-variant", children: [
+            (path.skill_tags || []).slice(0, 4).map((tag, i) => /* @__PURE__ */ jsx("span", { className: "px-2 py-0.5 rounded-full bg-surface-container/50 border border-outline/10 text-xs font-semibold text-on-surface-variant", children: tag }, i)),
+            (path.skill_tags || []).length > 4 && /* @__PURE__ */ jsxs("span", { className: "px-2 py-0.5 text-xs font-semibold text-on-surface-variant", children: [
               "+",
               path.skill_tags.length - 4
             ] })
           ] }),
           path.progress > 0 && /* @__PURE__ */ jsxs("div", { className: "pt-1", children: [
             /* @__PURE__ */ jsx(ProgressBar, { value: path.progress }),
-            /* @__PURE__ */ jsxs("span", { className: "text-[10px] font-bold text-amber-600 mt-1 block", children: [
+            /* @__PURE__ */ jsxs("span", { className: "text-xs font-bold text-amber-600 mt-1 block", children: [
               path.progress,
               "% complete"
             ] })
@@ -13532,7 +14560,7 @@ function PathTimeline({ path, onClose }) {
                   /* @__PURE__ */ jsxs("div", { className: "flex-1 min-w-0", children: [
                     /* @__PURE__ */ jsx("h4", { className: `text-sm font-bold ${course.status === "locked" ? "text-slate-400 dark:text-slate-500" : "text-on-surface"}`, children: course.title }),
                     /* @__PURE__ */ jsx("p", { className: "text-xs text-on-surface-variant mt-0.5", children: course.instructor }),
-                    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 mt-2 text-[11px] text-on-surface-variant", children: [
+                    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 mt-2 text-xs text-on-surface-variant", children: [
                       /* @__PURE__ */ jsxs("span", { className: "inline-flex items-center gap-1", children: [
                         /* @__PURE__ */ jsx(Clock, { className: "w-3 h-3" }),
                         course.duration_hrs,
@@ -13549,7 +14577,7 @@ function PathTimeline({ path, onClose }) {
                 ] }),
                 course.status !== "locked" && course.progress > 0 && course.progress < 100 && /* @__PURE__ */ jsxs("div", { className: "mt-3", children: [
                   /* @__PURE__ */ jsx(ProgressBar, { value: course.progress }),
-                  /* @__PURE__ */ jsxs("span", { className: "text-[10px] font-bold text-amber-600 mt-1 block", children: [
+                  /* @__PURE__ */ jsxs("span", { className: "text-xs font-bold text-amber-600 mt-1 block", children: [
                     course.progress,
                     "% complete"
                   ] })
@@ -13581,17 +14609,17 @@ function WeeklyPlanSidebar({ streak, activeCourses }) {
       /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-6", children: [
         /* @__PURE__ */ jsxs("div", { className: "text-center", children: [
           /* @__PURE__ */ jsx("p", { className: "text-3xl font-extrabold text-amber-500", children: streak.current }),
-          /* @__PURE__ */ jsx("p", { className: "text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide", children: "Current" })
+          /* @__PURE__ */ jsx("p", { className: "text-xs font-semibold text-on-surface-variant uppercase tracking-wide", children: "Current" })
         ] }),
         /* @__PURE__ */ jsx("div", { className: "w-px h-10 bg-outline/20" }),
         /* @__PURE__ */ jsxs("div", { className: "text-center", children: [
           /* @__PURE__ */ jsx("p", { className: "text-3xl font-extrabold text-on-surface", children: streak.longest }),
-          /* @__PURE__ */ jsx("p", { className: "text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide", children: "Best" })
+          /* @__PURE__ */ jsx("p", { className: "text-xs font-semibold text-on-surface-variant uppercase tracking-wide", children: "Best" })
         ] })
       ] }),
       /* @__PURE__ */ jsx("div", { className: "flex items-center gap-2 mt-4", children: WEEKDAY_LABELS.map((label, i) => /* @__PURE__ */ jsxs("div", { className: "flex-1 text-center", children: [
-        /* @__PURE__ */ jsx("div", { className: `w-6 h-6 mx-auto rounded-full flex items-center justify-center text-[9px] font-bold ${i < dayOfWeek ? "bg-emerald-500 text-white" : i === dayOfWeek ? "bg-amber-500 text-white ring-2 ring-amber-300" : "bg-slate-200 dark:bg-slate-700 text-on-surface-variant"}`, children: i < dayOfWeek ? /* @__PURE__ */ jsx(Check, { className: "w-3 h-3" }) : label[0] }),
-        /* @__PURE__ */ jsx("p", { className: `text-[9px] mt-1 ${i === dayOfWeek ? "font-bold text-amber-600" : "text-on-surface-variant"}`, children: label })
+        /* @__PURE__ */ jsx("div", { className: `w-6 h-6 mx-auto rounded-full flex items-center justify-center text-[10px] font-bold ${i < dayOfWeek ? "bg-emerald-500 text-white" : i === dayOfWeek ? "bg-amber-500 text-white ring-2 ring-amber-300" : "bg-slate-200 dark:bg-slate-700 text-on-surface-variant"}`, children: i < dayOfWeek ? /* @__PURE__ */ jsx(Check, { className: "w-3 h-3" }) : label[0] }),
+        /* @__PURE__ */ jsx("p", { className: `text-[10px] mt-1 ${i === dayOfWeek ? "font-bold text-amber-600" : "text-on-surface-variant"}`, children: label })
       ] }, label)) })
     ] }),
     /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-5", children: [
@@ -13667,7 +14695,7 @@ function CreateCustomPathModal({ allCourses, onClose, onSave }) {
               /* @__PURE__ */ jsx("div", { className: `w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${selectedIds.has(course.id) ? "bg-amber-500 text-white" : "bg-surface-container/50 border border-outline/20"}`, children: selectedIds.has(course.id) && /* @__PURE__ */ jsx(Check, { className: "w-3.5 h-3.5" }) }),
               /* @__PURE__ */ jsxs("div", { className: "flex-1 min-w-0", children: [
                 /* @__PURE__ */ jsx("p", { className: "text-sm font-semibold text-on-surface truncate", children: course.title }),
-                /* @__PURE__ */ jsxs("p", { className: "text-[11px] text-on-surface-variant", children: [
+                /* @__PURE__ */ jsxs("p", { className: "text-xs text-on-surface-variant", children: [
                   course.category,
                   " - ",
                   course.difficulty,
@@ -13802,12 +14830,12 @@ function LearningPaths() {
       /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-5 text-center", children: [
         /* @__PURE__ */ jsx(Trophy, { className: "w-6 h-6 text-amber-500 mx-auto mb-2" }),
         /* @__PURE__ */ jsx("p", { className: "text-2xl font-extrabold text-on-surface", children: stats.completedCount }),
-        /* @__PURE__ */ jsx("p", { className: "text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide", children: "Completed" })
+        /* @__PURE__ */ jsx("p", { className: "text-xs font-semibold text-on-surface-variant uppercase tracking-wide", children: "Completed" })
       ] }),
       /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-5 text-center", children: [
         /* @__PURE__ */ jsx(BookOpen, { className: "w-6 h-6 text-blue-500 mx-auto mb-2" }),
         /* @__PURE__ */ jsx("p", { className: "text-2xl font-extrabold text-on-surface", children: stats.enrollmentCount }),
-        /* @__PURE__ */ jsx("p", { className: "text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide", children: "Enrolled" })
+        /* @__PURE__ */ jsx("p", { className: "text-xs font-semibold text-on-surface-variant uppercase tracking-wide", children: "Enrolled" })
       ] }),
       /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-5 text-center", children: [
         /* @__PURE__ */ jsx(Clock, { className: "w-6 h-6 text-emerald-500 mx-auto mb-2" }),
@@ -13815,12 +14843,12 @@ function LearningPaths() {
           Math.round(stats.totalMinutesLearned / 60),
           "h"
         ] }),
-        /* @__PURE__ */ jsx("p", { className: "text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide", children: "Hours Learned" })
+        /* @__PURE__ */ jsx("p", { className: "text-xs font-semibold text-on-surface-variant uppercase tracking-wide", children: "Hours Learned" })
       ] }),
       /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-5 text-center", children: [
         /* @__PURE__ */ jsx(Flame, { className: "w-6 h-6 text-orange-500 mx-auto mb-2" }),
         /* @__PURE__ */ jsx("p", { className: "text-2xl font-extrabold text-on-surface", children: streak.current }),
-        /* @__PURE__ */ jsx("p", { className: "text-[11px] font-semibold text-on-surface-variant uppercase tracking-wide", children: "Day Streak" })
+        /* @__PURE__ */ jsx("p", { className: "text-xs font-semibold text-on-surface-variant uppercase tracking-wide", children: "Day Streak" })
       ] })
     ] }),
     /* @__PURE__ */ jsxs("div", { className: "flex flex-col lg:flex-row gap-8", children: [
@@ -15781,7 +16809,7 @@ function Community() {
               ] }),
               /* @__PURE__ */ jsx("span", { children: timeAgo(thread.createdAt) })
             ] }),
-            /* @__PURE__ */ jsx("div", { className: "flex gap-1.5 mt-2", children: (_a2 = thread.tags) == null ? void 0 : _a2.slice(0, 3).map((tag) => /* @__PURE__ */ jsxs("span", { className: "px-2 py-0.5 bg-surface-container/50 border border-outline/10 rounded-lg text-[10px] font-semibold text-on-surface-variant", children: [
+            /* @__PURE__ */ jsx("div", { className: "flex gap-1.5 mt-2", children: (_a2 = thread.tags) == null ? void 0 : _a2.slice(0, 3).map((tag) => /* @__PURE__ */ jsxs("span", { className: "px-2 py-0.5 bg-surface-container/50 border border-outline/10 rounded-lg text-xs font-semibold text-on-surface-variant", children: [
               "#",
               tag
             ] }, tag)) })
@@ -15831,7 +16859,7 @@ function Community() {
       /* @__PURE__ */ jsx("div", { className: "absolute top-0 left-0 w-full h-1 opacity-0 group-hover:opacity-100 transition-opacity", style: { background: `linear-gradient(90deg, ${event.color}, ${event.color}80)` } }),
       /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-4 mb-4", children: [
         /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center justify-center w-16 h-16 rounded-2xl border-2 border-outline/20 bg-surface-container/50 shrink-0", children: [
-          /* @__PURE__ */ jsx("span", { className: "text-[10px] font-bold text-on-surface-variant tracking-wider", children: month }),
+          /* @__PURE__ */ jsx("span", { className: "text-xs font-bold text-on-surface-variant tracking-wider", children: month }),
           /* @__PURE__ */ jsx("span", { className: "text-2xl font-extrabold text-on-surface leading-none", children: day })
         ] }),
         /* @__PURE__ */ jsxs("div", { className: "flex-1 min-w-0", children: [
@@ -20005,12 +21033,12 @@ function getActivityColor(type) {
   };
   return map[type] || "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
 }
-function KPICard({ title, value, change, trend, icon: Icon, color }) {
+function KPICard({ title, value, change, trend, icon: Icon2, color }) {
   const isPositive = trend === "up";
   return /* @__PURE__ */ jsxs("div", { className: "card rounded-2xl p-6 flex flex-col gap-2", children: [
     /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
       /* @__PURE__ */ jsx("span", { className: "text-on-surface-variant text-sm font-medium", children: title }),
-      /* @__PURE__ */ jsx("div", { className: `w-10 h-10 rounded-xl ${color} flex items-center justify-center`, children: /* @__PURE__ */ jsx(Icon, { className: "w-5 h-5 text-white" }) })
+      /* @__PURE__ */ jsx("div", { className: `w-10 h-10 rounded-xl ${color} flex items-center justify-center`, children: /* @__PURE__ */ jsx(Icon2, { className: "w-5 h-5 text-white" }) })
     ] }),
     /* @__PURE__ */ jsx("div", { className: "font-headline text-3xl text-on-surface", children: value }),
     /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-1.5 text-sm", children: [
@@ -21411,7 +22439,7 @@ function RecruiterPortal() {
                       /* @__PURE__ */ jsx("span", { className: "text-sm text-on-surface font-medium truncate", children: student.name })
                     ] }),
                     /* @__PURE__ */ jsx("p", { className: "text-xs text-on-surface-variant pl-5", children: student.department }),
-                    /* @__PURE__ */ jsx("div", { className: "flex flex-wrap gap-1 mt-1.5 pl-5", children: student.skills.slice(0, 3).map((s, i) => /* @__PURE__ */ jsx("span", { className: "px-1.5 py-0.5 rounded text-[10px] bg-white/80 dark:bg-gray-800/80 text-on-surface-variant", children: s }, i)) })
+                    /* @__PURE__ */ jsx("div", { className: "flex flex-wrap gap-1 mt-1.5 pl-5", children: student.skills.slice(0, 3).map((s, i) => /* @__PURE__ */ jsx("span", { className: "px-1.5 py-0.5 rounded text-xs bg-white/80 dark:bg-gray-800/80 text-on-surface-variant", children: s }, i)) })
                   ]
                 },
                 studentId
@@ -21641,6 +22669,79 @@ function ComingSoon({
     )
   ] }) });
 }
+function AIAssistantDemo() {
+  return /* @__PURE__ */ jsxs("div", { className: "fixed inset-0 bg-[#020617] flex items-center justify-center p-3 sm:p-4 md:p-6 overflow-hidden", children: [
+    /* @__PURE__ */ jsxs("div", { className: "absolute inset-0 z-0 overflow-hidden opacity-90 transition-opacity duration-1000", children: [
+      /* @__PURE__ */ jsx(
+        "div",
+        {
+          className: "absolute inset-[-50%] animate-[spin_10s_linear_infinite]",
+          style: {
+            background: "conic-gradient(from 0deg, transparent 0%, transparent 25%, #0ea5e9 35%, #3b82f6 45%, #6366f1 55%, transparent 65%, transparent 100%)",
+            filter: "blur(50px)",
+            opacity: 0.8
+          }
+        }
+      ),
+      /* @__PURE__ */ jsx(
+        "div",
+        {
+          className: "absolute inset-[-50%] animate-[spin_15s_linear_infinite_reverse]",
+          style: {
+            background: "conic-gradient(from 180deg, transparent 0%, transparent 25%, #10b981 35%, #0ea5e9 45%, #8b5cf6 55%, transparent 65%, transparent 100%)",
+            filter: "blur(60px)",
+            opacity: 0.6
+          }
+        }
+      ),
+      /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-blue-500/10 blur-[120px] animate-pulse-slow" })
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "relative z-10 w-full h-full bg-[#020617]/85 backdrop-blur-3xl rounded-[2.5rem] border border-blue-400/20 flex flex-col shadow-[0_0_80px_rgba(14,165,233,0.15)] overflow-hidden", children: [
+      /* @__PURE__ */ jsx("div", { className: "absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400/80 to-transparent" }),
+      /* @__PURE__ */ jsx("div", { className: "absolute bottom-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-blue-600/40 to-transparent" }),
+      /* @__PURE__ */ jsx(
+        "div",
+        {
+          className: "absolute inset-0 opacity-[0.03] pointer-events-none",
+          style: {
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h40v40H0V0zm20 20h20v20H20V20zM0 20h20v20H0V20z' fill='%23ffffff' fill-opacity='1' fill-rule='evenodd'/%3E%3C/svg%3E")`,
+            backgroundSize: "30px 30px"
+          }
+        }
+      ),
+      /* @__PURE__ */ jsxs("div", { className: "flex-1 flex flex-col items-center justify-center p-8 z-20", children: [
+        /* @__PURE__ */ jsxs("div", { className: "relative mb-10 group cursor-pointer", children: [
+          /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-600 rounded-2xl blur-xl opacity-40 group-hover:opacity-70 transition-opacity duration-500 animate-[pulse_3s_ease-in-out_infinite]" }),
+          /* @__PURE__ */ jsx("div", { className: "relative flex items-center justify-center w-20 h-20 rounded-2xl bg-white/[0.05] border border-white/10 shadow-2xl backdrop-blur-xl", children: /* @__PURE__ */ jsxs(
+            "svg",
+            {
+              className: "w-10 h-10 text-cyan-300",
+              viewBox: "0 0 24 24",
+              fill: "none",
+              stroke: "currentColor",
+              strokeWidth: "1.5",
+              strokeLinecap: "round",
+              strokeLinejoin: "round",
+              children: [
+                /* @__PURE__ */ jsx("path", { d: "M12 2a10 10 0 1 0 10 10H12V2Z" }),
+                /* @__PURE__ */ jsx("path", { d: "M12 12 2.1 7.1" }),
+                /* @__PURE__ */ jsx("path", { d: "m12 12 7.1 7.1" }),
+                /* @__PURE__ */ jsx("path", { d: "m12 12-7.1 7.1" })
+              ]
+            }
+          ) })
+        ] }),
+        /* @__PURE__ */ jsx("h1", { className: "text-5xl sm:text-7xl font-extrabold mb-6 tracking-tight font-headline text-center", children: /* @__PURE__ */ jsx("span", { className: "bg-gradient-to-br from-white via-cyan-100 to-blue-300 text-transparent bg-clip-text drop-shadow-sm", children: "JobTune AI" }) }),
+        /* @__PURE__ */ jsxs("p", { className: "text-xl sm:text-2xl text-blue-100/70 max-w-2xl text-center font-medium leading-relaxed", children: [
+          "Your intelligent career co-pilot. ",
+          /* @__PURE__ */ jsx("br", { className: "hidden sm:block" }),
+          " Let's optimize your path to success."
+        ] }),
+        /* @__PURE__ */ jsx("div", { className: "mt-12 flex gap-4", children: /* @__PURE__ */ jsx("button", { className: "px-8 py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-lg shadow-[0_0_30px_rgba(14,165,233,0.3)] hover:shadow-[0_0_40px_rgba(14,165,233,0.5)] hover:-translate-y-1 transition-all duration-300", children: "Start Session" }) })
+      ] })
+    ] })
+  ] });
+}
 function SessionBlocked() {
   const { sessionBlockedMessage, clearSessionBlocked, logout } = useAuthStore();
   const handleSignInAgain = async () => {
@@ -21780,7 +22881,8 @@ function App() {
       /* @__PURE__ */ jsx(Route, { path: "recruiter-portal", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/recruiter-portal", children: /* @__PURE__ */ jsx(RecruiterPortal, {}) }) }),
       /* @__PURE__ */ jsx(Route, { path: "career-readiness", element: /* @__PURE__ */ jsx(ProtectedToolRoute, { toolPath: "/career-readiness", children: /* @__PURE__ */ jsx(ComingSoon, { toolName: "Career Readiness Dashboard", description: "A unified career score with progress tracking and improvement recommendations across your whole journey. Launching soon." }) }) })
     ] }),
-    /* @__PURE__ */ jsx(Route, { path: "/login", element: /* @__PURE__ */ jsx(Login, {}) })
+    /* @__PURE__ */ jsx(Route, { path: "/login", element: /* @__PURE__ */ jsx(Login, {}) }),
+    /* @__PURE__ */ jsx(Route, { path: "/ai-assistant-demo", element: /* @__PURE__ */ jsx(AIAssistantDemo, {}) })
   ] }) });
 }
 const SSR_PATHS = /* @__PURE__ */ new Set(["/", "/blog", "/login"]);
