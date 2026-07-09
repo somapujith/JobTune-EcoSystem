@@ -58,6 +58,7 @@ import UniversityDashboard from './pages/UniversityDashboard';
 import FacultyPanel from './pages/FacultyPanel';
 import RecruiterPortal from './pages/RecruiterPortal';
 import ComingSoon from './pages/ComingSoon';
+import Survey from './pages/Survey';
 import useAuthStore from './store/useAuthStore';
 import useSubscriptionStore from './store/useSubscriptionStore';
 import SessionBlocked from './components/SessionBlocked';
@@ -205,6 +206,7 @@ function App() {
           <Route path="career-readiness" element={<ProtectedToolRoute toolPath="/career-readiness"><ComingSoon toolName="Career Readiness Dashboard" description="A unified career score with progress tracking and improvement recommendations across your whole journey. Launching soon." /></ProtectedToolRoute>} />
         </Route>
         <Route path="/login" element={<Login />} />
+        <Route path="/survey" element={<Survey />} />
       </Routes>
     </ErrorBoundary>
   );
