@@ -234,7 +234,32 @@ async function callLMStudio({ systemPrompt, userPrompt, maxTokens = 1024, temper
 
 // ── Main dispatcher ──
 
-async function callAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature = 0.4, model, structuredJson = false, cache = true }) {
+// In-flight dedup: identical cacheable calls that arrive while a request is
+// already running share that request's promise instead of firing duplicate
+// provider calls. Entries are removed as soon as the call settles, so only
+// truly concurrent calls dedupe (completed results are served by the LRU cache).
+const inFlight = new Map(); // cache key -> Promise<result>
+
+async function callAI(options) {
+  const { systemPrompt, userPrompt, maxTokens = 1024, temperature = 0.4, cache = true } = options;
+
+  // Single-flight only applies to cacheable calls — cache:false means the
+  // caller wants a fresh response every time.
+  if (!cache) {
+    return executeAI(options);
+  }
+
+  // Same key composition as aiCache (systemPrompt + userPrompt + maxTokens + temperature)
+  const flightKey = `${systemPrompt}|${userPrompt}|${maxTokens}|${temperature}`;
+  const existing = inFlight.get(flightKey);
+  if (existing) return existing;
+
+  const flight = executeAI(options).finally(() => inFlight.delete(flightKey));
+  inFlight.set(flightKey, flight);
+  return flight;
+}
+
+async function executeAI({ systemPrompt, userPrompt, maxTokens = 1024, temperature = 0.4, model, structuredJson = false, cache = true }) {
   const isMock = process.env.MOCK_AI === 'true';
   if (isMock) {
     await new Promise(resolve => setTimeout(resolve, 800));

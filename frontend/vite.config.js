@@ -4,7 +4,7 @@ import path from 'path'
 
 const apiTarget = process.env.VITE_API_PROXY || 'http://localhost:3000'
 
-export default defineConfig({
+export default defineConfig(({ isSsrBuild }) => ({
   plugins: [react()],
   resolve: {
     alias: {
@@ -14,6 +14,21 @@ export default defineConfig({
   build: {
     outDir: 'dist/client',
     emptyOutDir: true,
+    // manualChunks conflicts with the SSR build's inlineDynamicImports,
+    // so vendor chunking applies to the client bundle only.
+    ...(isSsrBuild
+      ? {}
+      : {
+          rollupOptions: {
+            output: {
+              manualChunks: {
+                'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+                'vendor-charts': ['recharts'],
+                'vendor-icons': ['lucide-react'],
+              },
+            },
+          },
+        }),
   },
   ssr: {
     noExternal: ['react-router-dom'],
@@ -26,4 +41,4 @@ export default defineConfig({
       },
     },
   },
-})
+}))

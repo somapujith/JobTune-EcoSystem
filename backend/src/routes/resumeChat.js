@@ -14,17 +14,25 @@ async function embedAndStoreResume(userId, resumeId, resumeText) {
     // Chunk the resume text
     const chunks = chunkText(resumeText, 500);
 
-    // Embed each chunk
-    for (let i = 0; i < chunks.length; i++) {
-      const chunk = chunks[i];
-      const embedding = await embedText(chunk);
+    // Embed all chunks in parallel instead of one await per chunk
+    const embeddings = await Promise.all(chunks.map(chunk => embedText(chunk)));
 
-      if (embedding) {
-        await pool.query(
-          'INSERT INTO resume_embeddings (user_id, resume_id, chunk_index, chunk_text, embedding) VALUES ($1, $2, $3, $4, $5)',
-          [userId, resumeId, i, chunk, JSON.stringify(embedding)]
-        );
-      }
+    // Store every successfully embedded chunk in a single multi-row insert
+    const placeholders = [];
+    const params = [];
+    chunks.forEach((chunk, i) => {
+      const embedding = embeddings[i];
+      if (!embedding) return;
+      const base = params.length;
+      placeholders.push(`($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5})`);
+      params.push(userId, resumeId, i, chunk, JSON.stringify(embedding));
+    });
+
+    if (placeholders.length > 0) {
+      await pool.query(
+        `INSERT INTO resume_embeddings (user_id, resume_id, chunk_index, chunk_text, embedding) VALUES ${placeholders.join(', ')}`,
+        params
+      );
     }
 
   } catch (err) {

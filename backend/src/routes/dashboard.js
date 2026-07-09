@@ -8,56 +8,85 @@ router.get('/overview', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // 1. Fetch resume scores (history + latest)
-    const resumes = await pool.query(
-      'SELECT overall_score, created_at FROM resumes WHERE user_id = $1 ORDER BY created_at DESC LIMIT 10',
-      [userId]
-    );
+    // Queries 1-6 are independent, so they run concurrently via Promise.all.
+    // pool.query is still invoked synchronously in array order (tests rely on
+    // mock call ordering); only the awaits overlap. Queries against tables
+    // that may not exist swallow their own errors so a missing table can't
+    // sink the whole dashboard, while resumes/mock_interviews failures still
+    // propagate to the outer catch (500).
+    const [resumes, interviews, jobsResult, skillsResult, streakResult, activityStats] = await Promise.all([
+      // 1. Resume scores (history + latest)
+      pool.query(
+        'SELECT overall_score, created_at FROM resumes WHERE user_id = $1 ORDER BY created_at DESC LIMIT 10',
+        [userId]
+      ),
+      // 2. Mock interview data
+      pool.query(
+        'SELECT score FROM mock_interviews WHERE user_id = $1 ORDER BY created_at DESC',
+        [userId]
+      ),
+      // 3. Job applications (table may not exist)
+      pool.query(
+        'SELECT status FROM job_applications WHERE user_id = $1',
+        [userId]
+      ).catch(err => {
+        console.warn('Job applications table not found or error:', err.message);
+        return null;
+      }),
+      // 4. Latest skill assessment (table may not exist)
+      pool.query(
+        'SELECT * FROM skill_assessments WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
+        [userId]
+      ).catch(err => {
+        console.warn('Skill assessments score not available:', err.message);
+        return null;
+      }),
+      // 7. Streak data (learning_streaks table may not exist)
+      pool.query(
+        'SELECT current, longest, daily_goal FROM learning_streaks WHERE user_id = $1',
+        [userId]
+      ).catch(() => null),
+      // 8. Activity stats (daily_activity table may not exist)
+      pool.query(
+        `SELECT COUNT(DISTINCT activity_date) AS days_active,
+                COUNT(DISTINCT tool_name) AS tools_used
+         FROM daily_activity WHERE user_id = $1`,
+        [userId]
+      ).catch(() => null)
+    ]);
+
+    // 1. Resume scores (history + latest)
     const resumeScores = resumes.rows.map(r => r.overall_score);
     const latestResumeScore = resumeScores[0] || 0;
 
-    // 2. Fetch mock interview data
-    const interviews = await pool.query(
-      'SELECT score FROM mock_interviews WHERE user_id = $1 ORDER BY created_at DESC',
-      [userId]
-    );
+    // 2. Mock interview data
     const avgInterviewScore = interviews.rows.length > 0
       ? Math.round(interviews.rows.reduce((sum, i) => sum + (i.score || 0), 0) / interviews.rows.length)
       : 0;
 
-    // 3. Fetch job applications (assumes job_applications table exists)
+    // 3. Job applications
     let jobStats = { total: 0, interviews: 0, offers: 0, rejected: 0, replyRate: 0 };
-    try {
-      const jobs = await pool.query(
-        'SELECT status FROM job_applications WHERE user_id = $1',
-        [userId]
-      );
-      jobStats.total = jobs.rows.length;
-      jobStats.interviews = jobs.rows.filter(j => j.status === 'interview' || j.status === 'interviewing').length;
-      jobStats.offers = jobs.rows.filter(j => j.status === 'offer').length;
-      jobStats.rejected = jobs.rows.filter(j => j.status === 'rejected').length;
+    if (jobsResult) {
+      jobStats.total = jobsResult.rows.length;
+      jobStats.interviews = jobsResult.rows.filter(j => j.status === 'interview' || j.status === 'interviewing').length;
+      jobStats.offers = jobsResult.rows.filter(j => j.status === 'offer').length;
+      jobStats.rejected = jobsResult.rows.filter(j => j.status === 'rejected').length;
       jobStats.replyRate = jobStats.total > 0
         ? Math.round(((jobStats.interviews + jobStats.offers) / jobStats.total) * 100)
         : 0;
-    } catch (err) {
-      console.warn('Job applications table not found or error:', err.message);
     }
 
     // 4. Skill assessment score (if available)
     let skillScore = 0;
     try {
-      const skills = await pool.query(
-        'SELECT * FROM skill_assessments WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
-        [userId]
-      );
-      if (skills.rows.length > 0) {
+      if (skillsResult && skillsResult.rows.length > 0) {
         // Try to extract score from available columns
-        if (skills.rows[0].score) {
-          skillScore = skills.rows[0].score;
-        } else if (skills.rows[0].scores) {
-          const scoresData = typeof skills.rows[0].scores === 'string'
-            ? JSON.parse(skills.rows[0].scores)
-            : skills.rows[0].scores;
+        if (skillsResult.rows[0].score) {
+          skillScore = skillsResult.rows[0].score;
+        } else if (skillsResult.rows[0].scores) {
+          const scoresData = typeof skillsResult.rows[0].scores === 'string'
+            ? JSON.parse(skillsResult.rows[0].scores)
+            : skillsResult.rows[0].scores;
           skillScore = Math.round(Object.values(scoresData).reduce((a, b) => a + b, 0) / Object.keys(scoresData).length);
         } else {
           // Default to 65 if we have skills assessment but no explicit score
@@ -97,38 +126,20 @@ router.get('/overview', authenticateToken, async (req, res) => {
 
     // 7. Streak data from learning_streaks
     let streak = { current: 0, longest: 0, dailyGoal: 30 };
-    try {
-      const streakResult = await pool.query(
-        'SELECT current, longest, daily_goal FROM learning_streaks WHERE user_id = $1',
-        [userId]
-      );
-      if (streakResult.rows.length > 0) {
-        streak = {
-          current: streakResult.rows[0].current || 0,
-          longest: streakResult.rows[0].longest || 0,
-          dailyGoal: streakResult.rows[0].daily_goal || 30
-        };
-      }
-    } catch (err) {
-      // learning_streaks table may not exist
+    if (streakResult && streakResult.rows.length > 0) {
+      streak = {
+        current: streakResult.rows[0].current || 0,
+        longest: streakResult.rows[0].longest || 0,
+        dailyGoal: streakResult.rows[0].daily_goal || 30
+      };
     }
 
     // 8. Activity stats from daily_activity
     let daysActive = 0;
     let toolsUsed = 0;
-    try {
-      const activityStats = await pool.query(
-        `SELECT COUNT(DISTINCT activity_date) AS days_active,
-                COUNT(DISTINCT tool_name) AS tools_used
-         FROM daily_activity WHERE user_id = $1`,
-        [userId]
-      );
-      if (activityStats.rows.length > 0) {
-        daysActive = parseInt(activityStats.rows[0].days_active) || 0;
-        toolsUsed = parseInt(activityStats.rows[0].tools_used) || 0;
-      }
-    } catch (err) {
-      // daily_activity table may not exist
+    if (activityStats && activityStats.rows.length > 0) {
+      daysActive = parseInt(activityStats.rows[0].days_active) || 0;
+      toolsUsed = parseInt(activityStats.rows[0].tools_used) || 0;
     }
 
     // 9. Profile completion percentage

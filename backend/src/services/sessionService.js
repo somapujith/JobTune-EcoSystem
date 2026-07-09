@@ -6,6 +6,18 @@ const { pool } = require('../config/database');
 const ACCESS_TOKEN_TTL = process.env.ACCESS_TOKEN_TTL || '15m';
 const REFRESH_TOKEN_DAYS = Math.min(Number(process.env.REFRESH_TOKEN_DAYS || 7), 30);
 
+// touchSession runs on every authenticated request, but last_active_at only
+// feeds "last active" display — 60s granularity is plenty, so UPDATEs within
+// the window are skipped.
+const TOUCH_THROTTLE_MS = 60 * 1000;
+const lastTouchedAt = new Map(); // sessionId -> lastTouchedMs
+
+// isSessionActive runs a SELECT on every authenticated request. Only positive
+// results are cached (short TTL); negatives are never cached, so revoke /
+// supersede takes effect immediately when uncached and within 10s worst case.
+const ACTIVE_SESSION_TTL_MS = 10 * 1000;
+const activeSessionCache = new Map(); // sessionId -> { active: true, expires }
+
 function hashToken(token) {
   return crypto.createHash('sha256').update(token).digest('hex');
 }
@@ -124,6 +136,10 @@ class SessionService {
 
   async touchSession(sessionId) {
     if (!sessionId) return;
+    const now = Date.now();
+    const lastTouched = lastTouchedAt.get(sessionId);
+    if (lastTouched && now - lastTouched < TOUCH_THROTTLE_MS) return;
+    lastTouchedAt.set(sessionId, now);
     await pool.query(
       'UPDATE user_sessions SET last_active_at = CURRENT_TIMESTAMP WHERE id = $1 AND revoked_at IS NULL',
       [sessionId]
@@ -132,12 +148,20 @@ class SessionService {
 
   async isSessionActive(sessionId) {
     if (!sessionId || !Number.isInteger(Number(sessionId))) return false;
+    const cached = activeSessionCache.get(sessionId);
+    if (cached && cached.expires > Date.now()) return true;
     const result = await pool.query(
       `SELECT id FROM user_sessions
        WHERE id = $1 AND revoked_at IS NULL AND expires_at > CURRENT_TIMESTAMP`,
       [sessionId]
     );
-    return result.rows.length > 0;
+    const active = result.rows.length > 0;
+    if (active) {
+      activeSessionCache.set(sessionId, { active: true, expires: Date.now() + ACTIVE_SESSION_TTL_MS });
+    } else {
+      activeSessionCache.delete(sessionId);
+    }
+    return active;
   }
 
   async refreshSession(refreshToken) {
@@ -203,6 +227,13 @@ class SessionService {
       [userId]
     );
     return result.rows;
+  }
+
+  // Test hook: the throttle/active caches are process-lifetime by design, so
+  // unit tests need a reset.
+  __clearSessionCaches() {
+    lastTouchedAt.clear();
+    activeSessionCache.clear();
   }
 }
 

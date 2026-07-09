@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown, Moon, Sun, Crown } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
@@ -38,9 +38,23 @@ const PREP_ITEMS_UNLOCKED = [
   { label: 'Learn & Build', path: '/preparation/learn-and-build', desc: 'Targeted Portfolio Projects' },
 ];
 
+const PRIMARY_NAV_LINKS = [
+  { label: 'Dashboard', path: '/dashboard', exact: true },
+  { label: 'Resume Forge', path: '/resume', prefix: true },
+  { label: 'Blog', path: '/blog', exact: true },
+];
+
+const MOBILE_PRIMARY_LINKS = [
+  { label: 'Dashboard', path: '/dashboard' },
+  { label: 'Resume Forge', path: '/resume' },
+  { label: 'Blog', path: '/blog' },
+];
+
 const Navbar = () => {
-  const { user, logout, isAuthenticated } = useAuthStore();
-  const { userPlan } = useSubscriptionStore();
+  const user = useAuthStore(s => s.user);
+  const logout = useAuthStore(s => s.logout);
+  const isAuthenticated = useAuthStore(s => s.isAuthenticated);
+  const userPlan = useSubscriptionStore(s => s.userPlan);
   const [isDark, setIsDark] = useDarkMode();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -59,22 +73,23 @@ const Navbar = () => {
         .then(({ data }) => { if (data?.data?.prepOnboardingDone) setPrepUnlocked(true); })
         .catch(() => {});
     };
+    const handleReset = () => setPrepUnlocked(false);
     recheck();
     window.addEventListener('prep-onboarding-complete', recheck);
-    window.addEventListener('prep-onboarding-reset', () => setPrepUnlocked(false));
+    window.addEventListener('prep-onboarding-reset', handleReset);
     return () => {
       window.removeEventListener('prep-onboarding-complete', recheck);
-      window.removeEventListener('prep-onboarding-reset', () => setPrepUnlocked(false));
+      window.removeEventListener('prep-onboarding-reset', handleReset);
     };
   }, [isAuthenticated]);
 
-  const NAV_GROUPS = [
+  const NAV_GROUPS = useMemo(() => [
     ...BASE_NAV_GROUPS,
     {
       label: 'Preparation',
       items: prepUnlocked ? PREP_ITEMS_UNLOCKED : PREP_ITEM_LOCKED,
     },
-  ];
+  ], [prepUnlocked]);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -109,11 +124,7 @@ const Navbar = () => {
         </Link>
 
         <nav className="hidden lg:flex items-center gap-1 flex-1 justify-center min-w-0" ref={dropdownRef}>
-          {[
-            { label: 'Dashboard', path: '/dashboard', exact: true },
-            { label: 'Resume Forge', path: '/resume', prefix: true },
-            { label: 'Blog', path: '/blog', exact: true },
-          ].map(link => {
+          {PRIMARY_NAV_LINKS.map(link => {
             const isActive = link.exact
               ? location.pathname === link.path
               : location.pathname.startsWith(link.path);
@@ -232,11 +243,7 @@ const Navbar = () => {
       {mobileOpen && (
         <div className="lg:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shadow-lg max-h-[80vh] overflow-y-auto animate-fade-in">
           <nav className="flex flex-col px-4 py-3 gap-0.5 w-full">
-            {[
-              { label: 'Dashboard', path: '/dashboard' },
-              { label: 'Resume Forge', path: '/resume' },
-              { label: 'Blog', path: '/blog' },
-            ].map(link => (
+            {MOBILE_PRIMARY_LINKS.map(link => (
               <Link
                 key={link.path}
                 to={link.path}

@@ -227,6 +227,17 @@ async function runMigrations() {
         )
     `);
 
+    // Hot-path indexes: these tables are filtered by user_id constantly but were
+    // created without indexes. They are created lazily by their route files
+    // (practice.js, courses.js), so guard with to_regclass — CREATE INDEX on a
+    // missing table throws.
+    for (const table of ['practice_submissions', 'course_enrollments', 'learning_streaks']) {
+      const { rows: [{ to_regclass: tableExists }] } = await pool.query(`SELECT to_regclass('${table}')`);
+      if (tableExists) {
+        await pool.query(`CREATE INDEX IF NOT EXISTS idx_${table}_user_id ON ${table}(user_id)`);
+      }
+    }
+
     console.log('✅ Database migrations completed successfully');
   } catch (err) {
     console.error('❌ Migration error:', err.message);

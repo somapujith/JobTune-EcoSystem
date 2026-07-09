@@ -16,28 +16,39 @@ const MockJobSource = require('../services/discovery/MockJobSource');
  * @param {Array}  jobs
  */
 async function cacheJobs(userId, jobs) {
+  if (!Array.isArray(jobs) || jobs.length === 0) return;
+
+  // Single multi-row parameterized insert instead of one round-trip per job
+  const placeholders = [];
+  const params = [];
   for (const job of jobs) {
-    try {
-      await pool.query(
-        `INSERT INTO discovered_jobs
-           (user_id, external_id, source, title, company, location, description, url, tags)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-         ON CONFLICT (source, external_id) DO NOTHING`,
-        [
-          userId,
-          job.externalId,
-          job.source,
-          job.title,
-          job.company,
-          job.location,
-          job.description,
-          job.url,
-          JSON.stringify(job.tags || [])
-        ]
-      );
-    } catch (_err) {
-      // Cache write failure is non-fatal
-    }
+    const base = params.length;
+    placeholders.push(
+      `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9})`
+    );
+    params.push(
+      userId,
+      job.externalId,
+      job.source,
+      job.title,
+      job.company,
+      job.location,
+      job.description,
+      job.url,
+      JSON.stringify(job.tags || [])
+    );
+  }
+
+  try {
+    await pool.query(
+      `INSERT INTO discovered_jobs
+         (user_id, external_id, source, title, company, location, description, url, tags)
+       VALUES ${placeholders.join(', ')}
+       ON CONFLICT (source, external_id) DO NOTHING`,
+      params
+    );
+  } catch (_err) {
+    // Cache write failure is non-fatal
   }
 }
 

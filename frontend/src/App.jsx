@@ -1,70 +1,74 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import ErrorBoundary from './components/ErrorBoundary';
 import PlanGate from './components/PlanGate';
 import { getToolForRoute, getRequiredPlan } from './config/toolAccess';
+// SSR-rendered pages (/, /blog, /login) must stay statically imported —
+// entry-server.jsx uses renderToString, which cannot resolve lazy components.
 import Home from './pages/Home';
-import PaymentConfirm from './pages/PaymentConfirm';
-import PlanSettings from './pages/PlanSettings';
-import SkillAssessment from './pages/SkillAssessment';
-import ResumeOptimizer from './pages/ResumeOptimizer';
-import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
-import ContentVault from './pages/ContentVault';
 import Blog from './pages/Blog';
-import LinkedInOptimizer from './pages/LinkedInOptimizer';
-import GitHubOptimizer from './pages/GitHubOptimizer';
-import PortfolioBuilder from './pages/PortfolioBuilder';
-import ProjectIdeas from './pages/ProjectIdeas';
-import MockInterview from './pages/MockInterview';
-import JobMatcher from './pages/JobMatcher';
-import JobTracker from './pages/JobTracker';
-import JobDiscovery from './pages/JobDiscovery';
-import ResumeBuilder from './pages/ResumeBuilder';
-import ResumeHistory from './pages/ResumeHistory';
-import ResumeComparison from './pages/ResumeComparison';
-import ResumeSend from './pages/ResumeSend';
-import CareerRoadmap from './pages/CareerRoadmap';
-import ATSChecker from './pages/ATSCheckerV2';
-import JobAnalyzer from './pages/JobAnalyzer';
-import CoverLetterGenerator from './pages/CoverLetterGenerator';
-import EvidenceDashboard from './pages/EvidenceDashboard';
-import JobFitAnalysis from './pages/JobFitAnalysis';
-import JobPreparation from './pages/JobPreparation';
-import TuneAndPolishTrack from './pages/TuneAndPolishTrack';
-import ZeroToHeroTrack from './pages/ZeroToHeroTrack';
-import LearnAndBuildTrack from './pages/LearnAndBuildTrack';
-import RecruiterVisibility from './pages/RecruiterVisibility';
-import ResumeConsistency from './pages/ResumeConsistency';
-import AchievementEnhancer from './pages/AchievementEnhancer';
-import AITutor from './pages/AITutor';
-import AIDoubtSolver from './pages/AIDoubtSolver';
-import CourseLibrary from './pages/CourseLibrary';
-import LearningPaths from './pages/LearningPaths';
-import AINotesGenerator from './pages/AINotesGenerator';
-import AIFlashcards from './pages/AIFlashcards';
-import AIQuizGenerator from './pages/AIQuizGenerator';
-import Community from './pages/Community';
-import CommunicationSkills from './pages/CommunicationSkills';
-import CodingPractice from './pages/CodingPractice';
-import Assessments from './pages/Assessments';
-import AIProjectBuilder from './pages/AIProjectBuilder';
-import ProjectWorkspace from './pages/ProjectWorkspace';
-import AICareerCoach from './pages/AICareerCoach';
-import AICodeReviewer from './pages/AICodeReviewer';
-import UniversityDashboard from './pages/UniversityDashboard';
-import FacultyPanel from './pages/FacultyPanel';
-import RecruiterPortal from './pages/RecruiterPortal';
-import ComingSoon from './pages/ComingSoon';
-import Survey from './pages/Survey';
-import CareerDiscovery from './pages/CareerDiscovery';
-import CareerPreview from './pages/CareerPreview';
-import SubscriptionGate from './pages/SubscriptionGate';
 import useAuthStore from './store/useAuthStore';
 import useSubscriptionStore from './store/useSubscriptionStore';
 import SessionBlocked from './components/SessionBlocked';
 import { isBrowser } from './lib/browser';
+
+// CSR-only routes: lazy-loaded so they land in their own chunks.
+const PaymentConfirm = lazy(() => import('./pages/PaymentConfirm'));
+const PlanSettings = lazy(() => import('./pages/PlanSettings'));
+const SkillAssessment = lazy(() => import('./pages/SkillAssessment'));
+const ResumeOptimizer = lazy(() => import('./pages/ResumeOptimizer'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const ContentVault = lazy(() => import('./pages/ContentVault'));
+const LinkedInOptimizer = lazy(() => import('./pages/LinkedInOptimizer'));
+const GitHubOptimizer = lazy(() => import('./pages/GitHubOptimizer'));
+const PortfolioBuilder = lazy(() => import('./pages/PortfolioBuilder'));
+const ProjectIdeas = lazy(() => import('./pages/ProjectIdeas'));
+const MockInterview = lazy(() => import('./pages/MockInterview'));
+const JobMatcher = lazy(() => import('./pages/JobMatcher'));
+const JobTracker = lazy(() => import('./pages/JobTracker'));
+const JobDiscovery = lazy(() => import('./pages/JobDiscovery'));
+const ResumeBuilder = lazy(() => import('./pages/ResumeBuilder'));
+const ResumeHistory = lazy(() => import('./pages/ResumeHistory'));
+const ResumeComparison = lazy(() => import('./pages/ResumeComparison'));
+const ResumeSend = lazy(() => import('./pages/ResumeSend'));
+const CareerRoadmap = lazy(() => import('./pages/CareerRoadmap'));
+const ATSChecker = lazy(() => import('./pages/ATSCheckerV2'));
+const JobAnalyzer = lazy(() => import('./pages/JobAnalyzer'));
+const CoverLetterGenerator = lazy(() => import('./pages/CoverLetterGenerator'));
+const EvidenceDashboard = lazy(() => import('./pages/EvidenceDashboard'));
+const JobFitAnalysis = lazy(() => import('./pages/JobFitAnalysis'));
+const JobPreparation = lazy(() => import('./pages/JobPreparation'));
+const TuneAndPolishTrack = lazy(() => import('./pages/TuneAndPolishTrack'));
+const ZeroToHeroTrack = lazy(() => import('./pages/ZeroToHeroTrack'));
+const LearnAndBuildTrack = lazy(() => import('./pages/LearnAndBuildTrack'));
+const RecruiterVisibility = lazy(() => import('./pages/RecruiterVisibility'));
+const ResumeConsistency = lazy(() => import('./pages/ResumeConsistency'));
+const AchievementEnhancer = lazy(() => import('./pages/AchievementEnhancer'));
+const AITutor = lazy(() => import('./pages/AITutor'));
+const AIDoubtSolver = lazy(() => import('./pages/AIDoubtSolver'));
+const CourseLibrary = lazy(() => import('./pages/CourseLibrary'));
+const LearningPaths = lazy(() => import('./pages/LearningPaths'));
+const AINotesGenerator = lazy(() => import('./pages/AINotesGenerator'));
+const AIFlashcards = lazy(() => import('./pages/AIFlashcards'));
+const AIQuizGenerator = lazy(() => import('./pages/AIQuizGenerator'));
+const Community = lazy(() => import('./pages/Community'));
+const CommunicationSkills = lazy(() => import('./pages/CommunicationSkills'));
+const CodingPractice = lazy(() => import('./pages/CodingPractice'));
+const Assessments = lazy(() => import('./pages/Assessments'));
+const AIProjectBuilder = lazy(() => import('./pages/AIProjectBuilder'));
+const ProjectWorkspace = lazy(() => import('./pages/ProjectWorkspace'));
+const AICareerCoach = lazy(() => import('./pages/AICareerCoach'));
+const AICodeReviewer = lazy(() => import('./pages/AICodeReviewer'));
+const UniversityDashboard = lazy(() => import('./pages/UniversityDashboard'));
+const FacultyPanel = lazy(() => import('./pages/FacultyPanel'));
+const RecruiterPortal = lazy(() => import('./pages/RecruiterPortal'));
+const ComingSoon = lazy(() => import('./pages/ComingSoon'));
+const Survey = lazy(() => import('./pages/Survey'));
+const CareerDiscovery = lazy(() => import('./pages/CareerDiscovery'));
+const CareerPreview = lazy(() => import('./pages/CareerPreview'));
+const SubscriptionGate = lazy(() => import('./pages/SubscriptionGate'));
 
 // Minimal inline loader shown while the very first onboarding check is in flight
 function OnboardingCheckLoader() {
@@ -79,8 +83,9 @@ function OnboardingCheckLoader() {
 }
 
 function ProtectedRoute({ children, requireOnboarding = true }) {
-  const { isAuthenticated } = useAuthStore();
-  const { onboardingComplete, onboardingChecked } = useSubscriptionStore();
+  const isAuthenticated = useAuthStore(s => s.isAuthenticated);
+  const onboardingComplete = useSubscriptionStore(s => s.onboardingComplete);
+  const onboardingChecked = useSubscriptionStore(s => s.onboardingChecked);
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (requireOnboarding && !onboardingChecked) return <OnboardingCheckLoader />;
@@ -92,8 +97,9 @@ function ProtectedRoute({ children, requireOnboarding = true }) {
 // Survey-chain guard: only authenticated users who have NOT completed onboarding
 // may enter; completed users are bounced to the dashboard.
 function SurveyRoute({ children }) {
-  const { isAuthenticated } = useAuthStore();
-  const { onboardingComplete, onboardingChecked } = useSubscriptionStore();
+  const isAuthenticated = useAuthStore(s => s.isAuthenticated);
+  const onboardingComplete = useSubscriptionStore(s => s.onboardingComplete);
+  const onboardingChecked = useSubscriptionStore(s => s.onboardingChecked);
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (!onboardingChecked) return <OnboardingCheckLoader />;
@@ -103,8 +109,9 @@ function SurveyRoute({ children }) {
 }
 
 function ProtectedToolRoute({ children, toolPath }) {
-  const { isAuthenticated } = useAuthStore();
-  const { onboardingComplete, onboardingChecked } = useSubscriptionStore();
+  const isAuthenticated = useAuthStore(s => s.isAuthenticated);
+  const onboardingComplete = useSubscriptionStore(s => s.onboardingComplete);
+  const onboardingChecked = useSubscriptionStore(s => s.onboardingChecked);
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
@@ -136,17 +143,21 @@ function AppLoader() {
 }
 
 function App() {
-  const { checkAuth, isLoading, sessionBlocked } = useAuthStore();
-  const { checkOnboarded, getUserPlan } = useSubscriptionStore();
+  const checkAuth = useAuthStore(s => s.checkAuth);
+  const isLoading = useAuthStore(s => s.isLoading);
+  const sessionBlocked = useAuthStore(s => s.sessionBlocked);
+  const checkOnboarded = useSubscriptionStore(s => s.checkOnboarded);
+  const getUserPlan = useSubscriptionStore(s => s.getUserPlan);
 
   useEffect(() => {
     if (!isBrowser) return;
-    // Sequential: verify session → check onboarding status → fetch plan once
-    checkAuth().then(async () => {
+    // Verify session, then fire onboarding check + plan fetch concurrently
+    // (both depend only on auth; a missing plan resolves to null harmlessly).
+    checkAuth().then(() => {
       const isAuthed = useAuthStore.getState().isAuthenticated;
       if (!isAuthed) return;
-      const onboarded = await checkOnboarded();
-      if (onboarded) getUserPlan();
+      checkOnboarded();
+      getUserPlan();
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -159,7 +170,8 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <Routes>
+      <Suspense fallback={<AppLoader />}>
+        <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="payment-confirm" element={<PaymentConfirm />} />
@@ -226,7 +238,8 @@ function App() {
         <Route path="/career-discovery" element={<SurveyRoute><CareerDiscovery /></SurveyRoute>} />
         <Route path="/career-preview" element={<SurveyRoute><CareerPreview /></SurveyRoute>} />
         <Route path="/subscription-gate" element={<SurveyRoute><SubscriptionGate /></SurveyRoute>} />
-      </Routes>
+        </Routes>
+      </Suspense>
     </ErrorBoundary>
   );
 }
