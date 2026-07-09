@@ -1,21 +1,63 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const SmoothTypewriter = ({ text, speed = 15, delay = 0, start = true, onComplete, className }) => {
+const useRotationRef = (baseSpeedDegreesPerSecond, activeMultiplier, isActive, ref) => {
+  const currentSpeed = useRef(baseSpeedDegreesPerSecond);
+  const rotationRef = useRef(0);
+  const lastTimeRef = useRef(performance.now());
+
+  useEffect(() => {
+    let animationFrameId;
+    lastTimeRef.current = performance.now();
+
+    const animate = (time) => {
+      const deltaTime = time - lastTimeRef.current;
+      lastTimeRef.current = time;
+
+      const targetSpeed = isActive ? baseSpeedDegreesPerSecond * activeMultiplier : baseSpeedDegreesPerSecond;
+      currentSpeed.current += (targetSpeed - currentSpeed.current) * 0.05;
+
+      const degreesToRotate = currentSpeed.current * (deltaTime / 1000);
+      rotationRef.current = (rotationRef.current + degreesToRotate) % 360;
+      
+      if (ref.current) {
+        ref.current.style.transform = `rotate(${rotationRef.current}deg)`;
+      }
+
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    animationFrameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [isActive, baseSpeedDegreesPerSecond, activeMultiplier, ref]);
+};
+
+const SmoothTypewriter = ({ text, speed = 15, delay = 0, start = true, onStart, onComplete, className }) => {
   const [visibleChars, setVisibleChars] = useState(0);
   const [started, setStarted] = useState(false);
   const completedFired = useRef(false);
+  const startFired = useRef(false);
 
   useEffect(() => {
     if (!start) return;
     let timeout;
     if (delay > 0) {
-      timeout = setTimeout(() => setStarted(true), delay);
+      timeout = setTimeout(() => {
+        setStarted(true);
+        if (onStart && !startFired.current) {
+          startFired.current = true;
+          onStart();
+        }
+      }, delay);
     } else {
       setStarted(true);
+      if (onStart && !startFired.current) {
+        startFired.current = true;
+        onStart();
+      }
     }
     return () => clearTimeout(timeout);
-  }, [delay, start]);
+  }, [delay, start, onStart]);
 
   useEffect(() => {
     if (!started) return;
@@ -66,9 +108,17 @@ const SmoothTypewriter = ({ text, speed = 15, delay = 0, start = true, onComplet
   );
 };
 
-const StaggeredList = ({ items, delay = 600, start = true, onComplete, className, itemClassName, icon }) => {
+const StaggeredList = ({ items, delay = 600, start = true, onStart, onComplete, className, itemClassName, icon }) => {
   const [visibleItems, setVisibleItems] = useState(0);
   const completedFired = useRef(false);
+  const startFired = useRef(false);
+
+  useEffect(() => {
+    if (start && onStart && !startFired.current) {
+      startFired.current = true;
+      onStart();
+    }
+  }, [start, onStart]);
 
   useEffect(() => {
     if (!start) return;
@@ -109,9 +159,17 @@ const StaggeredList = ({ items, delay = 600, start = true, onComplete, className
   );
 };
 
-const FadeInButton = ({ text, onClick, start = true, onComplete, className }) => {
+const FadeInButton = ({ text, onClick, start = true, onStart, onComplete, className }) => {
   const [visible, setVisible] = useState(false);
   const completedFired = useRef(false);
+  const startFired = useRef(false);
+
+  useEffect(() => {
+    if (start && onStart && !startFired.current) {
+      startFired.current = true;
+      onStart();
+    }
+  }, [start, onStart]);
   
   useEffect(() => {
     if (!start) return;
@@ -136,10 +194,20 @@ const FadeInButton = ({ text, onClick, start = true, onComplete, className }) =>
   );
 };
 
-const ScriptedScreen = ({ lines, onComplete, containerClassName }) => {
+const ScriptedScreen = ({ lines, onComplete, containerClassName, onTypingStateChange }) => {
   const [currentLine, setCurrentLine] = useState(0);
+  const [isActivelyTyping, setIsActivelyTyping] = useState(false);
+
+  useEffect(() => {
+    if (onTypingStateChange) onTypingStateChange(isActivelyTyping);
+  }, [isActivelyTyping, onTypingStateChange]);
+
+  const handleLineStart = () => {
+    setIsActivelyTyping(true);
+  };
 
   const handleLineComplete = () => {
+    setIsActivelyTyping(false);
     const line = lines[currentLine];
     const wait = line.waitAfter || 0;
     setTimeout(() => {
@@ -166,6 +234,7 @@ const ScriptedScreen = ({ lines, onComplete, containerClassName }) => {
                className={line.className}
                itemClassName={line.itemClassName}
                start={start}
+               onStart={index === currentLine ? handleLineStart : undefined}
                onComplete={index === currentLine ? handleLineComplete : undefined} 
              />
            );
@@ -179,6 +248,7 @@ const ScriptedScreen = ({ lines, onComplete, containerClassName }) => {
                onClick={line.onClick}
                className={line.className}
                start={start}
+               onStart={index === currentLine ? handleLineStart : undefined}
                onComplete={index === currentLine ? handleLineComplete : undefined}
              />
            );
@@ -192,6 +262,7 @@ const ScriptedScreen = ({ lines, onComplete, containerClassName }) => {
             speed={line.speed || 15}
             delay={line.delay || 0}
             start={start}
+            onStart={index === currentLine ? handleLineStart : undefined}
             onComplete={index === currentLine ? handleLineComplete : undefined} 
           />
         );
@@ -204,6 +275,14 @@ export default function Survey() {
   const navigate = useNavigate();
   const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
   const [isFadingOut, setIsFadingOut] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+
+  const layer1Ref = useRef(null);
+  const layer2Ref = useRef(null);
+
+  // Smooth DOM rotation synced with text typing states
+  useRotationRef(18, 5, isTyping, layer1Ref);  // 18 deg/s base, 5x speed when active
+  useRotationRef(-12, 5, isTyping, layer2Ref); // -12 deg/s base, 5x speed when active
 
   const handleStart = () => {
     navigate('/dashboard'); 
@@ -280,30 +359,42 @@ export default function Survey() {
 
   return (
     <div 
-      className="fixed inset-0 bg-[#020617] flex items-center justify-center p-3 sm:p-4 md:p-6 overflow-hidden"
+      className="fixed inset-0 bg-[#020617] flex items-center justify-center p-4 sm:p-8 md:p-12 overflow-hidden"
       style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}
     >
-      <div className="absolute inset-0 z-0 overflow-hidden opacity-90 transition-opacity duration-1000">
-        <div 
-          className="absolute inset-[-50%] animate-[spin_10s_linear_infinite]"
-          style={{
-            background: 'conic-gradient(from 0deg, transparent 0%, transparent 25%, #0ea5e9 35%, #3b82f6 45%, #6366f1 55%, transparent 65%, transparent 100%)',
-            filter: 'blur(50px)',
-            opacity: 0.8
-          }}
-        />
-        <div 
-          className="absolute inset-[-50%] animate-[spin_15s_linear_infinite_reverse]"
-          style={{
-            background: 'conic-gradient(from 180deg, transparent 0%, transparent 25%, #10b981 35%, #0ea5e9 45%, #8b5cf6 55%, transparent 65%, transparent 100%)',
-            filter: 'blur(60px)',
-            opacity: 0.6
-          }}
-        />
-        <div className="absolute inset-0 bg-blue-500/10 blur-[120px] animate-pulse-slow" />
+      <div className="absolute inset-0 z-0 overflow-hidden opacity-100 transition-opacity duration-1000 bg-[#020617]">
+        {/* Layer 1: Gemini Blue & Red */}
+        <div ref={layer1Ref} className="absolute inset-[-50%]">
+          <div 
+            className="absolute top-1/4 left-1/4 w-[60%] aspect-square rounded-full mix-blend-screen"
+            style={{ background: 'radial-gradient(closest-side, rgba(66, 133, 244, 1) 0%, rgba(66, 133, 244, 0.5) 50%, transparent 100%)' }}
+          />
+          <div 
+            className="absolute bottom-1/4 right-1/4 w-[60%] aspect-square rounded-full mix-blend-screen"
+            style={{ background: 'radial-gradient(closest-side, rgba(234, 67, 53, 1) 0%, rgba(234, 67, 53, 0.5) 50%, transparent 100%)' }}
+          />
+        </div>
+        
+        {/* Layer 2: Gemini Yellow & Green */}
+        <div ref={layer2Ref} className="absolute inset-[-50%]">
+          <div 
+            className="absolute bottom-1/3 left-1/3 w-[65%] aspect-square rounded-full mix-blend-screen"
+            style={{ background: 'radial-gradient(closest-side, rgba(251, 188, 5, 1) 0%, rgba(251, 188, 5, 0.5) 50%, transparent 100%)' }}
+          />
+          <div 
+            className="absolute top-1/3 right-1/3 w-[60%] aspect-square rounded-full mix-blend-screen"
+            style={{ background: 'radial-gradient(closest-side, rgba(52, 168, 83, 1) 0%, rgba(52, 168, 83, 0.5) 50%, transparent 100%)' }}
+          />
+        </div>
       </div>
 
-      <div className="relative z-10 w-full h-full bg-[#020617]/85 backdrop-blur-3xl rounded-[2.5rem] border border-blue-400/20 flex flex-col shadow-[0_0_80px_rgba(14,165,233,0.15)] overflow-hidden">
+      <div 
+        className="relative z-10 w-full h-full rounded-[3rem] flex flex-col shadow-2xl overflow-hidden backdrop-blur-[40px] border border-white/5"
+        style={{ backgroundColor: 'rgba(4,9,26,0.1)' }}
+      >
+        {/* Flawless solid core that smoothly fades out 10px before the edge */}
+        <div className="absolute inset-[10px] rounded-[2.5rem] bg-[#04091a] blur-[10px] z-0" />
+        
         <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 z-20 overflow-hidden relative">
           <div 
             className={`transition-all duration-1000 w-full flex flex-col items-center ${isFadingOut ? 'opacity-0 blur-md scale-95' : 'opacity-100 blur-0 scale-100'}`}
@@ -312,6 +403,7 @@ export default function Survey() {
               <ScriptedScreen 
                 key={currentScreenIndex}
                 lines={SCREENS[currentScreenIndex]} 
+                onTypingStateChange={setIsTyping}
                 onComplete={handleScreenComplete} 
               />
             )}
