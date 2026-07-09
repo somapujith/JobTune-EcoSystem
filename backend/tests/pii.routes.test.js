@@ -13,6 +13,10 @@ jest.mock('../src/middleware/auth', () => ({
     next();
   }
 }));
+jest.mock('../src/middleware/requireOnboarding', () => ({
+  requireOnboarding: (req, _res, next) => next(),
+}));
+
 
 const request = require('supertest');
 const { pool } = require('../src/config/database');

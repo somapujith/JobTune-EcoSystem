@@ -124,8 +124,8 @@ export default function CareerPreview() {
               <Sparkles className="w-6 h-6 mr-3 text-blue-400" />
               Your Personalized Plan
             </h2>
-            <button 
-              onClick={() => navigate('/subscription-gate')}
+            <button
+              onClick={() => navigate('/subscription-gate', { state: { answers } })}
               className="px-6 py-2.5 rounded-full bg-white text-black font-bold hover:scale-105 transition-transform"
             >
               Unlock All
@@ -157,8 +157,8 @@ export default function CareerPreview() {
           </div>
           
           <div className="mt-8 flex justify-center">
-            <button 
-              onClick={() => navigate('/subscription-gate')}
+            <button
+              onClick={() => navigate('/subscription-gate', { state: { answers } })}
               className="px-12 py-4 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 font-bold text-lg hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] hover:scale-105 transition-all"
             >
               Unlock My Career Plan

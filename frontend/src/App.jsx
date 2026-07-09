@@ -5,7 +5,6 @@ import ErrorBoundary from './components/ErrorBoundary';
 import PlanGate from './components/PlanGate';
 import { getToolForRoute, getRequiredPlan } from './config/toolAccess';
 import Home from './pages/Home';
-import Onboarding from './pages/Onboarding';
 import PaymentConfirm from './pages/PaymentConfirm';
 import PlanSettings from './pages/PlanSettings';
 import SkillAssessment from './pages/SkillAssessment';
@@ -67,13 +66,38 @@ import useSubscriptionStore from './store/useSubscriptionStore';
 import SessionBlocked from './components/SessionBlocked';
 import { isBrowser } from './lib/browser';
 
-function ProtectedRoute({ children, requireOnboarding = false }) {
-  const { isAuthenticated, hasCompletedOnboarding } = useAuthStore();
-  const { onboardingComplete } = useSubscriptionStore();
+// Minimal inline loader shown while the very first onboarding check is in flight
+function OnboardingCheckLoader() {
+  return (
+    <div className="w-full min-h-[60vh] flex items-center justify-center">
+      <div className="text-center">
+        <div className="inline-block w-8 h-8 rounded-full border-2 border-blue-600 border-t-transparent animate-spin mb-3" />
+        <p className="text-slate-500 text-sm font-medium">Loading your tools...</p>
+      </div>
+    </div>
+  );
+}
+
+function ProtectedRoute({ children, requireOnboarding = true }) {
+  const { isAuthenticated } = useAuthStore();
+  const { onboardingComplete, onboardingChecked } = useSubscriptionStore();
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (requireOnboarding && !hasCompletedOnboarding) return <Navigate to="/onboarding" replace />;
-  if (requireOnboarding && !onboardingComplete) return <Navigate to="/onboarding" replace />;
+  if (requireOnboarding && !onboardingChecked) return <OnboardingCheckLoader />;
+  if (requireOnboarding && !onboardingComplete) return <Navigate to="/survey" replace />;
+
+  return children;
+}
+
+// Survey-chain guard: only authenticated users who have NOT completed onboarding
+// may enter; completed users are bounced to the dashboard.
+function SurveyRoute({ children }) {
+  const { isAuthenticated } = useAuthStore();
+  const { onboardingComplete, onboardingChecked } = useSubscriptionStore();
+
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!onboardingChecked) return <OnboardingCheckLoader />;
+  if (onboardingComplete) return <Navigate to="/dashboard" replace />;
 
   return children;
 }
@@ -84,19 +108,9 @@ function ProtectedToolRoute({ children, toolPath }) {
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-  // Show a minimal inline loader only while the very first onboarding check is in flight
-  if (!onboardingChecked) {
-    return (
-      <div className="w-full min-h-[60vh] flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block w-8 h-8 rounded-full border-2 border-blue-600 border-t-transparent animate-spin mb-3" />
-          <p className="text-slate-500 text-sm font-medium">Loading your tools...</p>
-        </div>
-      </div>
-    );
-  }
+  if (!onboardingChecked) return <OnboardingCheckLoader />;
 
-  if (!onboardingComplete) return <Navigate to="/onboarding" replace />;
+  if (!onboardingComplete) return <Navigate to="/survey" replace />;
 
   const toolName = getToolForRoute(toolPath);
   if (!toolName) return children;
@@ -148,7 +162,6 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
-          <Route path="onboarding" element={<Onboarding />} />
           <Route path="payment-confirm" element={<PaymentConfirm />} />
           <Route path="skills" element={<ProtectedToolRoute toolPath="/skills"><SkillAssessment /></ProtectedToolRoute>} />
           <Route path="resume" element={<ProtectedToolRoute toolPath="/resume"><ResumeOptimizer /></ProtectedToolRoute>} />
@@ -167,7 +180,7 @@ function App() {
           <Route path="projects" element={<ProtectedToolRoute toolPath="/projects"><ProjectIdeas /></ProtectedToolRoute>} />
           <Route path="blog" element={<Blog />} />
           <Route path="dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="dashboard/settings/plans" element={<ProtectedRoute><PlanSettings /></ProtectedRoute>} />
+          <Route path="dashboard/settings/plans" element={<ProtectedRoute requireOnboarding={false}><PlanSettings /></ProtectedRoute>} />
           <Route path="interview" element={<ProtectedToolRoute toolPath="/interview"><MockInterview /></ProtectedToolRoute>} />
           <Route path="jobmatch" element={<ProtectedToolRoute toolPath="/jobmatch"><JobMatcher /></ProtectedToolRoute>} />
           <Route path="discover" element={<ProtectedToolRoute toolPath="/discover"><JobDiscovery /></ProtectedToolRoute>} />
@@ -209,10 +222,10 @@ function App() {
           <Route path="career-readiness" element={<ProtectedToolRoute toolPath="/career-readiness"><ComingSoon toolName="Career Readiness Dashboard" description="A unified career score with progress tracking and improvement recommendations across your whole journey. Launching soon." /></ProtectedToolRoute>} />
         </Route>
         <Route path="/login" element={<Login />} />
-        <Route path="/survey" element={<Survey />} />
-        <Route path="/career-discovery" element={<CareerDiscovery />} />
-        <Route path="/career-preview" element={<CareerPreview />} />
-        <Route path="/subscription-gate" element={<SubscriptionGate />} />
+        <Route path="/survey" element={<SurveyRoute><Survey /></SurveyRoute>} />
+        <Route path="/career-discovery" element={<SurveyRoute><CareerDiscovery /></SurveyRoute>} />
+        <Route path="/career-preview" element={<SurveyRoute><CareerPreview /></SurveyRoute>} />
+        <Route path="/subscription-gate" element={<SurveyRoute><SubscriptionGate /></SurveyRoute>} />
       </Routes>
     </ErrorBoundary>
   );

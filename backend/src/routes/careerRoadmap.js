@@ -2,13 +2,14 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
 const { requirePlan } = require('../middleware/requirePlan');
+const { requireOnboarding } = require('../middleware/requireOnboarding');
 const { pool } = require('../config/database');
 const { callAI, extractJSON } = require('../utils/aiClient');
 
 const activeGenerations = new Map();
 
 // ── POST /api/career/roadmap - Generate personalized career roadmap ────────
-router.post('/roadmap', authenticateToken, requirePlan(1), async (req, res) => {
+router.post('/roadmap', authenticateToken, requireOnboarding, requirePlan(1), async (req, res) => {
   const userId = req.user.id;
 
   if (activeGenerations.has(userId)) {
@@ -104,7 +105,7 @@ JSON schema:
 });
 
 // ── GET /api/career/roadmap/:id - Fetch saved roadmap ────────────────────
-router.get('/roadmap/:id', authenticateToken, requirePlan(1), async (req, res) => {
+router.get('/roadmap/:id', authenticateToken, requireOnboarding, requirePlan(1), async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
@@ -130,8 +131,62 @@ router.get('/roadmap/:id', authenticateToken, requirePlan(1), async (req, res) =
   }
 });
 
+// ── POST /api/career/discovery - Save career discovery survey answers ────
+router.post('/discovery', authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+  const { answers, subAnswers } = req.body;
+
+  if (!answers || typeof answers !== 'object') {
+    return res.status(400).json({ error: 'answers is required' });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO career_discovery_responses (user_id, answers, sub_answers)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (user_id) DO UPDATE
+         SET answers = EXCLUDED.answers,
+             sub_answers = EXCLUDED.sub_answers,
+             updated_at = NOW()
+       RETURNING id, updated_at`,
+      [userId, JSON.stringify(answers), JSON.stringify(subAnswers || {})]
+    );
+
+    res.json({ id: result.rows[0].id, updatedAt: result.rows[0].updated_at });
+  } catch (err) {
+    console.error('Save discovery response error:', err.message);
+    res.status(500).json({ error: 'Failed to save discovery responses' });
+  }
+});
+
+// ── GET /api/career/discovery - Fetch user's saved discovery answers ─────
+router.get('/discovery', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const result = await pool.query(
+      'SELECT answers, sub_answers, updated_at FROM career_discovery_responses WHERE user_id = $1',
+      [userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'No discovery response found.' });
+    }
+
+    const row = result.rows[0];
+    res.json({
+      answers: typeof row.answers === 'string' ? JSON.parse(row.answers) : row.answers,
+      subAnswers: typeof row.sub_answers === 'string' ? JSON.parse(row.sub_answers) : row.sub_answers,
+      updatedAt: row.updated_at
+    });
+  } catch (err) {
+    console.error('Fetch discovery response error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch discovery responses' });
+  }
+});
+
 // ── GET /api/career/roadmap - Fetch user's latest roadmap ────────────────
-router.get('/roadmap', authenticateToken, requirePlan(1), async (req, res) => {
+router.get('/roadmap', authenticateToken, requireOnboarding, requirePlan(1), async (req, res) => {
   try {
     const userId = req.user.id;
 

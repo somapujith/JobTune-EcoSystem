@@ -25,9 +25,9 @@ export default function Login() {
     return <Navigate to="/dashboard" replace />;
   }
 
-  const redirectAfterAuth = () => {
+  const redirectAfterAuth = (target) => {
     setTimeout(() => {
-      window.location.href = '/onboarding';
+      window.location.href = target;
     }, 500);
   };
 
@@ -41,10 +41,11 @@ export default function Login() {
           { email: formData.email, password: formData.password },
           { replaceDevice }
         );
-        redirectAfterAuth();
+        // Guards bounce incomplete users to /survey automatically.
+        redirectAfterAuth('/dashboard');
       } else {
         await signup(formData);
-        redirectAfterAuth();
+        redirectAfterAuth('/survey');
       }
     } catch (err) {
       if (err.code === 'ACCOUNT_IN_USE') return;

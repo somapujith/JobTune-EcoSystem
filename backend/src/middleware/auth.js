@@ -9,6 +9,11 @@ if (!JWT_SECRET || JWT_SECRET.length < 32) {
 }
 
 const authenticateToken = async (req, res, next) => {
+  // Skip re-verification only if THIS middleware already ran earlier in the
+  // chain (e.g. mount-level onboardingGate followed by a route that also
+  // declares authenticateToken) — never trust req.user set by anything else.
+  if (req._authenticatedByJwt) return next();
+
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -29,6 +34,7 @@ const authenticateToken = async (req, res, next) => {
     }
 
     req.user = user;
+    req._authenticatedByJwt = true;
     next();
   } catch (err) {
     console.error('JWT Verify Error:', err.message);

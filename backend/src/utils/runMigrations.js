@@ -201,6 +201,32 @@ async function runMigrations() {
       console.log('✅ Activity tracking tables created');
     }
 
+    // Career discovery survey responses
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS career_discovery_responses (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+        answers JSONB NOT NULL,
+        sub_answers JSONB DEFAULT '{}',
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_career_discovery_responses_user_id ON career_discovery_responses(user_id);
+    `);
+
+    // Onboarding gate: explicit completion flag on users (always-run, idempotent)
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS onboarding_completed BOOLEAN NOT NULL DEFAULT false`);
+    // Backfill: match the old /onboarded inference (a saved onboarding_responses row OR any
+    // user_subscriptions row) so existing users don't get bounced back into the survey.
+    await pool.query(`
+      UPDATE users SET onboarding_completed = true
+      WHERE onboarding_completed = false
+        AND (
+          id IN (SELECT user_id FROM onboarding_responses)
+          OR id IN (SELECT user_id FROM user_subscriptions)
+        )
+    `);
+
     console.log('✅ Database migrations completed successfully');
   } catch (err) {
     console.error('❌ Migration error:', err.message);

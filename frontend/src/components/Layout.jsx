@@ -307,7 +307,7 @@ const Navbar = () => {
 const Layout = () => {
   const location = useLocation();
 
-  const isFullScreenPage = location.pathname === '/onboarding' || location.pathname === '/payment-confirm';
+  const isFullScreenPage = location.pathname === '/payment-confirm';
 
   if (isFullScreenPage) {
     return <Outlet />;

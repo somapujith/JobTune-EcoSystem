@@ -73,6 +73,7 @@ router.post('/select-plan', authenticateToken, async (req, res, next) => {
     }
 
     await planService.assignPlan(req.user.id, planId);
+    await planService.setOnboardingCompleted(req.user.id);
     res.json({ success: true, plan });
   } catch (err) {
     next(err);
@@ -82,11 +83,8 @@ router.post('/select-plan', authenticateToken, async (req, res, next) => {
 // Check onboarding completion
 router.get('/onboarded', authenticateToken, async (req, res, next) => {
   try {
-    const [response, plan] = await Promise.all([
-      planService.getUserOnboardingResponse(req.user.id),
-      planService.getUserPlan(req.user.id),
-    ]);
-    res.json({ onboarded: !!response || !!plan });
+    const onboarded = await planService.getOnboardingCompleted(req.user.id);
+    res.json({ onboarded });
   } catch (err) {
     next(err);
   }

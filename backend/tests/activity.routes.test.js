@@ -8,6 +8,10 @@ jest.mock('../src/middleware/auth', () => ({
     next();
   },
 }));
+jest.mock('../src/middleware/requireOnboarding', () => ({
+  requireOnboarding: (req, _res, next) => next(),
+}));
+
 
 jest.mock('../src/services/activityService', () => ({
   trackActivity: jest.fn(),

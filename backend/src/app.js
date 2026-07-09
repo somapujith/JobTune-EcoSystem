@@ -44,6 +44,8 @@ const studyHistoryRoutes = require('./routes/studyHistory');
 const learningModulesRoutes = require('./routes/learningModules');
 const { errorHandler } = require('./middleware/errorHandler');
 const { auditLogger } = require('./middleware/auditLogger');
+const { authenticateToken } = require('./middleware/auth');
+const { requireOnboarding } = require('./middleware/requireOnboarding');
 const path = require('path');
 
 const app = express();
@@ -106,48 +108,52 @@ app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 // Global Audit Logger for API
 app.use('/api', auditLogger('API_REQUEST', 'system'));
 
+// Server-side onboarding gate: blocks incomplete users from every route
+// below that isn't part of auth or the signup survey chain itself.
+const onboardingGate = [authenticateToken, requireOnboarding];
+
 // Routes
 app.use('/api', apiLimiter);
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/subscriptions', subscriptionsRoutes);
-app.use('/api/skills', skillsRoutes);
-app.use('/api/resume', resumeRoutes);
-app.use('/api/resume', resumeV2Routes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/projects', projectsRoutes);
-app.use('/api/profiles', profilesRoutes);
+app.use('/api/skills', onboardingGate, skillsRoutes);
+app.use('/api/resume', onboardingGate, resumeRoutes);
+app.use('/api/resume', onboardingGate, resumeV2Routes);
+app.use('/api/dashboard', onboardingGate, dashboardRoutes);
+app.use('/api/projects', onboardingGate, projectsRoutes);
+app.use('/api/profiles', onboardingGate, profilesRoutes);
 app.use('/api/learning', learningRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/interview', interviewRoutes);
-app.use('/api/resume-chat', resumeChatRoutes);
+app.use('/api/interview', onboardingGate, interviewRoutes);
+app.use('/api/resume-chat', onboardingGate, resumeChatRoutes);
 app.use('/api/career', careerRoadmapRoutes);
-app.use('/api/jobs', jobTrackerRoutes);
-app.use('/api/ats', atsExportRoutes);
-app.use('/api/ats', atsCheckerV2Routes);
-app.use('/api/jobs', jobAnalyzerRoutes);
-app.use('/api/jobs', coverLetterRoutes);
+app.use('/api/jobs', onboardingGate, jobTrackerRoutes);
+app.use('/api/ats', onboardingGate, atsExportRoutes);
+app.use('/api/ats', onboardingGate, atsCheckerV2Routes);
+app.use('/api/jobs', onboardingGate, jobAnalyzerRoutes);
+app.use('/api/jobs', onboardingGate, coverLetterRoutes);
 app.use('/api/guides', guidesRoutes);
 app.use('/api/benchmarks', benchmarksRoutes);
-app.use('/api/evidence', evidenceRoutes);
-app.use('/api/pii', piiRedactionRoutes);
-app.use('/api/jobs', jobDiscoveryRoutes);
-app.use('/api/jobs', jobFitRoutes);
-app.use('/api/job-prep', jobPreparationRoutes);
-app.use('/api/progress', progressRoutes);
-app.use('/api/recruiter-visibility', recruiterVisibilityRoutes);
-app.use('/api/resume-consistency', resumeConsistencyRoutes);
-app.use('/api/jobs/achievement-enhancer', achievementEnhancerRoutes);
-app.use('/api/ai-tutor', aiTutorRoutes);
-app.use('/api/project-builder', projectBuilderRoutes);
-app.use('/api/study-tools', studyToolsRoutes);
-app.use('/api/courses', coursesRoutes);
-app.use('/api/ai-coach', aiCoachRoutes);
-app.use('/api/community', communityRoutes);
-app.use('/api/practice', practiceRoutes);
+app.use('/api/evidence', onboardingGate, evidenceRoutes);
+app.use('/api/pii', onboardingGate, piiRedactionRoutes);
+app.use('/api/jobs', onboardingGate, jobDiscoveryRoutes);
+app.use('/api/jobs', onboardingGate, jobFitRoutes);
+app.use('/api/job-prep', onboardingGate, jobPreparationRoutes);
+app.use('/api/progress', onboardingGate, progressRoutes);
+app.use('/api/recruiter-visibility', onboardingGate, recruiterVisibilityRoutes);
+app.use('/api/resume-consistency', onboardingGate, resumeConsistencyRoutes);
+app.use('/api/jobs/achievement-enhancer', onboardingGate, achievementEnhancerRoutes);
+app.use('/api/ai-tutor', onboardingGate, aiTutorRoutes);
+app.use('/api/project-builder', onboardingGate, projectBuilderRoutes);
+app.use('/api/study-tools', onboardingGate, studyToolsRoutes);
+app.use('/api/courses', onboardingGate, coursesRoutes);
+app.use('/api/ai-coach', onboardingGate, aiCoachRoutes);
+app.use('/api/community', onboardingGate, communityRoutes);
+app.use('/api/practice', onboardingGate, practiceRoutes);
 app.use('/api/admin-panels', adminPanelsRoutes);
-app.use('/api/activity', activityRoutes);
-app.use('/api/study-history', studyHistoryRoutes);
-app.use('/api/learning-modules', learningModulesRoutes);
+app.use('/api/activity', onboardingGate, activityRoutes);
+app.use('/api/study-history', onboardingGate, studyHistoryRoutes);
+app.use('/api/learning-modules', onboardingGate, learningModulesRoutes);
 
 // Admin UI Route
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));

@@ -334,7 +334,8 @@ export default function CareerDiscovery() {
 
   const handleSelect = (optionId) => {
     if (currentStep.type === 'single') {
-      setAnswers(prev => ({ ...prev, [currentStep.id]: optionId }));
+      const nextAnswers = { ...answers, [currentStep.id]: optionId };
+      setAnswers(nextAnswers);
       // Auto-advance after 300ms
       setTimeout(() => {
         if (currentStep.processingMessage) {
@@ -343,10 +344,10 @@ export default function CareerDiscovery() {
           setShowAI(false);
           setTimeout(() => {
             setShowProcessing(false);
-            goToNextStep();
+            goToNextStep(nextAnswers);
           }, 2000);
         } else {
-          goToNextStep();
+          goToNextStep(nextAnswers);
         }
       }, 300);
     } else if (currentStep.type === 'multi') {
@@ -396,12 +397,32 @@ export default function CareerDiscovery() {
     }
   };
 
-  const goToNextStep = () => {
+  const goToNextStep = (overrideAnswers) => {
     if (currentIndex < DISCOVERY_FLOW.length - 1) {
       setCurrentIndex(prev => prev + 1);
     } else {
-      // Finished all steps -> Navigate to AI Analysis
-      navigate('/career-preview', { state: { answers, subAnswers } }); 
+      // Finished all steps -> persist answers, then navigate to AI Analysis
+      const finalAnswers = overrideAnswers || answers;
+      saveDiscoveryResponses(finalAnswers, subAnswers);
+      navigate('/career-preview', { state: { answers: finalAnswers, subAnswers } });
+    }
+  };
+
+  const saveDiscoveryResponses = async (finalAnswers, finalSubAnswers) => {
+    const token = localStorage.getItem('token');
+    if (!token) return; // Guest flow — nothing to attach the data to.
+
+    try {
+      await fetch('/api/career/discovery', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ answers: finalAnswers, subAnswers: finalSubAnswers })
+      });
+    } catch (err) {
+      console.error('Failed to save discovery responses:', err);
     }
   };
 
