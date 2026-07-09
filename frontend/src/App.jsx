@@ -59,6 +59,9 @@ import FacultyPanel from './pages/FacultyPanel';
 import RecruiterPortal from './pages/RecruiterPortal';
 import ComingSoon from './pages/ComingSoon';
 import Survey from './pages/Survey';
+import CareerDiscovery from './pages/CareerDiscovery';
+import CareerPreview from './pages/CareerPreview';
+import SubscriptionGate from './pages/SubscriptionGate';
 import useAuthStore from './store/useAuthStore';
 import useSubscriptionStore from './store/useSubscriptionStore';
 import SessionBlocked from './components/SessionBlocked';
@@ -207,6 +210,9 @@ function App() {
         </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/survey" element={<Survey />} />
+        <Route path="/career-discovery" element={<CareerDiscovery />} />
+        <Route path="/career-preview" element={<CareerPreview />} />
+        <Route path="/subscription-gate" element={<SubscriptionGate />} />
       </Routes>
     </ErrorBoundary>
   );
