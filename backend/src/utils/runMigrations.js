@@ -72,12 +72,12 @@ async function runMigrations() {
     `);
 
     if (!atsResult.rows[0].exists) {
-      // Create resumes table
+      // Create resumes table (v2-first schema; v1 columns added below if needed)
       await pool.query(`
         CREATE TABLE IF NOT EXISTS resumes (
           id SERIAL PRIMARY KEY,
           user_id INTEGER NOT NULL,
-          original_resume TEXT NOT NULL,
+          original_resume TEXT,
           optimized_resume TEXT,
           original_score INTEGER,
           optimized_score INTEGER,
@@ -85,49 +85,11 @@ async function runMigrations() {
           keyword_coverage JSONB,
           missing_info JSONB,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
 
-      // Create analyses table
-      await pool.query(`
-        CREATE TABLE IF NOT EXISTS analyses (
-          id SERIAL PRIMARY KEY,
-          resume_id INTEGER NOT NULL UNIQUE,
-          section_completeness INTEGER,
-          keyword_relevance INTEGER,
-          formatting_score INTEGER,
-          action_verbs_count INTEGER,
-          metrics_count INTEGER,
-          missing_sections JSONB,
-          recommendations JSONB,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (resume_id) REFERENCES resumes(id) ON DELETE CASCADE
-        )
-      `);
-
-      // Create resume_exports table
-      await pool.query(`
-        CREATE TABLE IF NOT EXISTS resume_exports (
-          id SERIAL PRIMARY KEY,
-          resume_id INTEGER NOT NULL,
-          export_format VARCHAR(10),
-          file_path VARCHAR(255),
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (resume_id) REFERENCES resumes(id) ON DELETE CASCADE
-        )
-      `);
-
-      // Create indexes
-      await pool.query(`
-        CREATE INDEX IF NOT EXISTS idx_resumes_user_id ON resumes(user_id);
-        CREATE INDEX IF NOT EXISTS idx_resumes_created_at ON resumes(created_at DESC);
-        CREATE INDEX IF NOT EXISTS idx_analyses_resume_id ON analyses(resume_id);
-        CREATE INDEX IF NOT EXISTS idx_exports_resume_id ON resume_exports(resume_id);
-      `);
-
-      console.log('✅ ATS tables created');
+      console.log('✅ ATS resumes table created');
     }
 
     // Always-run: keep plan pricing/features in sync with the current pricing strategy (idempotent).
@@ -145,6 +107,54 @@ async function runMigrations() {
       UPDATE subscription_plans SET price = 499, description = 'The complete career transformation ecosystem.',
         features = ARRAY['Skill Assessment', 'Career Roadmap', 'Learning Hub', 'Project Builder', 'Portfolio Builder', 'Resume Optimizer', 'ATS Checker', 'LinkedIn Optimizer', 'GitHub Optimizer', 'Recruiter Visibility Checker', 'Application Assistant', 'Interview Prep', 'Job Analytics', 'Career Readiness Dashboard']
       WHERE name = 'Zero to Hero'
+    `);
+
+    // Upgrade existing installs: v1 resumes table may lack v2 ATS columns
+    const resumeV2Columns = [
+      ['original_resume', 'TEXT'],
+      ['optimized_resume', 'TEXT'],
+      ['original_score', 'INTEGER'],
+      ['optimized_score', 'INTEGER'],
+      ['role_detected', 'VARCHAR(100)'],
+      ['keyword_coverage', 'JSONB'],
+      ['missing_info', 'JSONB'],
+      ['updated_at', 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP'],
+    ];
+
+    for (const [col, def] of resumeV2Columns) {
+      await pool.query(`ALTER TABLE resumes ADD COLUMN IF NOT EXISTS ${col} ${def}`);
+    }
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS analyses (
+        id SERIAL PRIMARY KEY,
+        resume_id INTEGER NOT NULL UNIQUE,
+        section_completeness INTEGER,
+        keyword_relevance INTEGER,
+        formatting_score INTEGER,
+        action_verbs_count INTEGER,
+        metrics_count INTEGER,
+        missing_sections JSONB,
+        recommendations JSONB,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS resume_exports (
+        id SERIAL PRIMARY KEY,
+        resume_id INTEGER NOT NULL,
+        export_format VARCHAR(10),
+        file_path VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_resumes_user_id ON resumes(user_id);
+      CREATE INDEX IF NOT EXISTS idx_resumes_created_at ON resumes(created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_analyses_resume_id ON analyses(resume_id);
+      CREATE INDEX IF NOT EXISTS idx_exports_resume_id ON resume_exports(resume_id);
     `);
 
     console.log('✅ Database migrations completed successfully');

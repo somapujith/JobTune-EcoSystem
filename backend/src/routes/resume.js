@@ -52,6 +52,14 @@ const upload = multer({
       ['file_size',     'INTEGER DEFAULT 0'],
       ['suggestions',   'JSONB'],
       ['overall_score', 'INTEGER DEFAULT 0'],
+      ['original_resume', 'TEXT'],
+      ['optimized_resume', 'TEXT'],
+      ['original_score', 'INTEGER'],
+      ['optimized_score', 'INTEGER'],
+      ['role_detected', 'VARCHAR(100)'],
+      ['keyword_coverage', 'JSONB'],
+      ['missing_info', 'JSONB'],
+      ['updated_at', 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP'],
     ];
     for (const [col, def] of migrations) {
       try {
