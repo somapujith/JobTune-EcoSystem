@@ -15,3 +15,5 @@ backend/backend/
 .claude/
 .kilo/
 .vscode/
+.agents/
+skills-lock.json
