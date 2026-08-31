@@ -29,6 +29,7 @@ const atsCheckerV2Routes = require('./routes/atsCheckerV2');
 const recruiterVisibilityRoutes = require('./routes/recruiterVisibility');
 const resumeConsistencyRoutes = require('./routes/resumeConsistency');
 const achievementEnhancerRoutes = require('./routes/achievementEnhancer');
+const learningPathRoutes = require('./routes/learningPath');
 const { errorHandler } = require('./middleware/errorHandler');
 const { auditLogger } = require('./middleware/auditLogger');
 const path = require('path');
@@ -87,6 +88,7 @@ app.use('/api/progress', progressRoutes);
 app.use('/api/recruiter-visibility', recruiterVisibilityRoutes);
 app.use('/api/resume-consistency', resumeConsistencyRoutes);
 app.use('/api/jobs/achievement-enhancer', achievementEnhancerRoutes);
+app.use('/api/learning-path', learningPathRoutes);
 
 // Admin UI Route
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));

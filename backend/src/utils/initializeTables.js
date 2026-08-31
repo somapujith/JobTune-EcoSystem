@@ -246,6 +246,54 @@ const tables = [
         keywords JSONB
       );
     `
+  },
+  {
+    name: 'learning_topics',
+    query: `
+      CREATE TABLE IF NOT EXISTS learning_topics (
+        id SERIAL PRIMARY KEY,
+        subject VARCHAR(100) NOT NULL,
+        tier VARCHAR(20) NOT NULL,
+        topic_order INTEGER NOT NULL,
+        slug VARCHAR(150) NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        content_md TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(subject, tier, slug)
+      );
+      CREATE INDEX IF NOT EXISTS idx_learning_topics_subject_tier ON learning_topics(subject, tier, topic_order);
+    `
+  },
+  {
+    name: 'learning_topic_progress',
+    query: `
+      CREATE TABLE IF NOT EXISTS learning_topic_progress (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        topic_id INTEGER NOT NULL REFERENCES learning_topics(id) ON DELETE CASCADE,
+        completed BOOLEAN NOT NULL DEFAULT true,
+        completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, topic_id)
+      );
+      CREATE INDEX IF NOT EXISTS idx_learning_topic_progress_user ON learning_topic_progress(user_id);
+    `
+  },
+  {
+    name: 'learning_streaks',
+    query: `
+      CREATE TABLE IF NOT EXISTS learning_streaks (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        subject VARCHAR(100) NOT NULL,
+        current_streak INTEGER NOT NULL DEFAULT 0,
+        longest_streak INTEGER NOT NULL DEFAULT 0,
+        last_active_date DATE,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, subject)
+      );
+      CREATE INDEX IF NOT EXISTS idx_learning_streaks_user ON learning_streaks(user_id);
+    `
   }
 ];
 
