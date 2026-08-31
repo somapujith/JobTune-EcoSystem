@@ -35,6 +35,19 @@ const QUESTIONS = [
       { value: 'networking', label: '🤝 Networking', desc: 'Building professional network, getting referrals' },
       { value: 'project-building', label: '⚙️ Project Building', desc: 'Need ideas for portfolio projects' }
     ]
+  },
+  {
+    id: 'field-of-interest',
+    question: 'Which field are you focused on?',
+    type: 'single',
+    options: [
+      { value: 'frontend', label: '🎨 Frontend', desc: 'React, UI/UX, web interfaces' },
+      { value: 'backend', label: '⚙️ Backend', desc: 'APIs, servers, databases' },
+      { value: 'fullstack', label: '🧩 Full Stack', desc: 'Both frontend and backend' },
+      { value: 'data-ml', label: '📊 Data & ML', desc: 'Data science, machine learning, analytics' },
+      { value: 'devops', label: '☁️ DevOps', desc: 'Infrastructure, CI/CD, cloud' },
+      { value: 'mobile', label: '📱 Mobile', desc: 'iOS, Android, cross-platform apps' }
+    ]
   }
 ];
 
@@ -43,13 +56,14 @@ export default function OnboardingQuestionnaire({ onComplete }) {
   const [answers, setAnswers] = useState({
     'career-goal': null,
     'experience': null,
-    'pain-points': []
+    'pain-points': [],
+    'field-of-interest': null
   });
   const { getRecommendation, isLoading } = useSubscriptionStore();
 
   const currentQuestion = QUESTIONS?.[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === (QUESTIONS?.length || 0) - 1;
-  const answeredAll = answers['career-goal'] && answers['experience'] && answers['pain-points']?.length > 0;
+  const answeredAll = answers['career-goal'] && answers['experience'] && answers['pain-points']?.length > 0 && answers['field-of-interest'];
 
   if (!currentQuestion) {
     return <div className="text-center py-12">Loading questions...</div>;
@@ -72,7 +86,7 @@ export default function OnboardingQuestionnaire({ onComplete }) {
   };
 
   const handleSubmit = async () => {
-    if (!answers['career-goal'] || !answers['experience'] || answers['pain-points'].length === 0) {
+    if (!answers['career-goal'] || !answers['experience'] || answers['pain-points'].length === 0 || !answers['field-of-interest']) {
       alert('Please answer all questions before continuing');
       return;
     }
@@ -81,7 +95,8 @@ export default function OnboardingQuestionnaire({ onComplete }) {
       const result = await getRecommendation(
         answers['career-goal'],
         answers['experience'],
-        answers['pain-points']
+        answers['pain-points'],
+        answers['field-of-interest']
       );
 
       if (result) {

@@ -9,7 +9,7 @@ const PLAN_ICONS = {
 };
 
 export default function PlanSelection({ recommendation, onPlanSelected }) {
-  const { selectPlan, isLoading, plans: allPlans } = useSubscriptionStore();
+  const { createOrder, isLoading, plans: allPlans } = useSubscriptionStore();
   const [selectedPlanId, setSelectedPlanId] = useState(null);
 
   useEffect(() => {
@@ -21,13 +21,13 @@ export default function PlanSelection({ recommendation, onPlanSelected }) {
   const handleSelectPlan = async (planId) => {
     setSelectedPlanId(planId);
     try {
-      await selectPlan(planId);
-      // Redirect to payment confirmation page instead of dashboard
+      const order = await createOrder(planId);
+      // Redirect to payment confirmation page with the pending order reference
       setTimeout(() => {
-        window.location.href = '/payment-confirm';
+        window.location.href = `/payment-confirm?order=${encodeURIComponent(order.order_ref)}`;
       }, 500);
     } catch (err) {
-      console.error('Failed to select plan:', err);
+      console.error('Failed to create order:', err);
     }
   };
 

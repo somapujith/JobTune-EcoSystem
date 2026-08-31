@@ -26,9 +26,22 @@ CREATE TABLE IF NOT EXISTS onboarding_responses (
   career_goal VARCHAR(100),
   experience_level VARCHAR(50),
   pain_points TEXT[],
+  field_of_interest VARCHAR(100),
   recommended_plan_id INT REFERENCES subscription_plans(id),
   completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Pending plan orders: plan assignment happens only after payment verification (mock verifier for now)
+CREATE TABLE IF NOT EXISTS plan_orders (
+  id SERIAL PRIMARY KEY,
+  order_ref VARCHAR(64) UNIQUE NOT NULL,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  plan_id INT NOT NULL REFERENCES subscription_plans(id),
+  amount DECIMAL(10, 2) NOT NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  paid_at TIMESTAMP
 );
 
 -- Insert default plans

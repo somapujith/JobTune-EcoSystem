@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { api } from '../store/useAuthStore';
 import {
   Zap,
   UploadCloud,
@@ -42,6 +42,73 @@ const SEVERITY_STYLES = {
   low: 'bg-slate-100 text-slate-600',
 };
 
+function scaleScore(value, fromMax, toMax) {
+  if (!fromMax) return 0;
+  return Math.round((value / fromMax) * toMax);
+}
+
+function estimateInterviewProbability(score) {
+  if (score >= 90) return 85;
+  if (score >= 80) return 70;
+  if (score >= 70) return 55;
+  if (score >= 60) return 40;
+  return 25;
+}
+
+function mapAnalysisResponse(data) {
+  const analysis = data.analysis;
+  const scores = analysis.scores;
+
+  return {
+    resumeId: data.resumeId,
+    atsScore: {
+      score: analysis.overallScore,
+      breakdown: {
+        keywordMatch: scaleScore(scores.keywords, 25, 30),
+        skillsCoverage: scaleScore(scores.section, 30, 30),
+        experienceAlignment: scaleScore(scores.metrics, 15, 20),
+        atsFormatting: scaleScore(scores.formatting, 15, 10),
+        resumeQuality: scaleScore(scores.actionVerbs, 15, 10),
+      },
+    },
+    analysis: {
+      quality: {
+        overallScore: analysis.overallScore / 10,
+        overallQuality: analysis.quality.overallQuality,
+      },
+      keyStrengths: analysis.quality.keyStrengths,
+      keyWeaknesses: analysis.quality.keyWeaknesses,
+    },
+  };
+}
+
+function mapOptimizeResponse(data) {
+  const { optimization, optimizedResume } = data;
+  const beforeProb = estimateInterviewProbability(optimization.originalScore);
+  const afterProb = estimateInterviewProbability(optimization.optimizedScore);
+
+  return {
+    comparison: {
+      before: {
+        atsScore: optimization.originalScore,
+        interviewProbability: beforeProb,
+      },
+      after: {
+        atsScore: optimization.optimizedScore,
+        interviewProbability: afterProb,
+      },
+      improvement: {
+        atsScoreGain: optimization.improvement,
+        probabilityGain: afterProb - beforeProb,
+      },
+    },
+    enhancement: {
+      notes: optimization.optimizationNotes || [],
+      enhancedResume: optimizedResume,
+    },
+  };
+}
+
 export default function ATSCheckerV2() {
   const [resumeFile, setResumeFile] = useState(null);
   const [resumeFileName, setResumeFileName] = useState('');
@@ -50,6 +117,8 @@ export default function ATSCheckerV2() {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('input');
   const [dragActive, setDragActive] = useState(false);
+  const [enhancedResume, setEnhancedResume] = useState(null);
+  const [analyzing, setAnalyzing] = useState(false);
 
   const validateAndSetFile = (file) => {
     if (!file) return;
@@ -89,45 +158,34 @@ export default function ATSCheckerV2() {
     setError('');
     setLoading(true);
     setResults(null);
+    setEnhancedResume(null);
 
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setError('Please log in to use this feature');
-        setLoading(false);
-        return;
-      }
-
       const formData = new FormData();
       formData.append('resume', resumeFile);
 
-      const parseResponse = await axios.post('/api/ats/v2/parse', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}`
-        }
+      const { data } = await api.post('/resume/v2/analyze', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      if (!parseResponse.data.resumeText) {
-        throw new Error('Failed to parse resume');
+      if (data.status !== 'success') {
+        throw new Error(data.message || 'Analysis failed');
       }
 
-      const resumeText = parseResponse.data.resumeText;
+      setResults(mapAnalysisResponse(data));
+      setActiveTab('results');
 
-      const response = await axios.post('/api/resume/v2/analyze', {
-        resumeText
-      }, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.data.status === 'success') {
-        setResults(response.data);
-        setActiveTab('results');
+      if (data.resumeText) {
+        setAnalyzing(true);
+        enhanceResumeBackground(data.resumeText, data.resumeId);
       }
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Analysis failed');
+      const message =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.message ||
+        'Analysis failed';
+      setError(message);
       console.error('Analysis error:', err);
     } finally {
       setLoading(false);
@@ -137,6 +195,24 @@ export default function ATSCheckerV2() {
   const overallScore = results?.analysis?.overallScore ?? 0;
   const scoreBand = getScoreBand(overallScore);
   const circumference = 2 * Math.PI * 45;
+
+  // Background enhancement (non-blocking)
+  const enhanceResumeBackground = async (text, id) => {
+    try {
+      const { data } = await api.post('/resume/v2/optimize', {
+        resumeId: id,
+        resumeText: text,
+      });
+
+      if (data.status === 'success') {
+        setEnhancedResume(mapOptimizeResponse(data));
+      }
+    } catch (err) {
+      console.error('Enhancement error:', err);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto py-12 px-4 sm:px-6 lg:px-8 w-full">

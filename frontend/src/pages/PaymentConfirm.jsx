@@ -1,22 +1,59 @@
 import React, { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import useAuthStore from '../store/useAuthStore';
-import { Zap } from 'lucide-react';
+import useSubscriptionStore from '../store/useSubscriptionStore';
+import { Zap, AlertCircle } from 'lucide-react';
 
+// NOTE: No payment gateway is wired up yet. verifyPayment() calls a mock
+// backend verifier that always succeeds for a valid pending order — swap
+// in a real gateway (e.g. Razorpay checkout + signature verification)
+// before accepting real money.
 export default function PaymentConfirm() {
   const { isAuthenticated } = useAuthStore();
+  const { verifyPayment } = useSubscriptionStore();
+  const [searchParams] = useSearchParams();
+  const orderRef = searchParams.get('order');
   const [isProcessing, setIsProcessing] = useState(true);
+  const [error, setError] = useState(null);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  const handleContinue = () => {
-    setIsProcessing(false);
-    setTimeout(() => {
-      window.location.href = '/dashboard';
-    }, 1000);
+  const handleContinue = async () => {
+    if (!orderRef) {
+      setError('Missing order reference. Please restart plan selection.');
+      return;
+    }
+    setError(null);
+    try {
+      await verifyPayment(orderRef);
+      setIsProcessing(false);
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 1000);
+    } catch (err) {
+      setError(err?.response?.data?.error || 'Payment verification failed. Please try again.');
+    }
   };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-6">
+        <div className="max-w-md w-full text-center space-y-6">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto" />
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white">Payment Not Confirmed</h1>
+          <p className="text-slate-600 dark:text-slate-400">{error}</p>
+          <button
+            onClick={handleContinue}
+            className="w-full py-4 px-6 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all active:scale-95"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!isProcessing) {
     return (

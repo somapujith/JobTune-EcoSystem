@@ -157,6 +157,24 @@ async function runMigrations() {
       CREATE INDEX IF NOT EXISTS idx_exports_resume_id ON resume_exports(resume_id);
     `);
 
+    // Field of interest on onboarding responses (added after initial launch)
+    await pool.query(`ALTER TABLE onboarding_responses ADD COLUMN IF NOT EXISTS field_of_interest VARCHAR(100)`);
+
+    // Pending plan orders: plan assignment now happens only after payment verification
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS plan_orders (
+        id SERIAL PRIMARY KEY,
+        order_ref VARCHAR(64) UNIQUE NOT NULL,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        plan_id INTEGER NOT NULL REFERENCES subscription_plans(id),
+        amount DECIMAL(10, 2) NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        paid_at TIMESTAMP
+      )
+    `);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_plan_orders_user_id ON plan_orders(user_id)`);
+
     console.log('✅ Database migrations completed successfully');
   } catch (err) {
     console.error('❌ Migration error:', err.message);

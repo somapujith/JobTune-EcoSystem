@@ -6,5 +6,12 @@ dist/
 build/
 coverage/
 *.log
+*_log.txt
 .DS_Store
+Thumbs.db
+.idea/
+*.pdf
 backend/backend/
+.claude/
+.kilo/
+.vscode/

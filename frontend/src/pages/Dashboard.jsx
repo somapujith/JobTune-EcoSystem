@@ -107,6 +107,9 @@ export default function Dashboard() {
            <p className="text-slate-500 mt-2 font-medium">
              Your plan: <span className="font-bold text-blue-600">{userPlan?.name || 'Loading...'}</span>
              {userPlan && <span className="text-emerald-600 ml-2">• {visibleTools.length} tools available</span>}
+             {overview?.profile?.field_of_interest && (
+               <span className="text-slate-400 ml-2">• Focused on {overview.profile.field_of_interest}</span>
+             )}
            </p>
         </div>
         <div className="flex flex-col gap-3">
