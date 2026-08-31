@@ -96,6 +96,26 @@ const useSubscriptionStore = create((set, get) => ({
     if (!userPlan) return false;
     return userPlan.features && userPlan.features.includes(toolName);
   },
+
+  // Used by the "manage your plan" settings page to switch an already-onboarded
+  // user to a different tier. Goes through the same create-order + mock-verify
+  // flow as first-time onboarding, just without the redirect to /payment-confirm
+  // — the caller (PlanSettings) shows its own inline confirm/loading state.
+  selectPlan: async (planId) => {
+    set({ isLoading: true });
+    try {
+      const { data: orderData } = await api.post('/subscriptions/create-order', { planId });
+      const { data } = await api.post('/subscriptions/verify-payment', {
+        orderRef: orderData.order.order_ref,
+      });
+      set({ userPlan: data.plan, pendingOrder: null, isLoading: false });
+      return data.plan;
+    } catch (err) {
+      console.error('Failed to select plan:', err);
+      set({ isLoading: false });
+      throw err;
+    }
+  },
 }));
 
 export default useSubscriptionStore;

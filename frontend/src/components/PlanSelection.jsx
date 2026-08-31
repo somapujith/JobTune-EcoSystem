@@ -8,7 +8,7 @@ const PLAN_ICONS = {
   'Zero to Hero': <Crown className="w-8 h-8" />
 };
 
-export default function PlanSelection({ recommendation, onPlanSelected }) {
+export default function PlanSelection({ recommendation }) {
   const { createOrder, isLoading, plans: allPlans } = useSubscriptionStore();
   const [selectedPlanId, setSelectedPlanId] = useState(null);
 
