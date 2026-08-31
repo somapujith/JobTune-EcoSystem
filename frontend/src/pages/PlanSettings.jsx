@@ -85,7 +85,7 @@ export default function PlanSettings() {
   }
 
   const openSwitchModal = (plan) => {
-    if (!userPlan || plan.id === userPlan.id) return;
+    if (userPlan && plan.id === userPlan.id) return;
     setSwitchError(null);
     setPendingPlan(plan);
   };
