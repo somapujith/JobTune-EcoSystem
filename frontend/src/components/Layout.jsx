@@ -29,6 +29,7 @@ const BASE_NAV_GROUPS = [
 
 const PREP_ITEM_LOCKED = [
   { label: 'Preparation Dashboard', path: '/preparation', desc: 'Your central prep center' },
+  { label: 'Learning Path', path: '/learning-path', desc: 'Tiered curricula with streak tracking' },
 ];
 
 const PREP_ITEMS_UNLOCKED = [
@@ -36,6 +37,7 @@ const PREP_ITEMS_UNLOCKED = [
   { label: 'Tune & Polish', path: '/preparation/tune-and-polish', desc: 'Interview Copilot & Resumes' },
   { label: 'Zero to Hero', path: '/preparation/zero-to-hero', desc: 'Path Finder & AI Tutor' },
   { label: 'Learn & Build', path: '/preparation/learn-and-build', desc: 'Targeted Portfolio Projects' },
+  { label: 'Learning Path', path: '/learning-path', desc: 'Tiered curricula with streak tracking' },
 ];
 
 const Navbar = () => {

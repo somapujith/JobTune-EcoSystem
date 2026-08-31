@@ -24,7 +24,8 @@ import {
   Search,
   Gauge,
   ListChecks,
-  Map as MapIcon
+  Map as MapIcon,
+  GraduationCap
 } from 'lucide-react';
 
 // Mirrors the JobTube Subscription Plans PDF tiers exactly.
@@ -33,6 +34,7 @@ const ALL_TOOLS = [
   { name: 'Skill Assessment', icon: Activity, path: '/skills', color: 'bg-blue-500', tier: 'Foundation', plan: 'Learn & Build' },
   { name: 'Career Roadmap', icon: MapIcon, path: '/career', color: 'bg-teal-500', tier: 'Foundation', plan: 'Learn & Build' },
   { name: 'Learning Hub', icon: BookOpen, path: '/learning', color: 'bg-amber-500', tier: 'Foundation', plan: 'Learn & Build' },
+  { name: 'Learning Path', icon: GraduationCap, path: '/learning-path', color: 'bg-cyan-600', tier: 'Foundation', plan: 'Learn & Build' },
   { name: 'Project Builder', icon: Lightbulb, path: '/projects', color: 'bg-rose-500', tier: 'Foundation', plan: 'Learn & Build' },
   { name: 'Portfolio Builder', icon: LayoutIcon, path: '/portfolio', color: 'bg-indigo-500', tier: 'Foundation', plan: 'Learn & Build' },
 

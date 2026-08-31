@@ -27,6 +27,9 @@ import ResumeHistory from './pages/ResumeHistory';
 import ResumeComparison from './pages/ResumeComparison';
 import ResumeSend from './pages/ResumeSend';
 import CareerRoadmap from './pages/CareerRoadmap';
+import LearningPathSubjects from './pages/LearningPathSubjects';
+import LearningPathTier from './pages/LearningPathTier';
+import LearningPathTopic from './pages/LearningPathTopic';
 import ATSChecker from './pages/ATSCheckerV2';
 import JobAnalyzer from './pages/JobAnalyzer';
 import CoverLetterGenerator from './pages/CoverLetterGenerator';
@@ -148,6 +151,9 @@ function App() {
           <Route path="preparation/zero-to-hero" element={<ProtectedToolRoute toolPath="/preparation/zero-to-hero"><ZeroToHeroTrack /></ProtectedToolRoute>} />
           <Route path="preparation/learn-and-build" element={<ProtectedToolRoute toolPath="/preparation/learn-and-build"><LearnAndBuildTrack /></ProtectedToolRoute>} />
           <Route path="learning" element={<ProtectedToolRoute toolPath="/learning"><ContentVault /></ProtectedToolRoute>} />
+          <Route path="learning-path" element={<ProtectedToolRoute toolPath="/learning-path"><LearningPathSubjects /></ProtectedToolRoute>} />
+          <Route path="learning-path/:subject" element={<ProtectedToolRoute toolPath="/learning-path/:subject"><LearningPathTier /></ProtectedToolRoute>} />
+          <Route path="learning-path/:subject/:tier/:slug" element={<ProtectedToolRoute toolPath="/learning-path/:subject/:tier/:slug"><LearningPathTopic /></ProtectedToolRoute>} />
           <Route path="projects" element={<ProtectedToolRoute toolPath="/projects"><ProjectIdeas /></ProtectedToolRoute>} />
           <Route path="blog" element={<Blog />} />
           <Route
