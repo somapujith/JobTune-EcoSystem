@@ -105,3 +105,7 @@ These surfaced independently across the 10 module reviews and matter for priorit
 ## How to Extend
 
 When a module changes meaningfully, update its doc under `docs/modules/` directly rather than adding a new file — keep one doc per module. If a genuinely new module is added, give it the next number and add a row to the index table and system flowchart above.
+
+## In-Progress Infrastructure Changes
+
+- **Cloudflare Workers migration** — the backend is being ported from Express/Node to Cloudflare Workers. See [CLOUDFLARE_MIGRATION.md](CLOUDFLARE_MIGRATION.md) for the dependency compatibility assessment and porting plan. Not functional yet — `backend/wrangler.toml` and `backend/src/worker-entry.js` are scaffolding only; the Express app in `backend/src/app.js` remains the live backend until the port is complete.

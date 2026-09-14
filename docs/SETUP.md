@@ -5,7 +5,7 @@ Grounded in the actual scripts/config in `backend/` and `frontend/` as of 2026-0
 ## Prerequisites
 
 - Node.js (backend uses CommonJS + `pg`, frontend uses Vite — Node 18+ recommended)
-- A reachable PostgreSQL database (Supabase works out of the box — see [SUPABASE_SETUP.md](archive/SUPABASE_SETUP.md) in the archive for the original Supabase walkthrough)
+- A reachable PostgreSQL database. **The live/current environment runs on [Neon](https://neon.tech)** (serverless Postgres) — get the pooled connection string from the Neon console (Project → Connect) and use it as `DATABASE_URL`. Supabase also works out of the box if you'd rather self-host a dev DB there — see [SUPABASE_SETUP.md](archive/SUPABASE_SETUP.md) in the archive for that walkthrough. Any standard Postgres works; `database.js` only requires SSL and a `DATABASE_URL` connection string.
 - Optional: an LM Studio instance (or any OpenAI-compatible endpoint) if you want real AI-generated output instead of mocked responses
 
 ## 1. Clone & install
@@ -25,7 +25,7 @@ There is no root-level workspace linking — `backend/` and `frontend/` are inde
 | Variable | Required | Purpose |
 |---|---|---|
 | `PORT` | No (default `5000`) | Backend HTTP port |
-| `DATABASE_URL` | **Yes** | Postgres connection string (`postgresql://user:pass@host:port/db`) |
+| `DATABASE_URL` | **Yes** | Postgres connection string (`postgresql://user:pass@host:port/db`). Production uses a Neon pooled connection string (`...-pooler.<region>.aws.neon.tech/neondb?sslmode=require&channel_binding=require`) — get your own from the Neon console, never reuse someone else's, and never commit it (`.env` is gitignored) |
 | `JWT_SECRET` | **Yes** | Signs access tokens — see [Module 01](modules/01-auth-onboarding.md) |
 | `NODE_ENV` | No | `development` unmasks internal error messages in responses (see `errorHandler.js`) |
 | `LM_STUDIO_URL` | Only if `MOCK_AI=false` | Base URL of an OpenAI-compatible inference endpoint |
@@ -47,7 +47,9 @@ On boot, `backend/src/server.js` runs, in order:
 2. `runMigrations()` — adds subscription-related tables if missing
 3. `sessionService.ensureTables()` — creates session/progress tables
 
-So pointing `DATABASE_URL` at an empty Postgres database and starting the server is sufficient — it self-provisions its schema. Standalone `.sql` files in `backend/src/migrations/` (`add-ats-tables.sql`, `add-github-analyses.sql`, `add-subscriptions.sql`) exist for reference/manual application if needed, but are not run automatically.
+So pointing `DATABASE_URL` at an empty Postgres database (Neon or otherwise) and starting the server is sufficient — it self-provisions its schema, no manual `CREATE TABLE` or migration-runner step required. Standalone `.sql` files in `backend/src/migrations/` (`add-ats-tables.sql`, `add-github-analyses.sql`, `add-subscriptions.sql`) exist for reference/manual application if needed, but are not run automatically.
+
+**Working against the shared/production Neon database:** all 27 tables already exist there with live data (users, subscriptions, learning-path content, etc.) — pointing your local backend at it means you're developing against real data, not a sandbox. For local development, prefer creating your own empty Neon project (or a local/Supabase Postgres instance) and letting the app provision its own schema, rather than pointing at the shared production `DATABASE_URL`.
 
 **Known gotcha** (see [docs/README.md](README.md) cross-module findings): `initializeTables.js` and `runMigrations.js` define conflicting `resumes` table schemas. If you've run one boot path and then change code paths, check the actual `resumes` table columns before assuming `overall_score` vs `original_score`/`optimized_score` exists.
 
