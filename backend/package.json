@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.103.0",
+    "@neondatabase/serverless": "^1.1.0",
     "axios": "^1.17.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",

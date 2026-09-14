@@ -31,7 +31,7 @@ Concretely, in this codebase today:
 
 ## Porting plan (suggested order)
 
-1. **Swap the DB driver first, independent of everything else.** Replace `pg` with `@neondatabase/serverless` in [config/database.js](../backend/src/config/database.js). This can be tested against the existing Express app locally before touching the runtime — de-risks the biggest change first.
+1. **✅ Done — DB driver.** [config/database.worker.js](../backend/src/config/database.worker.js) wraps `@neondatabase/serverless`'s `Pool` (API-compatible with `pg`'s `.query()`, so ported routes' query calls don't need to change) behind a `getPool(env)` function — Workers has no `process.env`, so the connection string comes from the `env` object passed into `fetch(request, env, ctx)` instead. Smoke-tested against the live Neon DB (`SELECT COUNT(*) FROM users` returned the correct count). **Kept as a separate file from [config/database.js](../backend/src/config/database.js) on purpose** — the live Express app still uses `pg`/`database.js` unchanged and untouched; route files should only import `database.worker.js` once they're actually being ported, module by module, not as a blanket swap.
 2. **Pick and wire a Workers-native router.** Hono is the closest match to Express's `app.use('/api/x', router)` mounting style already used in [app.js](../backend/src/app.js) — minimizes the diff across all ~28 route files.
 3. **Replace `bcrypt` with `bcryptjs`** in [routes/auth.js](../backend/src/routes/auth.js) and [services/sessionService.js](../backend/src/services/sessionService.js) — same API, drop-in.
 4. **Rewrite file-upload handling** (3 route files) from `multer` middleware to `await request.formData()`.
