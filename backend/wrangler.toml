@@ -1,8 +1,8 @@
-name = "jobtube-backend"
+name = "jobtune-ecosystem"
 main = "src/worker-entry.js"
 compatibility_date = "2026-09-14"
 compatibility_flags = ["nodejs_compat"]
-account_id = "be94a0736d9fbbddc82edd847ab61e75"
+account_id = "af2854d5e1c39fde573717202a1deb36"
 
 # Not wired to real routes yet — see docs/archive-cloudflare or
 # docs/CLOUDFLARE_MIGRATION.md for the porting plan before deploying.

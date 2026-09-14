@@ -1,12 +1,14 @@
 # Cloudflare Workers Migration Plan
 
-Status: **connected, but not functional.** The `backend/` project is connected to Cloudflare Workers via **Cloudflare's native Git integration** (Workers & Pages → project → Settings → Build, connected directly to this GitHub repo — not via a GitHub Actions workflow or API token). It deploys automatically on push using `backend/wrangler.toml` as the config source. What's actually deployed right now is `backend/src/worker-entry.js`, which is still a stub returning `501` for every request — the real Express app has not been ported. This doc is the porting plan, written against the backend as of 2026-09-14.
+Status: **build pipeline connected and passing config validation; app itself still a stub.** The `backend/` project is connected to Cloudflare Workers via **Cloudflare's native Git integration** (Workers & Pages → project → Settings → Build). It deploys automatically on push, using `backend/wrangler.toml` as the config source. What's actually served right now is `backend/src/worker-entry.js`, a stub returning `501` for every request — the real Express app has not been ported. This doc is the porting plan, written against the backend as of 2026-09-14.
 
 ## Deploy mechanism
 
-- **Live path:** Cloudflare's Git integration, configured entirely in the Cloudflare dashboard. No `CLOUDFLARE_API_TOKEN` or GitHub secret is involved in this path — Cloudflare's own GitHub App has repo access and builds/deploys directly.
+- **Live path:** Cloudflare's Git integration, configured entirely in the Cloudflare dashboard (Build command: none, Deploy command: `npx wrangler deploy`, Root directory: `/backend`). No `CLOUDFLARE_API_TOKEN` or GitHub secret is involved in this path — Cloudflare's own GitHub App has repo access and builds/deploys directly.
 - A GitHub Actions–based deploy (`wrangler-action` + a `CLOUDFLARE_API_TOKEN` repo secret) was scaffolded and then removed to avoid two competing deploy paths — Cloudflare's Git integration is the one actually in use. If a CI-gated deploy (tests/lint before deploy) is wanted later, re-add that workflow *and* disconnect the native Git integration first, rather than running both.
-- `account_id` is set in `wrangler.toml`; it's not sensitive and is safe to keep in the repo.
+- `wrangler` is pinned as a `devDependency` in `backend/package.json` (`4.131.2`, matching what Cloudflare's build environment resolved) so local `npx wrangler` and CI use the same version.
+- **Project identity matters and must match exactly:** the Cloudflare Workers project name (`jobtune-ecosystem`) and `account_id` (`af2854d5e1c39fde573717202a1deb36`) in `wrangler.toml` must match the actual connected Cloudflare project — an earlier attempt used a different, incorrect `account_id`/project name pair copied from a mismatched dashboard session, and the build failed hard with `The account_id in your wrangler.toml file must match the account_id for this account`. If a future deploy fails the same way, re-check both values against the Cloudflare dashboard's Workers & Pages overview for this exact project before assuming it's a code problem.
+- Deployed URL: `jobtune-ecosystem.somapujith.workers.dev`.
 
 ## Why this isn't a drop-in deploy
 
