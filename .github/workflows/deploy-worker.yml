@@ -1,0 +1,46 @@
+name: Deploy Backend (Cloudflare Workers)
+
+# Deploys backend/ to Cloudflare Workers via Wrangler on every push to main
+# that touches backend/. Requires a CLOUDFLARE_API_TOKEN repo secret
+# (Settings -> Secrets and variables -> Actions -> New repository secret) —
+# never commit the token itself. See docs/CLOUDFLARE_MIGRATION.md: as of
+# this workflow's creation, backend/src/worker-entry.js is still a stub
+# (returns 501) — this pipeline will deploy that stub until the actual
+# Express -> Workers port is done.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/deploy-worker.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-worker-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: backend
