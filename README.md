@@ -46,4 +46,4 @@ Topic_workflows/  Learning-path curriculum content (source data for Module 06)
 
 ## In progress
 
-Backend is being ported to Cloudflare Workers — see [docs/CLOUDFLARE_MIGRATION.md](docs/CLOUDFLARE_MIGRATION.md) for the compatibility assessment and porting plan. Not yet functional; the Express app is still the live backend today.
+Backend is connected to Cloudflare Workers via Cloudflare's native Git integration (auto-deploys on push) but the actual Express app hasn't been ported yet — the deployed Worker is still a stub. See [docs/CLOUDFLARE_MIGRATION.md](docs/CLOUDFLARE_MIGRATION.md) for the compatibility assessment, porting plan, and deploy mechanism. The Express app (run locally / wherever it's hosted today) remains the real backend until the port is complete.

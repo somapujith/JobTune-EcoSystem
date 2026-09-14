@@ -6,16 +6,19 @@
 ⚠️ Network connectivity issue: Port 5432 appears blocked
 
 ## Your Supabase Details
-- **Project URL:** https://ertdjcmxfwmdhpgyfkln.supabase.co
-- **Database Host:** db.ertdjcmxfwmdhpgyfkln.supabase.co
-- **Port:** 5432
-- **Username:** postgresPujith
-- **Password:** @1008 (contains special char, auto-encoded to %40)
-- **Database:** postgres
 
-## Connection String (Already Set)
+**Credentials redacted** — this doc originally had a real project host/username/password committed in plaintext (since rotated; see security note at the top of [docs/archive/](README.md)). Get current values from your own Supabase project dashboard → Settings → Database.
+
+- **Project URL:** `https://<project-ref>.supabase.co`
+- **Database Host:** `db.<project-ref>.supabase.co`
+- **Port:** 5432 (direct) / 6543 (pooler, recommended — see below)
+- **Username:** your Supabase DB username
+- **Password:** your Supabase DB password (URL-encode special characters, e.g. `@` → `%40`)
+- **Database:** `postgres`
+
+## Connection String (Example Shape)
 ```
-DATABASE_URL=postgresql://postgresPujith:%401008@db.ertdjcmxfwmdhpgyfkln.supabase.co:5432/postgres?sslmode=require
+DATABASE_URL=postgresql://<username>:<url-encoded-password>@db.<project-ref>.supabase.co:5432/postgres?sslmode=require
 ```
 
 ## Troubleshooting Network Connectivity
@@ -28,11 +31,11 @@ Your ISP or firewall may block port 5432 (PostgreSQL default port).
 2. Find "Connection String - Transaction mode"
 3. Replace connection string with pooler URL:
    ```
-   postgresql://postgresPujith:%401008@db.ertdjcmxfwmdhpgyfkln.supabase.co:6543/postgres?sslmode=require
+   postgresql://<username>:<url-encoded-password>@db.<project-ref>.supabase.co:6543/postgres?sslmode=require
    ```
 4. Update `.env`:
    ```
-   DATABASE_URL=postgresql://postgresPujith:%401008@db.ertdjcmxfwmdhpgyfkln.supabase.co:6543/postgres?sslmode=require
+   DATABASE_URL=postgresql://<username>:<url-encoded-password>@db.<project-ref>.supabase.co:6543/postgres?sslmode=require
    ```
 5. Restart backend
 

@@ -108,4 +108,4 @@ When a module changes meaningfully, update its doc under `docs/modules/` directl
 
 ## In-Progress Infrastructure Changes
 
-- **Cloudflare Workers migration** — the backend is being ported from Express/Node to Cloudflare Workers. See [CLOUDFLARE_MIGRATION.md](CLOUDFLARE_MIGRATION.md) for the dependency compatibility assessment and porting plan. Not functional yet — `backend/wrangler.toml` and `backend/src/worker-entry.js` are scaffolding only; the Express app in `backend/src/app.js` remains the live backend until the port is complete.
+- **Cloudflare Workers migration** — `backend/` is connected to Cloudflare Workers via Cloudflare's native Git integration (auto-deploys on push to main, configured in the Cloudflare dashboard, not via GitHub Actions). The deployed Worker is currently just a stub (`backend/src/worker-entry.js`, returns `501`) — the real Express app has not been ported yet. See [CLOUDFLARE_MIGRATION.md](CLOUDFLARE_MIGRATION.md) for the dependency compatibility assessment, porting plan, and deploy mechanism. The Express app in `backend/src/app.js` remains the real backend until the port is complete.

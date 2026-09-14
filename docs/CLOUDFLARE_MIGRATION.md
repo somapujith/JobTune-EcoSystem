@@ -1,6 +1,12 @@
 # Cloudflare Workers Migration Plan
 
-Status: **not started — scaffolding only.** `backend/wrangler.toml` and `backend/src/worker-entry.js` exist as placeholders; the actual Express app has not been ported. This doc is the porting plan, written against the backend as of 2026-09-14.
+Status: **connected, but not functional.** The `backend/` project is connected to Cloudflare Workers via **Cloudflare's native Git integration** (Workers & Pages → project → Settings → Build, connected directly to this GitHub repo — not via a GitHub Actions workflow or API token). It deploys automatically on push using `backend/wrangler.toml` as the config source. What's actually deployed right now is `backend/src/worker-entry.js`, which is still a stub returning `501` for every request — the real Express app has not been ported. This doc is the porting plan, written against the backend as of 2026-09-14.
+
+## Deploy mechanism
+
+- **Live path:** Cloudflare's Git integration, configured entirely in the Cloudflare dashboard. No `CLOUDFLARE_API_TOKEN` or GitHub secret is involved in this path — Cloudflare's own GitHub App has repo access and builds/deploys directly.
+- A GitHub Actions–based deploy (`wrangler-action` + a `CLOUDFLARE_API_TOKEN` repo secret) was scaffolded and then removed to avoid two competing deploy paths — Cloudflare's Git integration is the one actually in use. If a CI-gated deploy (tests/lint before deploy) is wanted later, re-add that workflow *and* disconnect the native Git integration first, rather than running both.
+- `account_id` is set in `wrangler.toml`; it's not sensitive and is safe to keep in the repo.
 
 ## Why this isn't a drop-in deploy
 
@@ -39,5 +45,5 @@ If the document-generation dependencies (step 5) turn out to be broadly incompat
 
 ## Files added so far (scaffolding only)
 
-- [backend/wrangler.toml](../backend/wrangler.toml) — Workers project config, secrets left unset
-- [backend/src/worker-entry.js](../backend/src/worker-entry.js) — stub `fetch` handler, returns `501` — not wired to any real route yet
+- [backend/wrangler.toml](../backend/wrangler.toml) — Workers project config; `account_id` set, secrets left unset (must be added via `wrangler secret put` or the Cloudflare dashboard's Variables & Secrets UI, not this file)
+- [backend/src/worker-entry.js](../backend/src/worker-entry.js) — stub `fetch` handler, returns `501` — not wired to any real route yet, and is what's currently live on the deployed Worker

@@ -24,7 +24,7 @@ These are the project's original planning, design, and architecture docs. They a
 | [RESUME_ANALYZER_V2_IMPLEMENTATION.md](RESUME_ANALYZER_V2_IMPLEMENTATION.md) | Resume Analyzer V2 design doc — same LLM-critic-stage caveat as the ATS Checker doc above |
 | [ROADMAP.md](ROADMAP.md) | Product roadmap |
 | [SUBSCRIPTION_ONBOARDING_PLAN.md](SUBSCRIPTION_ONBOARDING_PLAN.md) | Original plan for the subscription/onboarding flow (see [01-auth-onboarding](../modules/01-auth-onboarding.md) for what was actually built) |
-| [SUPABASE_SETUP.md](SUPABASE_SETUP.md) | Original Supabase database setup walkthrough — still broadly useful, referenced from `docs/SETUP.md` |
+| [SUPABASE_SETUP.md](SUPABASE_SETUP.md) | Original Supabase database setup walkthrough — still broadly useful, referenced from `docs/SETUP.md`. **A real project password was originally committed in this file in plaintext and has been redacted (2026-09-14) — the old value is still visible in git history on `origin/feat/missing-pipeline-tools` and must be treated as compromised/rotated, never reused.** |
 | [TECH_STACK_VISUAL_GUIDE.md](TECH_STACK_VISUAL_GUIDE.md) | Tech stack visual reference |
 | [TIER1_AI_FEATURES_PLAN.md](TIER1_AI_FEATURES_PLAN.md) | Plan for tier-1 AI features |
 | [UX_IMPROVEMENTS.md](UX_IMPROVEMENTS.md) | UX improvement proposals |
