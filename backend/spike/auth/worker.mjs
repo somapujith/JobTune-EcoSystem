@@ -181,11 +181,11 @@ function e2(request) {
 }
 
 // ---- S11 (Neon) -- gated; see s11.mjs header. Never runs without env.DATABASE_URL. ----------
+// For a run against a REAL Neon URL with the driver's defaults. For the local wsproxy run use spike/s11/worker.mjs.
 async function s11(request, env, ctx) {
   const s11mod = await import('./s11.mjs');
-  const dbmod = await import('../../src/config/database.worker.js'); // the REAL backend module
-  const getPool = dbmod.getPool ?? (dbmod.default && dbmod.default.getPool);
-  return s11mod.handleS11(request, env, ctx, getPool);
+  const dbjs = (await import('../../src/worker/db.js')).default; // the REAL backend module (-> config/database.worker.js)
+  return s11mod.handleS11(request, env, ctx, { createNeonDb: dbjs.createNeonDb, createRequestDb: dbjs.createRequestDb });
 }
 
 export default {

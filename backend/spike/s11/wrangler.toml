@@ -1,0 +1,7 @@
+# S11 spike worker (throwaway, never deployed). Same compat settings as production wrangler.toml.
+# Run from backend/:  npx wrangler dev --local --port 8930 -c spike/s11/wrangler.toml
+# Needs spike/s11/.dev.vars (git-ignored, delete afterwards) -- see docs/migration/s11-results.md.
+name = "jobtune-spike-s11"
+main = "worker.mjs"
+compatibility_date = "2026-09-14"
+compatibility_flags = ["nodejs_compat"]

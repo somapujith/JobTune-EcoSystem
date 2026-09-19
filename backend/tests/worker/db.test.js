@@ -247,3 +247,140 @@ describe('db.hold (post-response background work)', () => {
     expect(pool.end).not.toHaveBeenCalled(); // pool never created (no queries), nothing to end
   });
 });
+
+// ---------------------------------------------------------------------------------------------
+// Defects proven by the S11 spike (docs/migration/s11-results.md), reproduced here with fakes that
+// mimic the real driver's behaviour inside workerd.
+describe('driver failures that are not Error instances (S11: bare ErrorEvent on WebSocket connect failure)', () => {
+  // What @neondatabase/serverless rejects with when the WebSocket cannot connect (observed in workerd):
+  // an ErrorEvent-like object, NOT an Error.
+  const errorEventLike = () => ({ type: 'error', message: 'Uncaught Error: Network connection lost.' });
+
+  it('query() rejects with a real Error that keeps the driver message', async () => {
+    const pool = fakePool();
+    pool.query.mockRejectedValueOnce(errorEventLike());
+    const db = createRequestDb(() => pool);
+    const err = await db.query('SELECT 1').catch((e) => e);
+    expect(err).toBeInstanceOf(Error);
+    expect(err.message).toBe('Uncaught Error: Network connection lost.');
+    await db.release();
+  });
+
+  it('keeps a driver error code on the wrapped Error', async () => {
+    const pool = fakePool();
+    pool.query.mockRejectedValueOnce({ message: 'boom', code: '57P01' });
+    const db = createRequestDb(() => pool);
+    const err = await db.query('SELECT 1').catch((e) => e);
+    expect(err).toBeInstanceOf(Error);
+    expect(err.code).toBe('57P01');
+    await db.release();
+  });
+
+  it('passes a genuine Error through unchanged (same object, code intact)', async () => {
+    const pool = fakePool();
+    const original = Object.assign(new Error('duplicate key'), { code: '23505' });
+    pool.query.mockRejectedValueOnce(original);
+    const db = createRequestDb(() => pool);
+    await expect(db.query('INSERT')).rejects.toBe(original);
+    await db.release();
+  });
+
+  it('reaches Hono app.onError as masked JSON instead of escaping to the runtime (Hono rethrows non-Error values)', async () => {
+    const pool = fakePool();
+    pool.query.mockRejectedValue(errorEventLike());
+    const app = new Hono();
+    app.use('*', dbMiddleware(() => createRequestDb(() => pool)));
+    app.onError((err, c) => c.json({ error: 'Internal Server Error' }, 500));
+    app.get('/bare', async (c) => { await getDb(c).query('SELECT 1'); return c.text('unreachable'); }); // no try/catch
+    const res = await app.request('/bare', {}, makeEnv(), makeCtx());
+    expect(res.status).toBe(500);
+    expect(await res.json()).toEqual({ error: 'Internal Server Error' });
+  });
+
+  it('control: WITHOUT the normalisation a raw non-Error throw escapes Hono onError entirely', async () => {
+    const app = new Hono();
+    app.onError((err, c) => c.json({ error: 'Internal Server Error' }, 500));
+    app.get('/raw', async () => { throw errorEventLike(); });
+    await expect(app.request('/raw', {}, makeEnv(), makeCtx())).rejects.toMatchObject({ type: 'error' });
+  });
+
+  it('connect() also rejects with a real Error', async () => {
+    const pool = fakePool();
+    pool.connect.mockRejectedValueOnce(errorEventLike());
+    const db = createRequestDb(() => pool);
+    const err = await db.connect().catch((e) => e);
+    expect(err).toBeInstanceOf(Error);
+    expect(err.message).toBe('Uncaught Error: Network connection lost.');
+    await db.release();
+  });
+});
+
+describe('pool / client error events: teardown noise vs real drops', () => {
+  const { EventEmitter } = require('events');
+  const emitterPool = () => Object.assign(new EventEmitter(), fakePool());
+
+  it('an error arriving AFTER release() began (workerd reports one for every socket the driver closed) is not logged', async () => {
+    const pool = emitterPool();
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const db = createRequestDb(() => pool);
+    await db.query('SELECT 1');
+    await db.release();
+    expect(() => pool.emit('error', { type: 'error', message: 'Uncaught Error: Network connection lost.' })).not.toThrow();
+    expect(errSpy).not.toHaveBeenCalled();
+    expect(warnSpy).not.toHaveBeenCalled();
+    errSpy.mockRestore(); warnSpy.mockRestore();
+  });
+
+  it('a non-Error event before release is a warning (ambiguous), a real Error is an error', async () => {
+    const pool = emitterPool();
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const db = createRequestDb(() => pool);
+    await db.query('SELECT 1');
+    pool.emit('error', { type: 'error', message: 'Uncaught Error: Network connection lost.' });
+    expect(warnSpy.mock.calls.flat().join(' ')).toContain('Network connection lost');
+    expect(errSpy).not.toHaveBeenCalled();
+    pool.emit('error', Object.assign(new Error('terminating connection due to administrator command'), { code: '57P01' }));
+    expect(errSpy.mock.calls.flat().join(' ')).toContain('terminating connection');
+    errSpy.mockRestore(); warnSpy.mockRestore();
+    await db.release();
+  });
+
+  it('connect(): a checked-out client gets its own error listener (the pool listener does not cover it)', async () => {
+    // Real pg-pool detaches its idle listener on checkout: a connection dying between two queries of a checked-out
+    // client was an uncaught "Unhandled error" in workerd (S11 spike, scenario dbjs-checkedout-kill).
+    const client = Object.assign(new EventEmitter(), { query: jest.fn(async () => ({ rows: [], rowCount: 0 })), release: jest.fn() });
+    const pool = emitterPool();
+    pool.connect = jest.fn(async () => client);
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const db = createRequestDb(() => pool);
+    const got = await db.connect();
+    expect(got).toBe(client);
+    expect(client.listenerCount('error')).toBe(1);
+    const dead = Object.assign(new Error('terminating connection due to administrator command'), { code: '57P01', stack: 'SECRET-STACK postgres://u:pw@h/db' });
+    expect(() => client.emit('error', dead)).not.toThrow();
+    const logged = errSpy.mock.calls.flat().join(' ');
+    expect(logged).toContain('terminating connection');
+    expect(logged).not.toContain('SECRET-STACK');
+    errSpy.mockRestore();
+    got.release();
+    await db.release();
+  });
+
+  it('connect(): callback form is passed through untouched', async () => {
+    const pool = fakePool();
+    const db = createRequestDb(() => pool);
+    const cb = jest.fn();
+    db.connect(cb);
+    expect(pool.connect).toHaveBeenCalledWith(cb);
+    await db.release();
+  });
+
+  it('a released db refuses connect() with a real Error', async () => {
+    const db = createRequestDb(() => fakePool());
+    await db.query('x');
+    await db.release();
+    await expect(db.connect()).rejects.toThrow(/after release/);
+  });
+});

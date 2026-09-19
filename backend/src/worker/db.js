@@ -19,20 +19,28 @@
  *     (e.g. a job started with safeWaitUntil). release() waits for held promises too,
  *     so the pool is not ended under them. Prefer it over keeping a checked-out client.
  *   - A pool 'error' listener is attached on creation: an idle Neon socket dropping
- *     ("Network connection lost") emits 'error' on the pool, and an unhandled 'error'
- *     event throws out of the isolate as an unmasked runtime error instead of the
- *     masked 500 JSON. The listener logs the message only (never the stack or URL).
+ *     emits 'error' on the pool, and an unhandled 'error' event is an uncaught exception
+ *     in the isolate. The listener logs the message only (never the stack or URL). Errors
+ *     that arrive after release() has begun are expected teardown noise (workerd reports
+ *     "Network connection lost" on every WebSocket the driver itself just closed) and are
+ *     not logged. Same for clients handed out by connect(): a checked-out client is NOT
+ *     covered by the pool listener, so connect() attaches its own.
+ *   - Driver failures that are not Error instances (a WebSocket connect failure rejects
+ *     with a bare ErrorEvent, message "Network connection lost") are wrapped into an Error:
+ *     Hono only routes `instanceof Error` throws to app.onError; anything else escapes to
+ *     the runtime as an unmasked "Uncaught Error" page (S11 spike, docs/migration/s11-results.md).
  *   - After the response is produced, dbMiddleware hands db.release() to
  *     ctx.waitUntil(). release() first waits for every query still in flight
  *     (audit-log inserts, touchSession, ... all issued through this db and
  *     tracked), then calls pool.end(). So fire-and-forget queries are never cut
  *     off by the pool closing under them.
  *
- * UNVERIFIED (ADR S11): that Neon actually frees the server-side connection
- * promptly after pool.end() inside a Worker, and that a per-request Pool does not
- * exhaust Neon's connection limit under concurrent load (checklist item 20).
- * This file implements the ADR-specified release strategy; it does not prove it.
- * Do not treat "tests pass" as evidence for it.
+ * VERIFIED LOCALLY (S11 spike, docs/migration/s11-results.md): against Postgres 17 through Neon's
+ * open-source wsproxy inside workerd, a per-request Pool released via ctx.waitUntil(db.release())
+ * frees the server connection within ~10 ms of the response and the count returns to baseline.
+ * NOT VERIFIED (needs a hosted Neon branch): the same against Neon's real proxy/pooler, and the
+ * real connection ceiling under concurrent load (checklist item 20).
+ * Do not treat "tests pass" as evidence for either.
  *
  * SQL SAFETY: the object only forwards (text, params) to the driver; it never
  * interpolates. Always pass values through $1..$n params.
@@ -40,6 +48,27 @@
 const { getConfig } = require('./lib/context');
 const { tagMiddleware } = require('./lib/tag');
 const { safeWaitUntil } = require('./lib/http');
+
+/**
+ * The Neon driver rejects with a bare ErrorEvent (not an Error) when its WebSocket cannot connect or
+ * drops. Normalise to a real Error, keeping the driver's message and code, so Hono's onError sees it.
+ */
+function toError(err) {
+  if (err instanceof Error) return err;
+  const message = (err && err.message) || (typeof err === 'string' ? err : '') || 'database connection error';
+  const wrapped = new Error(message);
+  if (err && err.code) wrapped.code = err.code;
+  wrapped.cause = err;
+  return wrapped;
+}
+
+/** Log a driver error event: message only (never the stack or the connection string). */
+function logDriverError(where, err) {
+  const msg = err && err.message;
+  // A non-Error event (ErrorEvent) is what workerd emits for every WebSocket close, including the ones we
+  // cause ourselves; a real Error (57P01, "Connection terminated unexpectedly") is a genuine server-side drop.
+  (err instanceof Error ? console.error : console.warn)(`${where}:`, msg);
+}
 
 /**
  * Wrap a pool factory into the request-scoped db object.
@@ -55,7 +84,10 @@ function createRequestDb(poolFactory) {
     if (!pool) {
       pool = poolFactory();
       if (pool && typeof pool.on === 'function') {
-        pool.on('error', (err) => console.error('db pool error:', err && err.message));
+        pool.on('error', (err) => {
+          if (released) return; // teardown noise: workerd reports an error for sockets we just closed
+          logDriverError('db pool error', err);
+        });
       }
     }
     return pool;
@@ -76,11 +108,33 @@ function createRequestDb(poolFactory) {
       } catch (err) {
         p = Promise.reject(err);
       }
-      return track(p);
+      return track(p.catch((err) => { throw toError(err); }));
     },
 
+    /**
+     * Check out a dedicated client (pg-Pool surface). Promise form only gets the hardening; the
+     * callback form is passed straight through. The pool's 'error' listener does not see a checked-out
+     * client, so one is attached here: a connection dying between two queries would otherwise be an
+     * uncaught exception (proved in the S11 spike). release() still waits for the client (pool.end()
+     * does not resolve while a client is checked out), so callers MUST client.release() in a finally.
+     */
     connect(...args) {
-      return getPool().connect(...args);
+      if (typeof args[args.length - 1] === 'function') return getPool().connect(...args);
+      let p;
+      try {
+        p = Promise.resolve(getPool().connect(...args));
+      } catch (err) {
+        p = Promise.reject(err);
+      }
+      return p.then(
+        (client) => {
+          if (client && typeof client.on === 'function') {
+            client.on('error', (err) => { if (!released) logDriverError('db client error', err); });
+          }
+          return client;
+        },
+        (err) => { throw toError(err); },
+      );
     },
 
     /**
