@@ -27,13 +27,13 @@ router.get('/my-plan', authenticateToken, async (req, res, next) => {
 // Get recommendation
 router.post('/recommend', authenticateToken, async (req, res, next) => {
   try {
-    const { careerGoal, experienceLevel, painPoints } = req.body;
+    const { careerGoal, experienceLevel, painPoints, fieldOfInterest } = req.body;
 
     if (!careerGoal || !experienceLevel || !painPoints || painPoints.length === 0) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const recommendation = await recommendationEngine.recommendPlan(careerGoal, experienceLevel, painPoints);
+    const recommendation = await recommendationEngine.recommendPlan(careerGoal, experienceLevel, painPoints, fieldOfInterest);
 
     // Save onboarding response
     try {
@@ -44,6 +44,7 @@ router.post('/recommend', authenticateToken, async (req, res, next) => {
         career_goal: careerGoal,
         experience_level: experienceLevel,
         pain_points: painPoints,
+        field_of_interest: fieldOfInterest,
         recommended_plan_id: recommendedPlanFromDb?.id
       });
     } catch (dbErr) {
@@ -58,8 +59,9 @@ router.post('/recommend', authenticateToken, async (req, res, next) => {
   }
 });
 
-// Select plan
-router.post('/select-plan', authenticateToken, async (req, res, next) => {
+// Create a pending order for the chosen plan. Plan is NOT assigned yet —
+// assignment happens only after /verify-payment succeeds.
+router.post('/create-order', authenticateToken, async (req, res, next) => {
   try {
     const { planId } = req.body;
 
@@ -67,12 +69,44 @@ router.post('/select-plan', authenticateToken, async (req, res, next) => {
       return res.status(400).json({ error: 'Plan ID required' });
     }
 
-    const plan = await planService.getPlanById(planId);
-    if (!plan) {
-      return res.status(404).json({ error: 'Plan not found' });
+    const { order, plan } = await planService.createOrder(req.user.id, planId);
+    res.json({ success: true, order, plan });
+  } catch (err) {
+    if (err.message === 'Plan not found') {
+      return res.status(404).json({ error: err.message });
+    }
+    next(err);
+  }
+});
+
+// Verify payment and assign the plan.
+// NOTE: No payment gateway is wired up yet — this is a mock verifier that
+// always succeeds for a valid pending order. Replace with real gateway
+// signature verification (e.g. Razorpay) before accepting real money.
+router.post('/verify-payment', authenticateToken, async (req, res, next) => {
+  try {
+    const { orderRef } = req.body;
+
+    if (!orderRef) {
+      return res.status(400).json({ error: 'orderRef required' });
     }
 
-    await planService.assignPlan(req.user.id, planId);
+    const order = await planService.getOrderByRef(orderRef);
+    if (!order || order.user_id !== req.user.id) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    if (order.status === 'paid') {
+      const plan = await planService.getPlanById(order.plan_id);
+      return res.json({ success: true, plan, alreadyPaid: true });
+    }
+
+    const paidOrder = await planService.markOrderPaid(orderRef);
+    if (!paidOrder) {
+      return res.status(409).json({ error: 'Order could not be marked paid' });
+    }
+
+    await planService.assignPlan(req.user.id, order.plan_id);
+    const plan = await planService.getPlanById(order.plan_id);
     res.json({ success: true, plan });
   } catch (err) {
     next(err);

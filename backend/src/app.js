@@ -42,6 +42,7 @@ const adminPanelsRoutes = require('./routes/adminPanels');
 const activityRoutes = require('./routes/activity');
 const studyHistoryRoutes = require('./routes/studyHistory');
 const learningModulesRoutes = require('./routes/learningModules');
+const learningPathRoutes = require('./routes/learningPath');
 const { errorHandler } = require('./middleware/errorHandler');
 const { auditLogger } = require('./middleware/auditLogger');
 const path = require('path');
@@ -148,6 +149,7 @@ app.use('/api/admin-panels', adminPanelsRoutes);
 app.use('/api/activity', activityRoutes);
 app.use('/api/study-history', studyHistoryRoutes);
 app.use('/api/learning-modules', learningModulesRoutes);
+app.use('/api/learning-path', learningPathRoutes);
 
 // Admin UI Route
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));

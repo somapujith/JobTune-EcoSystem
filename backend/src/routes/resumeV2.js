@@ -77,25 +77,31 @@ router.post('/v2/analyze', auth, requirePlan(2), upload.single('resume'), async 
     const analysis = ResumeAnalysisEngine.analyze(resumeText, fileBuffer);
     const processingTime = Date.now() - startTime;
 
-    // Save to database (async, don't block response)
-    const resumeRecord = await ResumeDatabase.saveResume(
-      req.user.id,
-      resumeText,
-      {
-        total: analysis.overallScore,
-        role: analysis.detectedRole.role,
-        keywordCoverage: {
-          found: analysis.analysis.skills.count,
-          total: analysis.analysis.skills.count
-        },
-        missingInfo: analysis.analysis.missingInfo.missing
-      }
-    );
+    let resumeId = null;
+    try {
+      const resumeRecord = await ResumeDatabase.saveResume(
+        req.user.id,
+        resumeText,
+        {
+          total: analysis.overallScore,
+          role: analysis.detectedRole.role,
+          keywordCoverage: {
+            found: analysis.analysis.keywords.keywords.found.length,
+            total: analysis.analysis.keywords.keywords.total
+          },
+          missingInfo: analysis.analysis.missingInfo.missing
+        }
+      );
+      resumeId = resumeRecord?.id ?? null;
+    } catch (dbError) {
+      console.error('Resume analysis saved locally but DB persist failed:', dbError.message);
+    }
 
     return res.json({
       status: 'success',
       message: 'Resume analyzed successfully',
-      resumeId: resumeRecord.id,
+      resumeId,
+      resumeText: resumeText.trim(),
       analysis: {
         overallScore: analysis.overallScore,
         detectedRole: analysis.detectedRole,

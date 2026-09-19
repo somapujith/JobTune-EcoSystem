@@ -11,12 +11,13 @@ export default function PlanChangeModal({
   isLoading,
   error,
 }) {
-  if (!isOpen || !currentPlan || !targetPlan) return null;
+  if (!isOpen || !targetPlan) return null;
 
-  const changeType = getChangeType(currentPlan.name, targetPlan.name);
-  const { gained, lost } = getFeatureDiff(currentPlan.features, targetPlan.features);
+  const isFirstSelection = !currentPlan;
+  const changeType = isFirstSelection ? 'upgrade' : getChangeType(currentPlan.name, targetPlan.name);
+  const { gained, lost } = getFeatureDiff(currentPlan?.features, targetPlan.features);
   const isDowngrade = changeType === 'downgrade';
-  const priceDelta = (targetPlan.price || 0) - (currentPlan.price || 0);
+  const priceDelta = (targetPlan.price || 0) - (currentPlan?.price || 0);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -34,28 +35,34 @@ export default function PlanChangeModal({
 
         <div className="p-8">
           <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">
-            {isDowngrade ? 'Confirm downgrade' : 'Confirm plan change'}
+            {isFirstSelection ? 'Confirm plan' : isDowngrade ? 'Confirm downgrade' : 'Confirm plan change'}
           </p>
-          <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-6">
-            Switch to {targetPlan.name}?
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-6">
+            {isFirstSelection ? `Get started with ${targetPlan.name}?` : `Switch to ${targetPlan.name}?`}
           </h2>
 
           {/* Plan transition */}
           <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 mb-6">
+            {!isFirstSelection && (
+              <>
+                <div className="flex-1 text-center">
+                  <p className="text-xs text-slate-400 font-bold uppercase mb-1">Current</p>
+                  <p className="font-bold text-slate-900 dark:text-white">{currentPlan.name}</p>
+                  <p className="text-sm text-slate-500">{formatPrice(currentPlan.price)}</p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-blue-500 shrink-0" />
+              </>
+            )}
             <div className="flex-1 text-center">
-              <p className="text-xs text-slate-400 font-bold uppercase mb-1">Current</p>
-              <p className="font-bold text-slate-900 dark:text-white">{currentPlan.name}</p>
-              <p className="text-sm text-slate-500">{formatPrice(currentPlan.price)}</p>
-            </div>
-            <ArrowRight className="w-5 h-5 text-blue-500 shrink-0" />
-            <div className="flex-1 text-center">
-              <p className="text-xs text-blue-500 font-bold uppercase mb-1">New</p>
+              <p className="text-xs text-blue-500 font-bold uppercase mb-1">
+                {isFirstSelection ? 'Selected plan' : 'New'}
+              </p>
               <p className="font-bold text-slate-900 dark:text-white">{targetPlan.name}</p>
               <p className="text-sm text-slate-500">{formatPrice(targetPlan.price)}</p>
             </div>
           </div>
 
-          {priceDelta !== 0 && (
+          {!isFirstSelection && priceDelta !== 0 && (
             <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
               {priceDelta > 0
                 ? `Your monthly cost increases by $${priceDelta}.`
@@ -128,7 +135,7 @@ export default function PlanChangeModal({
                   : 'bg-blue-600 hover:bg-blue-700'
               }`}
             >
-              {isDowngrade ? 'Confirm downgrade' : 'Confirm switch'}
+              {isFirstSelection ? 'Confirm plan' : isDowngrade ? 'Confirm downgrade' : 'Confirm switch'}
             </LoadingButton>
           </div>
         </div>

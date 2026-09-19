@@ -1,7 +1,7 @@
 const planService = require('./planService');
 
 class RecommendationEngine {
-  async recommendPlan(careerGoal, experienceLevel, painPoints) {
+  async recommendPlan(careerGoal, experienceLevel, painPoints, fieldOfInterest) {
     let score = { 'Learn & Build': 0, 'Tune & Polish': 0, 'Zero to Hero': 0 };
 
     // Career goal scoring (40 points max)
@@ -47,6 +47,21 @@ class RecommendationEngine {
             score[plan] += painPointScores[point][plan];
           });
         }
+      });
+    }
+
+    // Field of interest (10 points max) — light nudge, doesn't override goal/experience/pain-points
+    const fieldScores = {
+      'frontend': { 'Tune & Polish': 10, 'Zero to Hero': 5 },
+      'backend': { 'Tune & Polish': 10, 'Zero to Hero': 5 },
+      'fullstack': { 'Tune & Polish': 8, 'Zero to Hero': 8 },
+      'data-ml': { 'Learn & Build': 10, 'Zero to Hero': 5 },
+      'devops': { 'Zero to Hero': 10, 'Tune & Polish': 5 },
+      'mobile': { 'Tune & Polish': 8, 'Learn & Build': 5 },
+    };
+    if (fieldOfInterest && fieldScores[fieldOfInterest]) {
+      Object.entries(fieldScores[fieldOfInterest]).forEach(([plan, pts]) => {
+        score[plan] += pts;
       });
     }
 

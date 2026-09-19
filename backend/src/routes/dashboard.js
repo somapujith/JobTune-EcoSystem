@@ -95,7 +95,19 @@ router.get('/overview', authenticateToken, async (req, res) => {
       skillScore
     });
 
-    // 7. Streak data from learning_streaks
+    // 7. Onboarding profile (experience level, field of interest) for personalization
+    let profile = null;
+    try {
+      const onboarding = await pool.query(
+        'SELECT career_goal, experience_level, pain_points, field_of_interest FROM onboarding_responses WHERE user_id = $1',
+        [userId]
+      );
+      profile = onboarding.rows[0] || null;
+    } catch (err) {
+      console.warn('Onboarding profile not available:', err.message);
+    }
+
+    // 8. Streak data from learning_streaks
     let streak = { current: 0, longest: 0, dailyGoal: 30 };
     try {
       const streakResult = await pool.query(
@@ -182,8 +194,9 @@ router.get('/overview', authenticateToken, async (req, res) => {
       })
     );
 
-    // 11. Return comprehensive dashboard data
+    // 12. Return comprehensive dashboard data
     res.json({
+      profile,
       readinessScore,
       resumeScore: latestResumeScore,
       resumeHistory: resumeScores.slice(0, 5).reverse(), // Last 5 scores, oldest first

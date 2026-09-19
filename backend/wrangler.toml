@@ -1,0 +1,26 @@
+name = "jobtune-ecosystem"
+main = "src/worker-entry.js"
+compatibility_date = "2026-09-14"
+compatibility_flags = ["nodejs_compat"]
+account_id = "af2854d5e1c39fde573717202a1deb36"
+
+# Not wired to real routes yet — see docs/archive-cloudflare or
+# docs/CLOUDFLARE_MIGRATION.md for the porting plan before deploying.
+
+[observability]
+enabled = true
+
+# Secrets (JWT_SECRET, DATABASE_URL, ADZUNA_APP_KEY, etc.) must be set via
+# `wrangler secret put <NAME>` — do NOT put them in this file or commit them.
+# Non-secret config can go under [vars] once the real entry is wired up, e.g.:
+# [vars]
+# FRONTEND_URL = "https://your-app.pages.dev"
+
+# Static asset serving for the admin bundle / frontend build once ported —
+# Workers has no filesystem, so anything currently read via fs.readFileSync
+# (backend/src/ssr/setupFrontend.js, backend/src/public/admin) needs to move
+# to Cloudflare's Assets binding instead. Left commented until that porting
+# work happens.
+# [assets]
+# directory = "./public"
+# binding = "ASSETS"
