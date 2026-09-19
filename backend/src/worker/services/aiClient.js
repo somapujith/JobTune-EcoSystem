@@ -117,6 +117,11 @@ function createAiClient({ config, aiCache = getIsolateAiCache(), sleep = default
       generationConfig: {
         temperature,
         maxOutputTokens: maxTokens,
+        // gemini-2.5-flash "thinks" by default and thinking tokens count against maxOutputTokens: at this app's small
+        // budgets (e.g. 1000) the visible answer was cut off mid-JSON (finishReason MAX_TOKENS), every JSON-returning
+        // route then fell back to its canned response, and nothing was logged. Disable thinking for the flash models
+        // (the Pro model cannot disable it). Found by the production E2E; the Express client has the same change.
+        ...(/^gemini-2\.5-flash/.test(model) ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
       }
     };
 

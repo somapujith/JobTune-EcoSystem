@@ -131,10 +131,23 @@ describe('services/aiClient (port of utils/aiClient.js)', () => {
       expect(JSON.parse(init.body)).toEqual({
         contents: [{ role: 'user', parts: [{ text: 'USER' }] }],
         systemInstruction: { parts: [{ text: 'SYS' }] },
-        generationConfig: { temperature: 0.4, maxOutputTokens: 1024 },
+        // default model gemini-2.5-flash: thinking disabled so the visible answer is not truncated at small budgets
+        generationConfig: { temperature: 0.4, maxOutputTokens: 1024, thinkingConfig: { thinkingBudget: 0 } },
       });
       expect(timeout).toHaveBeenCalledWith(60000);
       expect(init.signal).toBeInstanceOf(AbortSignal);
+    });
+
+    it('Gemini: thinking is disabled for the 2.5 flash models only (Pro cannot disable it; other models are untouched)', async () => {
+      const gen = async (model) => {
+        fetchMock = stubFetch([geminiOk('g')]);
+        await call(build({ AI_PROVIDER: 'gemini', GEMINI_API_KEY: 'k', GEMINI_MODEL: model }).client);
+        return JSON.parse(fetchMock.mock.calls[0][1].body).generationConfig;
+      };
+      expect((await gen('gemini-2.5-flash')).thinkingConfig).toEqual({ thinkingBudget: 0 });
+      expect((await gen('gemini-2.5-flash-lite')).thinkingConfig).toEqual({ thinkingBudget: 0 });
+      expect((await gen('gemini-2.5-pro')).thinkingConfig).toBeUndefined();
+      expect((await gen('gemini-1.5-flash')).thinkingConfig).toBeUndefined();
     });
 
     it('Anthropic: body, headers, default model, 90 s timeout', async () => {

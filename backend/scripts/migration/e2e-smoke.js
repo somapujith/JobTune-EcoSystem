@@ -111,8 +111,16 @@ async function run(opts, log = console.log) {
       const onboarded = await call('GET', '/api/subscriptions/onboarded', { token: tokenA });
       check('GET /api/subscriptions/onboarded works (needs users.onboarding_completed) and is false for a new account', onboarded.status === 200 && onboarded.json && onboarded.json.onboarded === false, `HTTP ${onboarded.status} ${onboarded.text.slice(0, 60)}`);
 
-      const login2 = await call('POST', '/api/auth/login', { body: { email, password, deviceName: 'e2e-smoke-2' } });
-      const ok2 = check('logging in again succeeds (no 409) and returns a new session', login2.status === 200 && login2.json && login2.json.token, `HTTP ${login2.status} ${login2.json && login2.json.code ? login2.json.code : ''}`);
+      let login2 = await call('POST', '/api/auth/login', { body: { email, password, deviceName: 'e2e-smoke-2' } });
+      let proxyNote = '';
+      if (login2.status === 409 && login2.json && login2.json.code === 'ACCOUNT_IN_USE') {
+        // Behind a proxy whose egress IP rotates (Vercel), the same device can look like a different one: the API answers
+        // 409 ACCOUNT_IN_USE and the frontend then asks the user to continue here, i.e. logs in again with replaceDevice.
+        // That confirmed flow is the correct behavior; a 409 that cannot be resolved this way is not.
+        proxyNote = ' (409 ACCOUNT_IN_USE first: the client IP changed through the proxy; resolved with replaceDevice)';
+        login2 = await call('POST', '/api/auth/login', { body: { email, password, deviceName: 'e2e-smoke-2', replaceDevice: true } });
+      }
+      const ok2 = check('logging in again returns a new session (a proxy-induced 409 is resolved by replaceDevice)', login2.status === 200 && login2.json && login2.json.token, `HTTP ${login2.status} ${login2.json && login2.json.code ? login2.json.code : ''}${proxyNote}`);
       if (ok2) {
         const stale = await call('GET', '/api/auth/me', { token: tokenA });
         check('the previous device token is now 401 SESSION_SUPERSEDED (single active device)', stale.status === 401 && stale.json && stale.json.code === 'SESSION_SUPERSEDED', `HTTP ${stale.status} ${stale.json ? stale.json.code : ''}`);

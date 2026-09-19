@@ -175,7 +175,7 @@ describe('end to end through the real registry and the real mount()', () => {
     expect(fetchStub).toHaveBeenCalledTimes(1);
     expect(String(fetchStub.mock.calls[0][0])).toContain('generativelanguage.googleapis.com');
     const sent = JSON.parse(fetchStub.mock.calls[0][1].body);
-    expect(sent.generationConfig).toEqual({ temperature: 0.5, maxOutputTokens: 1024 });
+    expect(sent.generationConfig).toEqual({ temperature: 0.5, maxOutputTokens: 1024, thinkingConfig: { thinkingBudget: 0 } });
     expect(sent.contents[0].parts[0].text).toContain('for the role: Data Engineer.');
   });
 

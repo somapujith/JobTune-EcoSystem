@@ -1,5 +1,9 @@
 'use strict';
 
+// This file pushes two 10 MB bodies through BOTH the real Express stack and the Worker; under a loaded machine a single
+// test can take well over Jest's 10 s default (observed ~25 s for the whole file), so give it real headroom.
+jest.setTimeout(60000);
+
 /**
  * Express-vs-Worker DIFFERENTIAL tests for the four document route files.
  *

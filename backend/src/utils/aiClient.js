@@ -53,6 +53,11 @@ async function callGemini({ systemPrompt, userPrompt, maxTokens = 1024, temperat
     generationConfig: {
       temperature,
       maxOutputTokens: maxTokens,
+      // gemini-2.5-flash "thinks" by default and thinking tokens count against maxOutputTokens: at this app's small
+      // budgets (e.g. 1000) the visible answer was cut off mid-JSON (finishReason MAX_TOKENS), every JSON-returning
+      // route then fell back to its canned response, and nothing was logged. Disable thinking for the flash models
+      // (the Pro model cannot disable it). Kept identical in src/worker/services/aiClient.js.
+      ...(/^gemini-2\.5-flash/.test(model) ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
     }
   };
 
