@@ -15,7 +15,7 @@ export default function GitHubReadmePreview({ markdown, onCopy, onDownload, copi
       .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold">$1</strong>')
       .replace(/\*([^*]+)\*/g, '<em class="italic">$1</em>')
       .replace(/`([^`]+)`/g, '<code class="bg-slate-200 dark:bg-slate-700 px-2 py-1 rounded">$1</code>')
-      .replace(/^\- (.*?)$/gm, '<li class="ml-4">$1</li>')
+      .replace(/^- (.*?)$/gm, '<li class="ml-4">$1</li>')
       .replace(/(<li.*?<\/li>)/s, '<ul class="list-disc my-3">$1</ul>')
       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:underline" target="_blank">$1</a>')
       .replace(/^(```[\s\S]*?```)/gm, (match) => {

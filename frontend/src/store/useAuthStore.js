@@ -1,10 +1,7 @@
 import { create } from 'zustand';
 import axios from 'axios';
 import { isBrowser, safeLocalStorage, setSafeLocalStorage, removeSafeLocalStorage } from '../lib/browser';
-
-const apiBase =
-  import.meta.env.VITE_API_URL ||
-  (isBrowser ? `${window.location.origin}/api` : 'http://localhost:3000/api');
+import { API_BASE as apiBase } from '../lib/apiBase';
 
 const api = axios.create({
   baseURL: apiBase,

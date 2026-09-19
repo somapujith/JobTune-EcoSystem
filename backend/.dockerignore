@@ -1,0 +1,14 @@
+# Never bake secrets into the image. backend/.env points at the production
+# Neon database; dotenv would happily load it if it were copied in.
+.env
+.env.*
+
+node_modules
+.wrangler
+.dev.vars
+spike
+coverage
+tests
+npm-debug.log*
+Dockerfile
+.dockerignore

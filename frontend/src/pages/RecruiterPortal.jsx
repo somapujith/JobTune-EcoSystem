@@ -8,7 +8,7 @@ import {
   Search, Filter, Plus, Download, Send, Briefcase, Users, Star,
   ChevronDown, ChevronUp, X, ExternalLink, Github, Linkedin,
   FileText, GripVertical, MapPin, DollarSign, Calendar,
-  TrendingUp, UserCheck, Eye
+  TrendingUp, UserCheck, Eye, Award
 } from 'lucide-react';
 
 // ─────────────────────────────────────────────────────────────────────────────

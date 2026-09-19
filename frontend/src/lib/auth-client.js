@@ -3,11 +3,10 @@
 
 import axios from 'axios';
 import { setSafeLocalStorage, safeLocalStorage, removeSafeLocalStorage } from './browser';
-
-const apiURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import { API_BASE } from './apiBase';
 
 const authApi = axios.create({
-  baseURL: `${apiURL}/auth`,
+  baseURL: `${API_BASE}/auth`,
   withCredentials: true,
 });
 

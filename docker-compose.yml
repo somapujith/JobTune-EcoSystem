@@ -1,0 +1,71 @@
+# Local backend stack: Postgres + the Express API.
+#
+#   docker compose up --build          # API on :5000, Postgres on :5433
+#   docker compose up --build --watch  # same, and sync backend/src edits into the container
+#   docker compose up -d db            # database only (run the API on the host instead)
+#
+# The API creates its own schema on boot (initializeTables + runMigrations), so
+# a fresh volume needs no init scripts. `docker compose down -v` wipes the data.
+#
+# Production is Neon; this stack never touches it. DATABASE_URL is hard-coded
+# below rather than read from backend/.env.
+
+name: jobtune
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: jobtune
+      POSTGRES_PASSWORD: jobtune
+      POSTGRES_DB: jobtune
+    ports:
+      # Loopback only: the password is trivial, so don't expose it on the LAN.
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jobtune -d jobtune"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      # Loopback only: the dev JWT_SECRET is public in this repo, so do not expose the API on the LAN.
+      - "127.0.0.1:${API_HOST_PORT:-5000}:5000"
+    # Later files win; `environment:` below wins over both.
+    env_file:
+      - ./backend/.env.docker
+      - path: ./backend/.env.docker.local
+        required: false
+    environment:
+      PORT: "5000"
+      # sslmode=disable: the local Postgres has no TLS. pg lets the connection
+      # string override the forced SSL setting in src/config/database.js.
+      DATABASE_URL: postgresql://jobtune:jobtune@db:5432/jobtune?sslmode=disable
+    extra_hosts:
+      # Lets the container reach LM Studio on the host (Linux; built in on Docker Desktop).
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./backend/src
+          target: /app/src
+        - action: rebuild
+          path: ./backend/package.json
+
+volumes:
+  pgdata:

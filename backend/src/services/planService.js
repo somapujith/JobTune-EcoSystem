@@ -46,6 +46,15 @@ class PlanService {
     return result.rows[0] || null;
   }
 
+  async setOnboardingCompleted(userId) {
+    await pool.query('UPDATE users SET onboarding_completed = true WHERE id = $1', [userId]);
+  }
+
+  async getOnboardingCompleted(userId) {
+    const result = await pool.query('SELECT onboarding_completed FROM users WHERE id = $1', [userId]);
+    return !!result.rows[0]?.onboarding_completed;
+  }
+
   async createOrder(userId, planId) {
     const plan = await this.getPlanById(planId);
     if (!plan) throw new Error('Plan not found');

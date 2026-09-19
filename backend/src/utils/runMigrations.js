@@ -229,6 +229,40 @@ async function runMigrations() {
     `);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_plan_orders_user_id ON plan_orders(user_id)`);
 
+    // Career discovery survey responses (one row per user, upserted)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS career_discovery_responses (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+        answers JSONB NOT NULL,
+        sub_answers JSONB DEFAULT '{}',
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+
+    // Onboarding gate: explicit completion flag on users (set by /verify-payment).
+    const onboardingColumn = await pool.query(
+      `SELECT 1 FROM information_schema.columns
+       WHERE table_schema = current_schema() AND table_name = 'users' AND column_name = 'onboarding_completed'`
+    );
+    const onboardingColumnExisted = onboardingColumn.rows.length > 0;
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS onboarding_completed BOOLEAN NOT NULL DEFAULT false`);
+    // One-time backfill, only in the run that ADDS the column: match the old /onboarded inference (a saved
+    // onboarding_responses row OR any user_subscriptions row) so users who onboarded before the flag existed
+    // aren't sent back to the survey. It must NOT re-run on every boot: onboarding_responses rows are written by
+    // /recommend before payment, so re-running would flip users who answered the survey but never paid.
+    if (!onboardingColumnExisted) {
+      await pool.query(`
+        UPDATE users SET onboarding_completed = true
+        WHERE onboarding_completed = false
+          AND (
+            id IN (SELECT user_id FROM onboarding_responses)
+            OR id IN (SELECT user_id FROM user_subscriptions)
+          )
+      `);
+    }
+
     console.log('✅ Database migrations completed successfully');
   } catch (err) {
     console.error('❌ Migration error:', err.message);

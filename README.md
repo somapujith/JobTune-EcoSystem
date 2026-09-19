@@ -19,15 +19,16 @@ Monorepo: **Express + PostgreSQL** backend, **React + Vite** frontend.
 ## Quickstart
 
 ```bash
-# from repo root — installs nothing itself, just runs both dev servers
-npm run dev          # concurrently runs backend (:5000) + frontend (:5173)
+# one-time (needs Node 18+ and Docker Desktop running)
+npm run setup        # install deps + create backend/.env
+npm run db:up        # local Postgres in Docker (:5433)
+npm run seed         # schema + learning topics + test user (user@gmail.com / test@123)
 
-# or separately
-npm run dev:backend  # cd backend && node src/server.js
-npm run dev:frontend # cd frontend && npm run dev
+# every time
+npm run dev          # DB + backend (:5000) + frontend (:5173); open http://localhost:5173
 ```
 
-Requires `backend/.env` and `frontend/.env` to be populated first — see [docs/SETUP.md](docs/SETUP.md).
+The frontend proxies `/api` to the backend, which talks to the local Postgres — no frontend `.env` needed. Full details, env vars and troubleshooting: [docs/SETUP.md](docs/SETUP.md).
 
 ## Repo layout
 

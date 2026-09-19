@@ -23,8 +23,8 @@ const startServer = async () => {
     await sessionService.ensureTables();
   } catch (err) {
     console.warn('⚠️ WARNING: Could not connect to the database. The server will start, but API endpoints relying on DB will fail.');
-    console.warn('Please ensure PostgreSQL is running, user/pass is correct, and the database "fresher_ecosystem" exists.');
-    console.warn('Error details:', err.message);
+    console.warn('Check DATABASE_URL in backend/.env. For the local dev DB run `npm run db:up` from the repo root.');
+    console.warn('Error details:', err.message || err.code || err);
   }
 
   app.listen(PORT, '0.0.0.0', () => {

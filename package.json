@@ -3,9 +3,21 @@
   "version": "1.0.0",
   "description": "The complete execution scripts for Fresher Preparation Ecosystem",
   "scripts": {
+    "setup": "npm install && npm --prefix backend install && npm --prefix frontend install && node scripts/setup-env.js",
+    "db:up": "docker compose up -d --wait db",
+    "db:down": "docker compose stop db",
+    "db:init": "cd backend && node scripts/init_db.js",
+    "seed": "npm run db:init && cd backend && node scripts/import_learning_topics.js && node scripts/create_test_user.js",
     "dev:frontend": "cd frontend && npm run dev",
     "dev:backend": "cd backend && node src/server.js",
-    "dev": "npx concurrently \"npm run dev:frontend\" \"npm run dev:backend\""
+    "dev:apps": "npx concurrently -n api,web -c blue,green \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev": "npm run db:up && npm run dev:apps",
+    "docker:up": "docker compose up --build",
+    "docker:watch": "docker compose up --build --watch",
+    "docker:db": "docker compose up -d db",
+    "docker:down": "docker compose down",
+    "docker:reset": "docker compose down -v",
+    "docker:psql": "docker compose exec db psql -U jobtune jobtune"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

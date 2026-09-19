@@ -83,6 +83,7 @@ const allowedOrigins = [
     'http://localhost:5173',
     'http://localhost:5174',
     'http://localhost:5175',
+    'http://127.0.0.1:5173',
     'http://localhost:3000',
     `http://localhost:${serverPort}`,
   ] : []),
@@ -155,9 +156,26 @@ app.use('/api/learning-path', learningPathRoutes);
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));
 
 // Status route
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
   const { getAICacheStats } = require('./utils/aiClient');
-  res.json({ status: 'ok', aiCache: getAICacheStats() });
+  const { pool } = require('./config/database');
+  let db = 'connected';
+  // Bounded probe: a slow or unreachable Neon must not hold this endpoint for the pool's connection timeout (10s),
+  // because platform health checks may hit it. A timeout reports "unreachable" like any other probe failure.
+  let timer;
+  try {
+    await Promise.race([
+      pool.query('SELECT 1'),
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error('health db probe timeout')), 2000);
+      }),
+    ]);
+  } catch {
+    db = 'unreachable';
+  } finally {
+    clearTimeout(timer);
+  }
+  res.json({ status: db === 'connected' ? 'ok' : 'degraded', db, aiCache: getAICacheStats() });
 });
 
 // Frontend: SSR for public routes, CSR shell for the authenticated app

@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('./lib/assertLocalDb').assertLocalDb('create_test_user.js');
 const bcrypt = require('bcrypt');
 const { pool } = require('../src/config/database');
 
@@ -38,6 +39,9 @@ const { pool } = require('../src/config/database');
       'INSERT INTO user_subscriptions (user_id, plan_id) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET plan_id = $2',
       [userId, zeroToHero.id]
     );
+
+    // Skip the signup survey / payment flow for this local test account.
+    await pool.query('UPDATE users SET onboarding_completed = true WHERE id = $1', [userId]);
 
     const verify = await pool.query(
       'SELECT u.email, sp.name as plan_name, sp.tier_level FROM users u JOIN user_subscriptions us ON u.id = us.user_id JOIN subscription_plans sp ON us.plan_id = sp.id WHERE u.id = $1',

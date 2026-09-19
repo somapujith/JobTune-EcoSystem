@@ -25,7 +25,9 @@ const TYPE_FILTERS = ['All', 'Topic Tests', 'Mock Exams', 'Semester Assessments'
 // Timer Hook
 // ─────────────────────────────────────────────────────────────────────────────
 
-function useTimer(durationMinutes, onTimeout) {
+// `enabled` lets callers keep the hook call unconditional (rules of hooks) while
+// only actually ticking in exam mode.
+function useTimer(durationMinutes, onTimeout, enabled = true) {
   const [remaining, setRemaining] = useState(durationMinutes * 60);
   const intervalRef = useRef(null);
   const callbackRef = useRef(onTimeout);
@@ -33,6 +35,7 @@ function useTimer(durationMinutes, onTimeout) {
 
   useEffect(() => {
     setRemaining(durationMinutes * 60);
+    if (!enabled) return undefined;
     intervalRef.current = setInterval(() => {
       setRemaining(prev => {
         if (prev <= 1) {
@@ -44,7 +47,7 @@ function useTimer(durationMinutes, onTimeout) {
       });
     }, 1000);
     return () => clearInterval(intervalRef.current);
-  }, [durationMinutes]);
+  }, [durationMinutes, enabled]);
 
   const stop = useCallback(() => {
     clearInterval(intervalRef.current);
@@ -216,7 +219,7 @@ function ActiveTest({ assessment, mode, onSubmit, onBack }) {
     handleSubmit();
   }, [answers]);
 
-  const timer = mode === 'exam' ? useTimer(assessment.duration, handleTimeout) : null;
+  const timer = useTimer(assessment.duration, handleTimeout, mode === 'exam');
   const questions = assessment.questions || [];
   const question = questions[currentIndex];
 

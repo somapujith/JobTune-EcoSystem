@@ -96,6 +96,7 @@ router.post('/verify-payment', authenticateToken, async (req, res, next) => {
       return res.status(404).json({ error: 'Order not found' });
     }
     if (order.status === 'paid') {
+      await planService.setOnboardingCompleted(req.user.id);
       const plan = await planService.getPlanById(order.plan_id);
       return res.json({ success: true, plan, alreadyPaid: true });
     }
@@ -106,6 +107,7 @@ router.post('/verify-payment', authenticateToken, async (req, res, next) => {
     }
 
     await planService.assignPlan(req.user.id, order.plan_id);
+    await planService.setOnboardingCompleted(req.user.id);
     const plan = await planService.getPlanById(order.plan_id);
     res.json({ success: true, plan });
   } catch (err) {
@@ -116,11 +118,8 @@ router.post('/verify-payment', authenticateToken, async (req, res, next) => {
 // Check onboarding completion
 router.get('/onboarded', authenticateToken, async (req, res, next) => {
   try {
-    const [response, plan] = await Promise.all([
-      planService.getUserOnboardingResponse(req.user.id),
-      planService.getUserPlan(req.user.id),
-    ]);
-    res.json({ onboarded: !!response || !!plan });
+    const onboarded = await planService.getOnboardingCompleted(req.user.id);
+    res.json({ onboarded });
   } catch (err) {
     next(err);
   }
