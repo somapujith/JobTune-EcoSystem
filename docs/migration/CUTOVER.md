@@ -1,94 +1,67 @@
-# Cutover runbook: make the Cloudflare Worker the production API
+# Cutover: the Cloudflare Worker is the production API
 
-Last updated 2026-09-20. Read [security-review-2026-09-19.md](security-review-2026-09-19.md) first; this file is the executable checklist.
+Last updated 2026-09-20. **Status: CUT OVER and verified end to end through the production domain, with the open items listed at the bottom.**
+See also [security-review-2026-09-19.md](security-review-2026-09-19.md).
 
-## Where things stand (facts, checked live)
+## What is live (verified on 2026-09-20)
 
-| Item | State |
+| Layer | State |
 |---|---|
-| Production frontend | `https://job-tune-eco-system.vercel.app`, deployed by Vercel from `main` (both migration pushes deployed successfully) |
-| Production API (Render) | **Down.** `https://jobtune-backend-14k0.onrender.com` answers `404` with `x-render-routing: no-server` (no service bound to that hostname). The last recorded API request in the database is 2026-09-19 08:07 UTC. `frontend/vercel.json` still rewrites `/api/*` to it, so **the production API is currently unreachable**. There is no Render to fall back to |
-| Worker | Deployed and serving the full app at `https://jobtune-ecosystem.somapujith.workers.dev`. **No secrets set**, so every route fails closed with a masked 500 (verified). Config (`[vars]`, rate limits) is in `backend/wrangler.toml` |
-| Neon (production data) | Reachable, PostgreSQL 18.6, 10 users, 5 orders (4 paid), 3 plans, 10 active sessions. All 10 password hashes are `$2b$10$` (compatible with the Worker's bcryptjs, proven both ways against native bcrypt). Driver checks against hosted Neon passed (cold connect 233 ms, warm 49 ms, multi-statement, 20 parallel per-request pools) |
-| Neon **schema** | **Incomplete**: 47 of 52 needed tables, 7 columns missing, including `users.onboarding_completed`, `users.name`, `users.full_name` and `career_discovery_responses`. Render's boot migrations used to create them; nothing does now. A dry run on Neon (rolled back) succeeded |
-| Not verified / needs you | see "What is NOT proven" at the end |
+| Frontend | `https://job-tune-eco-system.vercel.app` (Vercel, deployed from `main`) |
+| API | Cloudflare Worker `jobtune-ecosystem` at `https://jobtune-ecosystem.somapujith.workers.dev`. `frontend/vercel.json` rewrites `/api/*` to it (commit `c6f1ca24`). Render is retired: `jobtune-backend-14k0.onrender.com` answers `404 x-render-routing: no-server` |
+| Database | Neon (PostgreSQL 18.6, pooled endpoint). Additive schema applied on 2026-09-20 (`onboarding_completed`, `career_discovery_responses`, `users.name/full_name`, `github_analyses`); row counts unchanged (10 users, 5 orders, 3 plans) |
+| Worker config | `wrangler.toml` `[vars]` (NODE_ENV, FRONTEND_URL, Gemini provider/model, MOCK_AI=false) and rate-limit bindings. Secrets set with `wrangler secret put`: `JWT_SECRET` (**new**, generated), `DATABASE_URL`, `GEMINI_API_KEY`, `ADZUNA_APP_ID`, `ADZUNA_APP_KEY` |
 
-## Step 1. Apply the missing schema to Neon (additive, one transaction)
+## Acceptance evidence
+
+`npm run migration:e2e -- --base https://job-tune-eco-system.vercel.app --frontend https://job-tune-eco-system.vercel.app --allow-writes`
+→ **22 of 22 checks pass through the production domain** (health with `db: connected`, plans, auth gate, error masking, CORS allow/deny,
+frontend served, rewrite works, signup, `/me`, plan gate `PLAN_UPGRADE_REQUIRED`, onboarding flag, session replacement,
+refresh, logout, wrong password). The same journey passes 21/22 directly on the Worker (the one failure was the rewrite, before it existed).
+
+Also verified live: a real Gemini answer through the production domain (see "Defects found by the live run"); rate limiting throttles
+(with a delay, see below); hosted-Neon driver checks (cold connect 233 ms, warm 49 ms, multi-statement, 20 parallel per-request pools).
+
+Rollback: `wrangler rollback` (previous Worker version), `wrangler secret delete JWT_SECRET` (every route fails closed), or reverting the
+`vercel.json` line (the API is then unreachable, as before the cutover; there is no Render to return to).
+
+## Defects found and fixed by the live run
+
+1. **AI answers were being truncated.** `gemini-2.5-flash` thinks by default and thinking tokens count against `maxOutputTokens`; at the
+   app's budgets (e.g. 1000) the JSON was cut off, so every JSON-returning AI route silently returned its canned fallback (Express had
+   the same code). Fixed in both clients (`thinkingBudget: 0` for the 2.5 flash models), commit `9189f434`; verified live.
+2. **Neon schema incomplete** (Render's boot migrations no longer run): applied with `scripts/migration/apply-neon-schema.js`.
+3. **Auth brute-force limiter keyed by IP would have throttled all users together** (production audit data: users share a couple of proxy
+   IPs); now keyed by account.
+
+## Known limitations (be honest about these)
+
+1. **Rate limiting is looser than designed.** Cloudflare's binding is eventually consistent: with a limit of 5 per 60 s per account, the
+   first 429 arrived at about attempt 30, then everything was blocked (26 of 26). It bounds password guessing to tens of attempts per minute
+   per account, not 5. For an exact limit, add a database-backed failed-login counter (code change, follow-up).
+2. **Single-active-device is coarse behind Vercel.** The client IP the Worker sees is Vercel's rotating egress IP (`13.201.x.x`, varying
+   within the range), so re-logging in from the same device sometimes answers 409 `ACCOUNT_IN_USE`; the frontend then offers "continue on this
+   device" (`replaceDevice`). Render had the same effect (2 distinct IPs across 200 recorded requests). `X-Forwarded-For` is deliberately
+   not trusted (tests pin this). Trusting Vercel's forwarded header would fix the friction but makes the device IP spoofable when the
+   `workers.dev` URL is hit directly.
+3. **The payment verifier is still a mock:** any signed-in user can create an order for a paid plan and verify it themselves. Ported as-is,
+   pinned by a test. Needs your decision before real money is involved.
+4. **CPU plan.** bcryptjs costs about 70 ms of CPU per login/signup. Signup, login and refresh ran in production without CPU errors, but
+   I cannot see which Workers plan the account is on; confirm it is Paid (the Free plan caps CPU at 10 ms per request).
+5. **Schema decisions left to you** (`proposed-schema-fixes.sql`): the two incompatible `learning_streaks` shapes (the course-streak display
+   shows zeros; nothing breaks), empty `profiles` / `interview_sessions` / `projects` tables (career-score output), unique indexes.
+6. **Supabase → Neon data parity is unproven.** I have no read access to the Supabase source. Neon itself is internally consistent.
+7. **Secrets in git history** (older commits contain a tracked `.env`): rotate the database credentials, the Gemini and Adzuna keys. The
+   Gemini and Adzuna values now set on the Worker came from your local `.env`; if those are the leaked ones, rotate and re-run
+   `set-worker-secrets.ps1`.
+8. **Test accounts** created by the acceptance runs remain in production (`jt-e2e-*@example.com`, no plan, no data). Remove with:
+   `DELETE FROM users WHERE email LIKE 'jt-e2e-%@example.com';`
+
+## Re-running the pieces
 
 ```powershell
 cd backend
-$env:DATABASE_URL = '<the Neon pooled connection string>'      # this shell only
-npm run migration:apply-neon-schema                            # DRY RUN: executes everything, then rolls back
-npm run migration:apply-neon-schema -- --apply                 # commit
-npm run migration:check-schema:live                            # expect: only the 3 owner-decision tables + learning_streaks columns left
-Remove-Item Env:DATABASE_URL
-```
-
-It only adds (`IF NOT EXISTS`), aborts if any row count changes, and never prints the URL. Neon keeps point-in-time history if
-you want a restore point first (Neon console → Branches → Create branch from now).
-
-Left alone on purpose (owner decisions, see `proposed-schema-fixes.sql`): the two incompatible `learning_streaks` shapes (the
-course-streak display shows zeros; nothing breaks), empty `profiles` / `interview_sessions` / `projects` tables (career-score
-output), unique indexes that fail on duplicate rows.
-
-## Step 2. Set the Worker's secrets
-
-```powershell
-cd backend
-$env:NEON_DATABASE_URL = '<the Neon pooled connection string>'
-$env:GEMINI_API_KEY = '<key>'; $env:ADZUNA_APP_ID = '<id>'; $env:ADZUNA_APP_KEY = '<key>'
-powershell -File scripts/migration/set-worker-secrets.ps1 -DryRun     # preview (names and lengths only)
-powershell -File scripts/migration/set-worker-secrets.ps1             # set them
-```
-
-`JWT_SECRET` is generated fresh (the old one is in git history). Signed-in users are unaffected beyond a token refresh.
-Rate limiting is already provisioned in `wrangler.toml` (login/signup **per account**, 5 per 60 s; 300 per 60 s per IP as a flood
-backstop), which is why it is safe to set secrets now.
-
-## Step 3. Prove the Worker directly (before touching the frontend)
-
-```powershell
-cd backend
-npm run migration:e2e -- --base https://jobtune-ecosystem.somapujith.workers.dev --allow-writes
-```
-
-18 checks: health with `db: connected`, plans, auth gate, error masking, signup, `/me`, plan gate (`PLAN_UPGRADE_REQUIRED`),
-onboarding flag, single-active-device replacement, refresh, logout, wrong password. It creates one test account and prints the SQL
-to delete it. Every check must pass. (The same script passes 18/18 against the local reference stack.)
-
-## Step 4. Point the production frontend at the Worker
-
-Edit `frontend/vercel.json`: replace the first rewrite's destination:
-
-```json
-{ "source": "/api/(.*)", "destination": "https://jobtune-ecosystem.somapujith.workers.dev/api/$1" }
-```
-
-Commit and push to `main`; Vercel redeploys the frontend. Then run the same script **through the production domain**:
-
-```powershell
 npm run migration:e2e -- --base https://job-tune-eco-system.vercel.app --frontend https://job-tune-eco-system.vercel.app --allow-writes
+npm run migration:check-schema:live                      # with DATABASE_URL set to the Neon URL (read-only)
+powershell -File scripts/migration/set-worker-secrets.ps1  # rotate secrets (values via stdin)
 ```
-
-## Rollback
-
-Render is gone, so there is no previous backend to return to. The controls that exist: `wrangler rollback` (previous Worker version),
-removing `JWT_SECRET` (`wrangler secret delete JWT_SECRET`, every route fails closed), or reverting the `vercel.json` line (the API is
-unreachable again, which is today's state).
-
-## What is NOT proven (do not call this done without these)
-
-1. **Workers-runtime behavior against hosted Neon under real load.** The driver was verified from Node against hosted Neon and from
-   workerd against a local Postgres. Step 3 is the first time the deployed Worker talks to Neon.
-2. **CPU limits.** bcryptjs costs about 70 ms of CPU per login/signup. That needs the Workers **Paid** plan (the Free plan caps CPU at
-   10 ms per request). Check the plan in the Cloudflare dashboard, and watch for `Exceeded CPU` in Workers logs during Step 3.
-3. **`CF-Connecting-IP` behind Vercel.** Production audit data shows users already arrived from 2 shared IPs on Render, so
-   single-device enforcement was already coarse; the Worker will behave the same. No regression, but it is not "fixed".
-4. **The payment verifier is still a mock** (any signed-in user can grant themselves a paid plan). Checklist item 16 needs your decision.
-5. **Rate limiting has been configured, not yet observed throttling** (checklist item 18): run `npm run migration:ratelimit` against a
-   test account after Step 2.
-6. **Neon schema decisions** listed under Step 1, and the secrets that were in git history (rotate the Gemini and Adzuna keys, and the
-   old database credentials).
-7. **Supabase → Neon data parity.** `scripts/migrate-to-neon.js` copied the data; I have no read access to the Supabase source, so I
-   could not compare row counts. Neon-side integrity is consistent (foreign keys hold, sequences work, 10 users / 5 orders / 10 sessions).
-   If the Supabase project still exists and you want a source-vs-target comparison, give me a read-only `SOURCE_DATABASE_URL`.
