@@ -627,14 +627,19 @@ describe('audit and rate limit seams on /api/auth', () => {
     expect(row.details).not.toContain(PASSWORD);
   });
 
-  it('authRateLimit(): when the AUTH_LIMITER binding says no, /api/auth/* answers 429 with the Express body, before any handler', async () => {
+  it('authRateLimit(): when the AUTH_LIMITER binding says no, login and signup answer 429 with the Express body, before any handler; other auth endpoints are not counted by it', async () => {
     const limited = buildApp({ env: makeEnv({ AUTH_LIMITER: { limit: async () => ({ success: false }) } }) });
-    for (const [method, path] of [['POST', '/api/auth/login'], ['POST', '/api/auth/signup'], ['POST', '/api/auth/refresh'], ['GET', '/api/auth/me']]) {
-      const res = await limited.request(path, jsonInit({ method, body: method === 'POST' ? { email: 'a@b.test', password: 'x' } : undefined }));
+    for (const [method, path] of [['POST', '/api/auth/login'], ['POST', '/api/auth/signup']]) {
+      const res = await limited.request(path, jsonInit({ method, body: { email: 'a@b.test', password: 'x' } }));
       expect(res.status).toBe(429);
       expect(await res.json()).toEqual({ error: 'Too many authentication attempts, please try again later.' });
     }
     expect(limited.db.calls.filter((c) => /FROM users/.test(c.sql))).toHaveLength(0);
+    // refresh / me are keyed by no account (a shared proxy IP would otherwise throttle every user together)
+    for (const [method, path] of [['POST', '/api/auth/refresh'], ['GET', '/api/auth/me']]) {
+      const res = await limited.request(path, jsonInit({ method, body: method === 'POST' ? { refreshToken: 'x' } : undefined }));
+      expect(res.status).not.toBe(429);
+    }
     // ...and it is scoped to /api/auth: other prefixes are not throttled by it
     expect((await limited.request('/api/subscriptions/plans')).status).toBe(200);
   });

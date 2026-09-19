@@ -6,16 +6,24 @@ account_id = "af2854d5e1c39fde573717202a1deb36"
 
 # Cloudflare Workers port (docs/migration/ADR-001-cloudflare-workers-port.md): the entry is
 # wired to the FULL Hono app in src/worker/ (all 41 Express route files, 184 endpoints + the /admin page).
-# Render stays authoritative; no production traffic is routed here (frontend/vercel.json still points at Render).
 #
-# !! DO NOT set JWT_SECRET or DATABASE_URL on the deployed Worker until rate limiting is provisioned
-# !! (the [[ratelimits]] block below) and docs/migration/verification-runbook.md checklist items 1, 7, 16 and 18 are done.
-# !! Without secrets every route fails closed (masked 500; /api/health reports "degraded") and no database is contacted.
-# !! With them, the public .workers.dev URL serves the whole API with NO brute-force protection on /api/auth/login
-# !! (bcryptjs ~60-70 ms CPU per attempt) and one Neon pool + one audit_logs insert per anonymous request.
+# Secrets are NOT in this file and must be set once with `wrangler secret put <NAME>` (see docs/migration/CUTOVER.md):
+#   JWT_SECRET (>= 32 chars; use a NEW random value, the old one is in git history), DATABASE_URL (Neon),
+#   GEMINI_API_KEY, ADZUNA_APP_ID, ADZUNA_APP_KEY.
+# Without JWT_SECRET every route fails closed (masked 500) and without DATABASE_URL no database is contacted.
+# Rate limiting is provisioned below (login/signup per ACCOUNT, everything else a per-IP flood backstop).
 
 [observability]
 enabled = true
+
+# Non-secret production configuration (read through worker/config.js; process.env is not used).
+#   FRONTEND_URL is the single allowed CORS origin: browsers reach the API same-origin through the Vercel rewrite.
+[vars]
+NODE_ENV = "production"
+FRONTEND_URL = "https://job-tune-eco-system.vercel.app"
+AI_PROVIDER = "gemini"
+GEMINI_MODEL = "gemini-2.5-flash"
+MOCK_AI = "false"
 
 # Build-time module aliases for the document / upload routes (/api/resume, /api/ats). Each one is required and
 # was proven by the Phase 0 spike (backend/spike/docs/wrangler.fixed.toml, docs/CLOUDFLARE_MIGRATION.md). Paths
@@ -28,12 +36,6 @@ enabled = true
 "node-ensure" = "./src/worker/stubs/node-ensure.cjs"
 "pdfkit" = "./node_modules/pdfkit/js/pdfkit.standalone.js"
 
-# Secrets (JWT_SECRET, DATABASE_URL, ADZUNA_APP_KEY, etc.) must be set via
-# `wrangler secret put <NAME>` — do NOT put them in this file or commit them.
-# Non-secret config can go under [vars] once the real entry is wired up, e.g.:
-# [vars]
-# FRONTEND_URL = "https://your-app.pages.dev"
-
 # Static asset serving for the admin bundle / frontend build once ported —
 # Workers has no filesystem, so anything currently read via fs.readFileSync
 # (backend/src/ssr/setupFrontend.js, backend/src/public/admin) needs to move
@@ -43,16 +45,21 @@ enabled = true
 # directory = "./public"
 # binding = "ASSETS"
 
-# Rate limiting (ADR-001 4.4, T1.9): NOT provisioned. The Express in-memory limiter is not
-# ported. Uncommenting these creates Workers Rate Limiting bindings on the next deploy; see
-# docs/migration/rate-limiting.md for why the numbers are an approximation (period can only be
-# 10 or 60 seconds) and what must be verified first (checklist item 18).
-# [[ratelimits]]
-# name = "API_LIMITER"
-# namespace_id = "1001"
-# simple = { limit = 100, period = 60 }
-#
-# [[ratelimits]]
-# name = "AUTH_LIMITER"
-# namespace_id = "1002"
-# simple = { limit = 5, period = 60 }
+# Rate limiting (ADR-001 4.4, T1.9), Workers Rate Limiting bindings (period can only be 10 or 60 seconds, so this
+# is a burst limiter, not Express's 20-per-15-minutes window; see docs/migration/rate-limiting.md).
+# Keys were chosen from PRODUCTION DATA: audit_logs on the live database show every user arriving from a couple of
+# shared proxy IPs (2 distinct IPs in the last 200 requests), so a per-IP auth limit would throttle all users together.
+#   AUTH_LIMITER  keyed by the ACCOUNT under attack (lower-cased email) on POST /api/auth/login and /signup only:
+#                 5 attempts per 60 s per account. Brute force against one account is capped regardless of source IP.
+#   API_LIMITER   generous per-IP flood backstop over /api/*: 300 requests per 60 s per IP (mainly catches direct
+#                 hits on the workers.dev URL; with a shared proxy IP it is a global ceiling of about 5 requests/s).
+# namespace_id values are arbitrary strings, unique per Cloudflare account.
+[[ratelimits]]
+name = "API_LIMITER"
+namespace_id = "1001"
+simple = { limit = 300, period = 60 }
+
+[[ratelimits]]
+name = "AUTH_LIMITER"
+namespace_id = "1002"
+simple = { limit = 5, period = 60 }

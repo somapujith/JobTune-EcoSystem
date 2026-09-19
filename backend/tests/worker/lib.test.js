@@ -156,10 +156,14 @@ describe('rate limiting placeholder (ADR 4.4)', () => {
   });
 
   it('auth limiter uses the auth message', async () => {
+    const { bodyParser } = require('../../src/worker/middleware/bodyParser');
     const app = new Hono();
+    app.use('*', bodyParser());
     app.use('*', authRateLimit());
-    app.get('/x', (c) => c.text('ok'));
-    const res = await app.request('/x', {}, makeEnv({ AUTH_LIMITER: { limit: async () => ({ success: false }) } }));
+    app.post('/api/auth/login', (c) => c.text('ok'));
+    const res = await app.request('/api/auth/login', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: 'a@b.test', password: 'x' }),
+    }, makeEnv({ AUTH_LIMITER: { limit: async () => ({ success: false }) } }));
     expect(res.status).toBe(429);
     expect(await res.json()).toEqual({ error: 'Too many authentication attempts, please try again later.' });
   });
