@@ -63,6 +63,7 @@ Every script supports `--dry-run` (prints the planned requests, sends nothing), 
 | `npm run migration:upload -- ...` | `upload-roundtrip.js` | 2, 23, 24, 25 | RENDER + WORKER + USER (tier 2+) |
 | `npm run migration:loadtest -- ...` | `load-test.js` | 20 | WORKER (+ NEON dashboard) |
 | `npm run migration:ratelimit -- ...` | `ratelimit-probe.js` | 18 | WORKER (or Render) + USER |
+| `npm run migration:validate-sql -- --db-url-env NAME` | `validate-sql.js` | 20 (schema), ADR 6.5 | A LOCAL or branch PostgreSQL (host guard: localhost/127.0.0.1/db unless `--allow-remote`). `PREPARE`s + plans (never executes) every Worker SQL statement; see `docs/migration/proposed-schema-fixes.sql` for what it found. Companion `replay-boot-ddl.js` rebuilds the Express boot schema on a throwaway local DB |
 
 Shared code: `lib/common.js`, `lib/ai-classify.js` (static classification of Express handlers that reach the AI model), `lib/ziputil.js`.
 Tests: `backend/tests/migration/*.test.js` (the default suite deliberately contains NO full-parity assertion: it would be red mid-migration).
@@ -74,9 +75,9 @@ Status words: **MET** (evidence produced by a command in this repo, re-run it), 
 
 ### Compatibility
 
-**1. Phase 0 spike results committed; S7, S9, S10, S11 all green.**
+**1. Phase 0 spike results committed; S7, S9, S10, S11 all green.** (S11: local PASS, hosted Neon OPEN)
 How: table in `docs/CLOUDFLARE_MIGRATION.md` ("Phase 0 spike results"). Needs: USER + NEON. Status: **OPEN.** S7, S9, S10 pass (local workerd, synthetic data);
-**S11 (Neon driver) was never run.** Prod-hash and prod-token checks of S7/S9 are also open (items 8, 9). Command (from `backend/spike/auth/s11.mjs`, against a Neon *branch*):
+**S11 (Neon driver) was run LOCALLY** (real driver in workerd against Postgres 17 via Neon's wsproxy and a PgBouncer; three defects found and fixed; results in `docs/migration/s11-results.md`). **It has NOT been run on a hosted Neon branch**: follow section 10 of `docs/migration/s11-results.md` (the older single-command version below still works for the basic 11 checks). Prod-hash and prod-token checks of S7/S9 are also open (items 8, 9). Command (from `backend/spike/auth/s11.mjs`, against a Neon *branch*):
 ```
 # create backend/spike/auth/.dev.vars (git-ignored) with one line: DATABASE_URL=postgresql://USER:PASSWORD@HOST/DB?sslmode=require
 npx wrangler dev --local --port 8788 -c spike/auth/wrangler.toml
@@ -289,7 +290,7 @@ git grep -n "onrender.com" -- frontend/.env.example docs/archive/ARCHITECTURE.md
 ### Summary of what needs a human
 
 7 (Vercel IP chain), 9 (production hashes), 10 (second network), 15 (payment steps), 16 (payment verifier decision), 18 (edge rate limiting, second client, Vercel path), 20 (Neon dashboard),
-24 (browser download), 26, 27, 28, 29 (Cloudflare/Vercel dashboards and ops), plus item 1's S11 run. Everything else has a script; none of the scripts has been run against a real service.
+24 (browser download), 26, 27, 28, 29 (Cloudflare/Vercel dashboards and ops), plus item 1's hosted-Neon S11 run (the local S11 run is done). Everything else has a script; none of the scripts has been run against a real service.
 
 ## 3. Spot checks to run after every Phase 5 step (`<p>` = the prefix just moved)
 

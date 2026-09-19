@@ -93,3 +93,14 @@ and `learning_topics` are filled by seed scripts.
 "migration:check-schema": "node scripts/migration/check-schema.js",
 "migration:check-schema:live": "node scripts/migration/check-schema.js --check"
 ```
+
+## Addendum: first execution on a real PostgreSQL 17.11 (sql agent, local Docker, disposable)
+
+- The catalog queries of `--check` (`information_schema.tables/columns`, `pg_constraint`, `pg_indexes`) were executed for the first time and
+  are correct on PostgreSQL 17 (results match `\d` / `psql` output). One bug found and fixed: `fetchCatalog` issued the five queries with
+  `Promise.all` on a single `pg.Client`, which prints pg's DeprecationWarning (removed in pg 9). They now run one after the other
+  (`tests/migration/checkSchema.test.js`, "never has two catalog queries in flight").
+- `--print-fix-sql` output (everything the Worker needs, and the diff for a real gap) was applied to PostgreSQL: it executes cleanly.
+- The Worker's own SQL is now validated by `backend/scripts/migration/validate-sql.js` (PREPARE + `EXPLAIN (GENERIC_PLAN)`, never executes);
+  see `docs/migration/proposed-schema-fixes.sql` for the schema gaps it found and `backend/tests/worker/pg/` for the real-execution tests.
+- What still holds: nothing here proves the state of the Neon database, only that the repository's DDL and the Worker's SQL agree on PostgreSQL 17.

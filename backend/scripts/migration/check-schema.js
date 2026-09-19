@@ -324,7 +324,7 @@ async function run(argv, io = {}) {
   return exit;
 }
 
-module.exports = { run, parseArgs, scrub, describeTarget, buildResult, HELP };
+module.exports = { run, parseArgs, scrub, describeTarget, buildResult, missingForFix, HELP };
 
 if (require.main === module) {
   run(process.argv.slice(2)).then((code) => { process.exitCode = code; }, (e) => {

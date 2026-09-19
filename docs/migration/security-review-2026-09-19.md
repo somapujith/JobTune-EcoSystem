@@ -7,9 +7,10 @@ unfixed blocker**. Items below are either fixed with a regression test, or open 
 > This repository is public. The open items are deliberately described at remediation level only (no payloads, timings or
 > line references). The reviewers' detailed notes were handed to the repository owner out of band.
 
-Method limits: static reading plus throwaway probes with synthetic secrets and fake databases. Nothing ran against a real
-database, Render, Vercel or a deployed Worker. Green tests and a clean review do not prove SQL correctness on Neon or runtime
-CPU/memory behavior.
+Method limits: static reading plus throwaway probes with synthetic secrets and fake databases; later, every Worker SQL statement
+and the Neon driver were also run against a disposable local PostgreSQL 17 (with Neon's WebSocket proxy and a PgBouncer). Nothing
+ran against hosted Neon, production data, Render, Vercel or a deployed Worker, so hosted-pooler behavior, production schema state
+and runtime CPU/memory limits remain unproven.
 
 ## Fixed in this change (each has a regression test)
 
@@ -24,6 +25,8 @@ CPU/memory behavior.
 | F7 | A Neon socket failure could escape masking as the runtime's own error page. A last-resort guard returns the masked 500; the pool `error` event is handled. | `src/worker-entry.js`, `src/worker/db.js` | `tests/worker/db.test.js`, `npm run migration:smoke` |
 | F8 | Comments claimed the Worker serves only `/api/health`. Corrected, with the warning in O1. | `wrangler.toml`, `worker-entry.js` | n/a |
 | F9 | Tests that only passed on one machine (gitignored fixtures, a missing `DATABASE_URL`). Built-in fixtures and a jest env default added; the full suite was run with fixtures and `.env` removed. | `scripts/migration/lib/fallbackFixtures.js`, `tests/setupEnv.js` | full suite |
+| F10 | Found by running the real Neon driver in workerd (S11, local): a database connection failure rejects with a bare `ErrorEvent`, which Hono does not send to `onError`, so it could reach the client as the runtime's error page. `db.js` now wraps non-Error rejections; clients from `db.connect()` get an error listener; late socket errors are dropped once the request is released. The pool is capped at 2 connections per request with a 10 s connect timeout (the default of 10 exhausted a 100-connection server at 14 concurrent dashboard-shaped requests). | `src/worker/db.js`, `src/config/database.worker.js` | `tests/worker/db.test.js`, `tests/worker/databaseWorkerConfig.test.js`, `docs/migration/s11-results.md` |
+| F11 | Every Worker SQL statement (219) is now parsed and planned by a real PostgreSQL 17; none fails because of the port. Failures are schema gaps that Express shares. Five additive, nullable columns that make endpoints answer 500 are added by guarded boot migrations. | `scripts/migration/validate-sql.js`, `src/utils/runMigrations.js` | `tests/migration/validateSql.test.js`, `tests/runMigrations.additive.test.js`, `tests/worker/pg/` |
 
 ## Open: owner action or decision
 
@@ -39,6 +42,8 @@ CPU/memory behavior.
 | O8 | Object-lookup on user-supplied keys (`SORT_MAP[sort]` pattern) in a few routes: garbage or masked errors only, not injectable. Use `Object.hasOwn`. |
 | O9 | Render deploy: `runMigrations` will add `users.onboarding_completed` and `career_discovery_responses` on the next boot. Check the Render log for `Migration error`. A new `backend/Dockerfile` should be ignored by a Node-runtime service; a Docker-type service would build it. |
 | O10 | The README/SETUP advertise a local test account. Confirm no such account exists in production. |
+| O12 | **Hosted Neon has still not been exercised** (hosted pooler behavior, real connection limits, compute wake-up, Workers production-edge behavior). Runbook: `docs/migration/s11-results.md` section 10, against a Neon branch, never the production branch. |
+| O13 | Schema decisions left to the owner (see `docs/migration/proposed-schema-fixes.sql`): unique indexes on `analyses(resume_id)` and `learning_streaks(user_id, subject)` (fail if production has duplicate rows), the two incompatible `learning_streaks` shapes (the clean fix is two tables, a code change), and whether to create empty `profiles`, `interview_sessions` and `projects` tables (changes career-score output). Run `npm run migration:check-schema:live` on a branch first to see what production actually has. |
 | O11 | `backend/coverage/` is tracked despite being gitignored; consider `git rm -r --cached backend/coverage`. |
 
 ## Verified OK

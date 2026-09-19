@@ -20,7 +20,8 @@
     "migration:bundle": "node scripts/migration/check-bundle.js",
     "migration:smoke": "node scripts/migration/smoke-worker-local.mjs",
     "migration:check-schema": "node scripts/migration/check-schema.js",
-    "migration:check-schema:live": "node scripts/migration/check-schema.js --check"
+    "migration:check-schema:live": "node scripts/migration/check-schema.js --check",
+    "migration:validate-sql": "node scripts/migration/validate-sql.js"
   },
   "keywords": [],
   "author": "",

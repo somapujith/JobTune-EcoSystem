@@ -263,6 +263,27 @@ async function runMigrations() {
       `);
     }
 
+    // Additive, NULLABLE columns that Express and the Worker SQL reference but no DDL in the repository declares
+    // (found by PREPARE-ing every statement against a real PostgreSQL, docs/migration/proposed-schema-fixes.sql).
+    // Without them admin GET /users and /audit-logs, community thread/reply creation, mock-interview feedback and
+    // resume scoring answer 500. Each runs on its own so a failure here can never abort the migrations above or block
+    // boot; IF EXISTS / IF NOT EXISTS make them no-ops where the table or column is already there. Deliberately NOT
+    // here (owner decisions in the proposal file): unique indexes (fail on duplicate rows), the learning_streaks
+    // shape conflict, and creating empty profiles / interview_sessions / projects tables (changes career-score output).
+    for (const sql of [
+      'ALTER TABLE IF EXISTS users ADD COLUMN IF NOT EXISTS name VARCHAR(255)',
+      'ALTER TABLE IF EXISTS users ADD COLUMN IF NOT EXISTS full_name VARCHAR(255)',
+      'ALTER TABLE IF EXISTS mock_interviews ADD COLUMN IF NOT EXISTS feedback JSONB',
+      'ALTER TABLE IF EXISTS resumes ADD COLUMN IF NOT EXISTS scores JSONB',
+      'ALTER TABLE IF EXISTS resumes ADD COLUMN IF NOT EXISTS sections JSONB',
+    ]) {
+      try {
+        await pool.query(sql);
+      } catch (err) {
+        console.error('❌ Optional migration failed:', sql, '-', err.message);
+      }
+    }
+
     console.log('✅ Database migrations completed successfully');
   } catch (err) {
     console.error('❌ Migration error:', err.message);

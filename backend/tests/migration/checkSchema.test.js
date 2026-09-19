@@ -472,7 +472,10 @@ describe('known DDL model built from the real repository files', () => {
     const cols = ls.columnDiffs.map((c) => c.column);
     expect(cols).toEqual(expect.arrayContaining(['current', 'longest', 'last_date', 'daily_goal', 'current_streak', 'longest_streak', 'last_active_date', 'subject']));
     expect(ls.uniqueDiffs.length).toBeGreaterThan(0);
-    expect(drift.find((d) => d.table === 'mock_interviews').columnDiffs.map((c) => c.column)).toContain('feedback');
+    // mock_interviews.feedback was drift until runMigrations began adding it (additive, IF NOT EXISTS): both shapes
+    // now end up with it, so it must no longer be reported as a column that only one shape has.
+    const mi = drift.find((d) => d.table === 'mock_interviews');
+    expect(mi ? mi.columnDiffs.map((c) => c.column) : []).not.toContain('feedback');
     expect(drift.map((d) => d.table)).toEqual(expect.arrayContaining(['resumes', 'learning_roadmaps']));
     // identical repeated definitions (linkedin_analyses in a migration, initializeTables and runMigrations) are not drift
     expect(drift.map((d) => d.table)).not.toContain('linkedin_analyses');
@@ -808,6 +811,23 @@ describe('--check logic with a mock pg client (no network)', () => {
     expect(pg.seen).toHaveLength(5);
     expect(pg.seen.every((s) => /^SELECT\b/.test(s))).toBe(true);
     expect(ro.executed).toEqual(pg.seen);
+  });
+
+  it('never has two catalog queries in flight on the one pg Client (pg 8 deprecation, removed in pg 9)', async () => {
+    // found on the first real PostgreSQL 17 run: Promise.all over one Client printed a pg DeprecationWarning
+    const pg = mockPg(fullDb());
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const inner = pg.query.bind(pg);
+    pg.query = async (sql, params) => {
+      inFlight++;
+      maxInFlight = Math.max(maxInFlight, inFlight);
+      await new Promise((r) => setImmediate(r));
+      try { return await inner(sql, params); } finally { inFlight--; }
+    };
+    const cat = await live.fetchCatalog(live.makeReadOnlyClient(pg));
+    expect(maxInFlight).toBe(1);
+    expect(live.checkCatalog(resolved, cat).ok).toBe(true);
   });
 
   it('reports a missing table', async () => {

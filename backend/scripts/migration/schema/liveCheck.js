@@ -169,9 +169,14 @@ function parseUniqueIndexDef(def) {
 
 async function fetchCatalog(ro) {
   const q = async (key) => (await ro.query(CATALOG_SQL[key])).rows;
-  const [identity, tables, columns, constraints, indexes] = await Promise.all([
-    q('identity'), q('tables'), q('columns'), q('constraints'), q('indexes'),
-  ]);
+  // One after the other, never Promise.all: the connection is a single pg Client, and issuing a second query while
+  // one is in flight is deprecated in pg 8 (DeprecationWarning, found on the first real PostgreSQL 17 run) and is
+  // removed in pg 9. Five tiny catalog queries: the sequential cost is a few round trips.
+  const identity = await q('identity');
+  const tables = await q('tables');
+  const columns = await q('columns');
+  const constraints = await q('constraints');
+  const indexes = await q('indexes');
   const cat = {
     identity: identity[0] || {},
     tables: new Map(), columns: new Map(), uniques: new Map(), constraintNames: new Set(),
