@@ -1,14 +1,14 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
-// Parse Supabase connection string if provided, otherwise fall back to individual env vars
+// Parse Neon (Postgres) connection string if provided, otherwise fall back to individual env vars
 let connectionConfig;
 
 if (process.env.DATABASE_URL) {
-  // Direct connection string (preferred for Supabase)
+  // Direct connection string (preferred for Neon)
   connectionConfig = {
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false } // Required for Supabase
+    ssl: { rejectUnauthorized: false } // Required for Neon
   };
   console.log('Database config: Using DATABASE_URL');
 } else {
