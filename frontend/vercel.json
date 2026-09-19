@@ -2,7 +2,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist/client",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://jobtune-backend-14k0.onrender.com/api/$1" },
+    { "source": "/api/(.*)", "destination": "https://jobtune-ecosystem.somapujith.workers.dev/api/$1" },
     { "source": "/(.*)", "destination": "/api/ssr" }
   ]
 }
