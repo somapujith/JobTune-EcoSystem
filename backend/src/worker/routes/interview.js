@@ -1,0 +1,275 @@
+'use strict';
+
+/**
+ * Worker port of backend/src/routes/interview.js  (mounted at /api/interview).
+ * Slice: mid1 (ADR-001 Phase 3).
+ *
+ *   POST /start         authenticateToken + requirePlan(3)
+ *   POST /:id/respond   authenticateToken                    (NO plan gate, as on Express)
+ *   GET  /history       authenticateToken                    (NO plan gate, as on Express)
+ *
+ * Services (injected, infra slice): getServices(c).aiClient (callAI, extractJSON).
+ * Model selection: config.vars.LM_STUDIO_MODEL_INTERVIEW for /start; /:id/respond passes no model,
+ * exactly like Express.
+ *
+ * Deliberately NOT ported: the boot-time CREATE TABLE IF NOT EXISTS mock_interviews that the Express
+ * file ran at module load (ADR 6.5: no schema bootstrap on Workers).
+ * Errors are thrown to the app's onError (Express: next(err)).
+ */
+const { createRouter } = require('../lib/routes');
+const { authenticateToken } = require('../middleware/auth');
+const { requirePlan } = require('../middleware/requirePlan');
+const { getConfig, getServices } = require('../lib/context');
+const { getDb } = require('../db');
+const { getBody } = require('../lib/http');
+
+const router = createRouter();
+
+// ── System Prompts ───────────────────────────────────────────────────────────
+const INTERVIEWER_PROMPT = `You are an elite technical interviewer who has conducted 5,000+ interviews at top tech companies. You use a structured interview methodology to accurately assess candidates.
+
+INTERVIEW METHODOLOGY:
+1. Start with a warm-up technical question to gauge baseline
+2. Adapt difficulty based on response quality — go deeper when answers are strong, scaffold when they struggle
+3. Mix question types: 2 technical, 2 behavioral (using STAR framework), 1 system design or situational
+4. After each answer, provide specific, actionable feedback — not just "good answer"
+
+FEEDBACK RULES:
+- Name EXACTLY what was strong ("Your mention of time complexity shows algorithmic thinking")
+- Name EXACTLY what was missing ("You didn't discuss edge cases — interviewers always check for this")
+- Give a concrete tip for improvement ("Next time, start with clarifying questions before diving into code")
+
+Return ONLY valid JSON:
+{
+  "feedback": "2-3 sentence specific feedback on their last answer. Empty string for first question. Reference exact parts of their answer.",
+  "next_question": "Your next interview question — make it conversational, not robotic",
+  "question_type": "technical|behavioral|situational",
+  "difficulty": "easy|medium|hard",
+  "what_interviewer_looks_for": "1-2 sentence hint about what makes a great answer to this question",
+  "tips": ["Specific actionable tip based on their performance so far"],
+  "is_complete": false
+}
+
+When is_complete is true (after 5 exchanges), also include:
+{
+  "is_complete": true,
+  "final_score": 0-100,
+  "final_feedback": "3-4 sentence overall assessment. What would make you a hire vs. no-hire at this point.",
+  "strengths": ["Specific strength with evidence from answers"],
+  "improvements": ["Specific improvement with concrete practice suggestion"],
+  "recommended_practice": ["Specific topic or resource to practice before next interview"]
+}`;
+
+const QUESTION_BANK = {
+  'Frontend Developer': [
+    { q: "Can you explain the Virtual DOM and how React uses it for performance optimization?", type: "technical" },
+    { q: "Tell me about a time you had to debug a complex UI rendering issue. How did you approach it?", type: "behavioral" },
+    { q: "If a page is loading slowly and the Core Web Vitals are poor, what steps would you take to diagnose and fix it?", type: "situational" },
+    { q: "What is the difference between controlled and uncontrolled components in React?", type: "technical" },
+    { q: "How do you decide between using local state, context, or a state management library?", type: "technical" },
+  ],
+  'Backend Developer': [
+    { q: "Explain the difference between SQL and NoSQL databases. When would you choose one over the other?", type: "technical" },
+    { q: "Describe a situation where you had to handle a production incident. What was your process?", type: "behavioral" },
+    { q: "You notice the API response time has increased from 200ms to 2 seconds. How would you investigate?", type: "situational" },
+    { q: "What is middleware in Express.js and how does the request pipeline work?", type: "technical" },
+    { q: "How would you implement rate limiting for a public API endpoint?", type: "technical" },
+  ],
+  'Full Stack Developer': [
+    { q: "How do you handle authentication and authorization in a full-stack application?", type: "technical" },
+    { q: "Tell me about the most complex feature you've built end-to-end. What were the challenges?", type: "behavioral" },
+    { q: "Your app's database starts running out of connections during peak traffic. What do you do?", type: "situational" },
+    { q: "Explain how CORS works and why it exists.", type: "technical" },
+    { q: "What's your approach to structuring a monorepo with both frontend and backend code?", type: "technical" },
+  ],
+  'default': [
+    { q: "Tell me about yourself and why you're interested in software development.", type: "behavioral" },
+    { q: "What programming languages are you most comfortable with, and why?", type: "technical" },
+    { q: "A teammate pushes code that breaks the build right before a deadline. How do you handle it?", type: "situational" },
+    { q: "Explain the concept of version control and why it's important.", type: "technical" },
+    { q: "Where do you see yourself as a developer in 2 years?", type: "behavioral" },
+  ]
+};
+
+function getFallbackResponse(role, messageCount, lastAnswer) {
+  const bank = QUESTION_BANK[role] || QUESTION_BANK['default'];
+  const questionIndex = Math.floor(messageCount / 2);
+
+  if (questionIndex >= bank.length) {
+    return {
+      feedback: lastAnswer ? "Good response. You showed thoughtful consideration of the topic." : "",
+      next_question: "",
+      question_type: "summary",
+      is_complete: true,
+      final_score: 68,
+      final_feedback: `You completed the mock interview for the ${role} role. Your answers demonstrated foundational knowledge with room for growth in articulating technical depth. Focus on providing specific examples and quantifying your impact in future interviews.`,
+      strengths: ["Clear communication", "Willingness to learn"],
+      improvements: ["Add more specific technical details", "Use the STAR method for behavioral questions"],
+      tips: []
+    };
+  }
+
+  const question = bank[questionIndex];
+  return {
+    feedback: lastAnswer ? "Solid answer. Try to include more specific examples next time." : "",
+    next_question: question.q,
+    question_type: question.type,
+    is_complete: false,
+    tips: questionIndex === 0 ? ["Take a moment to structure your thoughts before answering"] : []
+  };
+}
+
+// POST /api/interview/start - Start a new mock interview
+router.post('/start', authenticateToken, requirePlan(3), async (c) => {
+  const { role } = getBody(c);
+  const targetRole = role || 'Full Stack Developer';
+
+  const userPrompt = `Start a mock interview for the role: ${targetRole}. This is the first question - ask an engaging opening question appropriate for a fresher/junior candidate.`;
+
+  const { aiClient } = getServices(c);
+  const aiResult = await aiClient.callAI({
+    systemPrompt: INTERVIEWER_PROMPT,
+    userPrompt,
+    maxTokens: 1000,
+    model: getConfig(c).vars.LM_STUDIO_MODEL_INTERVIEW,
+    cache: false
+  });
+
+  let response;
+  let aiPowered = false;
+
+  if (aiResult.ok) {
+    const parsed = aiClient.extractJSON(aiResult.data);
+    if (parsed && parsed.next_question) {
+      response = parsed;
+      aiPowered = true;
+    } else {
+      response = getFallbackResponse(targetRole, 0, null);
+    }
+  } else {
+    response = getFallbackResponse(targetRole, 0, null);
+  }
+
+  // Save initial interview session
+  const messages = [
+    { role: 'interviewer', content: response.next_question, type: response.question_type }
+  ];
+
+  const result = await getDb(c).query(
+    'INSERT INTO mock_interviews (user_id, role, messages, score) VALUES ($1, $2, $3, $4) RETURNING id',
+    [c.get('user').id, targetRole, JSON.stringify(messages), 0]
+  );
+
+  return c.json({
+    success: true,
+    data: {
+      interviewId: result.rows[0].id,
+      question: response.next_question,
+      question_type: response.question_type,
+      tips: response.tips || [],
+      is_complete: false,
+      ai_powered: aiPowered
+    }
+  });
+});
+
+// POST /api/interview/:id/respond - Send a response
+router.post('/:id/respond', authenticateToken, async (c) => {
+  const { answer } = getBody(c);
+  const interviewId = c.req.param('id');
+
+  if (!answer || answer.trim().length === 0) {
+    return c.json({ error: 'Answer is required' }, 400);
+  }
+
+  // Fetch existing interview
+  const rows = await getDb(c).query(
+    'SELECT * FROM mock_interviews WHERE id = $1 AND user_id = $2',
+    [interviewId, c.get('user').id]
+  );
+
+  if (rows.rows.length === 0) {
+    return c.json({ error: 'Interview not found' }, 404);
+  }
+
+  const interview = rows.rows[0];
+  const messages = typeof interview.messages === 'string'
+    ? JSON.parse(interview.messages) : interview.messages;
+
+  // Add user's answer
+  messages.push({ role: 'candidate', content: answer });
+
+  // Build conversation for AI
+  const conversationHistory = messages.map(m =>
+    `${m.role === 'interviewer' ? 'Interviewer' : 'Candidate'}: ${m.content}`
+  ).join('\n');
+
+  const userPrompt = `Interview for: ${interview.role}\n\nConversation so far:\n${conversationHistory}\n\nThe candidate has answered ${Math.floor(messages.length / 2)} questions so far. ${messages.length >= 10 ? 'This should be the final question - wrap up the interview.' : 'Continue the interview.'}`;
+
+  const { aiClient } = getServices(c);
+  const aiResult = await aiClient.callAI({ systemPrompt: INTERVIEWER_PROMPT, userPrompt, maxTokens: 800, cache: false });
+
+  let response;
+  let aiPowered = false;
+
+  if (aiResult.ok) {
+    const parsed = aiClient.extractJSON(aiResult.data);
+    if (parsed && (parsed.next_question || parsed.is_complete)) {
+      response = parsed;
+      aiPowered = true;
+    } else {
+      response = getFallbackResponse(interview.role, messages.length, answer);
+    }
+  } else {
+    response = getFallbackResponse(interview.role, messages.length, answer);
+  }
+
+  // Add interviewer response
+  if (response.feedback) {
+    messages.push({ role: 'interviewer', content: response.feedback, type: 'feedback' });
+  }
+  if (response.next_question) {
+    messages.push({ role: 'interviewer', content: response.next_question, type: response.question_type });
+  }
+
+  // Update database
+  const score = response.is_complete ? (response.final_score || 70) : 0;
+  const feedback = response.is_complete ? JSON.stringify({
+    final_feedback: response.final_feedback,
+    strengths: response.strengths,
+    improvements: response.improvements,
+    score: response.final_score
+  }) : null;
+
+  await getDb(c).query(
+    'UPDATE mock_interviews SET messages = $1, score = $2, feedback = $3 WHERE id = $4',
+    [JSON.stringify(messages), score, feedback, interviewId]
+  );
+
+  return c.json({
+    success: true,
+    data: {
+      feedback: response.feedback || '',
+      question: response.next_question || '',
+      question_type: response.question_type || '',
+      tips: response.tips || [],
+      is_complete: response.is_complete || false,
+      final_score: response.final_score,
+      final_feedback: response.final_feedback,
+      strengths: response.strengths,
+      improvements: response.improvements,
+      ai_powered: aiPowered
+    }
+  });
+});
+
+// GET /api/interview/history
+router.get('/history', authenticateToken, async (c) => {
+  const rows = await getDb(c).query(
+    'SELECT id, role, score, created_at FROM mock_interviews WHERE user_id = $1 ORDER BY created_at DESC LIMIT 20',
+    [c.get('user').id]
+  );
+  return c.json({ success: true, data: rows.rows });
+});
+
+module.exports = router;

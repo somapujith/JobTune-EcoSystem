@@ -19,3 +19,10 @@ backend/backend/
 .vscode/
 .agents/
 skills-lock.json
+
+# Cloudflare Workers local dev
+.wrangler/
+.dev.vars
+**/.dev.vars
+backend/spike/**/fixtures/
+backend/spike/**/out/
