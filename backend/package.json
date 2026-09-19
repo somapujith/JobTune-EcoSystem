@@ -21,7 +21,9 @@
     "migration:smoke": "node scripts/migration/smoke-worker-local.mjs",
     "migration:check-schema": "node scripts/migration/check-schema.js",
     "migration:check-schema:live": "node scripts/migration/check-schema.js --check",
-    "migration:validate-sql": "node scripts/migration/validate-sql.js"
+    "migration:validate-sql": "node scripts/migration/validate-sql.js",
+    "migration:apply-neon-schema": "node scripts/migration/apply-neon-schema.js",
+    "migration:e2e": "node scripts/migration/e2e-smoke.js"
   },
   "keywords": [],
   "author": "",
