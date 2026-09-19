@@ -1,0 +1,9 @@
+# Phase 0 spike (S7-S10, E1, E2, S11) -- throwaway Worker, never deployed.
+# Run: (from backend/)  node spike/auth/run.mjs
+name = "jobtune-spike-auth"
+main = "worker.mjs"
+compatibility_date = "2026-09-14"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+SPIKE_VAR = "hello"

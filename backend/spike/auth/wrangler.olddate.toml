@@ -1,0 +1,8 @@
+# E1 variant: older compatibility_date (before populate-by-default) + nodejs_compat
+name = "jobtune-spike-auth"
+main = "worker.mjs"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+SPIKE_VAR = "hello"

@@ -1,0 +1,9 @@
+# NEGATIVE CONTROL: only the aws-sdk stub (needed to build at all). Used to reproduce the pdf-parse
+# runtime failure (node-ensure/browser.js infinite recursion). Do not use for anything else.
+name = "jobtune-spike-docs"
+main = "worker.mjs"
+compatibility_date = "2026-09-14"
+compatibility_flags = ["nodejs_compat"]
+
+[alias]
+"@aws-sdk/client-s3" = "./stubs/aws-sdk-client-s3.mjs"

@@ -1,0 +1,13 @@
+# "Fixed" config B: config A + pdfkit -> its standalone (fs-free, AFM fonts inlined) build.
+# With this alias the REAL src modules (resumeExportEngine.js, resumeExport.js) work unmodified.
+# NOTE: esbuild alias "pdfkit" also rewrites "pdfkit/<sub>" so the explicit standalone variant
+# (/s3?v=standalone) is not exercised under this config.
+name = "jobtune-spike-docs"
+main = "worker.mjs"
+compatibility_date = "2026-09-14"
+compatibility_flags = ["nodejs_compat"]
+
+[alias]
+"@aws-sdk/client-s3" = "./stubs/aws-sdk-client-s3.mjs"
+"node-ensure" = "./stubs/node-ensure.cjs"
+"pdfkit" = "../../node_modules/pdfkit/js/pdfkit.standalone.js"

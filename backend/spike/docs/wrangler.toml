@@ -1,0 +1,17 @@
+name = "jobtune-spike-docs"
+main = "worker.mjs"
+compatibility_date = "2026-09-14"
+compatibility_flags = ["nodejs_compat"]
+
+# Phase 0 spike S1-S6 + S12 (ADR-001). Local-only throwaway Worker.
+# No account_id, no bindings, no secrets. NEVER `wrangler deploy` this.
+
+# unzipper 0.12.3 does require('@aws-sdk/client-s3') inside Open.s3_v3(); esbuild
+# cannot resolve it (not installed) and the WHOLE bundle fails. Stub it out.
+# (wrangler.noalias.toml = same config without this alias, kept as failure evidence.)
+[alias]
+"@aws-sdk/client-s3" = "./stubs/aws-sdk-client-s3.mjs"
+
+# pdf-parse 1.1.4 -> pdf.js v1.10.100 -> require.ensure = require('node-ensure'). node-ensure's "browser" field
+# picks browser.js which recurses forever under the bundler (see stubs/node-ensure.cjs).
+"node-ensure" = "./stubs/node-ensure.cjs"

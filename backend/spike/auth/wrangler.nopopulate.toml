@@ -1,0 +1,8 @@
+# E1 variant: nodejs_compat_do_not_populate_process_env (the opt-out flag)
+name = "jobtune-spike-auth"
+main = "worker.mjs"
+compatibility_date = "2026-09-14"
+compatibility_flags = ["nodejs_compat", "nodejs_compat_do_not_populate_process_env"]
+
+[vars]
+SPIKE_VAR = "hello"
